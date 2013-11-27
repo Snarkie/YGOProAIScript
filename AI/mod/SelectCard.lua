@@ -712,7 +712,7 @@ end
   if GlobalActivatedCardID == 00423585 then -- Summoner Monk
     if GlobalCardMode == 1 then   
 	   GlobalCardMode = nil	  
-       return getRandomSTIndex(cards, 1)
+       return {math.random(#cards)}
       end
    end
 
