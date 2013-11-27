@@ -970,8 +970,8 @@ function getRandomSTIndex(Cards, Owner)
   if #Cards > 0 then
     for i=1,#Cards do
       if Cards[i] ~= false then
-		if (bit32.band(Cards[i].type,TYPE_TRAP) == TYPE_TRAP or bit32.band(Cards[i].type,TYPE_SPELL) == TYPE_SPELL)then-- and
-           --CurrentSTOwner(Cards[i].cardid) == Owner then
+		if (bit32.band(Cards[i].type,TYPE_TRAP) == TYPE_TRAP or bit32.band(Cards[i].type,TYPE_SPELL) == TYPE_SPELL) and
+           	CurrentSTOwner(Cards[i].cardid) == Owner then
 		  targets[#targets+1]=i
 		  Index = targets[math.random(#targets)]
 		end
