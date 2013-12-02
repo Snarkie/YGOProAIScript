@@ -1231,28 +1231,32 @@ function Index_By_Loc(Cards, Owner, Oper, Type, Position, Oper2, Location)
   local Highest   = 0
   local Lowest   = 99999999
   if Oper == "Highest" then 
-   for i=1,#Cards do
-     if Cards[i] ~= false then
-       if(Type == nil or bit32.band(Cards[i].type,Type) >= Type) and (Owner == nil or CurrentMonOwner(Cards[i].cardid) == Owner) and
-         (Position == nil or bit32.band(Cards[i].position,Position) > 0) and (Oper2 == "==" and Cards[i].location == Location) or
-		 (Oper2 == "~=" and Cards[i].location ~= Location) and
-		  Cards[i].attack > Highest then
+    for i=1,#Cards do
+      if Cards[i] ~= false then
+        if (Type == nil or bit32.band(Cards[i].type,Type) >= Type) 
+        and (Owner == nil or CurrentMonOwner(Cards[i].cardid) == Owner) 
+        and (Position == nil or bit32.band(Cards[i].position,Position) > 0) 
+        and (Oper2 == "==" and Cards[i].location == Location or Oper2 == "~=" and Cards[i].location ~= Location) 
+        and Cards[i].attack > Highest 
+        then
           Highest = Cards[i].attack
           Index = i
-	    end
+	end
       end
     end
   end
   if Oper == "Lowest" then 
-   for i=1,#Cards do
-     if Cards[i] ~= false then
-       if(Type == nil or bit32.band(Cards[i].type,Type) >= Type) and (Owner == nil or CurrentMonOwner(Cards[i].cardid) == Owner) and
-         (Position == nil or bit32.band(Cards[i].position,Position) > 0) and (Oper2 == "==" and Cards[i].location == Location) or
-		 (Oper2 == "~=" and Cards[i].location ~= Location) and
-		  Cards[i].attack < Lowest then
+    for i=1,#Cards do
+      if Cards[i] ~= false then
+        if (Type == nil or bit32.band(Cards[i].type,Type) >= Type) 
+        and (Owner == nil or CurrentMonOwner(Cards[i].cardid) == Owner) 
+        and (Position == nil or bit32.band(Cards[i].position,Position) > 0) 
+        and (Oper2 == "==" and Cards[i].location == Location or Oper2 == "~=" and Cards[i].location ~= Location) 
+        and Cards[i].attack < Lowest 
+        then
           Lowest = Cards[i].attack
           Index = i
-	    end
+	end
       end
     end
   end
