@@ -231,6 +231,17 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
       return COMMAND_ACTIVATE,i
     end
   end
+  
+   -------------------------------------------------
+-- **********************************************
+--        Functions for specific decks
+-- **********************************************
+-------------------------------------------------
+
+local DeckCommand = FireFistInit(cards, to_bp_allowed, to_ep_allowed)
+if DeckCommand ~= nil then 
+    return DeckCommand[1],DeckCommand[2]
+end
     
   ----------------------------------
   -- Activate any search cards here.
