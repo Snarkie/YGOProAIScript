@@ -282,11 +282,15 @@ end
 function SharkKnightFilter(c)
 	return c:IsPosition(POS_FACEUP_ATTACK) and not c:IsType(TYPE_TOKEN) 
   and bit.band(c:GetSummonType(),SUMMON_TYPE_SPECIAL)==SUMMON_TYPE_SPECIAL
-  and (c:IsType(TYPE_XYZ+TYPE_SYNCHRO+TYPE_RITUAL+TYPE_FUSION) or c:GetAttack()>=2400)
+  and (c:IsType(TYPE_XYZ+TYPE_SYNCHRO+TYPE_RITUAL+TYPE_FUSION) or c:GetAttack()>=2000)
 end
 function SummonSharkKnight()
   local cg=Duel.GetMatchingGroup(SharkKnightFilter,1-player_ai,LOCATION_MZONE,0,nil)
-  return cg:GetCount() > 0 and Chance(50)
+  if cg:GetCount() > 0 then
+    local g = cg:GetMaxGroup(Card.GetAttack)
+    return Chance(50) or g:GetFirst():GetAttack()>=2400
+  end
+  return false
 end
 function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
   set_player_turn()
@@ -295,7 +299,8 @@ function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
   local SpSummonable = cards.spsummonable_cards
   local Repositionable = cards.repositionable_cards
   local SetableMon = cards.monster_setable_cards
-  if HasID(Activatable,46772449) and UseBelzebuth() then
+  
+  if HasIDNotNegated(Activatable,46772449) and UseBelzebuth() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(SpSummonable,46772449) and SummonBelzebuth() then
@@ -517,6 +522,16 @@ function SpiritTarget(cards)
   if result==nil then result=math.random(#cards) end
   return {result}
 end
+function WolfbarkTarget(cards)
+  local result = nil
+  for i=1,#cards do
+    if cards[i].setcode==0x79 then
+      result = i
+    end
+  end
+  if result==nil then result=math.random(#cards) end
+  return {result}
+end
 function HorsePrinceTarget(cards)
   local result = nil
   if HasID(cards,17475251) then
@@ -695,6 +710,9 @@ function FireFistCard(cards, minTargets, maxTargets, triggeringID)
   if triggeringID == 01662004 then -- Spirit
     return SpiritTarget(cards)
   end
+  if triggeringID == 03534077 then -- Wolfbark
+    return WolfbarkTarget(cards)
+  end
   if triggeringID == 06353603 then -- Bear
     return BearTarget(cards)
   end
@@ -748,11 +766,17 @@ function ChainTensen()
   if Duel.GetCurrentPhase() == PHASE_DAMAGE then
 		local source = Duel.GetAttacker()
 		local target = Duel.GetAttackTarget()
-    if source and target and source:GetAttack() >= target:GetAttack() and source:GetAttack() <= target:GetAttack()+1000 
-    and target:IsControler(player_ai) and target:IsRace(RACE_BEASTWARRIOR) and target:IsPosition(POS_FACEUP_ATTACK)
-    then
-      GlobalTargetID=target:GetCode()
-      return true
+    if source and target then
+      if source:IsControler(player_ai) then
+        target = Duel.GetAttacker()
+        source = Duel.GetAttackTarget()
+      end
+      if source:GetAttack() >= target:GetAttack() and source:GetAttack() <= target:GetAttack()+1000 
+      and target:IsControler(player_ai) and target:IsRace(RACE_BEASTWARRIOR) and target:IsPosition(POS_FACEUP_ATTACK)
+      then
+        GlobalTargetID=target:GetCode()
+        return true
+      end
     end
     return false
   end
@@ -819,22 +843,22 @@ function ChainVeiler()
   return false
 end
 function FireFistOnChain(cards,only_chains_by_player)
+  if HasID(cards,97268402) and ChainVeiler() then
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,78474168) and ChainVeiler() then
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,70329348) and ChainTenken() then
+    return {1,CurrentIndex}
+  end
   if HasID(cards,44920699) and ChainTensen() then
     return {1,CurrentIndex}
   end
   if HasID(cards,21350571) and ChainHornOfPhantomBeast() then
     return {1,CurrentIndex}
   end
-  if HasID(cards,70329348) and ChainTenken() then
-    return {1,CurrentIndex}
-  end
   if HasID(cards,23434538) and ChainMaxxC() then
-    return {1,CurrentIndex}
-  end
-  if HasID(cards,97268402) and ChainVeiler() then
-    return {1,CurrentIndex}
-  end
-  if HasID(cards,78474168) and ChainVeiler() then
     return {1,CurrentIndex}
   end
   if HasID(cards,46772449) and UseBelzebuth() then
