@@ -9,7 +9,7 @@
 -- Return: index of the selected option
 function OnSelectOption(options)
 local result = 0
-	print("OnSelectOption available options:")
+	--print("OnSelectOption available options:")
 	for i=1,#options do
 		--print(i, options[i])
 	end

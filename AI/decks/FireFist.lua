@@ -16,9 +16,7 @@ function HasIDNotNegated(cards,id)
   local result = false;
   if cards ~= nil then 
     for i=1,#cards do
-      if cards[i].id == id and cards[i]:is_affected_by(EFFECT_DISABLE_EFFECT)==0 
-      and cards[i]:is_affected_by(EFFECT_DISABLE)==0 and bit32.band(cards[i].status,STATUS_SET_TURN)==0
-      then
+      if cards[i].id == id and cards[i]:is_affected_by(EFFECT_DISABLE_EFFECT)==0 then
         CurrentIndex = i
         result = true      
       end
@@ -41,7 +39,6 @@ function OppHasMonster()
 end
 function OppHasStrongestMonster()
   return Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") <= Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack")
-  or Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") <= Get_Card_Att_Def(OppMon(),"defense",">",POS_FACEUP_DEFENCE,"defense")
 end
 function OppHasFacedownMonster()
   local cards=OppMon()
@@ -96,17 +93,6 @@ function get_owner_by_controler(controler)
 end
 function Chance(chance)
   return math.random(100)<=chance
-end
-
--- check, if the AI can wait for an XYZ/Synchro summon until Main Phase 2
--- to get some additional damage in or trigger Bear/Gorilla/etc effects
-function MP2Check()
-  local cards = OppMon()
-  result = false
-  if AI.GetCurrentPhase() == PHASE_MAIN2 or Duel.GetTurnCount() == 1 or OppHasStrongestMonster() then
-    result = true
-  end
-  return result
 end
 FF={}          
 FF[57103969]=5  --Tenki       Priority for using Fire Formations as a cost.
@@ -259,10 +245,6 @@ end
 function SummonVulcan()
   return HasID(AIST(),57103969) and CardsMatchingFilter(OppMon(),VulcanFilter)>0 and Chance(50)
 end
-function SummonCowboy()
-  local OppAtt = Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack")
-  return AI.GetPlayerLP(2)<=800 or OppAtt >= 2500 and OppAtt < 3000 and not HasIDNotNegated(AIST(),44920699)
-end
 function SummonCardinal()
   local cards=UseLists({OppMon(),OppST()})
   local result=0;
@@ -278,7 +260,7 @@ function SummonCardinal()
       result=result+1
     end
   end
-  return result>=4 and MP2Check()
+  return result>=4
 end
 function UseTensu()
   return CardsMatchingFilter(AIHand(),function(c) return c.race==RACE_BEASTWARRIOR end)>0
@@ -430,7 +412,7 @@ function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(SpSummonable,74168099) then -- Horse Prince                
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasID(SpSummonable,37057743) and MP2Check() then -- Lion Emperor                
+  if HasID(SpSummonable,37057743) then -- Lion Emperor                
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSummonable,58504745) and SummonCardinal() then -- Cardinal           
@@ -439,13 +421,10 @@ function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(SpSummonable,48739166) and SummonSharkKnight() then -- SHark Knight            
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasID(SpSummonable,12014404) and SummonCowboy() then -- Cowboy
+  if HasID(SpSummonable,89856523) and Chance(50) then -- Kirin            
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasID(SpSummonable,89856523) and MP2Check() and Chance(50) then -- Kirin            
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
-  end
-  if HasID(SpSummonable,96381979) and MP2Check() then -- Tiger King 
+  if HasID(SpSummonable,96381979) then -- Tiger King 
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   
@@ -494,7 +473,6 @@ function GyokkoTarget(cards)
   return RandomIndexFilter(cards,GyokkoFilter)
 end
 function BearTarget(cards)
-  local result = nil
   if GlobalCardMode == nil then
     return FireFormationSearch(cards)
   end
@@ -506,26 +484,7 @@ function BearTarget(cards)
   end
   if GlobalCardMode == 1 then
     GlobalCardMode = nil
-    local attdef=-2
-    local prev=-2
-    for i=1,#cards do
-      if cards[i].owner==2 then
-        if cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT) then
-          attdef=math.max(attdef,-1)
-        else
-          attdef=math.max(attdef,cards[i].attack,cards[i].def)
-        end
-        if bit32.band(cards[i].position,POS_FACEDOWN)>0 then
-          attdef=math.max(attdef,1600)
-        end
-      end
-      if attdef > prev then
-        prev = attdef
-        result = {i}
-      end
-    end 
-   if result == nil then result = {math.random(#cards)} end
-    return result
+    return Index_By_Loc(cards,2,"Highest",TYPE_MONSTER,nil,"==",LOCATION_MZONE)
   end
 end
 function GorillaTarget(cards)
@@ -953,13 +912,6 @@ function FFGetPos(id)
   end
   for i=1,#FFDef do
     if FFDef[i]==id then return POS_FACEUP_DEFENCE end
-  end
-  if id == 12014404 then -- Cowboy
-    if AI.GetPlayerLP(2)<=800 then
-      return POS_FACEUP_DEFENCE
-    else
-      return POS_FACEUP_ATTACK
-    end
   end
   return result
 end

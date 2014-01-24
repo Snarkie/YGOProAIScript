@@ -18,7 +18,7 @@
 --[[
 Each "card" object has the following fields:
 card.id
-card.original_id --original --printed card id. Example: Elemental HERO Prisma can change id, but the original_id will always be 89312388
+card.original_id --original printed card id. Example: Elemental HERO Prisma can change id, but the original_id will always be 89312388
 card.type --Refer to /script/constant.lua for a list of card types
 card.attack
 card.defense
@@ -58,7 +58,7 @@ end
 if(cards.activatable_cards[i].xyz_material_count > 0) then
 local xyzmat = cards.activatable_cards[i].xyz_materials
 	for j=1,#xyzmat do
-		--print("material " .. j .. " = " .. xyzmat[j].id)
+		print("material " .. j .. " = " .. xyzmat[j].id)
 	end
 end
 
@@ -81,7 +81,7 @@ COMMAND_TO_END_PHASE   = 7
 
 
 function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
-  --print("OnSelectInitCommand")
+  print("OnSelectInitCommand")
   
   ------------------------------------------
   -- The first time around, it sets the AI's
@@ -93,7 +93,7 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
       GlobalAIPlaysFirst = 1
       Globals()
 	  ResetOncePerTurnGlobals()
-	  --print("GlobalSummonedThisTurn",GlobalSummonedThisTurn)
+	  print("GlobalSummonedThisTurn",GlobalSummonedThisTurn)
 	 end
     end
 
@@ -113,18 +113,6 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
   local SummonableCards = cards.summonable_cards
   local SpSummonableCards = cards.spsummonable_cards
   local RepositionableCards = cards.repositionable_cards
-
- -------------------------------------------------
--- **********************************************
---        Functions for specific decks
--- **********************************************
--------------------------------------------------
-
-local FireFistCommand = FireFistInit(cards, to_bp_allowed, to_ep_allowed)
-if FireFistCommand ~= nil then 
-    return FireFistCommand[1],FireFistCommand[2]
-end
-
   
 -------------------------------------------------
 -- **********************************************
@@ -243,6 +231,17 @@ end
       return COMMAND_ACTIVATE,i
     end
   end
+  
+   -------------------------------------------------
+-- **********************************************
+--        Functions for specific decks
+-- **********************************************
+-------------------------------------------------
+
+local DeckCommand = FireFistInit(cards, to_bp_allowed, to_ep_allowed)
+if DeckCommand ~= nil then 
+    return DeckCommand[1],DeckCommand[2]
+end
     
   ----------------------------------
   -- Activate any search cards here.
@@ -1995,33 +1994,23 @@ end
   if SpSummonableCards[i].rank <= 0 or SpSummonableCards[i].rank == nil then
    if (SpSummonableCards[i].setcode ~= 4522082 and SpSummonableCards[i].setcode ~= 98) or SpSummonableCards[i].level < 5 then 
 	if SpSummonableCards[i].id ~= 01710476 and  -- Sin End
-     SpSummonableCards[i].id ~= 00598988 and  -- Sin Bow
-     SpSummonableCards[i].id ~= 09433350 and  -- Sin Blue
-     SpSummonableCards[i].id ~= 36521459 and  -- Sin Dust
-     SpSummonableCards[i].id ~= 55343236 and  -- Sin Red
-     SpSummonableCards[i].id ~= 95992081 and  -- Leviair
-     SpSummonableCards[i].id ~= 80117527 and  -- No.11
-     SpSummonableCards[i].id ~= 34230233 and  -- Grapha, Dragon Lord of Dark World
-     SpSummonableCards[i].id ~= 34230233 and  -- Battlin' Boxer Spar
-     SpSummonableCards[i].id ~= 33347467 and  -- Ghost Ship
-     SpSummonableCards[i].id ~= 41269771 and  -- Constellar Algiedi
-     SpSummonableCards[i].id ~= 48579379 and  -- Perfectly Ultimate Great Moth
-     SpSummonableCards[i].id ~= 14536035 and  -- Dark Grepher
-     SpSummonableCards[i].id ~= 72989439 and  -- Black Luster Soldier
-     SpSummonableCards[i].id ~= 09596126 and  -- Chaos Sorcerer
-     SpSummonableCards[i].id ~= 99365553 and  -- Lightpulsar Dragon
-     SpSummonableCards[i].id ~= 98012938 and  -- Vulcan
-     SpSummonableCards[i].id ~= 58504745 and  -- Cardinal
-     SpSummonableCards[i].id ~= 96381979 and  -- Tiger King
-     SpSummonableCards[i].id ~= 74168099 and  -- Horse Prince
-     SpSummonableCards[i].id ~= 37057743 and  -- Lion Emperor
-	   SpSummonableCards[i].id ~= 98012938 and  -- Vulcan
-     SpSummonableCards[i].id ~= 58504745 and  -- Cardinal
-     SpSummonableCards[i].id ~= 96381979 and -- Tiger King
-     SpSummonableCards[i].id ~= 74168099 and -- Horse Prince
-     SpSummonableCards[i].id ~= 37057743 and -- Lion Emperor
-     SpSummonableCards[i].id ~= 88264978 then -- Red-Eyes Darkness Metal Dragonn	  
-    return COMMAND_SPECIAL_SUMMON,i
+       SpSummonableCards[i].id ~= 00598988 and  -- Sin Bow
+       SpSummonableCards[i].id ~= 09433350 and  -- Sin Blue
+       SpSummonableCards[i].id ~= 36521459 and  -- Sin Dust
+       SpSummonableCards[i].id ~= 55343236 and  -- Sin Red
+       SpSummonableCards[i].id ~= 95992081 and  -- Leviair
+       SpSummonableCards[i].id ~= 80117527 and  -- No.11
+       SpSummonableCards[i].id ~= 34230233 and  -- Grapha, Dragon Lord of Dark World
+	   SpSummonableCards[i].id ~= 34230233 and  -- Battlin' Boxer Spar
+	   SpSummonableCards[i].id ~= 33347467 and  -- Ghost Ship
+	   SpSummonableCards[i].id ~= 41269771 and  -- Constellar Algiedi
+	   SpSummonableCards[i].id ~= 48579379 and  -- Perfectly Ultimate Great Moth
+	   SpSummonableCards[i].id ~= 14536035 and  -- Dark Grepher
+	   SpSummonableCards[i].id ~= 72989439 and  -- Black Luster Soldier
+	   SpSummonableCards[i].id ~= 09596126 and  -- Chaos Sorcerer
+	   SpSummonableCards[i].id ~= 99365553 and  -- Lightpulsar Dragon
+	   SpSummonableCards[i].id ~= 88264978 then -- Red-Eyes Darkness Metal Dragonn
+	  return COMMAND_SPECIAL_SUMMON,i
       end
     end
   end
@@ -2302,7 +2291,7 @@ end
   -------------------------------------------------------
   for i=1,#SummonableCards do   
 	if SummonableCards[i].id == 41269771 then -- Constellar Algiedi
-       --print("Archetype_Card_Count",Archetype_Card_Count(AIHand(),83,nil) )
+       print("Archetype_Card_Count",Archetype_Card_Count(AIHand(),83,nil) )
 	   if Archetype_Card_Count(AIHand(),83,nil) -1 > 0 then 
 		GlobalSummonedThisTurn = GlobalSummonedThisTurn+1
 		GlobalActivatedCardID = SummonableCards[i].id
@@ -2615,7 +2604,7 @@ end
        RepositionableCards[i].attack >= Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack") or 
 	   RepositionableCards[i].attack < Get_Card_Att_Def(OppMon(), "attack", ">", POS_FACEUP_DEFENCE, "attack") and 
 	   RepositionableCards[i].attack > Get_Card_Att_Def(OppMon(),"attack", ">", POS_FACEUP_DEFENCE, "defense") and
-	   Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP_ATTACK,"attack") > Get_Card_Att_Def(OppMon(), "attack", ">", POS_FACEUP_DEFENCE, "defense") then
+	   Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP_ATTACK,"attack") > Get_Card_Att_Def(Cards, "attack", ">", POS_FACEUP_DEFENCE, "defense") then
 	  if RepositionableCards[i].position == POS_FACEUP_DEFENCE or
          RepositionableCards[i].position == POS_FACEDOWN_DEFENCE then
 		  return COMMAND_CHANGE_POS,i
@@ -2693,7 +2682,7 @@ end
   end
 
 
-  --print("DECISION: go to next phase")
+  print("DECISION: go to next phase")
   ------------------------------------------------------------
   -- Proceed to the next phase, and let AI write epic line in chat
   ------------------------------------------------------------

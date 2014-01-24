@@ -9,7 +9,7 @@
 -- Return: index of the selected choice
 function OnSelectNumber(choices)
 
-  print("SelectNumber")
+
   for i=1,#choices do
           --print(i, choices[i])
   end

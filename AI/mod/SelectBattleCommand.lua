@@ -13,7 +13,7 @@
 
 
 function OnSelectBattleCommand(cards)
-  print("OnSelectBattleCommand")
+  --print("OnSelectBattleCommand")
   local execute_attack = 0
   local index = 1
 
