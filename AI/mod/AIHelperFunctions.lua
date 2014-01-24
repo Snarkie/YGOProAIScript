@@ -501,11 +501,11 @@ function Card_Count_Specified(Cards, ID, Type, Pos, Oper, Level, Race, SetCode, 
 	    (Att == nil or Cards[i].attribute == Att)	and
 		(MinLvl == nil or Cards[i].level > MinLvl) and		 
 		 Level == nil or 
-		((Oper == ">" and Cards[i].level > Level) or 
+		(Oper == ">" and Cards[i].level > Level) or 
 		(Oper == "<" and Cards[i].level < Level) or   
 		(Oper == "==" and Cards[i].level == Level) or 
 		(Oper == ">=" and Cards[i].level >= Level) or
-		(Oper == "<=" and Cards[i].level <= Level)) then
+		(Oper == "<=" and Cards[i].level <= Level) then
 		 Result = Result + 1
        end
     end
@@ -971,7 +971,7 @@ function getRandomSTIndex(Cards, Owner)
     for i=1,#Cards do
       if Cards[i] ~= false then
 		if (bit32.band(Cards[i].type,TYPE_TRAP) == TYPE_TRAP or bit32.band(Cards[i].type,TYPE_SPELL) == TYPE_SPELL) and
-           	CurrentSTOwner(Cards[i].cardid) == Owner then
+           CurrentSTOwner(Cards[i].cardid) == Owner then
 		  targets[#targets+1]=i
 		  Index = targets[math.random(#targets)]
 		end
@@ -1231,32 +1231,28 @@ function Index_By_Loc(Cards, Owner, Oper, Type, Position, Oper2, Location)
   local Highest   = 0
   local Lowest   = 99999999
   if Oper == "Highest" then 
-    for i=1,#Cards do
-      if Cards[i] ~= false then
-        if (Type == nil or bit32.band(Cards[i].type,Type) >= Type) 
-        and (Owner == nil or CurrentMonOwner(Cards[i].cardid) == Owner) 
-        and (Position == nil or bit32.band(Cards[i].position,Position) > 0) 
-        and (Oper2 == "==" and Cards[i].location == Location or Oper2 == "~=" and Cards[i].location ~= Location) 
-        and Cards[i].attack > Highest 
-        then
+   for i=1,#Cards do
+     if Cards[i] ~= false then
+       if(Type == nil or bit32.band(Cards[i].type,Type) >= Type) and (Owner == nil or CurrentMonOwner(Cards[i].cardid) == Owner) and
+         (Position == nil or bit32.band(Cards[i].position,Position) > 0) and (Oper2 == "==" and Cards[i].location == Location) or
+		 (Oper2 == "~=" and Cards[i].location ~= Location) and
+		  Cards[i].attack > Highest then
           Highest = Cards[i].attack
           Index = i
-	end
+	    end
       end
     end
   end
   if Oper == "Lowest" then 
-    for i=1,#Cards do
-      if Cards[i] ~= false then
-        if (Type == nil or bit32.band(Cards[i].type,Type) >= Type) 
-        and (Owner == nil or CurrentMonOwner(Cards[i].cardid) == Owner) 
-        and (Position == nil or bit32.band(Cards[i].position,Position) > 0) 
-        and (Oper2 == "==" and Cards[i].location == Location or Oper2 == "~=" and Cards[i].location ~= Location) 
-        and Cards[i].attack < Lowest 
-        then
+   for i=1,#Cards do
+     if Cards[i] ~= false then
+       if(Type == nil or bit32.band(Cards[i].type,Type) >= Type) and (Owner == nil or CurrentMonOwner(Cards[i].cardid) == Owner) and
+         (Position == nil or bit32.band(Cards[i].position,Position) > 0) and (Oper2 == "==" and Cards[i].location == Location) or
+		 (Oper2 == "~=" and Cards[i].location ~= Location) and
+		  Cards[i].attack < Lowest then
           Lowest = Cards[i].attack
           Index = i
-	end
+	    end
       end
     end
   end
@@ -1566,28 +1562,6 @@ function ApplyATKBoosts(Cards)
           if IsDHeroMonster(Cards[i].id) == 1 then
             Cards[i].attack = Cards[i].attack + 1000
           end
-        end
-      end
-    end
-  end
-  
-  ------------------------------------------
-  -- Apply Tensen's 1000 ATK boost to Beast-
-  -- Warrior monsters
-  ------------------------------------------
-  if #Cards > 0 then
-    local ST = AIST()
-    local check = false
-    for i=1,#ST do
-      if ST[i].id == 44920699 and bit32.band(ST[i].position,POS_FACEDOWN)>0
-      and bit32.band(ST[i].status,STATUS_SET_TURN)==0 then
-        check = true
-      end
-    end
-    if check then
-      for i=1,#Cards do
-        if Cards[i].race==RACE_BEASTWARRIOR then
-          Cards[i].attack = Cards[i].attack + 1000
         end
       end
     end

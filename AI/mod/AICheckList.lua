@@ -286,7 +286,7 @@ function NormalSummonBlacklist(CardId)
      CardId == 70355994 or CardId == 17475251 or   -- Gorilla, Hawk
      CardId == 44860890 or CardId == 93294869 or   -- Raven, Wolf
      CardId == 97268402 or CardId == 41269771 or   -- Effect Veiler, Constellar Algiedi
-     CardId == 80344569 or CardId == 30929786 then -- Neo-Spacian Grand Mole, FF Chicken
+     CardId == 80344569 then                       -- Neo-Spacian Grand Mole
 	return 1 
   end
   return 0
@@ -510,9 +510,7 @@ function CardIsScripted(CardId)
      CardId == 43748308 or CardId == 97268402 or  -- FireFist Dragon, Effect Veiler
      CardId == 92572371 or CardId == 78474168 or  -- FireFist Buffalo, Breakthrough Skill
      CardId == 58504745 or CardId == 36499284 or  -- FireFist Cardinal, FireFormation Yoko
-     CardId == 77538567 or CardId == 70342110 or  -- Dark Bribe, Dimensional Prison 
-     CardId == 46772449 or CardId == 58504745     --Noblswarm Belzebuth, FireFist Cardinal                       
-     then  
+     CardId == 77538567 or CardId == 70342110 then  -- Dark Bribe, Dimensional Prison 
 	return 1
   end
   return 0

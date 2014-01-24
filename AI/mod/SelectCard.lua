@@ -14,7 +14,7 @@
 function OnSelectCard(cards, minTargets, maxTargets, triggeringID)
   local result = {}
 
-  --print("OnSelectCard",minTargets,maxTargets)
+  print("OnSelectCard",minTargets,maxTargets)
   
   
 -------------------------------------------------
@@ -629,6 +629,34 @@ end
       end
    end
 
+  
+  
+  --------------------------------------------     
+  -- Select any available card (for now)
+  --------------------------------------------   
+  if GlobalActivatedCardID == 06353603 then -- Brotherhood of the Fire Fist - Bear
+    if GlobalCardMode == 1 then
+	GlobalCardMode = nil
+	for i=1,#cards do
+      if cards[i] ~= false then 
+         result[1] = i
+		  return result
+         end
+       end
+     end	
+   end	
+  
+  --------------------------------------------     
+  -- Select Players strongest monster by attack points on the field.
+  --------------------------------------------   
+  if GlobalActivatedCardID == 06353603 then -- Brotherhood of the Fire Fist - Bear
+    if GlobalCardMode == nil then 
+       GlobalActivatedCardID = nil
+	   return Get_Card_Index(cards, 2, "Highest", TYPE_MONSTER, POS_FACEUP)
+	  end
+   end
+
+  
   --------------------------------------------     
   -- Select Players strongest monster by attack points on the field.
   --------------------------------------------   
@@ -712,7 +740,7 @@ end
   if GlobalActivatedCardID == 00423585 then -- Summoner Monk
     if GlobalCardMode == 1 then   
 	   GlobalCardMode = nil	  
-       return {math.random(#cards)}
+       return getRandomSTIndex(cards, 1)
       end
    end
 
