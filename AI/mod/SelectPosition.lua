@@ -95,10 +95,10 @@ function OnSelectPosition(id, available)
   if FireFistPosition then result=FireFistPosition end
   
   -- check if the selected position is valid
-  --print("is the position valid?", band(result,available))
+  ----print("is the position valid?", band(result,available))
   if band(result,available) == 0 then
           --invalid position! find a valid value
-          --print("invalid position! find a valid value")
+          ----print("invalid position! find a valid value")
           if band(POS_FACEUP_ATTACK,available) > 0 then
                   result = POS_FACEUP_ATTACK
           elseif band(POS_FACEUP_DEFENCE,available) > 0 then

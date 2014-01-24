@@ -286,7 +286,12 @@ function NormalSummonBlacklist(CardId)
      CardId == 70355994 or CardId == 17475251 or   -- Gorilla, Hawk
      CardId == 44860890 or CardId == 93294869 or   -- Raven, Wolf
      CardId == 97268402 or CardId == 41269771 or   -- Effect Veiler, Constellar Algiedi
-     CardId == 80344569 or CardId == 30929786 then -- Neo-Spacian Grand Mole, FF Chicken
+     CardId == 80344569 or CardId == 30929786 or   -- Neo-Spacian Grand Mole, FF Chicken
+     CardId == 82293134 or CardId == 60316373 or   -- Heraldic Beasts: Leo, Aberconway
+     CardId == 87255382 or CardId == 19310321 or   -- Amphisbaena, Twin Eagle
+     CardId == 45705025 or CardId == 82315772 or   -- Unicorn, Eale
+     CardId == 56921677 -- Basilisk
+     then 
 	return 1 
   end
   return 0
@@ -304,6 +309,34 @@ function NormalSummonWhitelist(CardId)
   end
   return 0
 end
+
+---------------------------------------------------------
+-- Checks if the specified card ID is in this "blacklist"
+-- of cards to never special summon, and returns
+-- True or False depending on if it's in the list.
+---------------------------------------------------------
+function SpecialSummonBlacklist(CardId)
+  for i=1,#SSBL do
+    if SSBL[i]==CardId then
+      return 1
+    end
+  end
+  return 0
+end
+
+SSBL={
+01710476,00598988,09433350, -- Sin End, Sin Bow, Sin Blue
+36521459,55343236,95992081, -- Sin Dust, Sin Red, Leviair
+80117527,34230233,33347467, -- No.11, Grapha, Ghost Ship
+41269771,48579379,14536035, -- Constellar Algiedi, PU Great Moth, Dark Grepher
+72989439,09596126,99365553, -- BLS, Chaos Sorcerer, Lightpulsar
+98012938,58504745,96381979, -- Vulcan, Cardinal, Tiger King
+74168099,37057743,88264978, -- Horse Prince, Lion Emperor, REDMD 
+47387961,23649496,02407234, -- Number 8, Number 18, Number 69
+11398059,22653490,34086406, -- King of the Feral Imps, Chidori, Lavalval Chain
+12014404,46772449,48739166, -- Gagaga Cowboy, Evilswarm Exciton Knight, SHArk Knight
+89856523                    -- Kirin
+}
 
 -----------------------------------------------------
 -- Checks if the card's ID is in a list of spell/trap
@@ -349,7 +382,7 @@ function isUnchainableTogether(CardId)
      CardId == 70342110 or -- Dimensional prison
      CardId == 56120475 or -- Sakuretsu armor
      CardId == 73964868 or -- Constellar Pleiades
-	 CardId == 55713623 or -- Shrink
+	   CardId == 55713623 or -- Shrink
      CardId == 08698851 or -- D-Counter
      CardId == 21481146 or -- Radiant mirror force
      CardId == 62271284 or -- Justi-break
@@ -372,7 +405,7 @@ function isUnchainableTogether(CardId)
      CardId == 04206964 or -- Trap hole
      CardId == 28654932 or -- Deep dark trap hole
      CardId == 94192409 or -- Compulsory Evacuation Device
-	 CardId == 29401950 or -- Bottomless trap hole
+	   CardId == 29401950 or -- Bottomless trap hole
      CardId == 62325062 or -- Adhesion trap hole
      CardId == 80723580 or -- Giant trap hole
      CardId == 99590524 or -- Treacherous trap hole
@@ -511,7 +544,13 @@ function CardIsScripted(CardId)
      CardId == 92572371 or CardId == 78474168 or  -- FireFist Buffalo, Breakthrough Skill
      CardId == 58504745 or CardId == 36499284 or  -- FireFist Cardinal, FireFormation Yoko
      CardId == 77538567 or CardId == 70342110 or  -- Dark Bribe, Dimensional Prison 
-     CardId == 46772449 or CardId == 58504745     --Noblswarm Belzebuth, FireFist Cardinal                       
+     CardId == 46772449 or CardId == 58504745 or  -- Noblswarm Belzebuth, FireFist Cardinal                       
+     CardId == 60316373 or CardId == 87255382 or  -- Heraldic Beasts: Aberconway, Amphisbaena
+     CardId == 19310321 or CardId == 45705025 or  -- Twin Eagle, Unicorn
+     CardId == 61314842 or CardId == 84220251 or  -- Advanced Heraldry Art, Heraldry Reborn
+     CardId == 59048135 or CardId == 81439173 or  -- Heraldry Augmentation, Foolish Burial
+     CardId == 47387961 or CardId == 23649496 or  -- Number 8: Heraldic King Genom-Heritage, Number 18: heraldic Progenitor Plain-Coat
+     CardId == 38296564 or CardId == 92365601     -- Safe Zone, Rank-Up Magic: Limited Barian's Force       
      then  
 	return 1
   end

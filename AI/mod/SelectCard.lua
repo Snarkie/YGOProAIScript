@@ -25,7 +25,11 @@ function OnSelectCard(cards, minTargets, maxTargets, triggeringID)
 -------------------------------------------------
 
 local result = FireFistCard(cards, minTargets, maxTargets, triggeringID)
-   if result ~= nil then
+if result ~= nil then
+  return result
+end
+result = HeraldicOnSelectCard(cards, minTargets, maxTargets, triggeringID)
+if result ~= nil then
   return result
 end
 result = {}
@@ -57,7 +61,7 @@ result = {}
   -- highest ATK/DEF that is below that of the currently
   -- attacking monster, and return that.
   ------------------------------------------------------
-  --print("GlobalAIIsAttacking",GlobalAIIsAttacking)
+  ----print("GlobalAIIsAttacking",GlobalAIIsAttacking)
   if GlobalAIIsAttacking and GlobalAttackerID ~= 26593852 then
 	if AI.GetCurrentPhase() == PHASE_BATTLE then	
 		GlobalAIIsAttacking = false
@@ -451,6 +455,7 @@ end
   if GlobalActivatedCardID == 05318639 or -- Mystical Space Typhoon 
 	 GlobalActivatedCardID == 71413901 then -- Breaker the Magical Warrior 
 	 GlobalActivatedCardID = nil
+     --print("MST target selection")
      return getRandomSTIndex(cards, 2)
    end
      
@@ -504,7 +509,7 @@ end
         end
       end	
     end
-   return result
+   return {result}
  end	
   
   --------------------------------------------     
@@ -1731,7 +1736,7 @@ end
 
 
   for i=1,minTargets do
-    --print(result[i]..'')
+    ----print(result[i]..'')
   end
 
 

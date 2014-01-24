@@ -13,7 +13,7 @@
 -- 0 = no
 -- -1 = let the ai decide
 function OnSelectYesNo(description_id)
-
+  --print("OnYesNo")
 	-- Example implementation: continue attacking, let the ai decide otherwise
 	if description_id == 30 then
 		return 1

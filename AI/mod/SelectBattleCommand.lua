@@ -196,7 +196,7 @@ end
     end
   end
   
-  --print("execute_attack",execute_attack)
+  ----print("execute_attack",execute_attack)
   -------------------------------------
   -- If it gets this far, don't attack.
   -------------------------------------

@@ -18,7 +18,7 @@
 --[[
 Each "card" object has the following fields:
 card.id
-card.original_id --original printed card id. Example: Elemental HERO Prisma can change id, but the original_id will always be 89312388
+card.original_id --original ----printed card id. Example: Elemental HERO Prisma can change id, but the original_id will always be 89312388
 card.type --Refer to /script/constant.lua for a list of card types
 card.attack
 card.defense
@@ -58,7 +58,7 @@ end
 if(cards.activatable_cards[i].xyz_material_count > 0) then
 local xyzmat = cards.activatable_cards[i].xyz_materials
 	for j=1,#xyzmat do
-		print("material " .. j .. " = " .. xyzmat[j].id)
+		----print("material " .. j .. " = " .. xyzmat[j].id)
 	end
 end
 
@@ -81,7 +81,7 @@ COMMAND_TO_END_PHASE   = 7
 
 
 function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
-  print("OnSelectInitCommand")
+  ----print("OnSelectInitCommand")
   
   ------------------------------------------
   -- The first time around, it sets the AI's
@@ -93,7 +93,7 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
       GlobalAIPlaysFirst = 1
       Globals()
 	  ResetOncePerTurnGlobals()
-	  print("GlobalSummonedThisTurn",GlobalSummonedThisTurn)
+	  ----print("GlobalSummonedThisTurn",GlobalSummonedThisTurn)
 	 end
     end
 
@@ -113,6 +113,59 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
   local SummonableCards = cards.summonable_cards
   local SpSummonableCards = cards.spsummonable_cards
   local RepositionableCards = cards.repositionable_cards
+  
+  
+  --------------------------------------------
+  -- Activate Heavy Storm only if the opponent
+  -- controls 2 more S/T cards than the AI.
+  --------------------------------------------
+  for i=1,#ActivatableCards do
+    if ActivatableCards[i].id == 19613556 and
+       Get_Card_Count(OppST()) >= Get_Card_Count(AIST()) + 2 then
+      return COMMAND_ACTIVATE,i
+    end
+  end
+
+  -------------------------------------
+  -- Activate Mystical Space Typhoon if
+  -- the opponent has any existing S/T.
+  -------------------------------------
+  for i=1,#ActivatableCards do
+    if ActivatableCards[i].id == 05318639 and
+       Get_Card_Count(OppST()) > 0 then
+	   GlobalActivatedCardID = ActivatableCards[i].id
+	  return COMMAND_ACTIVATE,i
+    end
+  end
+  
+  ------------------------------------------
+  -- Activate Dark Hole only if the opponent
+  -- controls at least 2 more monsters than
+  -- the AI.
+  ------------------------------------------
+  for i=1,#ActivatableCards do
+    if ActivatableCards[i].id == 53129443 and
+       Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") > Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") then
+      return COMMAND_ACTIVATE,i
+    end
+  end
+  
+
+ -------------------------------------------------
+-- **********************************************
+--        Functions for specific decks
+-- **********************************************
+-------------------------------------------------
+
+local DeckCommand = FireFistInit(cards, to_bp_allowed, to_ep_allowed)
+if DeckCommand ~= nil then 
+    return DeckCommand[1],DeckCommand[2]
+end
+DeckCommand = HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
+if DeckCommand ~= nil then 
+    return DeckCommand[1],DeckCommand[2]
+end
+
   
 -------------------------------------------------
 -- **********************************************
@@ -197,51 +250,7 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
 -- **********************************************
 -------------------------------------------------
   
-  --------------------------------------------
-  -- Activate Heavy Storm only if the opponent
-  -- controls 2 more S/T cards than the AI.
-  --------------------------------------------
-  for i=1,#ActivatableCards do
-    if ActivatableCards[i].id == 19613556 and
-       Get_Card_Count(OppST()) >= Get_Card_Count(AIST()) + 2 then
-      return COMMAND_ACTIVATE,i
-    end
-  end
 
-  -------------------------------------
-  -- Activate Mystical Space Typhoon if
-  -- the opponent has any existing S/T.
-  -------------------------------------
-  for i=1,#ActivatableCards do
-    if ActivatableCards[i].id == 05318639 and
-       Get_Card_Count(OppST()) > 0 then
-	   GlobalActivatedCardID = ActivatableCards[i].id
-	  return COMMAND_ACTIVATE,i
-    end
-  end
-  
-  ------------------------------------------
-  -- Activate Dark Hole only if the opponent
-  -- controls at least 2 more monsters than
-  -- the AI.
-  ------------------------------------------
-  for i=1,#ActivatableCards do
-    if ActivatableCards[i].id == 53129443 and
-       Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") > Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") then
-      return COMMAND_ACTIVATE,i
-    end
-  end
-  
-   -------------------------------------------------
--- **********************************************
---        Functions for specific decks
--- **********************************************
--------------------------------------------------
-
-local DeckCommand = FireFistInit(cards, to_bp_allowed, to_ep_allowed)
-if DeckCommand ~= nil then 
-    return DeckCommand[1],DeckCommand[2]
-end
     
   ----------------------------------
   -- Activate any search cards here.
@@ -1333,11 +1342,11 @@ end
   -- in deck.
   ---------------------------------------------  
   for i=1,#ActivatableCards do  
-   if ActivatableCards[i].id == 00423585 then  -- Summoner Monk
+    if ActivatableCards[i].id == 00423585 then  -- Summoner Monk
     if Get_Card_Count_ID(AIDeck(),68144350,nil) > 0 then -- Battlin' Boxer Switchitter
        GlobalCardMode = 1
-	   GlobalActivatedCardID = ActivatableCards[i].id
-	  return COMMAND_ACTIVATE,i
+      GlobalActivatedCardID = ActivatableCards[i].id
+      return COMMAND_ACTIVATE,i
      end
    end
  end
@@ -1403,7 +1412,7 @@ end
   -- AI should activate "Constellar Kaust" if players
   -- strongest attack position monster has more attack points than AI's.
   -------------------------------------------------------
-   for i=1,#ActivatableCards do  
+ for i=1,#ActivatableCards do  
 	if ActivatableCards[i].id == 70908596 then -- Constellar Kaust
 	  if Card_Count_Specified(AIMon(), nil, nil, nil, "==", 5, nil, 83, nil, nil) > 1 or 
 	     Card_Count_Specified(AIMon(), nil, nil, nil, "==", 6, nil, 83, nil, nil) > 0 and  
@@ -1469,20 +1478,6 @@ end
   for i=1,#ActivatableCards do
     if ActivatableCards[i].id == 73964868 then  
 	  if Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") >= Get_Card_Att_Def(AIMon(),"defense",">",POS_FACEUP,"defense") then
-         GlobalActivatedCardID = ActivatableCards[i].id
-         GlobalCardMode = 1
-        return COMMAND_ACTIVATE,i
-      end
-    end
-  end
-  
-   ------------------------------------------
-  -- Activate "Brotherhood of the Fire Fist - Bear"
-  -- if the enemy has a stronger monster
-  ------------------------------------------
-  for i=1,#ActivatableCards do
-    if ActivatableCards[i].id == 06353603 then  
-      if Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") >= Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") then
          GlobalActivatedCardID = ActivatableCards[i].id
          GlobalCardMode = 1
         return COMMAND_ACTIVATE,i
@@ -1952,7 +1947,7 @@ end
   -------------------------------------------------------   
    for i=1,#SpSummonableCards do
 	 CalculatePossibleSummonAttack(SpSummonableCards)
-	  if SpSummonableCards[i].rank > 0 and NormalSummonBlacklist(SpSummonableCards[i].id) == 0 then 
+	  if SpSummonableCards[i].rank > 0 and SpecialSummonBlacklist(SpSummonableCards[i].id) == 0 then 
 	   if SpSummonableCards[i].id ~= 38495396 then
 		if AIMonOnFieldMatCount(SpSummonableCards[i].rank) >= GetXYZRequiredMatCount() then 
 		  GlobalSSCardLevel = SpSummonableCards[i].level
@@ -1991,30 +1986,14 @@ end
   -- *************************************************
   ---------------------------------------------------
   for i=1,#SpSummonableCards do
-  if SpSummonableCards[i].rank <= 0 or SpSummonableCards[i].rank == nil then
-   if (SpSummonableCards[i].setcode ~= 4522082 and SpSummonableCards[i].setcode ~= 98) or SpSummonableCards[i].level < 5 then 
-	if SpSummonableCards[i].id ~= 01710476 and  -- Sin End
-       SpSummonableCards[i].id ~= 00598988 and  -- Sin Bow
-       SpSummonableCards[i].id ~= 09433350 and  -- Sin Blue
-       SpSummonableCards[i].id ~= 36521459 and  -- Sin Dust
-       SpSummonableCards[i].id ~= 55343236 and  -- Sin Red
-       SpSummonableCards[i].id ~= 95992081 and  -- Leviair
-       SpSummonableCards[i].id ~= 80117527 and  -- No.11
-       SpSummonableCards[i].id ~= 34230233 and  -- Grapha, Dragon Lord of Dark World
-	   SpSummonableCards[i].id ~= 34230233 and  -- Battlin' Boxer Spar
-	   SpSummonableCards[i].id ~= 33347467 and  -- Ghost Ship
-	   SpSummonableCards[i].id ~= 41269771 and  -- Constellar Algiedi
-	   SpSummonableCards[i].id ~= 48579379 and  -- Perfectly Ultimate Great Moth
-	   SpSummonableCards[i].id ~= 14536035 and  -- Dark Grepher
-	   SpSummonableCards[i].id ~= 72989439 and  -- Black Luster Soldier
-	   SpSummonableCards[i].id ~= 09596126 and  -- Chaos Sorcerer
-	   SpSummonableCards[i].id ~= 99365553 and  -- Lightpulsar Dragon
-	   SpSummonableCards[i].id ~= 88264978 then -- Red-Eyes Darkness Metal Dragonn
-	  return COMMAND_SPECIAL_SUMMON,i
+    if SpSummonableCards[i].rank <= 0 or SpSummonableCards[i].rank == nil then
+      if (SpSummonableCards[i].setcode ~= 4522082 and SpSummonableCards[i].setcode ~= 98) or SpSummonableCards[i].level < 5 then 
+        if SpecialSummonBlacklist(SpSummonableCards[i].id)==0 then
+          return COMMAND_SPECIAL_SUMMON,i
+        end
       end
     end
-  end
-end  
+  end  
   
   
 -------------------------------------------------
@@ -2239,6 +2218,28 @@ end
        end
      end
    end
+   
+  -------------------------------------------------------
+	-- AI should normal summon Battlin' Boxer Switchitter
+	-- if he has a Battlin' Boxer monster in his graveyard,
+	-- and Battlin' Boxer Lead Yoke in his extra deck.
+	-------------------------------------------------------
+	for i = 1,#SummonableCards do
+		if SummonableCards[i].id == 68144350 then
+			local AIGrave = AI.GetAIGraveyard()
+			local AIExDeck = AI.GetAIExtraDeck()
+			for j = 1,#AIGrave do
+				if bit32.band(AIGrave[j].type,TYPE_MONSTER) > 0 and AIGrave[j].setcode == 132 then
+					for k = 1,#AIExDeck do
+						if AIExDeck[k].id == 23232295 then
+							GlobalSummonedThisTurn = GlobalSummonedThisTurn + 1
+							return COMMAND_SUMMON,i
+						end
+					end
+				end
+			end
+		end
+	end
     
   -------------------------------------------------------  
   -- AI should summon "Exiled Force" if players
@@ -2291,7 +2292,7 @@ end
   -------------------------------------------------------
   for i=1,#SummonableCards do   
 	if SummonableCards[i].id == 41269771 then -- Constellar Algiedi
-       print("Archetype_Card_Count",Archetype_Card_Count(AIHand(),83,nil) )
+       ----print("Archetype_Card_Count",Archetype_Card_Count(AIHand(),83,nil) )
 	   if Archetype_Card_Count(AIHand(),83,nil) -1 > 0 then 
 		GlobalSummonedThisTurn = GlobalSummonedThisTurn+1
 		GlobalActivatedCardID = SummonableCards[i].id
@@ -2604,7 +2605,7 @@ end
        RepositionableCards[i].attack >= Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack") or 
 	   RepositionableCards[i].attack < Get_Card_Att_Def(OppMon(), "attack", ">", POS_FACEUP_DEFENCE, "attack") and 
 	   RepositionableCards[i].attack > Get_Card_Att_Def(OppMon(),"attack", ">", POS_FACEUP_DEFENCE, "defense") and
-	   Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP_ATTACK,"attack") > Get_Card_Att_Def(Cards, "attack", ">", POS_FACEUP_DEFENCE, "defense") then
+	   Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP_ATTACK,"attack") > Get_Card_Att_Def(OppMon(), "attack", ">", POS_FACEUP_DEFENCE, "defense") then
 	  if RepositionableCards[i].position == POS_FACEUP_DEFENCE or
          RepositionableCards[i].position == POS_FACEDOWN_DEFENCE then
 		  return COMMAND_CHANGE_POS,i
@@ -2682,7 +2683,7 @@ end
   end
 
 
-  print("DECISION: go to next phase")
+  ----print("DECISION: go to next phase")
   ------------------------------------------------------------
   -- Proceed to the next phase, and let AI write epic line in chat
   ------------------------------------------------------------

@@ -17,12 +17,16 @@ function OnSelectChain(cards,only_chains_by_player)
   local index = 1
   local ChainAllowed = 0
   
-  ----print("OnSelectChain")
+  --print("OnSelectChain")
   for i=1,#cards do
-    --print("Can chain these cards: "..cards[i].id)
+    ----print("Can chain these cards: "..cards[i].id)
   end
   
 local result=FireFistOnChain(cards,only_chains_by_player)
+if result ~= nil then
+  return result[1],result[2]
+end
+result=HeraldicOnSelectChain(cards,only_chains_by_player)
 if result ~= nil then
   return result[1],result[2]
 end
