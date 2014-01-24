@@ -14,8 +14,6 @@
 function OnSelectCard(cards, minTargets, maxTargets, triggeringID)
   local result = {}
 
-  --print("OnSelectCard",minTargets,maxTargets)
-  
   
 -------------------------------------------------
 -- **********************************************
@@ -61,7 +59,6 @@ result = {}
   -- highest ATK/DEF that is below that of the currently
   -- attacking monster, and return that.
   ------------------------------------------------------
-  ----print("GlobalAIIsAttacking",GlobalAIIsAttacking)
   if GlobalAIIsAttacking and GlobalAttackerID ~= 26593852 then
 	if AI.GetCurrentPhase() == PHASE_BATTLE then	
 		GlobalAIIsAttacking = false

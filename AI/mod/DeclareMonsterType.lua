@@ -40,11 +40,6 @@ function OnDeclareMonsterType(count, choices)
 	local result = 0
 	local returnCount = 0
 	
-	--print("OnDeclareType count: "..count)
-	for i=1,#choices do
-		--print(i, choices[i])
-	end
-	
 	-- Example implementation: Just return the first valid type(s) you come across
 	while returnCount < count do
 		result = result + choices[returnCount+1] --add type

@@ -9,7 +9,6 @@
 -- 1 = yes
 -- 0 = no
 function OnSelectEffectYesNo(id)
-  --print("OnEffectYesNo")
   local result = FireFistOnSelectEffectYesNo(id)
      
   if id  == 72989439 then  -- Black Luster Soldier - Envoy of the Beginning

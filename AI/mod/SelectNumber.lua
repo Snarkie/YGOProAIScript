@@ -9,12 +9,6 @@
 -- Return: index of the selected choice
 function OnSelectNumber(choices)
 
-  --print("OnSelectNumber")
-  for i=1,#choices do
-          ----print(i, choices[i])
-  end
-
-
   -------------------------------------------
   -- The AI should always try to mill as many
   -- cards as possible with Card Trooper.

@@ -310,6 +310,18 @@ function NormalSummonWhitelist(CardId)
   return 0
 end
 
+---------------------------------------------------
+-- Prefer monsters that benefit from being tributed
+---------------------------------------------------
+function TributeWhitelist(id)
+  if id == 03300267 or id == 77901552 -- Hieratic Dragons of Su, Tefnuit,
+  or id == 31516413 or id == 78033100 -- Eset, Gebeb
+  then
+    return 1
+  end
+  return 0
+end
+
 ---------------------------------------------------------
 -- Checks if the specified card ID is in this "blacklist"
 -- of cards to never special summon, and returns

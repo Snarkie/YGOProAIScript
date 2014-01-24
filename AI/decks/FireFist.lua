@@ -9,22 +9,32 @@ function HasID(cards,id)
       end
     end
   end
-  return result;
+  return result
 end
 function HasIDNotNegated(cards,id)
-  CurrentIndex = nil
-  local result = false;
+  CurrentIndex = nil;
+  local result = false
   if cards ~= nil then 
     for i=1,#cards do
-      if cards[i].id == id and cards[i]:is_affected_by(EFFECT_DISABLE_EFFECT)==0 
-      and cards[i]:is_affected_by(EFFECT_DISABLE)==0 and bit32.band(cards[i].status,STATUS_SET_TURN)==0
-      then
-        CurrentIndex = i
-        result = true      
+      if cards[i].id == id then
+        if bit32.band(cards[i].type,TYPE_MONSTER)>0 
+        and cards[i]:is_affected_by(EFFECT_DISABLE_EFFECT)==0 
+        and cards[i]:is_affected_by(EFFECT_DISABLE)==0
+        then
+          CurrentIndex = i
+          result = true  
+        end
+        if bit32.band(cards[i].type,TYPE_SPELL+TYPE_TRAP)>0
+        and bit32.band(cards[i].status,STATUS_SET_TURN)==0        
+        and cards[i]:is_affected_by(EFFECT_CANNOT_TRIGGER)==0
+        then
+          CurrentIndex = i
+          result = true 
+        end
       end
     end
   end
-  return result;
+  return result
 end
 function NeedsCard(id,cards,check) --checks if the card is in cards and not in check
   return not HasID(check,id) and HasID(cards,id)
@@ -50,7 +60,7 @@ function OppHasFacedownMonster()
       return true
     end
   end
-  return false;
+  return false
 end
 function OppHasMonsterInMP2()
   return AI.GetCurrentPhase() == PHASE_MAIN2 and OppHasMonster()
@@ -150,14 +160,15 @@ function FireFormationCost(cards,count)
   return result
 end
 function UseBear()
-  return FireFormationCostCheck(AIST(),1)>2 and (OppHasStrongestMonster() or OppHasFacedownMonster() or OppHasMonsterInMP2())
+  local cost=FireFormationCostCheck(AIST(),1)
+  return cost>1 and OppHasStrongestMonster() or cost>2 and OppHasFacedownMonster() or cost>4 and OppHasMonsterInMP2()
 end 
 function GorillaFilter(card)
-  return card.owner==2 and card:is_affected_by(EFFECT_CANNOT_TRIGGER)==0
+  return card.owner==2 --and card:is_affected_by(EFFECT_CANNOT_TRIGGER)
 end
 function UseGorilla()
   local cards=OppST()
-  return FireFormationCostCheck(AIST(),1)>2 and CardsMatchingFilter(OppST(),GorillaFilter)>0
+  return FireFormationCostCheck(AIST(),1)>1 and CardsMatchingFilter(OppST(),GorillaFilter)>0
 end
 function GyokkoFilter(card)
   return bit32.band(card.position,POS_FACEDOWN)>0 and card:is_affected_by(EFFECT_CANNOT_TRIGGER)==0
@@ -231,7 +242,7 @@ function UseChicken()
   return FireFormationCostCheck(AIST(),1)>2
 end
 function UseBuffalo()
-  return FireFormationCostCheck(AIST(),2)>2 and CardsMatchingFilter(AIMon(),function(c) return c.level==4 end)>0
+  return FireFormationCostCheck(AIST(),2)>1 and CardsMatchingFilter(AIMon(),function(c) return c.level==4 end)>0
 end
 function SummonLeopard()
   local AICards=UseLists({AIHand(),AIMon(),AIST()})
@@ -274,9 +285,12 @@ function SummonCardinal()
   result = math.max(result,2)
   cards=AIGrave()
   for i=1,#cards do
-    if cards[i].id == 57103969 or cards[i].id == 57103969 then
+    if cards[i].id == 57103969 then
       result=result+1
     end
+    --[[if cards[i].setcode == 0x7c then
+      result=result+1
+    end]]
   end
   return result>=4 and MP2Check()
 end
@@ -317,7 +331,6 @@ function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
   local SpSummonable = cards.spsummonable_cards
   local Repositionable = cards.repositionable_cards
   local SetableMon = cards.monster_setable_cards
-  
   if HasIDNotNegated(Activatable,46772449) and UseBelzebuth() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -440,7 +453,7 @@ function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSummonable,12014404) and SummonCowboy() then -- Cowboy
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,12014404)}
   end
   if HasID(SpSummonable,89856523) and MP2Check() and Chance(50) then -- Kirin            
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
@@ -510,10 +523,10 @@ function BearTarget(cards)
     local prev=-2
     for i=1,#cards do
       if cards[i].owner==2 then
-        if cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT) then
+        if cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)>0 then
           attdef=math.max(attdef,-1)
         else
-          attdef=math.max(attdef,cards[i].attack,cards[i].def)
+          attdef=math.max(attdef,cards[i].attack,cards[i].defense)
         end
         if bit32.band(cards[i].position,POS_FACEDOWN)>0 then
           attdef=math.max(attdef,1600)
@@ -540,7 +553,22 @@ function GorillaTarget(cards)
   end
   if GlobalCardMode == 1 then
     GlobalCardMode = nil
-    return RandomIndexFilter(cards,GorillaFilter)
+    for i=1,#cards do
+      cards[i].index=i
+      if cards[i].owner==2 then
+        if cards[i]:is_affected_by(EFFECT_CANNOT_TRIGGER)>0 then
+          cards[i].prio=1
+        elseif bit32.band(cards[i].position,POS_FACEUP)>0 then
+          cards[i].prio=3
+        else
+          cards[i].prio=2
+        end
+      else
+        cards[i].prio=0
+      end
+    end
+    table.sort(cards,function(a,b) return a.prio>b.prio end)
+    return {cards[1].index} 
   end
 end
 function LeopardTarget(cards)

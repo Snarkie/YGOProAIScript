@@ -81,7 +81,6 @@ COMMAND_TO_END_PHASE   = 7
 
 
 function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
-  ----print("OnSelectInitCommand")
   
   ------------------------------------------
   -- The first time around, it sets the AI's
@@ -93,7 +92,6 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
       GlobalAIPlaysFirst = 1
       Globals()
 	  ResetOncePerTurnGlobals()
-	  ----print("GlobalSummonedThisTurn",GlobalSummonedThisTurn)
 	 end
     end
 

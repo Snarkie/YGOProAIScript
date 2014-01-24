@@ -17,7 +17,6 @@ POS_FACEDOWN_DEFENCE	=0x8
 function OnSelectPosition(id, available)
 	local result = 0
 	local band = bit32.band --assign bit32.band() to a local variable
-	--print("OnSelectPosition",id,available)
 	
     result = POS_FACEUP_ATTACK 
   

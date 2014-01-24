@@ -10,8 +10,6 @@
 function OnDeclareCard()
  local result = 85138716	
  
- --print("OnDeclareCard")
-		
 --------------------------------------------------
 -- Select random card in player's hand when using 
 -- "Mind Crush".

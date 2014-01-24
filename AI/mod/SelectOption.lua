@@ -9,17 +9,12 @@
 -- Return: index of the selected option
 function OnSelectOption(options)
 local result = 0
-	--print("OnSelectOption available options:")
-	for i=1,#options do
-		--print(i, options[i])
-	end
-  
+
   result = HeraldicOnSelectOption(options)
   if result ~= nil then
     return result
   end
 	result = 0
-   ----print("GlobalActivatedCardID 22",GlobalActivatedCardID)
    ------------------------------------------------------    
    -- Return random result if it isn't specified below.
    ------------------------------------------------------   
@@ -54,12 +49,10 @@ local result = 0
     end  
 	
 	if GlobalActivatedCardID == 70908596 then -- Constellar Kaust
-	print("KAUST ACTIVATED")
 	for i=1,#options do
       if options[i] == 1134537537 then
       result = i
       GlobalActivatedCardID = nil
-	   ----print("INCREASE LEVEL",result)
 	    return result
 	    end
       end

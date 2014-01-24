@@ -11,17 +11,7 @@
 -- Return:
 -- result = table containing tribute indices
 
----------------------------------------------------
--- Prefer monsters that benefit from being tributed
----------------------------------------------------
-function TributeWhitelist(id)
-  if id == 03300267 or id == 77901552 -- Hieratic Dragons of Su, Tefnuit,
-  or id == 31516413 or id == 78033100 -- Eset, Gebeb
-  then
-    return 1
-  end
-  return 0
-end
+
 
 --------------------------------------------------- 
 -- always prefer mind-controlled, whitelisted or 
@@ -29,7 +19,6 @@ end
 -- attack and tribute exceptions.
 ---------------------------------------------------
 function OnSelectTribute(cards,minTributes, maxTributes)
-  --print("OnSelectTribute")
   local result = {}
   local preferred = {}
   local valid = {}
