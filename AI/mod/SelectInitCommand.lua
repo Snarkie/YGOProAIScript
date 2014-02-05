@@ -1371,7 +1371,9 @@ end
   ---------------------------------------------  
   for i=1,#ActivatableCards do  
    if ActivatableCards[i].id == 12014404 then  -- Gagaga Gunman
-	if Global1PTSparSSed ~= 1 and Get_Card_Count_Pos(OppMon(), POS_FACEUP) > 0 then  
+	if Global1PTSparSSed ~= 1 and Get_Card_Count_Pos(OppMon(), POS_FACEUP) > 0 
+  or AI.GetPlayerLP(2)<=800
+  then  
 	   GlobalActivatedCardID = ActivatableCards[i].id
 	   Global1PTGunman = 1
 	  return COMMAND_ACTIVATE,i
@@ -1462,7 +1464,6 @@ end
    if ActivatableCards[i].id == 38495396 then  
      if Card_Count_From_List(BanishBlacklist, AIGrave(),"==") > 0 or 
 	    Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") >= Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") then
-        GlobalActivatedCardID = ActivatableCards[i].id
         GlobalCardMode = 1
        return COMMAND_ACTIVATE,i
       end

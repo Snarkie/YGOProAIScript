@@ -137,6 +137,9 @@ function HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(Activatable,84220251) and UseHeraldryReborn() then 
     return {COMMAND_ACTIVATE,IndexByID(Activatable,84220251)}
   end
+  if HasID(Activatable,61314842) then 
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end 
   if HasID(SpSummonable,22653490) and SummonChidori() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
@@ -397,6 +400,16 @@ function RUMTarget(cards)
   end
   return {math.random(#cards)}
 end
+function AHATarget(cards)
+ local c=Duel.GetFirstTarget()
+ if c then
+  print("extra")
+  return {1}
+ else
+  print("grave")
+  return HeraldicToField(cards,1)
+ end
+end
 function HeraldicOnSelectCard(cards, minTargets, maxTargets, triggeringID)
   local result = {}
   if triggeringID == 34086406 then -- Lavalval Chain
@@ -428,6 +441,9 @@ function HeraldicOnSelectCard(cards, minTargets, maxTargets, triggeringID)
   end
   if triggeringID == 92365601 then -- Rank-Up Magic - Limited Barian's Force
     return RUMTarget(cards)
+  end
+  if triggeringID == 61314842 then -- Rank-Up Magic - Limited Barian's Force
+    return AHATarget(cards)
   end
   return nil
 end

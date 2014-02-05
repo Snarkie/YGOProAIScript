@@ -43,7 +43,7 @@ function IndexByID(cards,id)
   for i=1,#cards do
     if cards[i].id==id then return i end
   end
-  return 0
+  return nil
 end
 function OppHasMonster()
   local cards=OppMon()
@@ -95,6 +95,7 @@ GlobalTargetID = nil
 function set_player_turn()
 	if player_ai == nil then
 		player_ai = Duel.GetTurnPlayer()
+    SaveState()
 	end
 end
 function get_owner_by_controler(controler)
@@ -191,7 +192,7 @@ function WolfbarkFilter(c)
   return bit32.band(c.race,RACE_BEASTWARRIOR)>0 and bit32.band(c.attribute,ATTRIBUTE_FIRE)>0 and c.level==4 
 end
 function GetWolfbark()
-  return CardsMatchingFilter(AIGrave(),WolfbarkFilter)>0 or HasID(AICards,06353603)
+  return CardsMatchingFilter(AIGrave(),WolfbarkFilter)>0 or HasID(UseLists({AIHand(),AIMon()}),06353603)
 end
 function SummonWolfbark()
   return CardsMatchingFilter(AIGrave(),WolfbarkFilter)>0 and Duel.GetFlagEffect(player_ai,03534077)==0
@@ -229,7 +230,7 @@ function DragonFilter(card,level)
   return card.level==level and (card.location==LOCATION_MZONE or card.setcode==0x79 and card.id~=43748308)
 end
 function UseDragon()
-  return FireFormationCostCheck(AIST(),2)>1 and (CardsMatchingFilter(AIGrave(),DragonFilter,4)>0
+  return FireFormationCostCheck(AIST(),2)>0 and (CardsMatchingFilter(AIGrave(),DragonFilter,4)>0
   or CardsMatchingFilter(AIMon(),DragonFilter,3)>0 and CardsMatchingFilter(AIGrave(),DragonFilter,3)>0)
 end
 function UseLeopard()
@@ -250,7 +251,7 @@ function SummonLeopard()
   if HasID(AIMon(),01662004) then
     result=result+1
   end
-  if HasID(AIHand(),01662004) and not Duel.CheckNormalSummonActivity(player_ai) then
+  if HasID(AIHand(),01662004) and not Duel.CheckNormalSummonActivity(player_ai) and not SummonSpirit() then
     result=result+1
   end
   if HasID(AICards,57103969) and HasID(AIDeck(),01662004) then
@@ -391,6 +392,9 @@ function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(Summonable,03534077) and SummonWolfbark() then
     return {COMMAND_SUMMON,CurrentIndex}
   end
+  if HasID(Summonable,43748308) and (UseDragon() or CanXYZ(4)) then              
+    return {COMMAND_SUMMON,IndexByID(Summonable,43748308)}           --Dragon 
+  end
   if HasID(Summonable,06353603) and (UseBear() or CanXYZ(4)) then 
     return {COMMAND_SUMMON,IndexByID(Summonable,06353603)}           --Bear
   end
@@ -399,9 +403,6 @@ function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
   end 
   if HasID(Summonable,30929786) and (UseChicken() or CanXYZ(3)) then
     return {COMMAND_SUMMON,IndexByID(Summonable,30929786)}           --Chicken
-  end
-  if HasID(Summonable,43748308) and (UseDragon() or CanXYZ(4)) then              
-    return {COMMAND_SUMMON,IndexByID(Summonable,43748308)}           --Dragon 
   end
   if HasID(Summonable,44860890) and CanXYZ(3) then --Raven
     return {COMMAND_SUMMON,IndexByID(Summonable,44860890)}
@@ -433,9 +434,12 @@ function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(Summonable,30929786) then --Chicken
     return {COMMAND_SUMMON,CurrentIndex}
   end
+  if HasID(Summonable,92572371) then --Buffalo
+    return {COMMAND_SUMMON,CurrentIndex}
+  end
   if HasID(SpSummonable,98012938) and SummonVulcan() then
     GlobalCardMode = 1
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,98012938)}
   end
   if HasID(SpSummonable,95992081) and HasID(AIBanish(),01662004) then -- Leviair               
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,95992081)}
@@ -447,7 +451,7 @@ function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSummonable,58504745) and SummonCardinal() then -- Cardinal           
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,58504745)}
   end
   if HasID(SpSummonable,48739166) and SummonSharkKnight() then -- SHark Knight            
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
@@ -491,7 +495,7 @@ function TenkiTarget(cards)
   if NeedsCard(39699564,cards,AICards) and HasID(AIHand(),01662004) and not SummonSpirit() then
     result={IndexByID(cards,39699564)} --get leopard when you need a spirit target
   end
-  if NeedsCard(03534077,cards,AICards) and GetWolfbark() then
+  if HasID(cards,03534077) and GetWolfbark() then
     result={IndexByID(cards,03534077)}  --get wolfbark when available and he has targets in grave
   end                                   --or you have Bear already
   if NeedsCard(39699564,cards,AICards) and HasID(AIHand(),06353603) and not SummonSpirit() then
@@ -572,13 +576,15 @@ function GorillaTarget(cards)
   end
 end
 function LeopardTarget(cards)
+  local result = nil
   if GlobalCardMode==1 then
     GlobalCardMode=nil
-    result=IndexByID(cards,39699564)
-    if result == nil then result=math.random(#cards) end
+    result={IndexByID(cards,39699564)}
   else
-    return FireFormationSearch(cards)
+    result = FireFormationSearch(cards)
   end
+  if result == nil then result={math.random(#cards)} end
+  return result
 end
 function SpiritTarget(cards)
   local result = nil
@@ -713,28 +719,26 @@ function DragonTarget(cards)
 end
 function VulcanTarget(cards)
   local result = nil
-  if GlobalCardMode==1 then
-    GlobalCardMode=nil
-    if HasID(cards,57103969) then
-      result=CurrentIndex
-    end
+  local c=Duel.GetFirstTarget()
+  if c then
+    result = Index_By_Loc(cards,2,"Highest",TYPE_MONSTER,nil,"==",LOCATION_MZONE)
+  else
+    result=FireFormationCost(cards,1)
     if result == nil then 
       result = getRandomSTIndex(cards,1) 
     end
-    return result
   end
-  return Index_By_Loc(cards,2,"Highest",TYPE_MONSTER,nil,"==",LOCATION_MZONE)
+  if result == nil then result = {math.random[#cards]} end
+  return result
 end
 function SharkKnightTarget(cards,targets)
   local result = {}
-  local list = {}
   for i=1,#cards do
     cards[i].index=i
-    list[#list+1]=cards[i]
   end
-  table.sort(list,function(a,b)return a.attack>b.attack end)
+  table.sort(cards,function(a,b)return a.attack>b.attack end)
   for i=1,targets do
-    result[#result+1]=list[i].index
+    result[#result+1]=cards[i].index
   end
   return result
 end
@@ -800,7 +804,7 @@ function FireFistCard(cards, minTargets, maxTargets, triggeringID)
   if triggeringID == 37057743 then -- Lion Emperor
     return LionEmperorTarget(cards)
   end 
-  if triggeringID == 96381979 then -- SHark Knight
+  if triggeringID == 48739166 then -- SHark Knight
     return SharkKnightTarget(cards,minTargets)
   end 
   if triggeringID == 95992081 then -- Leviair
@@ -840,8 +844,9 @@ function ChainTensen()
         target = Duel.GetAttacker()
         source = Duel.GetAttackTarget()
       end
-      if source:GetAttack() >= target:GetAttack() and source:GetAttack() <= target:GetAttack()+1000 
-      and target:IsControler(player_ai) and target:IsRace(RACE_BEASTWARRIOR) and target:IsPosition(POS_FACEUP_ATTACK)
+      if (source:GetAttack() >= target:GetAttack() and source:GetAttack() <= target:GetAttack()+1000 and source:IsPosition(POS_FACEUP_ATTACK)
+      or source:GetDefence() >= target:GetAttack() and source:GetDefence() <= target:GetAttack()+1000 and source:IsPosition(POS_FACEUP_DEFENCE))
+      and target:IsPosition(POS_FACEUP_ATTACK) and target:IsControler(player_ai) and target:IsRace(RACE_BEASTWARRIOR) 
       then
         GlobalTargetID=target:GetCode()
         return true
@@ -864,7 +869,7 @@ function ChainHornOfPhantomBeast()
   end
 end
 function TenkenFilter(card)
-	return card:IsControler(player_ai) and card:IsType(TYPE_MONSTER) and card:IsLocation(LOCATION_MZONE) and card:IsRace(RACE_BEASTWARRIOR)
+	return card:IsControler(player_ai) and card:IsType(TYPE_MONSTER) and card:IsLocation(LOCATION_MZONE) and card:IsRace(RACE_BEASTWARRIOR) and card:IsPosition(POS_FACEUP)
 end
 function ChainTenken()
 	local ex,cg = Duel.GetOperationInfo(0, CATEGORY_DESTROY)
@@ -930,7 +935,7 @@ function FireFistOnChain(cards,only_chains_by_player)
   if HasID(cards,23434538) and ChainMaxxC() then
     return {1,CurrentIndex}
   end
-  if HasID(cards,46772449) and UseBelzebuth() then
+  if HasIDNotNegated(cards,46772449) and UseBelzebuth() then
     return {1,CurrentIndex}
   end
   return nil
@@ -941,7 +946,7 @@ function FireFistOnSelectEffectYesNo(id)
     if HasID(AIMon(),96381979) then
       GlobalCardMode=1
       result = 1
-    elseif FireFormationCostCheck(AIST(),3)>1 then
+    elseif FireFormationCostCheck(AIST(),3)>0 then
       GlobalCardMode=1
       result = 1
     else

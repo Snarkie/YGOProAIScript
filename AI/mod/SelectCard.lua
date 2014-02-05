@@ -347,24 +347,26 @@ end
   -- (currently just checks the banish blacklist
   -- which includes the bosses)
   --------------------------------------------   
-  if GlobalActivatedCardID == 38495396 then    -- Constellar Ptolemy M7
+  if triggeringID == 38495396 then    -- Constellar Ptolemy M7
     if GlobalCardMode == 1 then
         GlobalCardMode = nil
-        if Card_Count_From_List(BanishBlacklist,AIGrave(),"==") > 0 then
-            for i = 1,#cards do
-                if cards[i] and BanishBlacklist(cards[i].id) > 0 and 
-                 cards[i].owner == 1 and cards[i].location == LOCATION_GRAVE then 
-                    result[1] = i
-                    GlobalActivatedCardID = nil
-                    return result
-                end
-            end
-        else
-            GlobalActivatedCardID = nil
-            return Index_By_Loc(cards,2,"Highest",TYPE_MONSTER,nil,"==",LOCATION_MZONE)
+    else
+      if Card_Count_From_List(BanishBlacklist,AIGrave(),"==") > 0 then
+        for i = 1,#cards do
+          if cards[i] and BanishBlacklist(cards[i].id) > 0 and 
+           cards[i].owner == 1 and cards[i].location == LOCATION_GRAVE then 
+              result[1] = i
+              GlobalActivatedCardID = nil
+              return result
+          end
         end
+      else
+        GlobalActivatedCardID = nil
+        return Index_By_Loc(cards,2,"Highest",TYPE_MONSTER,nil,"==",LOCATION_MZONE)
+      end
     end
-end
+    return {math.random(#cards)}
+  end
   
   --------------------------------------------     
   -- Constellar Ptolemy M7.
