@@ -155,8 +155,8 @@ function HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(SpSummonable,34086406) and SummonLavalvalChain() then
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,34086406)}
   end
-  if HasID(SpSummonable,23649496) then -- Plain Coat
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  if HasID(SpSummonable,23649496) and not HasID(AIMon(),23649496) then -- Plain Coat
+    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,23649496)}
   end
   if HasID(Summonable,82293134) and HeraldicCanXYZ() then   -- Leo
     return {COMMAND_SUMMON,IndexByID(Summonable,82293134)}
@@ -376,6 +376,18 @@ function SafeZoneTarget(cards)
   if result == nil then result={math.random(#cards)} end
   return result
 end
+function LanceTarget(cards)
+  result = {}
+  if GlobalCardMode == 1 then
+    GlobalCardMode = nil
+    result=Index_By_Loc(cards,2,"Highest",TYPE_MONSTER,nil,"==",LOCATION_MZONE)
+  else
+    result={IndexByID(cards,GlobalTargetID)}
+    GlobalTargetID=nil
+  end  
+  if result == nil then result={math.random(#cards)} end
+  return result
+end
 function RUMTarget(cards)
   local c=Duel.GetFirstTarget()
   local cg=Duel.GetMatchingGroup(nil,1-player_ai,LOCATION_MZONE,0,nil)
@@ -436,13 +448,16 @@ function HeraldicOnSelectCard(cards, minTargets, maxTargets, triggeringID)
   if triggeringID == 38296564 then -- Safe Zone
     return SafeZoneTarget(cards)
   end
+  if triggeringID == 27243130 then -- Forbidden Lance
+    return LanceTarget(cards)
+  end
   if triggeringID == 84220251 then -- Heraldry Reborn
     return HeraldicToField(cards,1)
   end
   if triggeringID == 92365601 then -- Rank-Up Magic - Limited Barian's Force
     return RUMTarget(cards)
   end
-  if triggeringID == 61314842 then -- Rank-Up Magic - Limited Barian's Force
+  if triggeringID == 61314842 then -- Advanced Heraldry Art
     return AHATarget(cards)
   end
   return nil
@@ -519,12 +534,60 @@ function ChainSafeZone()
   return false
 end
 
+function LanceFilter(card)
+	return card:IsControler(player_ai) and card:IsType(TYPE_MONSTER) and card:IsLocation(LOCATION_MZONE) and card:IsPosition(POS_FACEUP)
+end
+function ChainLance()
+	local ex,cg = Duel.GetOperationInfo(0, CATEGORY_DESTROY)
+	if ex then
+		if cg:IsExists(function(c) return c:IsControler(player_ai) and c:IsCode(27243130) end, 1, nil) then
+      --return true
+    end	
+  end
+  local cardtype = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_EXTTYPE)
+  local ex,cg = Duel.GetOperationInfo(0, CATEGORY_DESTROY)
+  local tg = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TARGET_CARDS)
+  if ex then
+    local g = cg:Filter(LanceFilter, nil):GetMaxGroup(Card.GetAttack)
+    if g then
+      GlobalTargetID = g:GetFirst():GetCode()
+   end
+    return bit32.band(cardtype, TYPE_SPELL+TYPE_TRAP) ~= 0 and cg:IsExists(LanceFilter, 1, nil) and Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_PLAYER)~=player_ai
+  elseif tg then
+    local g = tg:GetMaxGroup(Card.GetAttack)
+    if g then
+      GlobalTargetID = g:GetFirst():GetCode() 
+    end
+    return bit32.band(cardtype, TYPE_SPELL+TYPE_TRAP) ~= 0 and tg:IsExists(LanceFilter, 1, nil) and Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_PLAYER)~=player_ai
+  end
+  if Duel.GetCurrentPhase() == PHASE_DAMAGE then
+		local source = Duel.GetAttacker()
+		local target = Duel.GetAttackTarget()
+    if source and target then
+      if source:IsControler(player_ai) then
+        target = Duel.GetAttacker()
+        source = Duel.GetAttackTarget()
+      end
+      if source:GetAttack() >= target:GetAttack() and math.max(source:GetAttack()-800,0) <= target:GetAttack() 
+      and source:IsPosition(POS_FACEUP_ATTACK) and target:IsPosition(POS_FACEUP_ATTACK) and target:IsControler(player_ai)
+      then
+        GlobalTargetID=source:GetCode()
+        return true
+      end
+    end
+  end
+  return false
+end
+
 function HeraldicOnSelectChain(cards,only_chains_by_player)
   if HasIDNotNegated(cards,23649496) and ChainPlainCoat() then
     GlobalCardMode=2
     return {1,CurrentIndex}
   end
   if HasID(cards,38296564) and ChainSafeZone() then
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,27243130) and ChainLance() then
     return {1,CurrentIndex}
   end
   return nil

@@ -1585,8 +1585,31 @@ function ApplyATKBoosts(Cards)
     end
     if check then
       for i=1,#Cards do
-        if Cards[i].race==RACE_BEASTWARRIOR then
+        if Cards[i].race==RACE_BEASTWARRIOR and Cards[i].owner == 1 then
           Cards[i].attack = Cards[i].attack + 1000
+        end
+      end
+    end
+  end
+  
+  ------------------------------------------
+  -- Apply Forbidden Lance's 800 ATK reduction
+  ------------------------------------------
+  if #Cards > 0 then
+    local ST = AIST()
+    local check = false
+    for i=1,#ST do
+      if ST[i].id == 27243130 and bit32.band(ST[i].status,STATUS_SET_TURN)==0 then
+        check = true
+      end
+    end
+    if HasID(AIHand(),27243130) and Duel.GetLocationCount(player_ai,LOCATION_SZONE)>0 then
+      check = true
+    end
+    if check then
+      for i=1,#Cards do
+        if Cards[i].owner==2 then
+          Cards[i].attack = Cards[i].attack -800
         end
       end
     end

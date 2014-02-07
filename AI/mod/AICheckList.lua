@@ -347,7 +347,7 @@ SSBL={
 47387961,23649496,02407234, -- Number 8, Number 18, Number 69
 11398059,22653490,34086406, -- King of the Feral Imps, Chidori, Lavalval Chain
 12014404,46772449,48739166, -- Gagaga Cowboy, Evilswarm Exciton Knight, SHArk Knight
-89856523                    -- Kirin
+89856523,38495396           -- Kirin, Constellar Ptolemy M7
 }
 
 -----------------------------------------------------
@@ -562,7 +562,8 @@ function CardIsScripted(CardId)
      CardId == 61314842 or CardId == 84220251 or  -- Advanced Heraldry Art, Heraldry Reborn
      CardId == 59048135 or CardId == 81439173 or  -- Heraldry Augmentation, Foolish Burial
      CardId == 47387961 or CardId == 23649496 or  -- Number 8: Heraldic King Genom-Heritage, Number 18: heraldic Progenitor Plain-Coat
-     CardId == 38296564 or CardId == 92365601     -- Safe Zone, Rank-Up Magic: Limited Barian's Force       
+     CardId == 38296564 or CardId == 92365601 or  -- Safe Zone, Rank-Up Magic: Limited Barian's Force       
+     CardId == 27243130 -- Forbidden Lance
      then  
 	return 1
   end

@@ -994,6 +994,9 @@ function FFGetPos(id)
       return POS_FACEUP_ATTACK
     end
   end
+  if id == 89856523 and AI.GetCurrentPhase() == PHASE_MAIN2 then -- Kirin
+    return POS_FACEUP_DEFENCE
+  end
   return result
 end
 function FireFistOnSelectPosition(id, available)

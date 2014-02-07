@@ -1912,7 +1912,7 @@ end
     end
     
   -------------------------------------------------------  
-  -- Constellar Ptolemy M7
+  -- Constellar Ptolemy M7 74168099
   -------------------------------------------------------
   for i=1,#SpSummonableCards do   
 	if SpSummonableCards[i].id == 38495396 then -- Constellar Ptolemy M7  
@@ -1930,7 +1930,8 @@ end
 	 if SpSummonableCards[i].id == 38495396 then -- Constellar Ptolemy M7   
 	  local AIMons = AIMon()
        local Result = 0
-		if Get_Card_Count_Level(AIMon(), 6, "==", POS_FACEUP)  >= GetXYZRequiredMatCount() then
+		if Get_Card_Count_Level(AIMon(), 6, "==", POS_FACEUP)  >= GetXYZRequiredMatCount()
+    and (not HasID(AIMon(),74168099) or AI.GetCurrentPhase() == PHASE_MAIN2) then
 		  PtolemySSMode = 1
 		  GlobalSSCardID = SpSummonableCards[i].id
 		  return COMMAND_SPECIAL_SUMMON,i

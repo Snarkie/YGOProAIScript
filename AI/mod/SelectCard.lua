@@ -13,7 +13,6 @@
 -- result = table containing target indices
 function OnSelectCard(cards, minTargets, maxTargets, triggeringID)
   local result = {}
-
   
 -------------------------------------------------
 -- **********************************************
@@ -61,6 +60,7 @@ result = {}
   ------------------------------------------------------
   if GlobalAIIsAttacking and GlobalAttackerID ~= 26593852 then
 	if AI.GetCurrentPhase() == PHASE_BATTLE then	
+    ApplyATKBoosts(OppMon())
 		GlobalAIIsAttacking = false
 		local FaceUpDestructibleGroup = {}
 		local FaceUpAttackPositionIndestructibleGroup = {}

@@ -46,6 +46,8 @@ function OnSelectBattleCommand(cards)
   -- are affected that way by another card.
   -----------------------------------------------------
   ApplyATKBoosts(cards)
+  local targets = OppMon()
+  ApplyATKBoosts(targets)
 
 
   ------------------------------------------------
@@ -73,7 +75,7 @@ function OnSelectBattleCommand(cards)
   for i=1,#cards do
    if cards[i] ~= false then
      if cards[i].id == 26593852 then 
-	  if Get_Card_Count_ATT(OppMon(),"~=",ATTRIBUTE_DARK,POS_FACEUP_ATTACK) > 0 then
+	  if Get_Card_Count_ATT(targets,"~=",ATTRIBUTE_DARK,POS_FACEUP_ATTACK) > 0 then
          GlobalCurrentATK = 99999999
          GlobalAIIsAttacking = 1
          GlobalAttackerID = cards[i].id
@@ -89,7 +91,7 @@ function OnSelectBattleCommand(cards)
   ---------------------------------------------------------------
   for i=1,#cards do
    if cards[i] ~= false then
-	  if isToonUndestroyable(cards) == 1 and (Archetype_Card_Count(OppMon(),98,POS_FACEUP) == 0 and Archetype_Card_Count(OppMon(),4522082,POS_FACEUP) == 0) then 
+	  if isToonUndestroyable(cards) == 1 and (Archetype_Card_Count(targets,98,POS_FACEUP) == 0 and Archetype_Card_Count(targets,4522082,POS_FACEUP) == 0) then 
         GlobalCurrentATK = 99999999
         GlobalAIIsAttacking = 1
          GlobalAttackerID = cards[i].id
@@ -107,8 +109,8 @@ function OnSelectBattleCommand(cards)
     if #cards > 0 then
       local i = GetStrongestAttackerIndex()
       if i > 0 then
-        if cards[i].attack > Get_Card_Att_Def_Pos(OppMon()) and cards[i].attack > 0 and 
-		   Card_Count_Affected_By(EFFECT_INDESTRUCTABLE_BATTLE,OppMon()) > 0 or Global1PTAArchers == 1 then
+        if cards[i].attack > Get_Card_Att_Def_Pos(targets) and cards[i].attack > 0 and 
+		   Card_Count_Affected_By(EFFECT_INDESTRUCTABLE_BATTLE,targets) > 0 or Global1PTAArchers == 1 then
           GlobalCurrentATK = cards[i].attack
           GlobalAIIsAttacking = 1
 		  return 1,i
@@ -128,7 +130,7 @@ function OnSelectBattleCommand(cards)
     if #cards > 0 then
       local i = GetStrongestAttackerIndex()
       if i > 0 then
-        local OppMon = OppMon()
+        local OppMon = targets
         local AttackTarget = 0
         local AttackValue = 0
         for x=1,#OppMon do
