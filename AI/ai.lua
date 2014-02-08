@@ -103,6 +103,7 @@ require("ai.mod.SelectPosition")
 require("ai.mod.SelectTribute")
 require("ai.mod.SelectYesNo")
 require("ai.decks.FireFist")
+require("ai.decks.HeraldicBeast")
 
 math.randomseed( require("os").time() )
 
