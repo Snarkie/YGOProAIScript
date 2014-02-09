@@ -90,8 +90,10 @@ function OnSelectPosition(id, available)
 	result = POS_FACEUP_ATTACK
   end
 
- local FireFistPosition = FireFistOnSelectPosition(id,available)
-  if FireFistPosition then result=FireFistPosition end
+ local Position = FireFistOnSelectPosition(id,available)
+ if Position then result=Position end
+ Position = HeraldicOnSelectPosition(id,available)
+ if Position then result=Position end
   
   -- check if the selected position is valid
   ----print("is the position valid?", band(result,available))

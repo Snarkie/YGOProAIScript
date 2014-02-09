@@ -271,9 +271,12 @@ end
 function SummonVulcan()
   return HasID(AIST(),57103969) and CardsMatchingFilter(OppMon(),VulcanFilter)>0 and Chance(50)
 end
-function SummonCowboy()
+function SummonCowboyAtt()
   local OppAtt = Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack")
-  return AI.GetPlayerLP(2)<=800 or OppAtt >= 2500 and OppAtt < 3000 and not HasIDNotNegated(AIST(),44920699)
+  return OppAtt >= 2500 and OppAtt < 3000 and not HasIDNotNegated(AIST(),44920699)
+end
+function SummonCowboyDef()
+  return AI.GetPlayerLP(2)<=800 
 end
 function SummonCardinal()
   local cards=UseLists({OppMon(),OppST()})
@@ -334,6 +337,9 @@ function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
   local SetableMon = cards.monster_setable_cards
   if HasIDNotNegated(Activatable,46772449) and UseBelzebuth() then
     return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasID(SpSummonable,12014404) and SummonCowboyDef() then -- Cowboy
+    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,12014404)}
   end
   if HasID(SpSummonable,46772449) and SummonBelzebuth() then
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,46772449)}
@@ -456,7 +462,7 @@ function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(SpSummonable,48739166) and SummonSharkKnight() then -- SHark Knight            
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasID(SpSummonable,12014404) and SummonCowboy() then -- Cowboy
+  if HasID(SpSummonable,12014404) and SummonCowboyAtt() then -- Cowboy
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,12014404)}
   end
   if HasID(SpSummonable,89856523) and MP2Check() and Chance(50) then -- Kirin            

@@ -347,9 +347,26 @@ SSBL={
 47387961,23649496,02407234, -- Number 8, Number 18, Number 69
 11398059,22653490,34086406, -- King of the Feral Imps, Chidori, Lavalval Chain
 12014404,46772449,48739166, -- Gagaga Cowboy, Evilswarm Exciton Knight, SHArk Knight
-89856523,38495396           -- Kirin, Constellar Ptolemy M7
+89856523,38495396,00001042, -- Kirin, Constellar Ptolemy M7, Ragna Zero
+61344030 -- Starliege Paladynamo
 }
 
+---------------------------------------------------------
+-- Checks if the specified card ID is in this "blacklist"
+-- of cards to never set in the Spell&Trap zone
+---------------------------------------------------------
+function SetBlacklist(CardId)
+  for i=1,#SSBL do
+    if SetBL[i]==CardId then
+      return 1
+    end
+  end
+  return 0
+end
+
+SetBL={
+  61314842,92365601,84220251 -- Advanced Heraldry Art, Rank-Up Magic - Limited Barian's Force, Heraldry Reborn
+}
 -----------------------------------------------------
 -- Checks if the card's ID is in a list of spell/trap
 -- cards that work well when multiple copies are
@@ -563,7 +580,7 @@ function CardIsScripted(CardId)
      CardId == 59048135 or CardId == 81439173 or  -- Heraldry Augmentation, Foolish Burial
      CardId == 47387961 or CardId == 23649496 or  -- Number 8: Heraldic King Genom-Heritage, Number 18: heraldic Progenitor Plain-Coat
      CardId == 38296564 or CardId == 92365601 or  -- Safe Zone, Rank-Up Magic: Limited Barian's Force       
-     CardId == 27243130 -- Forbidden Lance
+     CardId == 27243130 or CardId == 94656263  -- Forbidden Lance, Kagetokage
      then  
 	return 1
   end

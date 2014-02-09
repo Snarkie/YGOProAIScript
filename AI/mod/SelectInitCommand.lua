@@ -103,6 +103,31 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
     return COMMAND_TO_NEXT_PHASE,1
   end
   
+  ---------------------------------------
+  -- Don't do anything if if the AI controls
+  -- a face-up C106: Giant Hand Red with
+  -- a "Number" monster as XYZ material,
+  -- that didn't use its effect this turn
+  ---------------------------------------
+  
+  local aimon = AIMon()
+  local card = nil
+  for i=1,#aimon do
+    if aimon[i].id==55888045 then
+      card = aimon[i]
+    end
+  end
+  if card and bit32.band(card.position,POS_FACEUP)>0 
+  and Duel.GetTurnCount() ~= GlobalC106
+  then
+    local materials = card.xyz_materials
+    for i=1,#materials do
+      if bit32.band(materials[i].setcode,0x48)>0 then
+        return COMMAND_TO_NEXT_PHASE,1
+      end
+    end
+  end
+
   --------------------------------------------------
   -- Storing these lists of cards in local variables
   -- for faster access and gameplay.
@@ -2655,7 +2680,7 @@ end
   if #cards.st_setable_cards > 0 and (AI.GetCurrentPhase() == PHASE_MAIN2 or Duel.GetTurnCount() == 1) then
     local setCards = cards.st_setable_cards
     for i=1,#setCards do
-      if bit32.band(setCards[i].type,TYPE_TRAP) > 0 or bit32.band(setCards[i].type,TYPE_QUICKPLAY) > 0 then
+      if SetBlacklist(setCards[i].id)==0 and (bit32.band(setCards[i].type,TYPE_TRAP) > 0 or bit32.band(setCards[i].type,TYPE_QUICKPLAY) > 0 )then
 		return COMMAND_SET_ST,i
       end
     end
@@ -2673,7 +2698,7 @@ end
 	if #cards.st_setable_cards > 0 and AI.GetCurrentPhase() == PHASE_MAIN2 then
       local setCards = cards.st_setable_cards
       for i=1,#setCards do
-        if bit32.band(setCards[i].type,TYPE_SPELL) > 0 then
+        if bit32.band(setCards[i].type,TYPE_SPELL) > 0 and SetBlacklist(setCards[i].id)==0 then
           if Get_Card_Count(AIST()) < 2 then
             return COMMAND_SET_ST,i
           end
