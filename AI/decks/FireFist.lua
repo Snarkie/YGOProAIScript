@@ -313,7 +313,7 @@ function SummonBelzebuth()
   local OppField=UseLists({OppMon(),OppST()})
   local AICards=UseLists({AIHand(),AIField})
   local OppCards=UseLists({OppHand(),OppField})
-  return #AICards<#OppCards and Chance(math.min(math.max(0,(#OppField-#AIField)*34),100))
+  return #AICards<#OppCards and Chance(math.min(math.max(0,(#OppField-#AIField-1)*34),100))
 end
 function SharkKnightFilter(c)
 	return c:IsPosition(POS_FACEUP_ATTACK) and not c:IsType(TYPE_TOKEN) 
@@ -322,7 +322,7 @@ function SharkKnightFilter(c)
 end
 function SummonSharkKnight()
   local cg=Duel.GetMatchingGroup(SharkKnightFilter,1-player_ai,LOCATION_MZONE,0,nil)
-  if cg:GetCount() > 0 then
+  if cg and cg:GetCount() > 0 then
     local g = cg:GetMaxGroup(Card.GetAttack)
     return Chance(50) or g:GetFirst():GetAttack()>=2400
   end

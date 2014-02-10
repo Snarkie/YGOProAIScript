@@ -83,7 +83,7 @@ function UsePlainCoat()
   return result
 end
 function SummonPlainCoat()
-  return UsePlainCoat()
+  return UsePlainCoat() or not (HasID(UseLists({AIMon(),AIGrave()}),23649496)) and (Chance(50) or HasID(AIHand(),92365601))
 end
 function SummonGenomHeritage()
   local cards=OppMon()
@@ -121,12 +121,12 @@ function SummonRagnaZero()
   end
 end
 function SummonAmphisbaena()
-  return FieldCheck(4)==1 or FieldCheck(4)==0 and HasID(AIHand,94656263)
+  return FieldCheck(4)==1 or FieldCheck(4)==0 and HasID(AIHand(),94656263)
 end
 function UseAmphisbaena(card)
   if bit32.band(card.location,LOCATION_HAND)>0 then
     return Duel.CheckNormalSummonActivity(player_ai) and FieldCheck(4)==1 
-    or HeraldicCanXYZ() and HasID(AIHand(),82293134)
+    or HeraldicCanXYZ() and HasID(AIHand(),82293134) and HeraldicCount(AIHand())==2 and FieldCheck(4)==0
   else
     return false
   end
@@ -249,7 +249,7 @@ function HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_SUMMON,IndexByID(Summonable,56921677)}
   end
   if HasID(Summonable,87255382) and SummonAmphisbaena() then   -- Amphisbaena
-    return {COMMAND_SUMMON,CurrentIndex}
+    return {COMMAND_SUMMON,IndexByID(Summonable,87255382)}
   end
   if HasID(Summonable,56921677) and HasBackrow then   -- Basilisk
     return {COMMAND_SUMMON,IndexByID(Summonable,56921677)}
@@ -367,8 +367,9 @@ end
 function HeraldicToHand(cards)
   local AICards=UseLists({AIMon(),AIHand()})
   local AICardsGrave=UseLists({AICards,AIGrave()})
-  if NeedsCard(82293134,cards,AICardsGrave) then -- Leo
-    return CurrentIndex
+  if NeedsCard(82293134,cards,AICardsGrave) 
+  or NeedsCard(82293134,cards,AIHand()) and HasID(AIHand(),87255382) then -- Leo
+    return IndexByID(cards,82293134)
   end
   if NeedsCard(87255382,cards,AICards)          -- Amphisbaena
   and (HeraldicCount(AIHand())>1 or HasID(AIHand(),82293134) )
@@ -379,7 +380,7 @@ function HeraldicToHand(cards)
     return CurrentIndex
   end
 
-  if NeedsCard(82293134,cards,AICards) and Duel.GetFlagEffect(player_ai,82293134)==0 then -- Leo
+  if NeedsCard(82293134,cards,AICards) then -- Leo
     return CurrentIndex
   end
   if NeedsCard(60316373,cards,AICards) then -- Aberconway
@@ -425,18 +426,18 @@ function ImpKingTarget(cards)
 end
 function PlainCoatTarget(cards)
     local result = nil
-    if GlobalCardMode == 2 then
-      GlobalCardMode = 1
-      result = HeraldicToGrave(cards,1)
-    elseif GlobalCardMode == 1 then
-      GlobalCardMode = nil
+    local e=Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
+    local c=Duel.GetFirstTarget()
+    if e and e:GetActivateLocation()==LOCATION_GRAVE then 
+      result = HeraldicToGrave(cards,2)
+    elseif c then
       for i=1,#cards do
         if cards[i].owner == 1 then
           result = {i}
         end
       end
     else
-      result = HeraldicToGrave(cards,2)
+      result = HeraldicToGrave(cards,1)
     end
     if result then return result end
     return {math.random(#cards)}
@@ -529,9 +530,9 @@ function AHATarget(cards)
   if HasID(cards,23649496) and SummonPlainCoat() then
     result=IndexByID(cards,23649496)
   end
-  if HasID(cards,48739166) and SummonSharkKnight() then           
+  --[[if HasID(cards,48739166) and SummonSharkKnight() then 
     result=IndexByID(cards,48739166)
-  end 
+  end]]
   if HasID(cards,22653490) and SummonChidori() then
     result=IndexByID(cards,22653490)
   end
@@ -625,7 +626,10 @@ function ChainPlainCoat()
   return result and UsePlainCoat() 
 end
 function SafeZoneFilter(card)
-  return card:IsControler(player_ai) and card:IsType(TYPE_MONSTER) and not card:IsCode(23649496) and card:GetCode()~=82293134
+  return card:IsControler(player_ai) and card:IsType(TYPE_MONSTER) and not card:IsCode(23649496) and card:GetCode()~=82293134 and card:IsPosition(POS_FACEUP_ATTACK)
+end
+function SafeZoneFilterEnemy(card)
+  return card:IsControler(1-player_ai) and card:IsType(TYPE_MONSTER) and card:IsPosition(POS_FACEUP_ATTACK)
 end
 function RemovalCheck()
   local c={CATEGORY_DESTROY,CATEGORY_REMOVE,CATEGORY_TOGRAVE,CATEGORY_TOHAND,CATEGORY_TODECK}
@@ -639,8 +643,11 @@ function ChainSafeZone()
 	local cg = RemovalCheck()
 	if cg then
 		if cg:IsExists(function(c) return c:IsControler(player_ai) and c:IsCode(38296564) end, 1, nil) then
-      GlobalCardMode=1
-      return true
+      local g=Duel.GetMatchingGroup(SafeZoneFilterEnemy,1-player_ai,LOCATION_MZONE,0,nil)
+      if g and g:GetCount()>0 then
+        GlobalCardMode=1
+        return true
+      end
     end	
   end
   local cardtype = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_EXTTYPE)
@@ -731,7 +738,6 @@ end
 
 function HeraldicOnSelectChain(cards,only_chains_by_player)
   if HasIDNotNegated(cards,23649496) and ChainPlainCoat() then
-    GlobalCardMode=2
     return {1,CurrentIndex}
   end
   if HasID(cards,38296564) and ChainSafeZone() then

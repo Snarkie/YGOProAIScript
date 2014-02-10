@@ -348,7 +348,7 @@ SSBL={
 11398059,22653490,34086406, -- King of the Feral Imps, Chidori, Lavalval Chain
 12014404,46772449,48739166, -- Gagaga Cowboy, Evilswarm Exciton Knight, SHArk Knight
 89856523,38495396,00001042, -- Kirin, Constellar Ptolemy M7, Ragna Zero
-61344030 -- Starliege Paladynamo
+61344030,82315772 -- Starliege Paladynamo, Heraldic Beast Eale
 }
 
 ---------------------------------------------------------
