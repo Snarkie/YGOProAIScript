@@ -60,7 +60,7 @@ result = {}
   ------------------------------------------------------
   if GlobalAIIsAttacking and GlobalAttackerID ~= 26593852 then
 	if AI.GetCurrentPhase() == PHASE_BATTLE then	
-    ApplyATKBoosts(OppMon())
+    ApplyATKBoosts(cards)
 		GlobalAIIsAttacking = false
 		local FaceUpDestructibleGroup = {}
 		local FaceUpAttackPositionIndestructibleGroup = {}
@@ -71,7 +71,8 @@ result = {}
 		-- divide selectable attack targets into 3 groups
 		for i = 1, #cards do
 			-- 1st group
-			if bit32.band(cards[i].position,POS_FACEUP) > 0 and cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE) == 0 then
+			if bit32.band(cards[i].position,POS_FACEUP) > 0 and cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE) == 0 
+      and cards[i].attack < GlobalCurrentATK then
 				FaceUpDestructibleGroup[c] = cards[i]
 				FaceUpDestructibleGroup[c].index = i
 				FaceUpDestructibleGroup[c].attack_or_defense = bit32.band(cards[i].position,POS_ATTACK) > 0 and cards[i].attack or cards[i].defense

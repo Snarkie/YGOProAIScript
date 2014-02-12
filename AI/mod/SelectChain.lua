@@ -326,12 +326,10 @@ result = 0
   -- Always try to activate Stardust Dragon's
   -- or SD/AM's "summon from graveyard" effect.
   ---------------------------------------------
-  if OppCard ~= nil then
-    for i=1,#cards do
-      if cards[i].id == 44508094 or cards[i].id == 61257789 then
-        if cards[i].location == LOCATION_GRAVE then
-          return 1,i
-        end
+  for i=1,#cards do
+    if cards[i].id == 44508094 or cards[i].id == 61257789 then
+      if cards[i].location == LOCATION_GRAVE then
+        return 1,i
       end
     end
   end
@@ -498,15 +496,16 @@ end
   -- or Starlight Road only if the
   -- opponent activated something.
   ---------------------------------------------------------
-  if OppCard ~= nil then
-    for i=1,#cards do
-      if cards[i].id == 44508094 or cards[i].id == 58120309 or   -- SD, SR
-         cards[i].id == 61257789 or cards[i].id == 35952884 or   -- SDAM, SQD
-         cards[i].id == 24696097 or cards[i].id == 99188141 then -- SSD,THRIO
-         return 1,i
-        end
-      end
+  for i=1,#cards do
+    if cards[i].id == 44508094 or cards[i].id == 58120309 or   -- SD, SR
+       cards[i].id == 61257789 or cards[i].id == 35952884 or   -- SDAM, SQD
+       cards[i].id == 24696097 or cards[i].id == 99188141 then -- SSD,THRIO
+       local p = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_PLAYER)
+       if p ~= player_ai then
+        return 1,i
+       end
     end
+  end
   
   ---------------------------------------------
   -- AI should activate: Shrink, 

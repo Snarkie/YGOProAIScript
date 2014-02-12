@@ -65,10 +65,10 @@ function SummonChidori()
   return result[1]+result[2]>=2
 end
 function SummonLavalvalChain() 
-  return not (HasID(UseLists({AIGrave(),AIHand(),AIMon()}),82293134) or Duel.GetFlagEffect(player_ai,82293134)==1) and Chance(30)
+  return not (HasID(UseLists({AIGrave(),AIHand(),AIMon()}),82293134) or Duel.GetFlagEffect(player_ai,82293134)==1) and (Chance(30) or Duel.GetCurrentPhase() == PHASE_MAIN2)
 end
 function SummonImpKing()
-  return HasID(AIDeck(),94656263) and HasID(AIMon(),82293134) and (Chance(30) or HasID(AIMon(),23649496))
+  return HasID(AIDeck(),94656263) and HasID(AIMon(),82293134) and (Chance(30) or HasID(AIMon(),23649496) or Duel.GetCurrentPhase() == PHASE_MAIN2)
 end
 function UsePlainCoat()
   local cards=UseLists({AIMon(),OppMon()})
@@ -119,6 +119,9 @@ function SummonRagnaZero()
       return true
     end 
   end
+end
+function SummonLeo()
+  return FieldCheck(4)==1 or FieldCheck(4)==0 and HasID(AIHand(),94656263)
 end
 function SummonAmphisbaena()
   return FieldCheck(4)==1 or FieldCheck(4)==0 and HasID(AIHand(),94656263)
@@ -230,7 +233,10 @@ function HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(SpSummonable,23649496) and not HasID(AIMon(),23649496) and MP2Check() then -- Plain Coat
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,23649496)}
   end
-  if HasID(Summonable,82293134) and HeraldicCanXYZ() then   -- Leo
+  if HasID(SpSummonable,12014404) and SummonCowboyAtt() then -- Cowboy
+    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,12014404)}
+  end
+  if HasID(Summonable,82293134) and SummonLeo() then   -- Leo
     return {COMMAND_SUMMON,IndexByID(Summonable,82293134)}
   end
   if HasID(Summonable,60316373) and HeraldicCanXYZ() then   -- Aberconway
@@ -735,6 +741,7 @@ end
 function ChainKage()
   return FieldCheck(4)==1
 end
+
 
 function HeraldicOnSelectChain(cards,only_chains_by_player)
   if HasIDNotNegated(cards,23649496) and ChainPlainCoat() then

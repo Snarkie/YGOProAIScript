@@ -49,9 +49,20 @@ function OppHasMonster()
   local cards=OppMon()
   return #cards>0
 end
+function AIGetStrongestAttack()
+  local cards=AIMon()
+  local result=0
+  for i=1,#cards do
+    if cards[i] and cards[i]:is_affected_by(EFFECT_CANNOT_ATTACK)==0 and cards[i].attack>result then
+      result=cards[i].attack
+    end
+  end
+  return result
+end
 function OppHasStrongestMonster()
-  return Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") <= Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack")
-  or Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") <= Get_Card_Att_Def(OppMon(),"defense",">",POS_FACEUP_DEFENCE,"defense")
+  local att=AIGetStrongestAttack()
+  return att <= Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack")
+  or att <= Get_Card_Att_Def(OppMon(),"defense",">",POS_FACEUP_DEFENCE,"defense")
 end
 function OppHasFacedownMonster()
   local cards=OppMon()
@@ -273,7 +284,7 @@ function SummonVulcan()
 end
 function SummonCowboyAtt()
   local OppAtt = Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack")
-  return OppAtt >= 2500 and OppAtt < 3000 and not HasIDNotNegated(AIST(),44920699)
+  return OppAtt >= 2500 and OppAtt < 3000 and not HasIDNotNegated(AIST(),44920699) and Duel.GetCurrentPhase() ~= PHASE_MAIN2
 end
 function SummonCowboyDef()
   return AI.GetPlayerLP(2)<=800 
@@ -462,16 +473,12 @@ function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(SpSummonable,48739166) and SummonSharkKnight() then -- SHark Knight            
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasID(SpSummonable,12014404) and SummonCowboyAtt() then -- Cowboy
-    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,12014404)}
-  end
   if HasID(SpSummonable,89856523) and MP2Check() and Chance(50) then -- Kirin            
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSummonable,96381979) and MP2Check() then -- Tiger King 
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  
   if HasID(SetableMon,93294869) then --Wolf
     return {COMMAND_SET_MONSTER,CurrentIndex}
   end
@@ -906,6 +913,19 @@ end
 function ChainMaxxC()
   return Duel.GetOperationInfo(0, CATEGORY_SPECIAL_SUMMON) and  Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_PLAYER)~=player_ai  
 end
+function VeilerTarget(card)
+  local value=nil
+  local att=AIGetStrongestAttack()
+  if bit32.band(card.position,POS_FACEUP_ATTACK)>0 then
+    value=card.attack
+  elseif bit32.band(card.position,POS_FACEUP_DEFENCE)>0 then
+    value=card.defense
+  end
+  if value and att>value and card:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE)>0 then
+    return true
+  end
+  return false
+end
 function ChainVeiler()
   local effect = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
 	if effect then
@@ -918,6 +938,31 @@ function ChainVeiler()
     if card and card:IsControler(1-player) and card:IsLocation(LOCATION_MZONE) then
       GlobalTargetID=card:GetCode()
       return true
+    end
+  end
+  if Duel.GetCurrentPhase() == PHASE_BATTLE then --for Breakthrough Skill
+    if Duel.GetTurnPlayer()==player_ai then
+      local cards=OppMon()
+      for i=1,#cards do
+        if VeilerTarget(cards[i]) then
+          GlobalTargetID=cards[i].id
+          return true
+        end
+      end
+    end
+    local source = Duel.GetAttacker()
+		local target = Duel.GetAttackTarget()
+    if source and target then
+      if source:IsControler(player_ai) then
+        target = Duel.GetAttacker()
+        source = Duel.GetAttackTarget()
+      end
+      if source:GetAttack() <= target:GetAttack() and target:IsControler(player_ai) 
+      and target:IsPosition(POS_FACEUP_ATTACK) and source:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE)
+      then
+        GlobalTargetID=source:GetCode()
+        return true
+      end
     end
   end
   return false

@@ -580,7 +580,8 @@ function CardIsScripted(CardId)
      CardId == 59048135 or CardId == 81439173 or  -- Heraldry Augmentation, Foolish Burial
      CardId == 47387961 or CardId == 23649496 or  -- Number 8: Heraldic King Genom-Heritage, Number 18: heraldic Progenitor Plain-Coat
      CardId == 38296564 or CardId == 92365601 or  -- Safe Zone, Rank-Up Magic: Limited Barian's Force       
-     CardId == 27243130 or CardId == 94656263  -- Forbidden Lance, Kagetokage
+     CardId == 27243130 or CardId == 94656263 or  -- Forbidden Lance, Kagetokage
+     CardId == 44508094  -- Stardust Dragon
      then  
 	return 1
   end
