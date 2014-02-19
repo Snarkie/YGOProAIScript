@@ -65,10 +65,12 @@ function SummonChidori()
   return result[1]+result[2]>=2
 end
 function SummonLavalvalChain() 
-  return not (HasID(UseLists({AIGrave(),AIHand(),AIMon()}),82293134) or Duel.GetFlagEffect(player_ai,82293134)==1) and (Chance(30) or Duel.GetCurrentPhase() == PHASE_MAIN2)
+  return not (HasID(UseLists({AIGrave(),AIHand(),AIMon()}),82293134) or Duel.GetFlagEffect(player_ai,82293134)==1) 
+  and (Chance(30) or Duel.GetCurrentPhase() == PHASE_MAIN2 or Duel.GetTurnCount()==1)
 end
 function SummonImpKing()
-  return HasID(AIDeck(),94656263) and HasID(AIMon(),82293134) and (Chance(30) or HasID(AIMon(),23649496) or Duel.GetCurrentPhase() == PHASE_MAIN2)
+  return HasID(AIDeck(),94656263) and HasID(AIMon(),82293134) 
+  and (Chance(30) or HasID(AIMon(),23649496) or Duel.GetCurrentPhase() == PHASE_MAIN2 or Duel.GetTurnCount()==1)
 end
 function UsePlainCoat()
   local cards=UseLists({AIMon(),OppMon()})
@@ -145,8 +147,7 @@ function C101Filter(c)
 	return bit.band(c:GetSummonType(),SUMMON_TYPE_SPECIAL)>0 and not c:IsType(TYPE_TOKEN) 
 end
 function UseC101()
-  local cg=Duel.GetMatchingGroup(C101Filter,1-player_ai,LOCATION_MZONE,0,nil)
-  return cg:GetCount() > 0 
+  return Duel.IsExistingMatchingCard(C101Filter,1-player_ai,LOCATION_MZONE,0,1,nil)
 end
 function UsedSHarkFilter(c)
   return c.id == 48739166 and c.xyz_material_count < 2
@@ -209,8 +210,8 @@ function HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(Activatable,61314842) then 
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(SpSummonable,1042) and SummonRagnaZero() then
-    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,1042)}
+  if HasID(SpSummonable,94380860) and SummonRagnaZero() then
+    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,94380860)}
   end  
   if HasID(SpSummonable,22653490) and SummonChidori() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
@@ -542,8 +543,8 @@ function AHATarget(cards)
   if HasID(cards,22653490) and SummonChidori() then
     result=IndexByID(cards,22653490)
   end
-  if HasID(cards,1042) and SummonRagnaZero() then
-    return IndexByID(cards,1042)
+  if HasID(cards,94380860) and SummonRagnaZero() then
+    return IndexByID(cards,94380860)
   end
   if HasID(cards,61344030) and SummonPaladynamo() then
     result=IndexByID(cards,61344030)
@@ -765,7 +766,7 @@ end
 HeraldicAtt={
   65367484,60316373,87255382,61344030,
   47387961,11398059,34086406,22653490,
-  11522979,55888045,12744567,00001042
+  11522979,55888045,12744567,94380860
 }
 HeraldicDef={
   19310321,45705025,82315772,56921677
