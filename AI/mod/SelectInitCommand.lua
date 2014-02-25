@@ -1623,7 +1623,9 @@ end
 	if ActivatableCards[i].type ~= TYPE_SPELL + TYPE_FIELD then                  
 	  if CardIsScripted(ActivatableCards[i].id) == 0 then -- Check if card's activation is already scripted above
 		  GlobalActivatedCardID = ActivatableCards[i].id
+      if ActivatableCards[i]:is_affected_by(EFFECT_DISABLE_EFFECT)==0 and ActivatableCards[i]:is_affected_by(EFFECT_DISABLE)==0 then
 		  return COMMAND_ACTIVATE,i
+            end
           end
         end
       end
