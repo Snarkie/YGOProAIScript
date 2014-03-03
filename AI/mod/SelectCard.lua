@@ -29,6 +29,10 @@ result = HeraldicOnSelectCard(cards, minTargets, maxTargets, triggeringID)
 if result ~= nil then
   return result
 end
+result = GadgetOnSelectCard(cards, minTargets, maxTargets, triggeringID)
+if result ~= nil then
+  return result
+end
 result = {}
 
   --------------------------------------------

@@ -348,8 +348,12 @@ SSBL={
 11398059,22653490,34086406, -- King of the Feral Imps, Chidori, Lavalval Chain
 12014404,46772449,48739166, -- Gagaga Cowboy, Evilswarm Exciton Knight, SHArk Knight
 89856523,38495396,94380860, -- Kirin, Constellar Ptolemy M7, Ragna Zero
-61344030,82315772 -- Starliege Paladynamo, Heraldic Beast Eale
+61344030,82315772,28912357, -- Starliege Paladynamo, Heraldic Beast Eale, Gear Gigant X
+80117527,22110647,88033975, -- Number 11: Big Eye, Mecha Phantom Beast Dracossack, Armades, Keeper of Boundaries
+33198837,83994433,76774528, -- Naturia Beast, Stardust Spark Dragon, Scrap Dragon
+05556499,39284521 -- Machina Fortress, Machina Cannon
 }
+
 
 ---------------------------------------------------------
 -- Checks if the specified card ID is in this "blacklist"
@@ -366,6 +370,24 @@ end
 
 SetBL={
   61314842,92365601,84220251 -- Advanced Heraldry Art, Rank-Up Magic - Limited Barian's Force, Heraldry Reborn
+}
+
+---------------------------------------------------------
+-- Checks if the specified card ID is in this "blacklist"
+-- of cards to never negate on the field via cards like
+-- Effect Veiler or Breakthrough Skill
+---------------------------------------------------------
+function NegateBlacklist(CardId)
+  for i=1,#SSBL do
+    if SetBL[i]==CardId then
+      return 1
+    end
+  end
+  return 0
+end
+
+SetBL={
+  53804307,26400609,89399912,90411554 -- the 4 Dragon Rulers
 }
 -----------------------------------------------------
 -- Checks if the card's ID is in a list of spell/trap
@@ -581,8 +603,13 @@ function CardIsScripted(CardId)
      CardId == 47387961 or CardId == 23649496 or  -- Number 8: Heraldic King Genom-Heritage, Number 18: heraldic Progenitor Plain-Coat
      CardId == 38296564 or CardId == 92365601 or  -- Safe Zone, Rank-Up Magic: Limited Barian's Force       
      CardId == 27243130 or CardId == 94656263 or  -- Forbidden Lance, Kagetokage
-     CardId == 44508094  -- Stardust Dragon
-     then  
+     CardId == 44508094 or CardId == 90411554 or  -- Stardust Dragon, Redox, Dragon Ruler of Boulders
+     CardId == 18964575 or CardId == 80117527 or  -- Swift Scarecrow, Number 11: Big Eye
+     CardId == 22110647 or CardId == 33198837 or  -- Mecha Phantom Beast Dracossack, Naturia Beast 
+     CardId == 83994433 or CardId == 76774528 or  -- Stardust Spark Dragon, Scrap Dragon
+     CardId == 97077563 or CardId == 94380860 or  -- Call of the Haunted, Ragna Zero
+     CardId == 48739166 or CardId == 12744567   -- SHArk Knight, SHDark Knight
+    then  
 	return 1
   end
   return 0

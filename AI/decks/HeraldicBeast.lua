@@ -62,7 +62,12 @@ function SummonChidori()
     if bit32.band(cards[i].position,POS_FACEUP)>0 then result[1]=1 end
     if bit32.band(cards[i].position,POS_FACEDOWN)>0 then result[2]=1 end
   end
-  return result[1]+result[2]>=2
+  if cg and cg:GetCount() > 0 then
+    return true
+  end
+  return result[1]+result[2]>=2 
+  or Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack") >= 2300 --for now
+  or Get_Card_Att_Def(OppMon(),"defense",">",POS_FACEUP_DEFENCE,"defense") >= 2300
 end
 function SummonLavalvalChain() 
   return not (HasID(UseLists({AIGrave(),AIHand(),AIMon()}),82293134) or Duel.GetFlagEffect(player_ai,82293134)==1) 
@@ -90,7 +95,8 @@ end
 function SummonGenomHeritage()
   local cards=OppMon()
   for i=1,#cards do
-    if bit32.band(cards[i].type,TYPE_XYZ)>0 then
+    if bit32.band(cards[i].type,TYPE_XYZ)>0 
+    and cards[i]:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0 then
       return true
     end
   end
@@ -107,6 +113,7 @@ function SummonPaladynamo()
       return true
     end 
   end
+  return false
 end
 function SummonRagnaZero()
   local cards = OppMon()
@@ -121,12 +128,16 @@ function SummonRagnaZero()
       return true
     end 
   end
+  return false
 end
 function SummonLeo()
   return FieldCheck(4)==1 or FieldCheck(4)==0 and HasID(AIHand(),94656263)
+  or HeraldicCount(AIGrave())>0 and HasID(AIHand(),84220251)
+  or HeraldicCount(AIHand())>2 and HasID(AIHand(),87255382)
 end
 function SummonAmphisbaena()
   return FieldCheck(4)==1 or FieldCheck(4)==0 and HasID(AIHand(),94656263)
+  or HeraldicCount(AIGrave())>0 and HasID(AIHand(),84220251)
 end
 function UseAmphisbaena(card)
   if bit32.band(card.location,LOCATION_HAND)>0 then
@@ -155,6 +166,34 @@ end
 function UseRUM()
   return HasID(AIMon(),23649496) or (HasID(AIGrave(),48739166) or CardsMatchingFilter(AIMon(),UsedSHarkFilter)>0) and UseC101()
 end
+function UseTwinEagle()
+  local cards=AIMon()
+  for i=1,#cards do
+    if cards[i].id==48739166 and cards[i].xyz_material_count==0 
+    and Duel.GetFlagEffect(player_ai,48739166)==0 and SummonSharkKnight() then
+      return true
+    end
+    if cards[i].id==23649496 and cards[i].xyz_material_count==0 
+    and (UsePlainCoat() and cards[i]:is_affected_by(EFFECT_DISABLE_EFFECT)==0 
+    and cards[i]:is_affected_by(EFFECT_DISABLE)==0 
+    or HasID(AIHand(),92365601) and HasID(AIGrave(),82293134)) then
+      return true
+    end
+    if cards[i].id==34086406 and cards[i].xyz_material_count==0
+    and Duel.GetFlagEffect(player_ai,82293134)==0 then
+      return true
+    end
+    if cards[i].id==94380860 and SummonRagnaZero() 
+    and cards[i].xyz_material_count==0 then
+      return IndexByID(cards,94380860)
+    end
+    if cards[i].id==55888045 or cards[i].id==12744567
+    and cards[i].xyz_material_count==0 then
+      return true
+    end
+  end
+  return false
+end
 function HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local Activatable = cards.activatable_cards
   local Summonable = cards.summonable_cards
@@ -176,6 +215,20 @@ function HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
       return {COMMAND_ACTIVATE,CurrentIndex-1}
     end
   end
+  if HasIDNotNegated(Activatable,94380860) then  -- Ragna Zero
+    GlobalCardMode = 1
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Activatable,22653490) then  -- Chidori
+    GlobalCardMode = 2
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Activatable,48739166) then  -- SHArk Knight
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Activatable,12744567) then  -- SHDark Knight
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   if HasIDNotNegated(Activatable,11398059) then   -- Imp King
     GlobalCardMode = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
@@ -189,16 +242,19 @@ function HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   end
   if HasID(SpSummonable,65367484) then -- Photon Thrasher
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
-  end 
-  if HasID(Activatable,87255382) and UseAmphisbaena(Activatable[CurrentIndex]) then   -- Amphisbaena
-    return {COMMAND_ACTIVATE,IndexByID(Activatable,87255382)}
   end
   if HasID(Activatable,60316373) and UseAberconway() then   -- Aberconway
     GlobalCardMode = 1
     return {COMMAND_ACTIVATE,IndexByID(Activatable,60316373)}
+  end  
+  if HasID(Activatable,87255382) and UseAmphisbaena(Activatable[CurrentIndex]) then   -- Amphisbaena
+    return {COMMAND_ACTIVATE,IndexByID(Activatable,87255382)}
   end
   if HasID(Activatable,45705025) then  -- Unicorn
     return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasID(Activatable,19310321) and UseTwinEagle() then  -- Twin Eagle
+    return {COMMAND_ACTIVATE,IndexByID(Activatable,19310321)}
   end
   if HasID(Activatable,92365601) and UseRUM() then   -- Rank-Up Magic - Limited Barian's Force
     GlobalCardMode = 1
@@ -207,12 +263,15 @@ function HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(Activatable,84220251) and UseHeraldryReborn() then 
     return {COMMAND_ACTIVATE,IndexByID(Activatable,84220251)}
   end
-  if HasID(Activatable,61314842) then 
+  if HasID(Activatable,61314842) then -- AHA
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(SpSummonable,94380860) and SummonRagnaZero() then
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,94380860)}
   end  
+  if HasID(SpSummonable,47387961) and SummonGenomHeritage() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
   if HasID(SpSummonable,22653490) and SummonChidori() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
@@ -221,9 +280,6 @@ function HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   end
   if HasID(SpSummonable,23649496) and SummonPlainCoat() then
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,23649496)}
-  end
-  if HasID(SpSummonable,47387961) and SummonGenomHeritage() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSummonable,34086406) and SummonLavalvalChain() and MP2Check() then
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,34086406)}
@@ -439,7 +495,9 @@ function PlainCoatTarget(cards)
       result = HeraldicToGrave(cards,2)
     elseif c then
       for i=1,#cards do
-        if cards[i].owner == 1 then
+        if cards[i].owner == 1 and HasID(OppMon(),cards[i].id)
+        or cards[i].owner == 2 and not HasID(AIMon(),cards[i].id)
+        then
           result = {i}
         end
       end
@@ -544,7 +602,7 @@ function AHATarget(cards)
     result=IndexByID(cards,22653490)
   end
   if HasID(cards,94380860) and SummonRagnaZero() then
-    return IndexByID(cards,94380860)
+    result=IndexByID(cards,94380860)
   end
   if HasID(cards,61344030) and SummonPaladynamo() then
     result=IndexByID(cards,61344030)
@@ -561,16 +619,127 @@ function AHATarget(cards)
   if result == nil then result=math.random(#cards) end
   return {result}
  else
-  if SummonChidori() then 
+  --[[if SummonChidori() then 
     for i=1,#cards do
       if bit32.band(cards[i].attribute,ATTRIBUTE_WIND)>0 then
         result = {i}
       end
     end 
-  end
+  end]]
   if result == nil then result = HeraldicToField(cards,1) end
   return result
  end
+end
+function TwinEagleTarget(cards,minTargets)
+ local result=nil
+ if minTargets==2 then
+  return HeraldicToField(cards,2)
+ else
+   for i=1,#cards do
+    if cards[i].id==48739166 and cards[i].xyz_material_count==0 
+    and Duel.GetFlagEffect(player_ai,48739166)==0 then
+      result=IndexByID(cards,48739166)
+    end
+    if cards[i].id==23649496 and cards[i].xyz_material_count==0 
+    and (UsePlainCoat() and cards[i]:is_affected_by(EFFECT_DISABLE_EFFECT)==0 
+    and cards[i]:is_affected_by(EFFECT_DISABLE)==0 
+    or HasID(AIHand(),92365601) and HasID(AIGrave(),82293134)) then
+      result=IndexByID(cards,23649496)
+    end
+    if cards[i].id==34086406 and cards[i].xyz_material_count==0
+    and Duel.GetFlagEffect(player_ai,82293134)==0 then
+      result=IndexByID(cards,34086406)
+    end
+    if cards[i].id==55888045 then
+      result=IndexByID(cards,55888045)
+    end
+    if cards[i].id==12744567 then
+      result=IndexByID(cards,12744567)
+    end
+    if cards[i].id==94380860 and SummonRagnaZero() then
+      result=IndexByID(cards,94380860)
+    end
+    if result == nil then result = math.random(#cards) end
+    return {result}
+  end
+ end
+end
+function UnicornTarget(cards)
+  if HasID(cards,11522979) then
+    return {CurrentIndex}
+  end
+  if HasID(cards,23649496) then
+    return {CurrentIndex}
+  end
+  return {math.random(#cards)}
+end
+function ChidoriTarget(cards)
+  local result = nil
+  if GlobalCardMode == 2 then
+    GlobalCardMode = 1
+    result = HeraldicToGrave(cards,1)
+  elseif GlobalCardMode == 1 then
+    GlobalCardMode = nil
+    local attdef=-2
+    local prev=-2
+    for i=1,#cards do
+      if bit32.band(cards[i].type,TYPE_MONSTER) then
+        if bit32.band(cards[i].type,TYPE_XYZ+TYPE_SYNCHRO+TYPE_RITUAL+TYPE_FUSION) then 
+          attdef=math.max(attdef,cards[i].attack,cards[i].defense)
+        else
+          attdef=0
+        end
+      else
+        attdef=-1
+      end
+      if attdef > prev then
+        prev = attdef
+        result = {i}
+      end
+    end 
+  end
+  if result == nil then result = {math.random(#cards)} end
+  return result
+end
+function RagnaZeroTarget(cards)
+  local result = nil
+  if GlobalCardMode == 1 then
+    GlobalCardMode = nil
+    result = HeraldicToGrave(cards,1)
+  else
+    local attdef=-2
+    local prev=-2
+    for i=1,#cards do
+      if cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)>0 then
+        attdef=-1
+      else
+        attdef=math.max(cards[i].attack,cards[i].defense)
+      end
+      if attdef > prev then
+        prev = attdef
+        result = {i}
+      end
+    end 
+  end
+  if result == nil then result = {math.random(#cards)} end
+  return result
+end
+function PaladynamoTarget(cards,minTargets)
+  if minTargets==2 then
+    return {1,2}
+  else
+    local attdef=-2
+    local prev=-2
+    for i=1,#cards do
+      attdef=math.max(cards[i].attack,cards[i].defense)
+      if attdef > prev then
+        prev = attdef
+        result = {i}
+      end
+    end 
+  end
+  if result == nil then result = {math.random(#cards)} end
+  return result
 end
 function HeraldicOnSelectCard(cards, minTargets, maxTargets, triggeringID)
   local result = {}
@@ -580,6 +749,15 @@ function HeraldicOnSelectCard(cards, minTargets, maxTargets, triggeringID)
   if triggeringID == 11398059 then -- King of the Feral Imps
     return ImpKingTarget(cards)
   end
+  if triggeringID == 22653490 then -- Chidori
+    return ChidoriTarget(cards)
+  end
+  if triggeringID == 94380860 then -- Ragna Zero
+    return RagnaZeroTarget(cards)
+  end 
+  if triggeringID == 61344030 then -- Paladynamo
+    return PaladynamoTarget(cards,minTargets)
+  end
   if triggeringID == 23649496 then -- Plain Coat
     return PlainCoatTarget(cards)
   end
@@ -588,6 +766,12 @@ function HeraldicOnSelectCard(cards, minTargets, maxTargets, triggeringID)
   end
   if triggeringID == 82293134 then -- Leo
     return {HeraldicToHand(cards)}
+  end
+  if triggeringID == 45705025 then -- Unicorn
+    return UnicornTarget(cards)
+  end
+  if triggeringID == 19310321 then -- Twin Eagle
+    return TwinEagleTarget(cards,minTargets)
   end
   if triggeringID == 60316373 then -- Aberconway
     return AberconwayTarget(cards)
@@ -660,6 +844,12 @@ function ChainSafeZone()
   local cardtype = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_EXTTYPE)
   local ex,cg = Duel.GetOperationInfo(0, CATEGORY_DESTROY)
   local tg = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TARGET_CARDS)
+  for i=1,Duel.GetCurrentChain() do
+    effect = Duel.GetChainInfo(i, CHAININFO_TRIGGERING_EFFECT)
+    if effect and effect:GetHandler():GetCode()==38296564 then
+      return false
+    end
+  end
   if ex then
     if tg then
       local g = tg:GetMaxGroup(Card.GetAttack)
@@ -756,6 +946,10 @@ function HeraldicOnSelectChain(cards,only_chains_by_player)
   end
   if HasID(cards,94656263) and ChainKage() then
     return {1,IndexByID(cards,94656263)}
+  end
+  if HasIDNotNegated(cards,94380860) then  -- Ragna Zero
+    GlobalCardMode = 1
+    return {1,CurrentIndex}
   end
   return nil
 end

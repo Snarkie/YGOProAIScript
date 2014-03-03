@@ -333,7 +333,7 @@ function SharkKnightFilter(c)
 end
 function SummonSharkKnight()
   local cg=Duel.GetMatchingGroup(SharkKnightFilter,1-player_ai,LOCATION_MZONE,0,nil)
-  if cg and cg:GetCount() > 0 then
+  if cg and cg:GetCount() > 0 and Duel.GetFlagEffect(player_ai,48739166)==0 then
     local g = cg:GetMaxGroup(Card.GetAttack)
     return Chance(50) or g:GetFirst():GetAttack()>=2400
   end
@@ -470,8 +470,9 @@ function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(SpSummonable,58504745) and SummonCardinal() then -- Cardinal           
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,58504745)}
   end
-  if HasID(SpSummonable,48739166) and SummonSharkKnight() then -- SHark Knight            
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  if HasID(SpSummonable,48739166) and SummonSharkKnight() -- SHark Knight            
+    and not (HasID(SpSummonable,94380860) and SummonRagnaZero()) then
+    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,48739166)}
   end
   if HasID(SpSummonable,89856523) and MP2Check() and Chance(50) then -- Kirin            
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
@@ -541,12 +542,12 @@ function BearTarget(cards)
     for i=1,#cards do
       if cards[i].owner==2 then
         if cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)>0 then
-          attdef=math.max(attdef,-1)
+          attdef=-1
         else
-          attdef=math.max(attdef,cards[i].attack,cards[i].defense)
+          attdef=math.max(cards[i].attack,cards[i].defense)
         end
         if bit32.band(cards[i].position,POS_FACEDOWN)>0 then
-          attdef=math.max(attdef,1600)
+          attdef=1600
         end
       end
       if attdef > prev then
@@ -935,7 +936,9 @@ function ChainVeiler()
     else
       player=player_ai
     end
-    if card and card:IsControler(1-player) and card:IsLocation(LOCATION_MZONE) then
+    if card and card:IsControler(1-player) and card:IsLocation(LOCATION_MZONE) 
+    and NegateBlacklist(card:GetCode())==0
+    then
       GlobalTargetID=card:GetCode()
       return true
     end
