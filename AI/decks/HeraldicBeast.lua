@@ -55,6 +55,13 @@ function HasBackrow(Setable)
   end
   return false
 end
+-- check, if the AI is already controlling the field, 
+-- so it doesn't overcommit as much
+function OverExtendCheck()
+  local cards = AIMon()
+  local hand = AIHand()
+  return OppHasStrongestMonster() or #cards < 2 or #hand > 4 or AI.GetPlayerLP(2)<=800 and HasID(AIExtra(),12014404) -- Cowboy
+end
 function SummonChidori()
   local cards = UseLists({OppMon(),OppST()})
   local result={0,0}
@@ -74,8 +81,8 @@ function SummonLavalvalChain()
   and (Chance(30) or Duel.GetCurrentPhase() == PHASE_MAIN2 or Duel.GetTurnCount()==1)
 end
 function SummonImpKing()
-  return HasID(AIDeck(),94656263) and HasID(AIMon(),82293134) 
-  and (Chance(30) or HasID(AIMon(),23649496) or Duel.GetCurrentPhase() == PHASE_MAIN2 or Duel.GetTurnCount()==1)
+  return (HasID(AIDeck(),94656263) or HasID(AIDeck(),53573406)) and (Chance(30) or HasID(AIMon(),23649496) 
+  or Duel.GetCurrentPhase() == PHASE_MAIN2 or Duel.GetTurnCount()==1)
 end
 function UsePlainCoat()
   local cards=UseLists({AIMon(),OppMon()})
@@ -208,12 +215,9 @@ function HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(Activatable,32807846) then   -- Reinforcement of the Army
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasIDNotNegated(Activatable,34086406) then   -- Lavalval Chain
-    if Activatable[CurrentIndex-1].id==34086406 then
-      GlobalCardMode = 1
-      GlobalActivatedCardID = 34086406
-      return {COMMAND_ACTIVATE,CurrentIndex-1}
-    end
+  if HasIDNotNegated(Activatable,34086406,false,545382497) then   -- Lavalval Chain
+    GlobalCardMode = 1
+    return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Activatable,94380860) then  -- Ragna Zero
     GlobalCardMode = 1
@@ -262,9 +266,6 @@ function HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   end
   if HasID(Activatable,84220251) and UseHeraldryReborn() then 
     return {COMMAND_ACTIVATE,IndexByID(Activatable,84220251)}
-  end
-  if HasID(Activatable,61314842) then -- AHA
-    return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(SpSummonable,94380860) and SummonRagnaZero() then
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,94380860)}
@@ -332,6 +333,10 @@ function HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(Summonable,60316373) then   -- Aberconway
     return {COMMAND_SUMMON,IndexByID(Summonable,60316373)}
   end
+  if HasID(Activatable,61314842) and OverExtendCheck() then 
+  -- AHA, activate after most summons are done for the overextension check
+    return {COMMAND_ACTIVATE,IndexByID(Activatable,61314842)}
+  end
   if HasID(SetableMon,82293134) then   -- Leo
     return {COMMAND_SET_MONSTER,CurrentIndex}
   end
@@ -346,6 +351,12 @@ end
 GlobalLeoCheck = 0
 function HeraldicToGravePriority(card)
   local id=card.id
+  if id==90411554 then
+    return 4
+  end
+  if id==05556499 then
+    return 3
+  end
   if id==82293134 then
     if Duel.GetFlagEffect(player_ai,82293134)==0 and Duel.GetTurnCount()~=GlobalLeoCheck and card.location ~= LOCATION_REMOVED then
       GlobalLeoCheck=Duel.GetTurnCount()
@@ -371,6 +382,9 @@ function HeraldicToGravePriority(card)
     end
   end
   if id==60316373 then return 5 end
+  if card.attribute==ATTRIBUTE_EARTH then 
+    return 2 
+  end
   return 1
 end
 function HeraldicAssignPriority(cards,toLocation)
@@ -483,6 +497,13 @@ function ImpKingTarget(cards)
     if GlobalCardMode == 1 then
       GlobalCardMode = nil
       result = HeraldicToGrave(cards,1)
+    else
+      if NeedsCard(94656263,cards,AIHand()) then
+        result = {CurrentIndex}
+      end
+      if NeedsCard(53573406,cards,AIHand()) then
+        result = {CurrentIndex}
+      end
     end
     if result then return result end
     return {math.random(#cards)}
@@ -517,13 +538,15 @@ function AberconwayTarget(cards)
   if result == nil then result={math.random(#cards)} end
   return result
 end
+
 function SafeZoneTarget(cards)
   result = {}
   if GlobalCardMode == 1 then
     GlobalCardMode = nil
     result=Index_By_Loc(cards,2,"Highest",TYPE_MONSTER,nil,"==",LOCATION_MZONE)
   else
-    result={IndexByID(cards,GlobalTargetID)}
+    local filter = function(c) return c.id==GlobalTargetID and c.owner==1 end
+    result=RandomIndexFilter(cards,filter)
     GlobalTargetID=nil
   end  
   if result == nil then result={math.random(#cards)} end
@@ -535,8 +558,10 @@ function LanceTarget(cards)
     GlobalCardMode = nil
     result=Index_By_Loc(cards,2,"Highest",TYPE_MONSTER,nil,"==",LOCATION_MZONE)
   else
-    result={IndexByID(cards,GlobalTargetID)}
+    local filter = function(c) return c.id==GlobalTargetID and c.owner==GlobalPlayer end
+    result=RandomIndexFilter(cards,filter)
     GlobalTargetID=nil
+    GlobalPlayer=nil
   end  
   if result == nil then result={math.random(#cards)} end
   return result
@@ -761,7 +786,7 @@ function HeraldicOnSelectCard(cards, minTargets, maxTargets, triggeringID)
   if triggeringID == 23649496 then -- Plain Coat
     return PlainCoatTarget(cards)
   end
-  if triggeringID == 81439173 then -- Foolish Burial
+  if triggeringID == 81439173 then -- Foolish Burial 
     return HeraldicToGrave(cards,1)
   end
   if triggeringID == 82293134 then -- Leo
@@ -817,10 +842,13 @@ function ChainPlainCoat()
   return result and UsePlainCoat() 
 end
 function SafeZoneFilter(card)
-  return card:IsControler(player_ai) and card:IsType(TYPE_MONSTER) and not card:IsCode(23649496) and card:GetCode()~=82293134 and card:IsPosition(POS_FACEUP_ATTACK)
+  return card:IsControler(player_ai) and card:IsType(TYPE_MONSTER) 
+  and not card:IsCode(23649496) and card:GetCode()~=82293134 and card:IsPosition(POS_FACEUP_ATTACK) 
+  and not card:IsHasEffect(EFFECT_INDESTRUCTABLE_EFFECT) 
+  and not card:IsHasEffect(EFFECT_IMMUNE_EFFECT) 
 end
 function SafeZoneFilterEnemy(card)
-  return card:IsControler(1-player_ai) and card:IsType(TYPE_MONSTER) and card:IsPosition(POS_FACEUP_ATTACK)
+  return card:IsControler(1-player_ai) and card:IsType(TYPE_MONSTER) and card:IsPosition(POS_FACEUP_ATTACK) and not card:IsHasEffect(EFFECT_INDESTRUCTABLE_EFFECT)
 end
 function RemovalCheck()
   local c={CATEGORY_DESTROY,CATEGORY_REMOVE,CATEGORY_TOGRAVE,CATEGORY_TOHAND,CATEGORY_TODECK}
@@ -828,6 +856,11 @@ function RemovalCheck()
     local ex,cg = Duel.GetOperationInfo(0,c[i])
     if ex then return cg end
   end
+  return false
+end
+function NegateCheck()
+  local ex,cg = Duel.GetOperationInfo(0,CATEGORY_DISABLE)
+  if ex then return cg end
   return false
 end
 function ChainSafeZone()
@@ -844,11 +877,9 @@ function ChainSafeZone()
   local cardtype = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_EXTTYPE)
   local ex,cg = Duel.GetOperationInfo(0, CATEGORY_DESTROY)
   local tg = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TARGET_CARDS)
-  for i=1,Duel.GetCurrentChain() do
-    effect = Duel.GetChainInfo(i, CHAININFO_TRIGGERING_EFFECT)
-    if effect and effect:GetHandler():GetCode()==38296564 then
-      return false
-    end
+  local e = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
+  if e and e:GetHandler():GetCode()==38296564 then
+    return false
   end
   if ex then
     if tg then
@@ -874,7 +905,8 @@ function ChainSafeZone()
         source = Duel.GetAttackTarget()
       end
       if source:GetAttack() >= target:GetAttack() and target:IsControler(player_ai) 
-      and target:IsPosition(POS_FACEUP_ATTACK) and not target:IsCode(23649496)
+      and source:IsPosition(POS_FACEUP_ATTACK) and target:IsPosition(POS_FACEUP_ATTACK) and not target:IsCode(23649496)
+      and not target:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE) and not target:IsHasEffect(EFFECT_IMMUNE_EFFECT) 
       then
         GlobalTargetID=target:GetCode()
         return true
@@ -885,7 +917,9 @@ function ChainSafeZone()
 end
 
 function LanceFilter(card)
-	return card:IsControler(player_ai) and card:IsType(TYPE_MONSTER) and card:IsLocation(LOCATION_MZONE) and card:IsPosition(POS_FACEUP)
+	return card:IsControler(player_ai) and card:IsType(TYPE_MONSTER) 
+  and card:IsLocation(LOCATION_MZONE) and card:IsPosition(POS_FACEUP)
+  and not card:IsHasEffect(EFFECT_IMMUNE_EFFECT)
 end
 function ChainLance()
 	local ex,cg = Duel.GetOperationInfo(0, CATEGORY_DESTROY)
@@ -894,21 +928,29 @@ function ChainLance()
       --return true
     end	
   end
-  local cardtype = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_EXTTYPE)
+  local cc=Duel.GetCurrentChain()
+  local cardtype = Duel.GetChainInfo(cc, CHAININFO_EXTTYPE)
   local ex,cg = Duel.GetOperationInfo(0, CATEGORY_DESTROY)
-  local tg = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TARGET_CARDS)
+  local tg = Duel.GetChainInfo(cc, CHAININFO_TARGET_CARDS)
+  local e = Duel.GetChainInfo(cc, CHAININFO_TRIGGERING_EFFECT)
+  local p = Duel.GetChainInfo(cc, CHAININFO_TRIGGERING_PLAYER)
+  if e and e:GetHandler():GetCode()==27243130 then
+    return false
+  end
   if ex then
     local g = cg:Filter(LanceFilter, nil):GetMaxGroup(Card.GetAttack)
     if g then
       GlobalTargetID = g:GetFirst():GetCode()
-   end
-    return bit32.band(cardtype, TYPE_SPELL+TYPE_TRAP) ~= 0 and cg:IsExists(LanceFilter, 1, nil) and Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_PLAYER)~=player_ai
+      GlobalPlayer=1
+    end
+    return bit32.band(cardtype, TYPE_SPELL+TYPE_TRAP) ~= 0 and g and p~=player_ai
   elseif tg then
     local g = tg:GetMaxGroup(Card.GetAttack)
     if g then
       GlobalTargetID = g:GetFirst():GetCode() 
+      GlobalPlayer=1
     end
-    return bit32.band(cardtype, TYPE_SPELL+TYPE_TRAP) ~= 0 and tg:IsExists(LanceFilter, 1, nil) and Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_PLAYER)~=player_ai
+    return bit32.band(cardtype, TYPE_SPELL+TYPE_TRAP) ~= 0 and g and p~=player_ai
   end
   if Duel.GetCurrentPhase() == PHASE_DAMAGE then
 		local source = Duel.GetAttacker()
@@ -920,8 +962,10 @@ function ChainLance()
       end
       if source:GetAttack() >= target:GetAttack() and math.max(source:GetAttack()-800,0) <= target:GetAttack() 
       and source:IsPosition(POS_FACEUP_ATTACK) and target:IsPosition(POS_FACEUP_ATTACK) and target:IsControler(player_ai)
+      and not source:IsHasEffect(EFFECT_IMMUNE_EFFECT) 
       then
         GlobalTargetID=source:GetCode()
+        GlobalPlayer=2
         return true
       end
     end
@@ -930,6 +974,10 @@ function ChainLance()
 end
 
 function ChainKage()
+  local e=Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
+  if e and e:GetHandler():IsCode(18063928) then
+    return false
+  end
   return FieldCheck(4)==1
 end
 

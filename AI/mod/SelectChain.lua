@@ -25,6 +25,10 @@ result=HeraldicOnSelectChain(cards,only_chains_by_player)
 if result ~= nil then
   return result[1],result[2]
 end
+result=GadgetOnSelectChain(cards,only_chains_by_player)
+if result ~= nil then
+  return result[1],result[2]
+end
 result = 0
  
   ------------------------------------------
@@ -127,6 +131,8 @@ result = 0
   end
   if card and bit32.band(card.position,POS_FACEUP)>0 
   and Duel.GetTurnCount() ~= GlobalC106
+  and card:is_affected_by(EFFECT_DISABLE_EFFECT)==0 
+  and card:is_affected_by(EFFECT_DISABLE)==0
   then
     local materials = card.xyz_materials
     for i=1,#materials do
@@ -334,18 +340,6 @@ result = 0
     end
   end
   
-  ---------------------------------------------
-  -- AI should activate: Fiendish Chain, 
-  -- only if player has any face up effect monsters on the field
-  --------------------------------------------- 
-  for i=1,#cards do 
-   if cards[i].id == 50078509 then -- Fiendish Chain 
-	if Get_Card_Count_Type(OppMon(), TYPE_MONSTER + TYPE_EFFECT, "==", POS_FACEUP) > 0 then
-       GlobalActivatedCardID = cards[i].id
-	  return 1,i
-     end
-   end
- end
       
   ---------------------------------------------
   -- Activate Gladiator Beast War Chariot,

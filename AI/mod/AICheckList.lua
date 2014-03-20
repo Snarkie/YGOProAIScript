@@ -290,7 +290,11 @@ function NormalSummonBlacklist(CardId)
      CardId == 82293134 or CardId == 60316373 or   -- Heraldic Beasts: Leo, Aberconway
      CardId == 87255382 or CardId == 19310321 or   -- Amphisbaena, Twin Eagle
      CardId == 45705025 or CardId == 82315772 or   -- Unicorn, Eale
-     CardId == 56921677 -- Basilisk
+     CardId == 56921677 or CardId == 86445415 or   -- Basilisk, Red Gadget
+     CardId == 41172955 or CardId == 13839120 or   -- Green Gadget, Yellow Gadget
+     CardId == 42940404 or CardId == 05556499 or   -- Machina Gearframe, Machina Fortress
+     CardId == 39284521 or CardId == 18063928 or   -- Machina Cannon, Tin Goldfish
+     CardId == 53573406  -- Masked Chameleon
      then 
 	return 1 
   end
@@ -351,7 +355,7 @@ SSBL={
 61344030,82315772,28912357, -- Starliege Paladynamo, Heraldic Beast Eale, Gear Gigant X
 80117527,22110647,88033975, -- Number 11: Big Eye, Mecha Phantom Beast Dracossack, Armades, Keeper of Boundaries
 33198837,83994433,76774528, -- Naturia Beast, Stardust Spark Dragon, Scrap Dragon
-05556499,39284521 -- Machina Fortress, Machina Cannon
+05556499,39284521,39765958 -- Machina Fortress, Machina Cannon, Jeweled RDA
 }
 
 
@@ -360,7 +364,7 @@ SSBL={
 -- of cards to never set in the Spell&Trap zone
 ---------------------------------------------------------
 function SetBlacklist(CardId)
-  for i=1,#SSBL do
+  for i=1,#SetBL do
     if SetBL[i]==CardId then
       return 1
     end
@@ -378,15 +382,15 @@ SetBL={
 -- Effect Veiler or Breakthrough Skill
 ---------------------------------------------------------
 function NegateBlacklist(CardId)
-  for i=1,#SSBL do
-    if SetBL[i]==CardId then
+  for i=1,#NegBL do
+    if NegBL[i]==CardId then
       return 1
     end
   end
   return 0
 end
 
-SetBL={
+NegBL={
   53804307,26400609,89399912,90411554 -- the 4 Dragon Rulers
 }
 -----------------------------------------------------
@@ -608,7 +612,8 @@ function CardIsScripted(CardId)
      CardId == 22110647 or CardId == 33198837 or  -- Mecha Phantom Beast Dracossack, Naturia Beast 
      CardId == 83994433 or CardId == 76774528 or  -- Stardust Spark Dragon, Scrap Dragon
      CardId == 97077563 or CardId == 94380860 or  -- Call of the Haunted, Ragna Zero
-     CardId == 48739166 or CardId == 12744567   -- SHArk Knight, SHDark Knight
+     CardId == 48739166 or CardId == 12744567 or  -- SHArk Knight, SHDark Knight
+     CardId == 42940404 -- Machina Gearframe
     then  
 	return 1
   end

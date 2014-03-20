@@ -389,8 +389,9 @@ end
 function Get_Card_Count_Att_Def(Cards, Oper, Attack, Defense, Position)
   local Result = 0
   for i=1,#Cards do
-    if(Position == nil or bit32.band(Cards[i].position,Position) > 0) and 
-   (Attack == nil or 
+    if bit32.band(Cards[i].type,TYPE_MONSTER)>0 and
+     (Position == nil or bit32.band(Cards[i].position,Position) > 0) and 
+     (Attack == nil or 
      Oper == ">" and Cards[i].attack > Attack or 
      Oper == "<" and Cards[i].attack < Attack or   
      Oper == "==" and Cards[i].attack == Attack or 
@@ -1612,6 +1613,25 @@ function ApplyATKBoosts(Cards)
           Cards[i].attack = Cards[i].attack -800
         end
       end
+    end
+  end
+  
+  
+  -- make indestructable monsters crash
+  local cards=AIMon()
+  local StardustSparkCheck=false
+  for i=1,#cards do
+    if cards[i].id == 83994433
+    and GlobalStardustSparkActivation[cards[i].cardid]~=Duel.GetTurnCount()
+    then
+      StardustSparkCheck = true
+    end
+  end
+  for i=1,#Cards do
+    if Cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE)>0
+    or Cards[i].owner==1 and StardustSparkCheck 
+    then
+      Cards[i].attack=Cards[i].attack+1
     end
   end
 end

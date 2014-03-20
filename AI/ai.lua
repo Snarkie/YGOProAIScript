@@ -130,7 +130,6 @@ math.randomseed( require("os").time() )
 -- help detect when the opponent plays a card.
 -------------------------------------------------
 function OnStartOfDuel()
-
   SaveState()
 end
 

@@ -1,34 +1,32 @@
-function HasID(cards,id)
-  CurrentIndex = nil
+function HasID(cards,id,skipglobal,desc)
   local result = false;
   if cards ~= nil then 
     for i=1,#cards do
-      if cards[i].id == id then
-        CurrentIndex = i
+      if cards[i].id == id and (desc == nil or cards[i].description == desc) then
+        if not skipglobal then CurrentIndex = i end
         result = true      
       end
     end
   end
   return result
 end
-function HasIDNotNegated(cards,id)
-  CurrentIndex = nil;
+function HasIDNotNegated(cards,id,skipglobal,desc)
   local result = false
   if cards ~= nil then 
     for i=1,#cards do
-      if cards[i].id == id then
+      if cards[i].id == id and (desc == nil or cards[i].description == desc) then
         if bit32.band(cards[i].type,TYPE_MONSTER)>0 
         and cards[i]:is_affected_by(EFFECT_DISABLE_EFFECT)==0 
         and cards[i]:is_affected_by(EFFECT_DISABLE)==0
         then
-          CurrentIndex = i
+          if not skipglobal then CurrentIndex = i end
           result = true  
         end
         if bit32.band(cards[i].type,TYPE_SPELL+TYPE_TRAP)>0
         and bit32.band(cards[i].status,STATUS_SET_TURN)==0        
         and cards[i]:is_affected_by(EFFECT_CANNOT_TRIGGER)==0
         then
-          CurrentIndex = i
+          if not skipglobal then CurrentIndex = i end
           result = true 
         end
       end
@@ -103,11 +101,38 @@ function CanXYZ(rank)
 end
 player_ai = nil
 GlobalTargetID = nil
+GlobalCheating = false
 function set_player_turn()
 	if player_ai == nil then
 		player_ai = Duel.GetTurnPlayer()
     SaveState()
+    if GlobalCheating then
+      EnableCheats()
+    end
 	end
+end
+function EnableCheats()
+  local e1=Effect.GlobalEffect()
+  e1:SetType(EFFECT_TYPE_CONTINUOUS+EFFECT_TYPE_FIELD)
+  e1:SetCode(EVENT_PHASE+PHASE_DRAW)
+  e1:SetCountLimit(1)
+  e1:SetOperation(function(e,tp,eg,ep,ev,re,r,rp) 
+    if Duel.GetTurnPlayer()==player_ai then 
+      AI.Chat("Oh yeah, cheating feels good.")
+      Duel.Draw(player_ai,1,REASON_RULE) 
+    end 
+  end)
+  Duel.RegisterEffect(e1,0)
+  local e2=Effect.GlobalEffect()
+  e2:SetType(EFFECT_TYPE_CONTINUOUS+EFFECT_TYPE_FIELD)
+  e2:SetCode(EVENT_PHASE+PHASE_DRAW)
+  e2:SetCountLimit(1)
+  e2:SetOperation(function(e,tp,eg,ep,ev,re,r,rp) 
+    if Duel.GetTurnPlayer()==player_ai then 
+      Duel.Recover(player_ai,1000,REASON_RULE) 
+    end 
+  end)
+  Duel.RegisterEffect(e2,0)
 end
 function get_owner_by_controler(controler)
 	if controler == player_ai then
@@ -123,7 +148,6 @@ end
 -- check, if the AI can wait for an XYZ/Synchro summon until Main Phase 2
 -- to get some additional damage in or trigger Bear/Gorilla/etc effects
 function MP2Check()
-  local cards = OppMon()
   result = false
   if AI.GetCurrentPhase() == PHASE_MAIN2 or Duel.GetTurnCount() == 1 or OppHasStrongestMonster() then
     result = true
@@ -331,8 +355,9 @@ function SharkKnightFilter(c)
   and bit.band(c:GetSummonType(),SUMMON_TYPE_SPECIAL)==SUMMON_TYPE_SPECIAL
   and (c:IsType(TYPE_XYZ+TYPE_SYNCHRO+TYPE_RITUAL+TYPE_FUSION) or c:GetAttack()>=2000)
 end
-function SummonSharkKnight()
+function SummonSharkKnight(cards)
   local cg=Duel.GetMatchingGroup(SharkKnightFilter,1-player_ai,LOCATION_MZONE,0,nil)
+  if HasID(cards,83994433) or HasID(cards,39765958) then return false end
   if cg and cg:GetCount() > 0 and Duel.GetFlagEffect(player_ai,48739166)==0 then
     local g = cg:GetMaxGroup(Card.GetAttack)
     return Chance(50) or g:GetFirst():GetAttack()>=2400
@@ -340,7 +365,6 @@ function SummonSharkKnight()
   return false
 end
 function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
-  set_player_turn()
   local Activatable = cards.activatable_cards
   local Summonable = cards.summonable_cards
   local SpSummonable = cards.spsummonable_cards
@@ -454,6 +478,15 @@ function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(Summonable,92572371) then --Buffalo
     return {COMMAND_SUMMON,CurrentIndex}
   end
+  if HasID(SpSummonable,39765958) and SummonJeweledRDA() then
+    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,39765958)}
+  end
+  if HasID(SpSummonable,83994433) and SummonStardustSpark() then
+    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,83994433)}
+  end
+  if HasID(SpSummonable,28912357) and SummonGearGigant() then
+    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,28912357)}
+  end
   if HasID(SpSummonable,98012938) and SummonVulcan() then
     GlobalCardMode = 1
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,98012938)}
@@ -471,7 +504,8 @@ function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,58504745)}
   end
   if HasID(SpSummonable,48739166) and SummonSharkKnight() -- SHark Knight            
-    and not (HasID(SpSummonable,94380860) and SummonRagnaZero()) then
+  and not (HasID(SpSummonable,94380860) and SummonRagnaZero())  
+  then
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,48739166)}
   end
   if HasID(SpSummonable,89856523) and MP2Check() and Chance(50) then -- Kirin            
@@ -914,6 +948,23 @@ end
 function ChainMaxxC()
   return Duel.GetOperationInfo(0, CATEGORY_SPECIAL_SUMMON) and  Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_PLAYER)~=player_ai  
 end
+function NegateBPCheck(card)
+  if card:is_affected_by(EFFECT_DISABLE)>0 or card:is_affected_by(EFFECT_DISABLE_EFFECT)>0 then
+    return false
+  end
+  if card.id==22110647 then --Dracossack
+    return HasID(OppMon(),22110648)
+  end
+  if card.id==78156759 or card.id==25341652 or card.id==48739166 -- Zenmaines, Maestroke, SHArk Knight
+  or card.id==10002346 -- Gachi
+  then
+    return card.xyz_material_count>0
+  end
+  if card.id==31305911 then -- Marshmallon
+    return true
+  end
+  return false
+end
 function VeilerTarget(card)
   local value=nil
   local att=AIGetStrongestAttack()
@@ -922,7 +973,7 @@ function VeilerTarget(card)
   elseif bit32.band(card.position,POS_FACEUP_DEFENCE)>0 then
     value=card.defense
   end
-  if value and att>value and card:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE)>0 then
+  if value and att>value and NegateBPCheck(card) then
     return true
   end
   return false
@@ -963,8 +1014,8 @@ function ChainVeiler()
       if source:GetAttack() <= target:GetAttack() and target:IsControler(player_ai) 
       and target:IsPosition(POS_FACEUP_ATTACK) and source:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE)
       then
-        GlobalTargetID=source:GetCode()
-        return true
+        --GlobalTargetID=source:GetCode()
+        --return true
       end
     end
   end

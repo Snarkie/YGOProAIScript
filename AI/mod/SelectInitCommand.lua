@@ -92,9 +92,11 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
       GlobalAIPlaysFirst = 1
       Globals()
 	  ResetOncePerTurnGlobals()
+    
 	 end
     end
 
+  set_player_turn()
   ---------------------------------------
   -- Don't do anything if the AI controls
   -- a face-up Light and Darkness Dragon.
@@ -119,6 +121,8 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
   end
   if card and bit32.band(card.position,POS_FACEUP)>0 
   and Duel.GetTurnCount() ~= GlobalC106
+  and card:is_affected_by(EFFECT_DISABLE_EFFECT)==0 
+  and card:is_affected_by(EFFECT_DISABLE)==0
   then
     local materials = card.xyz_materials
     for i=1,#materials do
@@ -1178,23 +1182,6 @@ end
     end
   end
   
-  
-  ----------------------------------------------------------------------------------------
-  -- Mecha Phantom Beast Dracossack: Actrivate it's effect 
-  -- only if any "Mecha Phantom" tokens are on field, or if we can detach any xyz materials.
-  ----------------------------------------------------------------------------------------
-  for i=1,#ActivatableCards do
-    if ActivatableCards[i].id == 22110647 then
-     if ActivatableCards[i].xyz_material_count > 0 or Get_Card_Count_ID(UseLists({AIMon(),AIST()}),31533705, POS_FACEUP) > 0 or 
-	    Get_Card_Count_ID(UseLists({AIMon(),AIST()}),22110648, POS_FACEUP) > 0 and 
-	    Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") <= Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") then
-	    GlobalCardMode = 1  
-	    GlobalActivatedCardID = ActivatableCards[i].id
-	   return COMMAND_ACTIVATE,i
-      end
-    end
-  end
-  
   ----------------------------------------------------------
   -- Activate Lyla, Lightsworn Summoner's S/T destroy effect
   -- only if it hasn't already been attempted this turn.
@@ -1788,17 +1775,6 @@ end
     end
   end
 
-  -----------------------------------------
-  -- Special Summon Number 11: Big Eye only
-  -- if the opponent controls a monster.
-  -----------------------------------------
-  for i=1,#SpSummonableCards do
-    if SpSummonableCards[i].id == 80117527 then
-      if Get_Card_Count(AI.GetOppMonsterZones()) > 0 then
-        return COMMAND_SPECIAL_SUMMON,i
-      end
-    end
-  end
 
   -------------------------------------------------------  
   -- AI should summon Perfectly Ultimate Great Moth only if he 
@@ -2685,9 +2661,16 @@ end
   ---------------------------------------------------------
   if #cards.st_setable_cards > 0 and (AI.GetCurrentPhase() == PHASE_MAIN2 or Duel.GetTurnCount() == 1) then
     local setCards = cards.st_setable_cards
+    local setThisTurn = 0
+    local aist=AIST()
+    for i=1,#aist do
+      if bit32.band(aist[i].status,STATUS_SET_TURN)>0 then
+        setThisTurn=setThisTurn+1
+      end
+    end
     for i=1,#setCards do
-      if SetBlacklist(setCards[i].id)==0 and (bit32.band(setCards[i].type,TYPE_TRAP) > 0 or bit32.band(setCards[i].type,TYPE_QUICKPLAY) > 0 )then
-		return COMMAND_SET_ST,i
+      if setThisTurn < 2 and SetBlacklist(setCards[i].id)==0 and (bit32.band(setCards[i].type,TYPE_TRAP) > 0 or bit32.band(setCards[i].type,TYPE_QUICKPLAY) > 0 )then
+        return COMMAND_SET_ST,i
       end
     end
   end
