@@ -75,9 +75,11 @@ result = {}
 		-- divide selectable attack targets into 3 groups
 		for i = 1, #cards do
 			-- 1st group
-			if bit32.band(cards[i].position,POS_FACEUP) > 0 and cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE) == 0 
-      and cards[i].attack < GlobalCurrentATK then
-				FaceUpDestructibleGroup[c] = cards[i]
+			if cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE) == 0 
+      and (bit32.band(cards[i].position,POS_FACEUP_ATTACK) > 0 and cards[i].attack < GlobalCurrentATK
+      or bit32.band(cards[i].position,POS_FACEUP_DEFENCE) > 0 and cards[i].defense < GlobalCurrentATK)
+			then
+        FaceUpDestructibleGroup[c] = cards[i]
 				FaceUpDestructibleGroup[c].index = i
 				FaceUpDestructibleGroup[c].attack_or_defense = bit32.band(cards[i].position,POS_ATTACK) > 0 and cards[i].attack or cards[i].defense
 				-- give priority to each selectable target based on its type(s):
@@ -100,7 +102,7 @@ result = {}
 				c = c + 1
 			-- 2nd group
 			elseif bit32.band(cards[i].position,POS_FACEUP_ATTACK) > 0 and cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE) > 0 then
-				FaceUpAttackPositionIndestructibleGroup[m] = cards[i]
+        FaceUpAttackPositionIndestructibleGroup[m] = cards[i]
 				FaceUpAttackPositionIndestructibleGroup[m].index = i
 				m = m + 1
 			-- 3rd group
@@ -459,7 +461,6 @@ end
   if GlobalActivatedCardID == 05318639 or -- Mystical Space Typhoon 
 	 GlobalActivatedCardID == 71413901 then -- Breaker the Magical Warrior 
 	 GlobalActivatedCardID = nil
-     --print("MST target selection")
      return getRandomSTIndex(cards, 2)
    end
      
@@ -1737,12 +1738,6 @@ end
   for i=1,minTargets do
         result[i]=i
   end
-
-
-  for i=1,minTargets do
-    ----print(result[i]..'')
-  end
-
 
   return result 
 end

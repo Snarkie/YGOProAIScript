@@ -613,7 +613,7 @@ function CardIsScripted(CardId)
      CardId == 83994433 or CardId == 76774528 or  -- Stardust Spark Dragon, Scrap Dragon
      CardId == 97077563 or CardId == 94380860 or  -- Call of the Haunted, Ragna Zero
      CardId == 48739166 or CardId == 12744567 or  -- SHArk Knight, SHDark Knight
-     CardId == 42940404 -- Machina Gearframe
+     CardId == 42940404 or CardId == 39765958 -- Machina Gearframe, Jeweled Red Dragon Archfiend
     then  
 	return 1
   end

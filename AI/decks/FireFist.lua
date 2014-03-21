@@ -77,7 +77,7 @@ end
 function CardsMatchingFilter(cards,filter,opt)
   result = 0
   for i=1,#cards do
-    if opt and filter(cards[i],opt) or filter(cards[i]) then
+    if opt and filter(cards[i],opt) or opt==nil and filter(cards[i]) then
       result = result + 1
     end
   end
@@ -86,7 +86,7 @@ end
 function RandomIndexFilter(cards,filter,opt)
   result={}
   for i=1,#cards do
-    if opt and filter(cards[i],opt) or filter(cards[i]) then
+    if opt and filter(cards[i],opt) or opt==nil and filter(cards[i]) then
       result[#result+1]=i
     end
   end
@@ -478,7 +478,7 @@ function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(Summonable,92572371) then --Buffalo
     return {COMMAND_SUMMON,CurrentIndex}
   end
-  if HasID(SpSummonable,39765958) and SummonJeweledRDA() then
+  if HasID(SpSummonable,39765958) and SummonJeweledRDA(SpSummonable[CurrentIndex]) then
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,39765958)}
   end
   if HasID(SpSummonable,83994433) and SummonStardustSpark() then

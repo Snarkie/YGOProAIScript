@@ -12,12 +12,44 @@
 -- 1 = yes
 -- 0 = no
 -- -1 = let the ai decide
+function GetAttacker()
+  local attacker = Duel.GetAttacker()
+  local attackerid = nil
+  local cards = nil
+  if attacker then 
+    attackerid = attacker:GetCode() 
+    if attacker:IsControler(player_ai) then
+      cards = AIMon()
+    else
+      cards = OppMon()
+    end
+    return cards[IndexByID(cards,attackerid)]
+  end
+  return nil
+end
+
 function OnSelectYesNo(description_id)
-	-- Example implementation: continue attacking, let the ai decide otherwise
 	if description_id == 30 then
-		return 1
-	else
-		return -1
+    GlobalAIIsAttacking = true
+    local cards = nil
+    local attacker = GetAttacker()
+    local attack = 0
+    if attacker then
+      cards = {attacker}
+      ApplyATKBoosts(cards)
+      attacker = cards[1]
+      attack = attacker.attack
+    end
+    cards=OppMon()
+    ApplyATKBoosts(cards)
+    local lowest = Get_Card_Att_Def(cards,"attack","<",POS_FACEUP_ATTACK,"attack")
+    lowest = math.max(lowest,Get_Card_Att_Def(OppMon(),"defense","<",POS_FACEUP_DEFENCE,"defense"))
+    if attack>lowest then 
+      return 1
+    else
+      return 0
+    end
 	end
+	return -1
 end
 

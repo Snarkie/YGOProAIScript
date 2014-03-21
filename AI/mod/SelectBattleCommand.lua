@@ -186,15 +186,10 @@ end
   -- weakest monster. Inflict as much damage as possible
   -- before a potential Gorz drop.
   --------------------------------------------------------
-  if Get_Card_Count(AI.GetOppMonsterZones()) == 0 then
-   local i = GetStrongestAttackerIndex()  
-	if #cards > 0 then
-      if cards[i].attack > 0 then
-	  GlobalCurrentATK = 1
-      GlobalAIIsAttacking = 1
-      return 1,GetWeakestAttackerIndex()
-      end
-    end
+  if Get_Card_Count(AI.GetOppMonsterZones()) == 0 and #cards>0 then
+   local i = GetWeakestAttackerIndex()
+	 GlobalCurrentATK = cards[i].attack
+   return 1,i
   end
   
   ----print("execute_attack",execute_attack)

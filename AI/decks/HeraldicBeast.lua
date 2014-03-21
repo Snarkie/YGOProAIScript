@@ -943,9 +943,9 @@ function ChainLance()
       GlobalTargetID = g:GetFirst():GetCode()
       GlobalPlayer=1
     end
-    return bit32.band(cardtype, TYPE_SPELL+TYPE_TRAP) ~= 0 and g and p~=player_ai
+    return bit32.band(cardtype, TYPE_SPELL+TYPE_TRAP) ~= 0 and g
   elseif tg then
-    local g = tg:GetMaxGroup(Card.GetAttack)
+    local g = tg:Filter(LanceFilter, nil):GetMaxGroup(Card.GetAttack)
     if g then
       GlobalTargetID = g:GetFirst():GetCode() 
       GlobalPlayer=1

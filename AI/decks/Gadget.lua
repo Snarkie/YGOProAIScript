@@ -35,7 +35,7 @@ end
 function SubGroup(cards,filter,opt)
   result = {}
   for i=1,#cards do
-    if opt and filter(cards[i],opt) or filter(cards[i]) then
+    if opt and filter(cards[i],opt) or opt==nil and filter(cards[i]) then
       result[#result+1]=cards[i]
     end
   end
@@ -203,9 +203,9 @@ end
 function SummonStardustSpark()
   return true
 end
-function SummonJeweledRDA()
-  return Get_Card_Count_Pos(OppMon(),POS_FACEUP_ATTACK)-Get_Card_Count_Pos(AIMon(),POS_FACEUP_ATTACK)>=2 
-  or Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack") > 2500
+function SummonJeweledRDA(card)
+  local OppAtt=Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack")
+  return UseJeweledRDA(card,1) or OppAtt > 2500
 end
 
 function IsMonster(card)
@@ -333,6 +333,45 @@ function UseDracossack2(card)
   return MPBTokenCount(AIMon())>0 and (OppHasStrongestMonster() 
   or (AI.GetCurrentPhase()==PHASE_MAIN2 and #oppcards>0))
 end
+function JeweledRDAFilter(card,id)
+  return card.cardid~=id and bit32.band(card.position,POS_FACEUP_ATTACK)>0 
+  and card:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0 and card:is_affected_by(EFFECT_IMMUNE)==0
+end
+function UseJeweledRDA(card,mod)
+  local aimon=AIMon()
+  local AITargets=SubGroup(aimon,JeweledRDAFilter,card.cardid)
+  local OppTargets=SubGroup(OppMon(),JeweledRDAFilter,card.cardid)
+  local diff=(#OppTargets+mod)-#AITargets
+  if HasIDNotNegated(aimon,83994433) and GlobalStardustSparkActivation[aimon[CurrentIndex].cardid]~=Duel.GetTurnCount() then
+    diff = diff+1
+  end
+  AITargets[#AITargets+1]=card
+  ApplyATKBoosts(AITargets)
+  ApplyATKBoosts(OppTargets)
+  local AIAtt=Get_Card_Att_Def(AITargets,"attack",">",nil,"attack")
+  local OppAtt=Get_Card_Att_Def(OppTargets,"attack",">",nil,"attack")
+  return #AITargets==1 or diff>1 or (diff<0 and AIAtt-OppAtt < diff*500)
+end
+function DarkHoleFilter(card)
+  return card:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0 and card:is_affected_by(EFFECT_IMMUNE)==0
+end
+function UseDarkHole(card)
+  local aimon=AIMon()
+  local AITargets=SubGroup(aimon,DarkHoleFilter)
+  local OppTargets=SubGroup(OppMon(),DarkHoleFilter)
+  local diff=#OppTargets-#AITargets
+  if HasIDNotNegated(aimon,83994433) and GlobalStardustSparkActivation[aimon[CurrentIndex].cardid]~=Duel.GetTurnCount() then
+    diff = diff+1
+  end
+  if HasIDNotNegated(AIST(),27243130) or HasID(AIHand(),27243130) then
+    diff = diff+1
+  end
+  ApplyATKBoosts(AITargets)
+  ApplyATKBoosts(OppTargets)
+  local AIAtt=Get_Card_Att_Def(AITargets,"attack",">",nil,"attack")
+  local OppAtt=Get_Card_Att_Def(OppTargets,"attack",">",nil,"attack")
+  return (#AITargets==0 and AIAtt > 2000) or diff>1 or (AIAtt > 2000 and diff<0 and AIAtt-OppAtt < diff*500)
+end
 function GadgetOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local Activatable = cards.activatable_cards
   local Summonable = cards.summonable_cards
@@ -340,6 +379,9 @@ function GadgetOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local Repositionable = cards.repositionable_cards
   local SetableMon = cards.monster_setable_cards
   local SetableST = cards.st_setable_cards
+  if HasID(Activatable,53129443) and UseDarkHole() then
+    return {COMMAND_ACTIVATE,IndexByID(Activatable,53129443)}
+  end
   if HasIDNotNegated(Activatable,28912357) then -- GGX
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -355,6 +397,9 @@ function GadgetOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   end
   if HasIDNotNegated(Activatable,80117527) and UseBigEye() then
     return {COMMAND_ACTIVATE,IndexByID(Activatable,80117527)}
+  end
+  if HasIDNotNegated(Activatable,39765958) and UseJeweledRDA(Activatable[CurrentIndex],0) then
+    return {COMMAND_ACTIVATE,IndexByID(Activatable,39765958)}
   end
   if HasID(SpSummonable,80117527) and SummonBigEye() then
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,80117527)}
@@ -601,6 +646,7 @@ function GearframeTarget(cards)
   if HasID(cards,39284521) and HasID(AIGrave(),05556499) then
     result = {IndexByID(cards,39284521)}
   end
+  result = Get_Card_Index(cards,nil,"Highest",nil,nil)
   if result == nil then result = {math.random(#cards)} end
   return result
 end
