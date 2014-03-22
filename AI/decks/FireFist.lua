@@ -119,7 +119,7 @@ function EnableCheats()
   e1:SetCountLimit(1)
   e1:SetOperation(function(e,tp,eg,ep,ev,re,r,rp) 
     if Duel.GetTurnPlayer()==player_ai then 
-      AI.Chat("Oh yeah, cheating feels good.")
+      --AI.Chat("Oh yeah, cheating feels good.")
       Duel.Draw(player_ai,1,REASON_RULE) 
     end 
   end)
