@@ -441,7 +441,7 @@ function GadgetOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   or HasID(Summonable,41172955)) and HasBackrow(SetableST) then
     return {COMMAND_SUMMON,CurrentIndex}
   end
-  if HasID(Summonable,18063928) and not(HandCheck(4)>0) == (FieldCheck(4)==1) and OverExtendCheck() then
+  if HasID(Summonable,18063928) and (not(HandCheck(4)>1) == (FieldCheck(4)==1)) and OverExtendCheck() then
     return {COMMAND_SUMMON,IndexByID(Summonable,18063928)}
   end
   if HasID(Summonable,53573406) and HasID(AIHand(),94656263) and OverExtendCheck() then
