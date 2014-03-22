@@ -59,8 +59,9 @@ function AIGetStrongestAttack()
 end
 function OppHasStrongestMonster()
   local att=AIGetStrongestAttack()
-  return att <= Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack")
-  or att <= Get_Card_Att_Def(OppMon(),"defense",">",POS_FACEUP_DEFENCE,"defense")
+  local mon=OppMon()
+  return #mon>0 and (att <= Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack")
+  or att <= Get_Card_Att_Def(OppMon(),"defense",">",POS_FACEUP_DEFENCE,"defense"))
 end
 function OppHasFacedownMonster()
   local cards=OppMon()

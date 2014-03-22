@@ -1758,29 +1758,5 @@ end
 -- if both are equal, and False if any field is different.
 ----------------------------------------------------------
 function CardsEqual(Card1, Card2)
-  if Card1 == nil or Card2 == nil then
-    return 0
-  end
-  if Card1 == false and Card2 == false then
-    return 1
-  end
-  if Card1 == false and Card2 ~= false then
-    return 0
-  end
-  if Card1 ~= false and Card2 == false then
-    return 0
-  end
-  if Card1.id ~= Card2.id or Card1.type ~= Card2.type or
-     Card1.attack ~= Card2.attack or Card1.defense ~= Card2.defense or
-     Card1.base_attack ~= Card2.base_attack or
-     Card1.base_defense ~= Card2.base_defense or
-     Card1.level ~= Card2.level or Card1.rank ~= Card2.rank or
-     Card1.race ~= Card2.race or Card1.attribute ~= Card2.attribute or
-     Card1.position ~= Card2.position or
-     Card1.setcode ~= Card2.setcode or
-     Card1.location ~= Card2.location or
-     Card1.xyz_material_count ~= Card2.xyz_material_count then
-    return 0
-  end
-  return 1
+  return Card1 and Card2 and Card1.cardid==Card2.cardid
 end

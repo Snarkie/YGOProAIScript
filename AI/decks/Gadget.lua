@@ -350,7 +350,7 @@ function UseJeweledRDA(card,mod)
   ApplyATKBoosts(OppTargets)
   local AIAtt=Get_Card_Att_Def(AITargets,"attack",">",nil,"attack")
   local OppAtt=Get_Card_Att_Def(OppTargets,"attack",">",nil,"attack")
-  return #AITargets==1 or diff>1 or (diff<0 and AIAtt-OppAtt < diff*500)
+  return #AITargets==1 or diff>1 or (diff<=1 and AIAtt-OppAtt < diff*500)
 end
 function DarkHoleFilter(card)
   return card:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0 and card:is_affected_by(EFFECT_IMMUNE)==0
@@ -370,7 +370,7 @@ function UseDarkHole(card)
   ApplyATKBoosts(OppTargets)
   local AIAtt=Get_Card_Att_Def(AITargets,"attack",">",nil,"attack")
   local OppAtt=Get_Card_Att_Def(OppTargets,"attack",">",nil,"attack")
-  return (#AITargets==0 and AIAtt > 2000) or diff>1 or (AIAtt > 2000 and diff<0 and AIAtt-OppAtt < diff*500)
+  return (#AITargets==0 and OppAtt >= 2000) or diff>1 or (OppAtt >= 2000 and diff<=1 and AIAtt-OppAtt < diff*500)
 end
 function GadgetOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local Activatable = cards.activatable_cards
@@ -504,7 +504,7 @@ function BestTargets(cards,count,DestroyCheck)
         then
           cards[i].prio = 1
         else
-          cards[i].prio = math.max(cards[i].attack,cards[i].defense)+5
+          cards[i].prio = math.max(cards[i].attack+1,cards[i].defense)+5
         end
       else
         cards[i].prio = 2

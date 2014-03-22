@@ -215,6 +215,13 @@ function HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(Activatable,32807846) then   -- Reinforcement of the Army
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+  --[[if HasIDNotNegated(Activatable,34086406) then   -- Lavalval Chain
+    if Activatable[CurrentIndex-1].id==34086406 then
+      GlobalCardMode = 1
+      GlobalActivatedCardID = 34086406
+      return {COMMAND_ACTIVATE,CurrentIndex-1}
+    end
+  end]]
   if HasIDNotNegated(Activatable,34086406,false,545382497) then   -- Lavalval Chain
     GlobalCardMode = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
