@@ -473,17 +473,17 @@ end
   -- Use these cards only on opponents cards.
   -- TODO: Expand card list
   ---------------------------------------------------
-  if OppCard ~= nil then
-  if OppCardOwner == 2 then
-    for i=1,#cards do
-	  if cards[i].id == 41420027 or cards[i].id == 84749824 or 
-	     cards[i].id == 03819470 or cards[i].id == 77538567 then     
-         GlobalActivatedCardID = cards[i].id 
-		return 1,i
-       end
-     end
-   end
- end
+  for i=1,#cards do
+	  if cards[i].id == 41420027 or cards[i].id == 84749824 
+    or cards[i].id == 03819470 or cards[i].id == 77538567 
+    then     
+      local p = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_PLAYER)
+      if p ~= player_ai then
+        GlobalActivatedCardID = cards[i].id 
+        return 1,i
+      end
+    end
+  end
    
   ---------------------------------------------------------
   -- Activate Stardust Dragon/etc's effect, 

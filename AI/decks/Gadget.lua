@@ -292,7 +292,7 @@ function UseRedox1(card)
   local cards=SubGroup(AIHand(),RedoxFilter1,card.cardid)
   if cards and #cards>0 then
     local check = DiscardCostCheck(cards,1)
-    return check >= 0 and FieldCheck(7)>0 or check > 0
+    return check >= 0 and FieldCheck(7)==1 or check > 0
   end
   return false
 end
@@ -304,7 +304,7 @@ function UseRedox2(card)
   if cards and #cards>0 then
     local check = BanishCostCheck(cards,2)
     local mon = AIMon()
-    return check >= 0 and FieldCheck(7)>0 or check > 0 
+    return check >= 0 and FieldCheck(7)==1 or check > 0 
     and AI.GetCurrentPhase()==PHASE_MAIN2 and #mon==0
   end
   return false
@@ -713,6 +713,10 @@ function ChainCotH()
     local oppatt = Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack")
     local aiatt = Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP_ATTACK,"attack")
     local cards=AIMon()
+    local e = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
+    if e and e:GetHandler():GetCode()==97077563 then
+      return false
+    end
     if source and source:IsControler(1-player_ai) and (graveatt > source:GetAttack() 
     or HasID(AIGrave(),83994433) or source:GetAttack()>AI.GetPlayerLP(1)) then
       return #cards==0
