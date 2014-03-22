@@ -478,9 +478,15 @@ end
     or cards[i].id == 03819470 or cards[i].id == 77538567 
     then     
       local p = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_PLAYER)
-      if p ~= player_ai then
+      if p and p ~= player_ai then
         GlobalActivatedCardID = cards[i].id 
         return 1,i
+      end
+      local oppmon=OppMon()
+      for j=1,#oppmon do
+        if bit32.band(oppmon[j].status,STATUS_SUMMONING) then
+          return 1,i
+        end
       end
     end
   end
