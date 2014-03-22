@@ -474,7 +474,7 @@ function GadgetToHand(cards,count)
       end
     end
     if id==42940404 and not HasID(AIHand(),42940404) 
-    and not HasID(UseLists(AIHand(),AIMon(),AIGrave()),05556499) 
+    and not HasID(UseLists({AIHand(),AIMon(),AIGrave()}),05556499) 
     then
       cards[i].prio=4
     end
