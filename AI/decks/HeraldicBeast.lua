@@ -77,7 +77,7 @@ function SummonChidori()
   or Get_Card_Att_Def(OppMon(),"defense",">",POS_FACEUP_DEFENCE,"defense") >= 2300
 end
 function SummonLavalvalChain() 
-  return HasID(AIDeck(),82293134) and not (HasID(UseLists({AIGrave(),AIHand(),AIMon()}),82293134) or Duel.GetFlagEffect(player_ai,82293134)==1) 
+  return (HasID(AIDeck(),82293134) or HasID(AIDeck(),90411554) and not (HasID(UseLists({AIGrave(),AIHand(),AIMon()}),82293134) or Duel.GetFlagEffect(player_ai,82293134)==1))
   and (Chance(30) or Duel.GetCurrentPhase() == PHASE_MAIN2 or Duel.GetTurnCount()==1)
 end
 function SummonImpKing()
