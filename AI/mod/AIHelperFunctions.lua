@@ -1616,6 +1616,38 @@ function ApplyATKBoosts(Cards)
     end
   end
   
+  ------------------------------------------
+  -- Apply Vampire Empire's Attack Boost
+  ------------------------------------------
+  if HasID(UseLists({AIST(),OppST()}),62188962,true) then
+    for i=1,#Cards do
+      if bit32.band(Cards[i].race,RACE_ZOMBIE)>0 then
+        Cards[i].attack = Cards[i].attack +500
+      end
+    end
+  end
+  ------------------------------------------
+  -- Apply Bujingi Crane's Attack Doubling
+  ------------------------------------------
+  for i=1,#Cards do
+    if HasID(AIHand(),68601507,true) and bit32.band(Cards[i].setcode,0x88)>0
+    and bit32.band(Cards[i].race,RACE_BEASTWARRIOR)>0 and Cards[i].owner==1 
+    then
+      Cards[i].attack = Cards[i].base_attack * 2
+    end
+  end
+  
+  ------------------------------------------
+  -- Apply Honest's Attack Bonus
+  ------------------------------------------
+  for i=1,#Cards do
+    if HasID(AIHand(),37742478,true) and Cards[i].owner==1
+    and bit32.band(Cards[i].attribute,ATTRIBUTE_LIGHT)>0 
+    then
+      local OppAtt = Get_Card_Att_Def(OppMon(),"attack",">",nil,"attack")
+      Cards[i].attack = Cards[i].attack + OppAtt
+    end
+  end
   
   -- make indestructable monsters crash
   local cards=AIMon()

@@ -50,6 +50,7 @@ end
 function AIGetStrongestAttack()
   local cards=AIMon()
   local result=0
+  ApplyATKBoosts(cards)
   for i=1,#cards do
     if cards[i] and cards[i]:is_affected_by(EFFECT_CANNOT_ATTACK)==0 and cards[i].attack>result then
       result=cards[i].attack
@@ -60,8 +61,9 @@ end
 function OppHasStrongestMonster()
   local att=AIGetStrongestAttack()
   local mon=OppMon()
-  return #mon>0 and (att <= Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack")
-  or att <= Get_Card_Att_Def(OppMon(),"defense",">",POS_FACEUP_DEFENCE,"defense"))
+  ApplyATKBoosts(mon)
+  return #mon>0 and (att <= Get_Card_Att_Def(mon,"attack",">",POS_FACEUP_ATTACK,"attack")
+  or att <= Get_Card_Att_Def(mon,"defense",">",POS_FACEUP_DEFENCE,"defense"))
 end
 function OppHasFacedownMonster()
   local cards=OppMon()
@@ -552,6 +554,9 @@ function TenkiTarget(cards)
   end
   if NeedsCard(01662004,cards,AICards) then
     result={CurrentIndex} --get spirit when available and not in hand/field yet
+  end
+  if result == nil then
+    result = BujinAdd(cards)
   end
   if result == nil then result = {math.random(#cards)}end
   return result
@@ -1047,7 +1052,7 @@ function FireFistOnChain(cards,only_chains_by_player)
   return nil
 end
 function FireFistOnSelectEffectYesNo(id)
-  local result=0   
+  local result=nil   
   if id == 96381979 then --Tiger King
     if HasID(AIMon(),96381979) then
       GlobalCardMode=1
@@ -1055,8 +1060,6 @@ function FireFistOnSelectEffectYesNo(id)
     elseif FireFormationCostCheck(AIST(),3)>0 then
       GlobalCardMode=1
       result = 1
-    else
-      result = 0
     end
   end
   return result

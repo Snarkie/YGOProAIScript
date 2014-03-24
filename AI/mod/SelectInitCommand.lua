@@ -184,14 +184,18 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
 -------------------------------------------------
 
 local DeckCommand = FireFistInit(cards, to_bp_allowed, to_ep_allowed)
-if DeckCommand ~= nil then 
+if DeckCommand ~= nil and not BujinCheck() then 
     return DeckCommand[1],DeckCommand[2]
 end
 DeckCommand = HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
-if DeckCommand ~= nil then 
+if DeckCommand ~= nil and not BujinCheck() then 
     return DeckCommand[1],DeckCommand[2]
 end
 DeckCommand = GadgetOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
+if DeckCommand ~= nil and not BujinCheck() then 
+    return DeckCommand[1],DeckCommand[2]
+end
+DeckCommand = BujinOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
 if DeckCommand ~= nil then 
     return DeckCommand[1],DeckCommand[2]
 end

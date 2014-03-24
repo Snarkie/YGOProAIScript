@@ -774,6 +774,13 @@ function PaladynamoTarget(cards,minTargets)
   if result == nil then result = {math.random(#cards)} end
   return result
 end
+function FoolishTarget(cards)
+  if BujinCheck() then
+    return BujinAdd(cards,LOCATION_GRAVE)
+  else
+    return HeraldicToGrave(cards,1)
+  end
+end
 function HeraldicOnSelectCard(cards, minTargets, maxTargets, triggeringID)
   local result = {}
   if triggeringID == 34086406 then -- Lavalval Chain
@@ -795,7 +802,7 @@ function HeraldicOnSelectCard(cards, minTargets, maxTargets, triggeringID)
     return PlainCoatTarget(cards)
   end
   if triggeringID == 81439173 then -- Foolish Burial 
-    return HeraldicToGrave(cards,1)
+    return FoolishTarget(cards)
   end
   if triggeringID == 82293134 then -- Leo
     return {HeraldicToHand(cards)}

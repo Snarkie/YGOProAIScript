@@ -10,10 +10,14 @@
 -- 0 = no
 function OnSelectEffectYesNo(id)
   local result = FireFistOnSelectEffectYesNo(id)
-     
+  if result==nil then
+    result = BujinOnSelectEffectYesNo(id)
+  end
+  if result then return result end
+  
   if id  == 72989439 then  -- Black Luster Soldier - Envoy of the Beginning
-      result = 1
-     end
+    result = 1
+  end
   
   if id  == 84013237 then -- Number 39: Utopia
     if GlobalIsAIsTurn == 0 and AI.GetCurrentPhase() == PHASE_BATTLE and Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") < Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") then 

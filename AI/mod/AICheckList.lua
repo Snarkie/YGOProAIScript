@@ -294,7 +294,11 @@ function NormalSummonBlacklist(CardId)
      CardId == 41172955 or CardId == 13839120 or   -- Green Gadget, Yellow Gadget
      CardId == 42940404 or CardId == 05556499 or   -- Machina Gearframe, Machina Fortress
      CardId == 39284521 or CardId == 18063928 or   -- Machina Cannon, Tin Goldfish
-     CardId == 53573406  -- Masked Chameleon
+     CardId == 53573406 or CardId == 32339440 or   -- Masked Chameleon, Bujin Yamato
+     CardId == 53678698 or CardId == 23979249 or  -- Bujin Mikazuchi, Arasuda
+     CardId == 68601507 or CardId == 59251766 or  -- Bujin Crane, Hare
+     CardId == 05818294 or CardId == 69723159 or  -- Turtle, Quilin
+     CardId == 88940154 or CardId == 50474354  -- Centipede, Peacock
      then 
 	return 1 
   end
@@ -355,7 +359,10 @@ SSBL={
 61344030,82315772,28912357, -- Starliege Paladynamo, Heraldic Beast Eale, Gear Gigant X
 80117527,22110647,88033975, -- Number 11: Big Eye, Mecha Phantom Beast Dracossack, Armades, Keeper of Boundaries
 33198837,83994433,76774528, -- Naturia Beast, Stardust Spark Dragon, Scrap Dragon
-05556499,39284521,39765958 -- Machina Fortress, Machina Cannon, Jeweled RDA
+05556499,39284521,39765958, -- Machina Fortress, Machina Cannon, Jeweled RDA
+09418365,68618157,75840616, -- Bujin Hirume, Amaterasu, Susanowo
+01855932,73289035,26329679, -- Bujin Kagutsuchi, Tsukuyomi, Constellar Omega
+95169481 -- Diamond Dire Wolf
 }
 
 
@@ -373,7 +380,8 @@ function SetBlacklist(CardId)
 end
 
 SetBL={
-  61314842,92365601,84220251 -- Advanced Heraldry Art, Rank-Up Magic - Limited Barian's Force, Heraldry Reborn
+  61314842,92365601,84220251, -- Advanced Heraldry Art, Rank-Up Magic - Limited Barian's Force, Heraldry Reborn
+  73906480 -- Bujincarnation
 }
 
 ---------------------------------------------------------
@@ -613,7 +621,17 @@ function CardIsScripted(CardId)
      CardId == 83994433 or CardId == 76774528 or  -- Stardust Spark Dragon, Scrap Dragon
      CardId == 97077563 or CardId == 94380860 or  -- Call of the Haunted, Ragna Zero
      CardId == 48739166 or CardId == 12744567 or  -- SHArk Knight, SHDark Knight
-     CardId == 42940404 or CardId == 39765958 -- Machina Gearframe, Jeweled Red Dragon Archfiend
+     CardId == 42940404 or CardId == 39765958 or  -- Machina Gearframe, Jeweled Red Dragon Archfiend
+     CardId == 53678698 or CardId == 23979249 or  -- Bujin Mikazuchi, Arasuda
+     CardId == 09418365 or CardId == 68601507 or  -- Bujin Hirume, Crane
+     CardId == 59251766 or CardId == 05818294 or  -- Bujin Hare, Turtle
+     CardId == 69723159 or CardId == 88940154 or  -- Bujin Quilin, Centipede
+     CardId == 50474354 or CardId == 73906480 or  -- Bujin Peacock, Bujincarnation
+     CardId == 32339440 or CardId == 30338466 or  -- Bujin Yamato, Bujin Regalia - The Sword
+     CardId == 98645731 or CardId == 68618157 or  -- Pot of Duality, Bujin Amaterasu
+     CardId == 26329679 or CardId == 95169481 or  -- Constellar Omega, Diamond Dire Wolf
+     CardId == 73289035 or CardId == 01855932 or  -- Bujin Tsukuyomi, Kagutsuchi
+     CardId == 75840616  -- Bujintei Susanowo
     then  
 	return 1
   end

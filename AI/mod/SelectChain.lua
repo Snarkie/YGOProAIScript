@@ -29,6 +29,10 @@ result=GadgetOnSelectChain(cards,only_chains_by_player)
 if result ~= nil then
   return result[1],result[2]
 end
+result=BujinOnSelectChain(cards,only_chains_by_player)
+if result ~= nil then
+  return result[1],result[2]
+end
 result = 0
  
   ------------------------------------------
@@ -391,14 +395,14 @@ result = 0
   -- AI should activate: Honest, if any AI's 
   -- light monster is being attacked
    ---------------------------------------------
-   for i=1,#cards do
+   --[[for i=1,#cards do
    if cards[i].id == 37742478 then -- Honest
     if AIAttackedLightMonCount() > 0 then
        GlobalActivatedCardID = cards[i].id
       return 1,i
      end
    end
- end
+ end]]--
  
   ---------------------------------------------
   -- AI should activate: Shadow Spell,

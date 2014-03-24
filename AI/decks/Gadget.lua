@@ -494,6 +494,10 @@ function GadgetToHand(cards,count)
 end
 function BestTargets(cards,count,DestroyCheck)
   local result = {}
+  local AIMon=AIMon()
+  if count == nil then count = 1 end
+  ApplyATKBoosts(AIMon)
+  local AIAtt=Get_Card_Att_Def(AIMon,"attack",">",nil,"attack")
   for i=1,#cards do
     cards[i].index = i
     cards[i].prio = 0
@@ -505,6 +509,9 @@ function BestTargets(cards,count,DestroyCheck)
           cards[i].prio = 1
         else
           cards[i].prio = math.max(cards[i].attack+1,cards[i].defense)+5
+          if cards[i].owner==2 then
+            cards[i].prio = math.max(0,cards[i].prio-AIAtt*.75)
+          end
         end
       else
         cards[i].prio = 2
@@ -781,7 +788,7 @@ function ChainStardustSpark()
   end
   if ex then
     if tg then
-      local g = tg:GetMaxGroup(Card.GetAttack)
+      local g = tg:Filter(StardustSparkFilter, nil):GetMaxGroup(Card.GetAttack)
       if g then
         GlobalTargetID = g:GetFirst():GetCode() 
       end

@@ -33,6 +33,10 @@ result = GadgetOnSelectCard(cards, minTargets, maxTargets, triggeringID)
 if result ~= nil then
   return result
 end
+result = BujinOnSelectCard(cards, minTargets, maxTargets, triggeringID)
+if result ~= nil then
+  return result
+end
 result = {}
 
   --------------------------------------------
