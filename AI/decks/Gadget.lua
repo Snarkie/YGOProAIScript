@@ -379,9 +379,6 @@ function GadgetOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local Repositionable = cards.repositionable_cards
   local SetableMon = cards.monster_setable_cards
   local SetableST = cards.st_setable_cards
-  if HasID(Activatable,53129443) and UseDarkHole() then
-    return {COMMAND_ACTIVATE,IndexByID(Activatable,53129443)}
-  end
   if HasIDNotNegated(Activatable,28912357) then -- GGX
     return {COMMAND_ACTIVATE,CurrentIndex}
   end

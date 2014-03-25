@@ -170,12 +170,9 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
   -- controls at least 2 more monsters than
   -- the AI.
   ------------------------------------------
-  --[[for i=1,#ActivatableCards do
-    if ActivatableCards[i].id == 53129443 and
-       Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") > Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") then
-      return COMMAND_ACTIVATE,i
-    end
-  end]]
+  if HasID(ActivatableCards,53129443) and UseDarkHole() then
+    return {COMMAND_ACTIVATE,IndexByID(ActivatableCards,53129443)}
+  end
 
  -------------------------------------------------
 -- **********************************************

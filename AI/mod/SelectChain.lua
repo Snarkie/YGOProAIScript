@@ -488,7 +488,7 @@ end
       end
       local oppmon=OppMon()
       for j=1,#oppmon do
-        if bit32.band(oppmon[j].status,STATUS_SUMMONING) then
+        if bit32.band(oppmon[j].status,STATUS_SUMMONING)>0 then
           return 1,i
         end
       end
