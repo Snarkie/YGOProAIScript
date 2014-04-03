@@ -55,6 +55,56 @@ function ExpectedDamage()
   end
   return result
 end
+function BestTargets(cards,count,DestroyCheck,filter)
+  local result = {}
+  local AIMon=AIMon()
+  if count == nil then count = 1 end
+  ApplyATKBoosts(AIMon)
+  local AIAtt=Get_Card_Att_Def(AIMon,"attack",">",nil,"attack")
+  for i=1,#cards do
+    cards[i].index = i
+    cards[i].prio = 0
+    if bit32.band(cards[i].type,TYPE_MONSTER)>0 then
+      if bit32.band(cards[i].position, POS_FACEUP)>0 then
+        if cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)>0 and DestroyCheck
+        or cards[i]:is_affected_by(EFFECT_IMMUNE)>0
+        then
+          cards[i].prio = 1
+        else
+          cards[i].prio = math.max(cards[i].attack+1,cards[i].defense)+5
+          if cards[i].owner==2 then
+            cards[i].prio = math.max(0,cards[i].prio-AIAtt*.75)
+          end
+        end
+      else
+        cards[i].prio = 2
+      end
+    else
+      if cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)>0 and DestroyCheck
+      or cards[i]:is_affected_by(EFFECT_IMMUNE)>0
+      then
+        cards[i].prio = 1
+      else    
+        if bit32.band(cards[i].position, POS_FACEUP)>0 then
+          cards[i].prio = 4
+        else
+          cards[i].prio = 3
+        end
+      end
+    end
+    if filter and not filter(cards[i]) then
+      cards[i].prio = 0
+    end
+    if cards[i].owner == 1 then 
+      cards[i].prio = -1 * cards[i].prio
+    end
+  end
+  table.sort(cards,function(a,b) return a.prio > b.prio end)
+  for i=1,count do
+    result[i]=cards[i].index
+  end
+  return result
+end
 function SetBanishPriority(cards)
   for i=1,#cards do
     local c=cards[i]
@@ -489,53 +539,7 @@ function GadgetToHand(cards,count)
   end
   return result
 end
-function BestTargets(cards,count,DestroyCheck)
-  local result = {}
-  local AIMon=AIMon()
-  if count == nil then count = 1 end
-  ApplyATKBoosts(AIMon)
-  local AIAtt=Get_Card_Att_Def(AIMon,"attack",">",nil,"attack")
-  for i=1,#cards do
-    cards[i].index = i
-    cards[i].prio = 0
-    if bit32.band(cards[i].type,TYPE_MONSTER)>0 then
-      if bit32.band(cards[i].position, POS_FACEUP)>0 then
-        if cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)>0 and DestroyCheck
-        or cards[i]:is_affected_by(EFFECT_IMMUNE)>0
-        then
-          cards[i].prio = 1
-        else
-          cards[i].prio = math.max(cards[i].attack+1,cards[i].defense)+5
-          if cards[i].owner==2 then
-            cards[i].prio = math.max(0,cards[i].prio-AIAtt*.75)
-          end
-        end
-      else
-        cards[i].prio = 2
-      end
-    else
-      if cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)>0 and DestroyCheck
-      or cards[i]:is_affected_by(EFFECT_IMMUNE)>0
-      then
-        cards[i].prio = 1
-      else    
-        if bit32.band(cards[i].position, POS_FACEUP)>0 then
-          cards[i].prio = 4
-        else
-          cards[i].prio = 3
-        end
-      end
-    end
-    if cards[i].owner == 1 then 
-      cards[i].prio = -1 * cards[i].prio
-    end
-  end
-  table.sort(cards,function(a,b) return a.prio > b.prio end)
-  for i=1,count do
-    result[i]=cards[i].index
-  end
-  return result
-end
+
 
 function MachinaFortressTarget(cards)
   local result = nil
@@ -703,12 +707,8 @@ function GadgetOnSelectCard(cards, minTargets, maxTargets, ID)
   end
   return nil
 end
-function ChainSwiftScarecrow()
-  local e = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
-  if e and e:GetHandler():GetCode()==18964575 then
-    return false
-  end
-  return ExpectedDamage() >= 0.35*AI.GetPlayerLP(1)
+function ChainSwiftScarecrow(id)
+  return UnchainableCheck(id) and ExpectedDamage() >= 0.35*AI.GetPlayerLP(1)
 end
 function ChainCotH()
   if Duel.GetCurrentPhase() == PHASE_BATTLE then
@@ -838,8 +838,11 @@ function ChainStardustSpark()
 end
 GlobalStardustSparkActivation={}
 function GadgetOnSelectChain(cards,only_chains_by_player)
-  if HasID(cards,18964575) and ChainSwiftScarecrow() then
+  if HasID(cards,18964575) and ChainSwiftScarecrow(18964575) then
     return {1,IndexByID(cards,18964575)}
+  end
+  if HasID(cards,19665973) and ChainSwiftScarecrow(19665973) then -- Battle Fader
+    return {1,IndexByID(cards,19665973)}
   end
   if HasID(cards,97077563) and ChainCotH() then
     return {1,IndexByID(cards,97077563)}
@@ -853,12 +856,6 @@ function GadgetOnSelectChain(cards,only_chains_by_player)
   if HasID(cards,83994433) and ChainStardustSpark() then
     GlobalStardustSparkActivation[cards[CurrentIndex].cardid]=Duel.GetTurnCount()
     return {1,CurrentIndex}
-  end
-  if HasID(cards,18964575) and ChainSwiftScarecrow() then
-    return {1,IndexByID(cards,18964575)}
-  end
-  if HasID(cards,19665973) and ChainSwiftScarecrow() then -- Battle Fader
-    return {1,IndexByID(cards,19665973)}
   end
   return nil
 end

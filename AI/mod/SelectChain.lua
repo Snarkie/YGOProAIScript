@@ -167,8 +167,7 @@ result = 0
    if Get_Card_Count_ID(AIST(),cards[i].id, POS_FACEUP) == 0 or
 	  MultiActivationOK(cards[i].id) == 1 then 
 	  if bit32.band(cards[i].type,TYPE_MONSTER) > 0 or (bit32.band(cards[i].type,TYPE_TRAP) > 0 and TrapsNegated == 0) or (bit32.band(cards[i].type,TYPE_SPELL) > 0 and SpellsNegated == 0) then		
-		if isUnchainableTogether(cards[i].id) == 0 or
-		  (isUnchainableTogether(cards[i].id) == 1 and AIControlsFaceupUnchainable(cards[i].id) == 0) then  -- Checks if any cards from UnchainableTogether list are already in chain.
+		if UnchainableCheck(cards[i].id) then  -- Checks if any cards from UnchainableTogether list are already in chain.
           if isUnactivableWithNecrovalley(cards[i].id) == 0 or
 		    (isUnactivableWithNecrovalley(cards[i].id) == 1 and Get_Card_Count_ID(UseLists({AIMon(),AIST(),OppMon(),OppST()}),47355498,POS_FACEUP) == 0) then -- Check if card shouldn't be activated when Necrovalley is on field
 		    ChainAllowed = 1
@@ -596,12 +595,11 @@ end
 	  MultiActivationOK(cards[i].id) == 1 then 
     if bit32.band(cards[i].type,TYPE_MONSTER) > 0 or (bit32.band(cards[i].type,TYPE_TRAP) > 0 and TrapsNegated == 0) or 
 	  (bit32.band(cards[i].type,TYPE_SPELL) > 0 and SpellsNegated == 0) then
-	if isUnchainableTogether(cards[i].id) == 0 or
-	  (isUnchainableTogether(cards[i].id) == 1 and AIControlsFaceupUnchainable(cards[i].id) == 0) then  -- Checks if any cards from UnchainableTogether list are already in chain.
+	if UnchainableCheck(cards[i].id) == 0  then  -- Checks if any cards from UnchainableTogether list are already in chain.
     if isUnactivableWithNecrovalley(cards[i].id) == 0 or
 	  (isUnactivableWithNecrovalley(cards[i].id) == 1 and Get_Card_Count_ID(UseLists({AIMon(),AIST(),OppMon(),OppST()}),47355498,POS_FACEUP) == 0) then -- Check if card shouldn't be activated when Necrovalley is on field
-	 if CardIsScripted(cards[i].id) == 0 then -- Check if card's activation is already scripted above
-		 GlobalActivatedCardID = cards[i].id 
+	 if CardIsScripted(cards[i].id) == 0 and (cards[i]:is_affected_by(EFFECT_DISABLE) or cards[i]:is_affected_by(EFFECT_DISABLE_EFFECT)) == false then -- Check if card's activation is already scripted above
+     GlobalActivatedCardID = cards[i].id 
 	      return 1,i
          end
         else

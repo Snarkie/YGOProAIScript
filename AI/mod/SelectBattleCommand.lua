@@ -192,6 +192,18 @@ end
    return 1,i
   end
   
+  --------------------------------------------------------
+  -- If a monster is forced to attack for some reason, 
+  -- attack with the strongest monster fist to potentially
+  -- clear the way for weaker ones.
+  --------------------------------------------------------
+  if #cards>0 then
+    local i=GetStrongestAttackerIndex()
+    if cards[i] and cards[i]:is_affected_by(EFFECT_MUST_ATTACK)>0 then
+      return 1,i
+    end
+  end
+  
   ----print("execute_attack",execute_attack)
   -------------------------------------
   -- If it gets this far, don't attack.

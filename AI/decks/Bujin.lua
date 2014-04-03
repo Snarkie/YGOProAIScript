@@ -9,30 +9,30 @@ end
 BujinPrio = {}
 -- {hand,hand+,field,field+,grave,grave+,banished}
 --  "+" == has one already
-BujinPrio[32339440] = {9,2,9,0,1,1,2} -- Yamato
-BujinPrio[53678698] = {5,1,5,0,1,1,2} -- Mikazuchi
-BujinPrio[23979249] = {3,1,3,0,1,1,2} -- Arasuda
-BujinPrio[09418365] = {4,1,4,0,1,1,2} -- Hirume
+BujinPrio[32339440] = {9,2,9,5,1,1,2} -- Yamato
+BujinPrio[53678698] = {5,1,5,4,2,1,2} -- Mikazuchi
+BujinPrio[23979249] = {3,1,3,3,2,1,2} -- Arasuda
+BujinPrio[09418365] = {4,1,4,3,2,1,2} -- Hirume
 BujinPrio[68601507] = {7,2,0,0,0,0,2} -- Crane
 BujinPrio[59251766] = {3,1,2,2,9,5,0} -- Hare
-BujinPrio[05818294] = {3,1,2,2,7,4,0} -- Turtle
-BujinPrio[69723159] = {2,1,2,2,6,3,0} -- Quilin
-BujinPrio[88940154] = {2,1,2,2,5,3,0} -- Centipede
+BujinPrio[05818294] = {3,1,2,2,8,4,0} -- Turtle
+BujinPrio[69723159] = {2,1,2,2,7,3,0} -- Quilin
+BujinPrio[88940154] = {2,1,2,2,6,3,0} -- Centipede
 BujinPrio[50474354] = {3,1,0,0,2,2,5} -- Peacock
 BujinPrio[37742478] = {8,2,0,0,0,0,2} -- Honest
 
 BujinPrio[73906480] = {4,2,0,0,0,0,0} -- Bujincarnation
 BujinPrio[30338466] = {3,1,0,0,0,0,0} -- Bujin Regalia - The Sword
 BujinPrio[57103969] = {8,1,0,0,0,0,0} -- Fire Formation - Tenki
-BujinPrio[98645731] = {1,0,0,0,3,3,0} -- Pot of Duality
-BujinPrio[81439173] = {1,0,0,0,2,2,0} -- Foolish Burial
-BujinPrio[05318639] = {2,1,0,0,1,1,0} -- Mystical Space Typhoon
-BujinPrio[27243130] = {2,1,0,0,1,1,0} -- Forbidden Lance
-BujinPrio[78474168] = {1,1,0,0,4,3,0} -- Breakthrough Skill
-BujinPrio[94192409] = {2,1,0,0,1,1,0} -- Compulsory Evacuation Device
-BujinPrio[53582587] = {2,1,0,0,1,1,0} -- Torrential Tribute
-BujinPrio[84749824] = {3,1,0,0,1,1,0} -- Solemn Warning
-BujinPrio[29401950] = {2,1,0,0,1,1,0} -- Bottomless Trap Hole
+BujinPrio[98645731] = {1,0,0,0,4,3,0} -- Pot of Duality
+BujinPrio[81439173] = {1,0,0,0,3,2,0} -- Foolish Burial
+BujinPrio[05318639] = {2,1,0,0,2,1,0} -- Mystical Space Typhoon
+BujinPrio[27243130] = {2,1,0,0,2,1,0} -- Forbidden Lance
+BujinPrio[78474168] = {1,1,0,0,3,3,0} -- Breakthrough Skill
+BujinPrio[94192409] = {2,1,0,0,2,1,0} -- Compulsory Evacuation Device
+BujinPrio[53582587] = {2,1,0,0,2,1,0} -- Torrential Tribute
+BujinPrio[84749824] = {3,1,0,0,2,1,0} -- Solemn Warning
+BujinPrio[29401950] = {2,1,0,0,2,1,0} -- Bottomless Trap Hole
 
 function BujinGetPriority(id,loc)
   local index = 0
@@ -41,7 +41,7 @@ function BujinGetPriority(id,loc)
   if loc == LOCATION_HAND then
     index = 1
     checklist = AIHand()
-    if id==32339440 then checklist = UseLists({AIHand(),AIMon()}) end
+    if id==32339440 or id==53678698 then checklist = UseLists({AIHand(),AIMon()}) end
   elseif loc == LOCATION_FIELD then
     index = 3
     checklist = AIMon()
@@ -104,14 +104,14 @@ function SummonTsukuyomi()
   return UseTsukuyomi(AIHand())
 end
 function UseTsukuyomi(cards)
-  return #cards==1 and BujinPriorityCheck(cards,LOCATION_GRAVE)>2 
-  or #cards==2 and BujinPriorityCheck(cards,LOCATION_GRAVE,2)>3
+  return #cards==1 and BujinPriorityCheck(cards,LOCATION_GRAVE)>3 
+  or #cards==2 and BujinPriorityCheck(cards,LOCATION_GRAVE,2)>4
 end
 function AmaterasuFilter(card)
   return card and card.level==4 and bit32.band(card.setcode,0x88)>0
 end
 function SummonAmaterasu()
-  return CardsMatchingFilter(AIBanish(),AmaterasuFilter)>2 and BujinPriorityCheck(AIBanish(),LOCATION_GRAVE,2)>3
+  return CardsMatchingFilter(AIBanish(),AmaterasuFilter)>2 and BujinPriorityCheck(AIBanish(),LOCATION_GRAVE,2)>4
 end
 function SummonHirume()
   return OverExtendCheck() and BujinPriorityCheck(AIGrave(),LOCATION_REMOVED)>0
@@ -139,7 +139,7 @@ function UseRegaliaGrave()
 	local cg = RemovalCheck()
 	if cg then
 		if cg:IsExists(function(c) return c:IsControler(player_ai) and c:IsCode(30338466) end, 1, nil) then
-      if BujinPriorityCheck(AIGrave())>2 then --and BujinPriorityCheck(AIBanish(),LOCATION_GRAVE)<=2
+      if BujinPriorityCheck(AIGrave())>2 then --and BujinPriorityCheck(AIBanish(),LOCATION_GRAVE)<=3
         GlobalCardMode=1
         return true 
       end
@@ -185,10 +185,21 @@ function UseRegaliaBanish()
 	local cg = RemovalCheck()
 	if cg then
 		if cg:IsExists(function(c) return c:IsControler(player_ai) and c:IsCode(30338466) end, 1, nil) then
-      return BujinPriorityCheck(AIGrave())<2 and BujinPriorityCheck(AIBanish(),LOCATION_GRAVE)>2
+      return BujinPriorityCheck(AIGrave())<2 and BujinPriorityCheck(AIBanish(),LOCATION_GRAVE)>3
     end	
   end
   return
+end
+function BujinXYZCheck()
+  return BujinCheck() and (not HasID(AIMon(),32339440) or OppHasStrongestMonster())
+end
+function SummonTigerKingBujin()
+  return BujinCheck() and not HasID(UseLists({AIMon(),AIHand()}),32339440) 
+  and HasID(AIDeck(),32339440) and HasID(AIDeck(),57103969) and MP2Check()
+end
+function SummonOmegaBujin()
+  local cards=OppST()
+  return BujinCheck() and Chance((#cards-1)*25)
 end
 function BujinOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local Activatable = cards.activatable_cards
@@ -251,8 +262,16 @@ function BujinOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     GlobalActivatedCardID=09418365
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
+  
+  GlobalBujinSS=true
+  if HasID(cards,12014404) and SummonCowboyDef() then
+    result=IndexByID(cards,12014404)
+  end
   if HasID(SpSummonable,75840616) and SummonSusanowo() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(SpSummonable,46772449) and SummonBelzebuth() then
+    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,46772449)}
   end
   if HasID(SpSummonable,01855932) and SummonKagutsuchi() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
@@ -263,12 +282,31 @@ function BujinOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(SpSummonable,68618157) and SummonAmaterasu() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
+  if HasID(SpSummonable,96381979) and SummonTigerKingBujin() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(SpSummonable,94380860) and BujinXYZCheck() and SummonRagnaZero() then
+    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,94380860)}
+  end  
+  if HasID(SpSummonable,61344030) and BujinXYZCheck() and SummonPaladynamo() and Chance(50) then
+    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,61344030)}
+  end
+  if HasID(SpSummonable,48739166) and BujinXYZCheck() and SummonSharkKnight() then
+    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,48739166)}
+  end
+  if HasID(SpSummonable,26329679) and BujinXYZCheck() and SummonOmegaBujin() then
+    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,26329679)}
+  end
+  if HasID(SpSummonable,48739166) and BujinXYZCheck() and SummonCowboyAtt() then
+    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,48739166)}
+  end
+  GlobalBujinSS=nil
   return nil
 end
 function YamatoTarget(cards)
   if GlobalCardMode==1 then
     GlobalCardMode = nil
-    if BujinPriorityCheck(AIHand(),LOCATION_GRAVE)>3 then
+    if BujinPriorityCheck(AIHand(),LOCATION_GRAVE)>4 then
       return BujinAdd(cards)
     end
   end
@@ -330,7 +368,7 @@ function BujincarnationTarget(cards)
   if GlobalCardMode==1 then
     GlobalCardMode=nil
   else
-    if BujinPriorityCheck(cards,LOCATION_GRAVE)>2 then
+    if BujinPriorityCheck(cards,LOCATION_GRAVE)>3 then
       result=BujinAdd(cards,LOCATION_GRAVE)
     end
   end
@@ -355,6 +393,16 @@ function RegaliaTarget(cards)
 end
 function ArasudaTarget(cards)
   return BujinAdd(cards,LOCATION_GRAVE)
+end
+function BujinXYZTarget(cards,count)
+  GlobalBujinSS=nil
+  result={}
+  BujinAssignPriority(cards,LOCATION_FIELD)
+  table.sort(cards,function(a,b) return a.prio<b.prio end)
+  for i=1,count do
+    result[i]=cards[i].index
+  end
+  return result
 end
 function BujinOnSelectCard(cards, minTargets, maxTargets, ID)
   if ID == 98645731 or ID == 50474354  -- Duality, Peacock
@@ -402,10 +450,17 @@ function BujinOnSelectCard(cards, minTargets, maxTargets, ID)
   if ID == 73906480 then
     return BujincarnationTarget(cards)
   end
+  if GlobalBujinSS then
+    return BujinXYZTarget(cards,minTargets)
+  end
   return nil
 end
 function ChainArasuda()
-  return BujinPriorityCheck(AIHand(),LOCATION_GRAVE)>3
+  if HasID(AIHand(),23979249) then
+    return Duel.GetTurnPlayer()==player_ai and OverExtendCheck()
+  else
+    return BujinPriorityCheck(AIHand(),LOCATION_GRAVE)>4
+  end
 end
 function HareFilter(card)
   return card:IsControler(player_ai) and card:IsPosition(POS_FACEUP) 
@@ -531,7 +586,28 @@ function ChainTurtle()
   return player and player ~= player_ai
 end
 function ChainHirume()
-  return BujinPriorityCheck(AIHand(),LOCATION_GRAVE)>3
+  return BujinPriorityCheck(AIHand(),LOCATION_GRAVE)>4
+end
+function OmegaFilter(card)
+	return card:IsControler(player_ai) and card:IsType(TYPE_MONSTER) 
+  and card:IsLocation(LOCATION_MZONE) and card:IsPosition(POS_FACEUP)
+  and not card:IsHasEffect(EFFECT_IMMUNE_EFFECT) and card:IsSetCard(0x53)
+end
+function ChainOmega()
+  local cc=Duel.GetCurrentChain()
+  local cardtype = Duel.GetChainInfo(cc, CHAININFO_EXTTYPE)
+  local ex,cg = Duel.GetOperationInfo(0, CATEGORY_DESTROY)
+  local tg = Duel.GetChainInfo(cc, CHAININFO_TARGET_CARDS)
+  local e = Duel.GetChainInfo(cc, CHAININFO_TRIGGERING_EFFECT)
+  local p = Duel.GetChainInfo(cc, CHAININFO_TRIGGERING_PLAYER)
+  if ex then
+    local g = cg:Filter(OmegaFilter, nil):GetMaxGroup(Card.GetAttack)
+    return bit32.band(cardtype, TYPE_SPELL+TYPE_TRAP) ~= 0 and g
+  elseif tg then
+    local g = tg:Filter(OmegaFilter, nil):GetMaxGroup(Card.GetAttack)
+    return bit32.band(cardtype, TYPE_SPELL+TYPE_TRAP) ~= 0 and g and p~=player_ai
+  end
+  return false
 end
 function BujinOnSelectChain(cards,only_chains_by_player)
   if HasID(cards,30338466--[[,false,485415456]]) and UseRegaliaGrave() then
@@ -567,6 +643,9 @@ function BujinOnSelectChain(cards,only_chains_by_player)
   end
   if HasIDNotNegated(cards,32339440) then -- Yamato
     GlobalCardMode = 1
+    return {1,CurrentIndex}
+  end
+  if HasIDNotNegated(cards,26329679) and ChainOmega() then
     return {1,CurrentIndex}
   end
   return nil

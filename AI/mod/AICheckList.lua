@@ -486,10 +486,23 @@ function isUnchainableTogether(CardId)
      CardId == 86871614 or -- Cloning
      CardId == 84749824 or -- Solem warning
      CardId == 37412656 or -- Hero blast
+     CardId == 19665973 or -- Battle Fader
+     CardId == 18964575 or -- Swift Scarecrow
      CardId == 53582587 then -- Torrential tribute   
 	return 1
   end
   return 0
+end
+
+function UnchainableCheck(id)
+  local e = nil
+  for i=1,Duel.GetCurrentChain() do
+    e = Duel.GetChainInfo(i, CHAININFO_TRIGGERING_EFFECT)
+    if e and isUnchainableTogether(e:GetHandler():GetCode())>0 then
+      return isUnchainableTogether(id)==0;
+    end
+  end
+  return true
 end
 
 ----------------------------------------------------

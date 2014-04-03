@@ -101,14 +101,7 @@ function SummonPlainCoat()
   return UsePlainCoat() or not (HasID(UseLists({AIMon(),AIGrave()}),23649496)) and (Chance(50) or HasID(AIHand(),92365601))
 end
 function SummonGenomHeritage()
-  local cards=OppMon()
-  for i=1,#cards do
-    if bit32.band(cards[i].type,TYPE_XYZ)>0 
-    and cards[i]:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0 then
-      return true
-    end
-  end
-  return false
+  return UseGenomHeritage()
 end
 function SummonPaladynamo()
   local cards = OppMon()
@@ -202,6 +195,13 @@ function UseTwinEagle()
   end
   return false
 end
+function GenomHeritageFilter(c)
+	return bit.band(c:GetType(),TYPE_XYZ)>0 and c:IsCanBeEffectTarget() 
+  and c:IsControler(1-player_ai) and (c:GetOriginalCode()~=47387961 or c:GetAttack()>0)
+end
+function UseGenomHeritage() 
+  return Duel.IsExistingMatchingCard(GenomHeritageFilter,1-player_ai,LOCATION_MZONE,0,1,nil)
+end
 function HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local Activatable = cards.activatable_cards
   local Summonable = cards.summonable_cards
@@ -245,7 +245,7 @@ function HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     GlobalCardMode = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasIDNotNegated(Activatable,47387961) then   -- Genom Heritage
+  if HasIDNotNegated(Activatable,47387961) and UseGenomHeritage() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Activatable,23649496) and UsePlainCoat() then
@@ -781,8 +781,14 @@ function FoolishTarget(cards)
     return HeraldicToGrave(cards,1)
   end
 end
+function GenomHeritageTarget(cards)
+  return BestTargets(cards,1,false,function(c) return c.original_id ~= 47387961 or c.attack > 0 end)
+end
 function HeraldicOnSelectCard(cards, minTargets, maxTargets, triggeringID)
   local result = {}
+  if triggeringID == 47387961 then -- Genom Heritage
+    return GenomHeritageTarget(cards)
+  end
   if triggeringID == 34086406 then -- Lavalval Chain
     return LavalvalChainTarget(cards)
   end

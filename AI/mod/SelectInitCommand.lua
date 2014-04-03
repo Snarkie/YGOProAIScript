@@ -171,7 +171,7 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
   -- the AI.
   ------------------------------------------
   if HasID(ActivatableCards,53129443) and UseDarkHole() then
-    return {COMMAND_ACTIVATE,IndexByID(ActivatableCards,53129443)}
+    return COMMAND_ACTIVATE,IndexByID(ActivatableCards,53129443)
   end
 
  -------------------------------------------------
@@ -1191,22 +1191,6 @@ end
     for i=1,#ActivatableCards do
       if ActivatableCards[i].id == 22624373 then
          Global1PTLylaST = 1
-         GlobalActivatedCardID = ActivatableCards[i].id
-        return COMMAND_ACTIVATE,i
-      end
-    end
-  end
-
-  ------------------------------------------------------------
-  -- Activate Number 8: Heraldic King Genom-Heritage's effect
-  -- only if it hasn't already been attempted this turn.
-  -- Targeting an opponent's Genom-Heritage causes a potential
-  -- infinite loop for the AI.
-  ------------------------------------------------------------
-  if Global1PTGenom ~= 1 then
-    for i=1,#ActivatableCards do
-      if ActivatableCards[i].id == 47387961 then
-         Global1PTGenom = 1
          GlobalActivatedCardID = ActivatableCards[i].id
         return COMMAND_ACTIVATE,i
       end
