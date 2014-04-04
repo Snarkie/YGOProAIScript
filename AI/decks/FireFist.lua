@@ -367,6 +367,24 @@ function SummonSharkKnight(cards)
   end
   return false
 end
+function TigerKingFilter(c)
+	return c:IsPosition(POS_FACEUP_ATTACK) and not c:IsType(TYPE_TOKEN) 
+  and (c:IsType(TYPE_XYZ+TYPE_SYNCHRO+TYPE_RITUAL+TYPE_FUSION) or c:GetAttack()>=2000)
+end
+function UseTigerKing()
+  local cards = UseLists({AIMon(),OppMon()})
+  local count = 0
+  for i=1,#cards do
+    if cards[i].race~=RACE_BEASTWARRIOR then
+      if cards[i].owner==1 then
+        count = count-1
+      else
+        count = count+1
+      end
+    end
+  end
+  return count>0
+end
 function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
   local Activatable = cards.activatable_cards
   local Summonable = cards.summonable_cards
@@ -410,7 +428,7 @@ function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
     GlobalCardMode = 1
     return {COMMAND_ACTIVATE,IndexByID(Activatable,39699564)}
   end
-  if HasIDNotNegated(Activatable,96381979) then -- Tiger King   
+  if HasIDNotNegated(Activatable,96381979) and UseTigerKing() then  
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Activatable,30929786) and UseChicken() then

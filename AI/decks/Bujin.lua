@@ -209,6 +209,9 @@ function BujinOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local SetableMon = cards.monster_setable_cards
   local SetableST = cards.st_setable_cards
   --
+  if HasIDNotNegated(Activatable,46772449) and UseBelzebuth() then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   if HasID(Activatable,30338466,false,485415456) and UseRegaliaGrave() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -246,6 +249,15 @@ function BujinOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   end
   if HasIDNotNegated(Activatable,68618157) then -- Amaterasu
     GlobalCardMode = 1
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Activatable,94380860) then  -- Ragna Zero
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Activatable,48739166) then  -- SHArk Knight
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Activatable,96381979) and UseTigerKing() then  
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   --

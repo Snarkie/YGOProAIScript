@@ -496,9 +496,12 @@ end
 
 function UnchainableCheck(id)
   local e = nil
+  print("unchainable check")
   for i=1,Duel.GetCurrentChain() do
+    print("chain")
     e = Duel.GetChainInfo(i, CHAININFO_TRIGGERING_EFFECT)
     if e and isUnchainableTogether(e:GetHandler():GetCode())>0 then
+      print("unchainable in chain")
       return isUnchainableTogether(id)==0;
     end
   end
