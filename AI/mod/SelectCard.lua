@@ -151,7 +151,7 @@ result = {}
 		-- otherwise, select an attack target from the 2nd group
 		elseif #FaceUpAttackPositionIndestructibleGroup > 0 then
 			local function compare_2nd_group(x,y)
-				return x.attack < y.attack
+				return x.attack-x.bonus < y.attack-y.bonus
 			end
 			table.sort(FaceUpAttackPositionIndestructibleGroup,compare_2nd_group)
 			if FaceUpAttackPositionIndestructibleGroup[1].attack < GlobalCurrentATK then

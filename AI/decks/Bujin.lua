@@ -124,8 +124,18 @@ function UseQuilin()
   local result = 0
   for i=1,#cards do
     if bit32.band(cards[i].position,POS_FACEUP)>0
-    and cards[i]:is_affected_by(EFFECT_INDESTRUCTIBLE_EFFECT)==0
+    and cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0
+    and cards[i]:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
     and cards[i]:is_affected_by(EFFECT_IMMUNE_EFFECT)==0
+    then
+      result = result +1
+    end
+  end
+  cards=OppMon()
+  for i=1,#cards do
+    if cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0
+    and cards[i]:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
+    and cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE)>0
     then
       result = result +1
     end
@@ -199,7 +209,17 @@ function SummonTigerKingBujin()
 end
 function SummonOmegaBujin()
   local cards=OppST()
-  return BujinCheck() and Chance((#cards-1)*25)
+  return BujinCheck() and Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack")<2400 and Chance((#cards-2)*33)
+end
+function SharkKnightFilterBujin(c)
+	return c:IsPosition(POS_FACEUP_ATTACK) and not c:IsType(TYPE_TOKEN) 
+  and bit.band(c:GetSummonType(),SUMMON_TYPE_SPECIAL)>0
+  and c:IsHasEffect(EFFECT_INDESTRUCTABLE_EFFECT) and c:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE)
+  and c:IsCanBeEffectTarget()
+end
+function SummonSharkKnightBujin(cards)
+  local cg=Duel.GetMatchingGroup(SharkKnightFilterBujin,1-player_ai,LOCATION_MZONE,0,nil)
+  return cg and cg:GetCount() > 0
 end
 function BujinOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local Activatable = cards.activatable_cards
@@ -276,12 +296,16 @@ function BujinOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   end
   
   GlobalBujinSS=true
-  if HasID(cards,12014404) and SummonCowboyDef() then
-    result=IndexByID(cards,12014404)
+  if HasID(SpSummonable,12014404) and SummonCowboyDef() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(SpSummonable,48739166) and SummonSharkKnightBujin() then
+    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,48739166)}
   end
   if HasID(SpSummonable,75840616) and SummonSusanowo() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
+
   if HasID(SpSummonable,46772449) and SummonBelzebuth() then
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,46772449)}
   end
@@ -468,7 +492,7 @@ function BujinOnSelectCard(cards, minTargets, maxTargets, ID)
   return nil
 end
 function ChainArasuda()
-  if HasID(AIHand(),23979249) then
+  if HasID(AIHand(),23979249,true) then
     return Duel.GetTurnPlayer()==player_ai and OverExtendCheck()
   else
     return BujinPriorityCheck(AIHand(),LOCATION_GRAVE)>4
@@ -489,18 +513,26 @@ function ChainHare()
     return false
   end
   if ex then
+    local g
     if tg then
-      local g = tg:Filter(HareFilter, nil):GetMaxGroup(Card.GetAttack)
-      if g then
-        GlobalTargetID = g:GetFirst():GetCode() 
-      end
-      return tg:IsExists(HareFilter, 1, nil)
+      g = tg:Filter(HareFilter, nil)
     else
-      local g = cg:Filter(HareFilter, nil):GetMaxGroup(Card.GetAttack)
-      if g then
-        GlobalTargetID = g:GetFirst():GetCode()
+      g = cg:Filter(HareFilter, nil)
+    end
+    if g then
+      local c=g:GetFirst()
+      local p,hp,a,ha=0,0,0,0
+      while c do
+        p=BujinGetPriority(c:GetCode(),LOCATION_FIELD)
+        a=c:GetAttack()
+        if hp<p or hp==p and ha<a then
+          hp=p
+          ha=a
+          GlobalTargetID = c:GetCode() 
+        end
+        c=g:GetNext()
       end
-      return cg:IsExists(HareFilter, 1, nil)
+      return true
     end
   end
   if Duel.GetCurrentPhase() == PHASE_BATTLE then
@@ -514,7 +546,10 @@ function ChainHare()
       if source:GetAttack() >= target:GetAttack() 
       and target:IsControler(player_ai) 
       and source:IsPosition(POS_FACEUP_ATTACK)
-      and (not (HasID(AIHand(),68601507,true) or HasID(AIHand(),37742478,true))
+      and target:IsPosition(POS_FACEUP)
+      and (not (HasID(AIHand(),68601507,true) or HasID(AIHand(),37742478,true)
+      or HasID(AIHand(),27243130,true) and Duel.GetTurnPlayer()==player_ai
+      or HasIDNotNegated(AIST(),27243130,true))
       or source:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE))
       and not target:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE)
       --and not target:IsHasEffect(EFFECT_IMMUNE_EFFECT) 
@@ -613,10 +648,10 @@ function ChainOmega()
   local e = Duel.GetChainInfo(cc, CHAININFO_TRIGGERING_EFFECT)
   local p = Duel.GetChainInfo(cc, CHAININFO_TRIGGERING_PLAYER)
   if ex then
-    local g = cg:Filter(OmegaFilter, nil):GetMaxGroup(Card.GetAttack)
+    local g = cg:Filter(OmegaFilter, nil)
     return bit32.band(cardtype, TYPE_SPELL+TYPE_TRAP) ~= 0 and g
   elseif tg then
-    local g = tg:Filter(OmegaFilter, nil):GetMaxGroup(Card.GetAttack)
+    local g = tg:Filter(OmegaFilter, nil)
     return bit32.band(cardtype, TYPE_SPELL+TYPE_TRAP) ~= 0 and g and p~=player_ai
   end
   return false
@@ -630,7 +665,7 @@ function BujinOnSelectChain(cards,only_chains_by_player)
   end
   --[[if HasID(cards,30338466,false,485415457) and UseRegaliaBanish() then
     return {1,CurrentIndex}
-  end]]--
+  end]]
   if HasID(cards,68601507) and ChainCrane() then
     return {1,CurrentIndex}
   end

@@ -984,7 +984,7 @@ function NegateBPCheck(card)
   then
     return card.xyz_material_count>0
   end
-  if card.id==31305911 then -- Marshmallon
+  if card.id==31305911 or card.id==34408491 then -- Marshmallon, Beelze
     return true
   end
   return false

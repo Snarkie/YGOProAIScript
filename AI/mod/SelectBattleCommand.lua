@@ -100,26 +100,7 @@ function OnSelectBattleCommand(cards)
      end
   end
    
-  ---------------------------------------------------------------
-  -- If the opponent controls a monster, attack if the AI's
-  -- strongest monster has more ATK than the opponent's monsters,
-  -- or if any card that forces monsters to attack is activated.
-  ---------------------------------------------------------------
-  if Get_Card_Count(AI.GetOppMonsterZones()) > 0 then
-    if #cards > 0 then
-      local i = GetStrongestAttackerIndex()
-      if i > 0 then
-        if cards[i].attack > Get_Card_Att_Def_Pos(targets) and cards[i].attack > 0 and 
-		   Card_Count_Affected_By(EFFECT_INDESTRUCTABLE_BATTLE,targets) > 0 or Global1PTAArchers == 1 then
-          GlobalCurrentATK = cards[i].attack
-          GlobalAIIsAttacking = 1
-		  return 1,i
-        end
-      end
-    end
-  end
-
-
+   
   -------------------------------------------------------
   -- If the opponent has a monster with more ATK than any
   -- of the AI's monsters, look for an opponent's monster
@@ -134,20 +115,23 @@ function OnSelectBattleCommand(cards)
         local AttackTarget = 0
         local AttackValue = 0
         for x=1,#OppMon do
-          if OppMon[x].position == POS_FACEUP_ATTACK and
-             OppMon[x].attack >= AttackValue and cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE) == 0 then
-            if OppMon[x].attack < cards[i].attack then
-                AttackTarget = x
-                AttackValue = OppMon[x].attack
-              end
+          if OppMon[x].position == POS_FACEUP_ATTACK then
+            if OppMon[x].attack >= AttackValue 
+            and OppMon[x].attack < cards[i].attack and OppMon[x]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE) == 0 
+            or OppMon[x].attack-OppMon[x].bonus < cards[i].attack-cards[i].bonus and OppMon[x]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE) > 0 
+            then
+              AttackTarget = x
+              AttackValue = OppMon[x].attack
             end
-            if OppMon[x].position == POS_FACEUP_DEFENCE and
-               OppMon[x].defense >= AttackValue and cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE) == 0 then
-              if OppMon[x].defense < cards[i].attack then
-                AttackTarget = x
-                AttackValue = OppMon[x].defense
-               end
+          elseif OppMon[x].position == POS_FACEUP_DEFENCE then
+            if OppMon[x].defense >= AttackValue 
+            and OppMon[x].defense < cards[i].attack and OppMon[x]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE) == 0 
+            or OppMon[x].defense< cards[i].attack-cards[i].bonus and OppMon[x]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE) > 0 
+            then
+              AttackTarget = x
+              AttackValue = OppMon[x].attack
             end
+          end
          end
         if AttackTarget > 0 then
           GlobalCurrentATK = cards[i].attack

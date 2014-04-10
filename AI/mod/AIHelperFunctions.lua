@@ -1470,6 +1470,10 @@ end
 -- cards, either built-in or from a field spell.
 -------------------------------------------------
 function ApplyATKBoosts(Cards)
+  for i=1,#Cards do
+    Cards[i].bonus = 0  -- bonus is used, if the ATK boost needs to use up a card to apply
+                        -- (Honest, Crane, Lance...), to make sure they are not used on indestructible targets
+  end
   ------------------------------------------------------
   -- Apply Jain, Lightsworn Paladin's, X-Saber Galahad's
   -- and Cyber Dragon Zwei's +300 ATK boost.
@@ -1588,6 +1592,7 @@ function ApplyATKBoosts(Cards)
       for i=1,#Cards do
         if Cards[i].race==RACE_BEASTWARRIOR and Cards[i].owner == 1 then
           Cards[i].attack = Cards[i].attack + 1000
+          Cards[i].bonus = 1000
         end
       end
     end
@@ -1611,6 +1616,7 @@ function ApplyATKBoosts(Cards)
       for i=1,#Cards do
         if Cards[i].owner==2 then
           Cards[i].attack = Cards[i].attack -800
+          Cards[i].bonus = -800
         end
       end
     end
@@ -1633,6 +1639,7 @@ function ApplyATKBoosts(Cards)
     if HasID(AIHand(),68601507,true) and bit32.band(Cards[i].setcode,0x88)>0
     and bit32.band(Cards[i].race,RACE_BEASTWARRIOR)>0 and Cards[i].owner==1 
     then
+      Cards[i].bonus = Cards[i].base_attack * 2 - Cards[i].attack 
       Cards[i].attack = Cards[i].base_attack * 2
     end
   end
@@ -1646,6 +1653,7 @@ function ApplyATKBoosts(Cards)
     then
       local OppAtt = Get_Card_Att_Def(OppMon(),"attack",">",nil,"attack")
       Cards[i].attack = Cards[i].attack + OppAtt
+      Cards[i].bonus = OppAtt
     end
   end
   
