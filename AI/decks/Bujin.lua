@@ -34,6 +34,11 @@ BujinPrio[53582587] = {2,1,0,0,2,1,0} -- Torrential Tribute
 BujinPrio[84749824] = {3,1,0,0,2,1,0} -- Solemn Warning
 BujinPrio[29401950] = {2,1,0,0,2,1,0} -- Bottomless Trap Hole
 
+BujinPrio[75840616] = {0,0,8,6,1,1,1} -- Bujintei Susanowo
+BujinPrio[01855932] = {0,0,6,3,1,1,1} -- Bujintei Kagutsuchi
+BujinPrio[73289035] = {0,0,5,4,1,1,1} -- Bujintei Tsukuyomi
+BujinPrio[68618157] = {0,0,7,6,1,1,1} -- Bujintei Amaterasu
+
 function BujinGetPriority(id,loc)
   local index = 0
   local checklist = nil
@@ -133,7 +138,8 @@ function UseQuilin()
   end
   cards=OppMon()
   for i=1,#cards do
-    if cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0
+    if bit32.band(cards[i].position,POS_FACEUP)>0
+    and cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0
     and cards[i]:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
     and cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE)>0
     then
@@ -146,10 +152,17 @@ function UseCentipede()
   return true
 end
 function UseRegaliaGrave()
-	local cg = RemovalCheck()
+  local e
+  for i=1,Duel.GetCurrentChain() do
+    e = Duel.GetChainInfo(i, CHAININFO_TRIGGERING_EFFECT)
+    if e and e:GetHandler():GetCode()==73906480 and e:GetHandlerPlayer()==player_ai  then
+      return false
+    end
+  end
+  local cg = RemovalCheck()
 	if cg then
 		if cg:IsExists(function(c) return c:IsControler(player_ai) and c:IsCode(30338466) end, 1, nil) then
-      if BujinPriorityCheck(AIGrave())>2 then --and BujinPriorityCheck(AIBanish(),LOCATION_GRAVE)<=3
+      if BujinPriorityCheck(AIGrave())>2 then --and BujinPriorityCheck(AIBanish(),LOCATION_GRAVE)<=3 then
         GlobalCardMode=1
         return true 
       end
@@ -192,6 +205,13 @@ function UseRegaliaGrave()
   return
 end
 function UseRegaliaBanish()
+  local e
+  for i=1,Duel.GetCurrentChain() do
+    e = Duel.GetChainInfo(i, CHAININFO_TRIGGERING_EFFECT)
+    if e and e:GetHandler():GetCode()==73906480 and e:GetHandlerPlayer()==player_ai  then
+      return false
+    end
+  end
 	local cg = RemovalCheck()
 	if cg then
 		if cg:IsExists(function(c) return c:IsControler(player_ai) and c:IsCode(30338466) end, 1, nil) then
@@ -209,7 +229,8 @@ function SummonTigerKingBujin()
 end
 function SummonOmegaBujin()
   local cards=OppST()
-  return BujinCheck() and Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack")<2400 and Chance((#cards-2)*33)
+  return BujinCheck() and Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack")<2400 
+  and Duel.GetCurrentPhase() == PHASE_MAIN1 and Chance((#cards-2)*33) 
 end
 function SharkKnightFilterBujin(c)
 	return c:IsPosition(POS_FACEUP_ATTACK) and not c:IsType(TYPE_TOKEN) 
@@ -440,7 +461,7 @@ function BujinXYZTarget(cards,count)
   end
   return result
 end
-function BujinOnSelectCard(cards, minTargets, maxTargets, ID)
+function BujinOnSelectCard(cards, minTargets, maxTargets,ID,triggeringCard)
   if ID == 98645731 or ID == 50474354  -- Duality, Peacock
   or ID == 53678698 then -- Mikazuchi
     return BujinAdd(cards)
@@ -498,12 +519,19 @@ function ChainArasuda()
     return BujinPriorityCheck(AIHand(),LOCATION_GRAVE)>4
   end
 end
-function HareFilter(card)
+function HareFilterEffect(card)
   return card:IsControler(player_ai) and card:IsPosition(POS_FACEUP) 
   and card:IsSetCard(0x88) and card:IsRace(RACE_BEASTWARRIOR)
   and not card:IsHasEffect(EFFECT_INDESTRUCTABLE_EFFECT) 
-  and not card:IsHasEffect(EFFECT_IMMUNE_EFFECT) 
+  and not card:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET)
+  and not card:IsHasEffect(EFFECT_IMMUNE_EFFECT)   
+end
+function HareFilterBattle(card)
+  return card:IsControler(player_ai) and card:IsPosition(POS_FACEUP) 
+  and card:IsSetCard(0x88) and card:IsRace(RACE_BEASTWARRIOR)
+  and not card:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE) 
   and not card:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET) 
+  --and not card:IsHasEffect(EFFECT_IMMUNE_EFFECT) 
 end
 function ChainHare()
   local ex,cg = Duel.GetOperationInfo(0, CATEGORY_DESTROY)
@@ -515,11 +543,11 @@ function ChainHare()
   if ex then
     local g
     if tg then
-      g = tg:Filter(HareFilter, nil)
+      g = tg:Filter(HareFilterEffect, nil)
     else
-      g = cg:Filter(HareFilter, nil)
+      g = cg:Filter(HareFilterEffect, nil)
     end
-    if g then
+    if g and g:GetCount()>0 then
       local c=g:GetFirst()
       local p,hp,a,ha=0,0,0,0
       while c do
@@ -544,15 +572,13 @@ function ChainHare()
         source = Duel.GetAttackTarget()
       end
       if source:GetAttack() >= target:GetAttack() 
-      and target:IsControler(player_ai) 
+      and HareFilterBattle(target)
       and source:IsPosition(POS_FACEUP_ATTACK)
       and target:IsPosition(POS_FACEUP)
-      and (not (HasID(AIHand(),68601507,true) or HasID(AIHand(),37742478,true)
+      and (not (HasID(AIHand(),68601507,true) and target:GetBaseAttack()*2>source:GetAttack() or HasID(AIHand(),37742478,true)
       or HasID(AIHand(),27243130,true) and Duel.GetTurnPlayer()==player_ai
       or HasIDNotNegated(AIST(),27243130,true))
       or source:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE))
-      and not target:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE)
-      --and not target:IsHasEffect(EFFECT_IMMUNE_EFFECT) 
       then
         GlobalTargetID=target:GetCode()
         return true
@@ -676,6 +702,10 @@ function BujinOnSelectChain(cards,only_chains_by_player)
     return {1,CurrentIndex}
   end
   if HasID(cards,05818294) and ChainTurtle() then
+    return {1,CurrentIndex}
+  end
+  if HasIDNotNegated(cards,94380860) then  -- Ragna Zero
+    GlobalCardMode = 1
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,68618157) then -- Amaterasu

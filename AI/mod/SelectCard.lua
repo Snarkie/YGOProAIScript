@@ -11,7 +11,7 @@
 --
 -- Return: 
 -- result = table containing target indices
-function OnSelectCard(cards, minTargets, maxTargets, triggeringID)
+function OnSelectCard(cards, minTargets, maxTargets, triggeringID,triggeringCard)
   local result = {}
   
 -------------------------------------------------
@@ -21,19 +21,19 @@ function OnSelectCard(cards, minTargets, maxTargets, triggeringID)
 -- **********************************************
 -------------------------------------------------
 
-local result = FireFistCard(cards, minTargets, maxTargets, triggeringID)
+local result = FireFistCard(cards, minTargets, maxTargets, triggeringID, triggeringCard)
 if result ~= nil then
   return result
 end
-result = HeraldicOnSelectCard(cards, minTargets, maxTargets, triggeringID)
+result = HeraldicOnSelectCard(cards, minTargets, maxTargets, triggeringID, triggeringCard)
 if result ~= nil then
   return result
 end
-result = GadgetOnSelectCard(cards, minTargets, maxTargets, triggeringID)
+result = GadgetOnSelectCard(cards, minTargets, maxTargets, triggeringID, triggeringCard)
 if result ~= nil then
   return result
 end
-result = BujinOnSelectCard(cards, minTargets, maxTargets, triggeringID)
+result = BujinOnSelectCard(cards, minTargets, maxTargets, triggeringID, triggeringCard)
 if result ~= nil then
   return result
 end

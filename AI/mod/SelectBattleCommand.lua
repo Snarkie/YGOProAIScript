@@ -117,8 +117,8 @@ function OnSelectBattleCommand(cards)
         for x=1,#OppMon do
           if OppMon[x].position == POS_FACEUP_ATTACK then
             if OppMon[x].attack >= AttackValue 
-            and OppMon[x].attack < cards[i].attack and OppMon[x]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE) == 0 
-            or OppMon[x].attack-OppMon[x].bonus < cards[i].attack-cards[i].bonus and OppMon[x]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE) > 0 
+            and (OppMon[x].attack < cards[i].attack and OppMon[x]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE) == 0 
+            or OppMon[x].attack-OppMon[x].bonus < cards[i].attack-cards[i].bonus and OppMon[x]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE) > 0 )
             then
               AttackTarget = x
               AttackValue = OppMon[x].attack

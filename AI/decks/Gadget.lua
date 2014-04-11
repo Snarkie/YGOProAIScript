@@ -671,7 +671,7 @@ end
 function StardustSparkTarget(cards)
   return {IndexByID(cards,GlobalTargetID)}
 end
-function GadgetOnSelectCard(cards, minTargets, maxTargets, ID)
+function GadgetOnSelectCard(cards, minTargets, maxTargets,ID,triggeringCard)
   if ID == 05556499 then
     return MachinaFortressTarget(cards)
   end

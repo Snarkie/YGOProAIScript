@@ -833,7 +833,7 @@ function BuffaloTarget(cards)
     if result == nil then result = {math.random(#cards)} end
     return result
 end
-function FireFistCard(cards, minTargets, maxTargets, triggeringID)
+function FireFistCard(cards, minTargets, maxTargets, triggeringID, triggeringCard)
   if triggeringID == 57103969 then -- Tenki
     return TenkiTarget(cards)
   end
@@ -977,14 +977,14 @@ function NegateBPCheck(card)
     return false
   end
   if card.id==22110647 then --Dracossack
-    return HasID(OppMon(),22110648)
+    return HasID(OppMon(),22110648) and not HasID(AIMon(),75840616)
   end
   if card.id==78156759 or card.id==25341652 or card.id==48739166 -- Zenmaines, Maestroke, SHArk Knight
   or card.id==10002346 -- Gachi
   then
     return card.xyz_material_count>0
   end
-  if card.id==31305911 or card.id==34408491 then -- Marshmallon, Beelze
+  if IsUndestroyableByBattle(card.id)>0 then
     return true
   end
   return false
@@ -997,7 +997,8 @@ function VeilerTarget(card)
   elseif bit32.band(card.position,POS_FACEUP_DEFENCE)>0 then
     value=card.defense
   end
-  if value and att>value and NegateBPCheck(card) then
+  if value and att>value and NegateBPCheck(card) 
+  and card:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0 then
     return true
   end
   return false
@@ -1012,7 +1013,7 @@ function ChainVeiler()
       player=player_ai
     end
     if card and card:IsControler(1-player) and card:IsLocation(LOCATION_MZONE) 
-    and NegateBlacklist(card:GetCode())==0
+    and NegateBlacklist(card:GetCode())==0 and card:IsCanBeEffectTarget()
     then
       GlobalTargetID=card:GetCode()
       return true

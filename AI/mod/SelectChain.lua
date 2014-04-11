@@ -12,7 +12,7 @@
 --		0 = no, don't chain
 -- index = index of the chain
 
-function OnSelectChain(cards,only_chains_by_player)
+function OnSelectChain(cards,only_chains_by_player,forced)
   local result = 0
   local index = 1
   local ChainAllowed = 0
@@ -581,6 +581,10 @@ end
        end
      end
    end
+  
+  if HasID(cards,53804307) then
+    return 1,CurrentIndex
+  end
   
   ----------------------------------------------------------
   -- For now, chain anything else (not already listed above)

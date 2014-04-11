@@ -784,7 +784,7 @@ end
 function GenomHeritageTarget(cards)
   return BestTargets(cards,1,false,function(c) return c.original_id ~= 47387961 or c.attack > 0 end)
 end
-function HeraldicOnSelectCard(cards, minTargets, maxTargets, triggeringID)
+function HeraldicOnSelectCard(cards, minTargets, maxTargets, triggeringID, triggeringCard)
   local result = {}
   if triggeringID == 47387961 then -- Genom Heritage
     return GenomHeritageTarget(cards)

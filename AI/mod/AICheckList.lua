@@ -35,7 +35,10 @@ function LegitDWMonster(CardId)
 end
 
 function IsUndestroyableByBattle(CardId)
-  if CardId == 31305911 then -- Marshmallon 
+  if CardId == 31305911 or CardId == 34408491 or CardId == 69031175 -- Marshmallon, Beelze, BW Armor Master
+  or CardId == 31764700 or CardId == 04779091 or CardId == 78371393 -- the 3 Yubel forms
+  or CardId == 74530899 or CardId == 23205979 or CardId == 62892347 -- Metaion, Spirit Reaper, AF - The Fool
+  then 
     return 1
   end
   return 0
