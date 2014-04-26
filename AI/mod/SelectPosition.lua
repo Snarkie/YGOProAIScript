@@ -97,6 +97,8 @@ function OnSelectPosition(id, available)
  if Position then result=Position end
  Position = BujinOnSelectPosition(id,available)
  if Position then result=Position end
+ Position = MermailOnSelectPosition(id,available)
+ if Position then result=Position end
   
   -- check if the selected position is valid
   ----print("is the position valid?", band(result,available))

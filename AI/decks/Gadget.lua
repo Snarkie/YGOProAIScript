@@ -654,7 +654,6 @@ function GearframeTarget(cards)
   if HasID(cards,39284521) and HasID(AIGrave(),05556499) then
     result = {IndexByID(cards,39284521)}
   end
-  result = Get_Card_Index(cards,nil,"Highest",nil,nil)
   if result == nil then result = {math.random(#cards)} end
   return result
 end

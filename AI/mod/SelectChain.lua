@@ -33,6 +33,10 @@ result=BujinOnSelectChain(cards,only_chains_by_player)
 if result ~= nil then
   return result[1],result[2]
 end
+result=MermailOnSelectChain(cards,only_chains_by_player)
+if result ~= nil then
+  return result[1],result[2]
+end
 result = 0
  
   ------------------------------------------
@@ -581,8 +585,21 @@ end
        end
      end
    end
-  
-  if HasID(cards,53804307) then
+   
+  ---------------------------------------------
+  -- Mandatory effects the AI could potentially 
+  -- skip, if not handled here
+  ---------------------------------------------
+  if HasID(cards,53804307) then -- Blaster
+    return 1,CurrentIndex
+  end
+  if HasID(cards,26400609) then -- Tidal
+    return 1,CurrentIndex
+  end
+  if HasID(cards,89399912) then -- Tempest
+    return 1,CurrentIndex
+  end
+  if HasID(cards,90411554) then -- Redox
     return 1,CurrentIndex
   end
   

@@ -196,7 +196,10 @@ DeckCommand = BujinOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
 if DeckCommand ~= nil then 
     return DeckCommand[1],DeckCommand[2]
 end
-
+DeckCommand = MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
+if DeckCommand ~= nil then 
+    return DeckCommand[1],DeckCommand[2]
+end
   
 -------------------------------------------------
 -- **********************************************

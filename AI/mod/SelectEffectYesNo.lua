@@ -13,6 +13,9 @@ function OnSelectEffectYesNo(id)
   if result==nil then
     result = BujinOnSelectEffectYesNo(id)
   end
+  if result==nil then
+    result = MermailOnSelectEffectYesNo(id)
+  end
   if result then return result end
   
   if id  == 72989439 then  -- Black Luster Soldier - Envoy of the Beginning

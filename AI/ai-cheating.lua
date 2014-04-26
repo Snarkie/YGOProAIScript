@@ -19,6 +19,8 @@ require("ai.mod.SelectYesNo")
 require("ai.decks.FireFist")
 require("ai.decks.HeraldicBeast")
 require("ai.decks.Gadget")
+require("ai.decks.Bujin")
+require("ai.decks.Mermail")
 
 math.randomseed( require("os").time() )
 

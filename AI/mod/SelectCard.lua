@@ -37,6 +37,10 @@ result = BujinOnSelectCard(cards, minTargets, maxTargets, triggeringID, triggeri
 if result ~= nil then
   return result
 end
+result = MermailOnSelectCard(cards, minTargets, maxTargets, triggeringID, triggeringCard)
+if result ~= nil then
+  return result
+end
 result = {}
 
   --------------------------------------------

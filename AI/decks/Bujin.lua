@@ -16,10 +16,10 @@ BujinPrio[09418365] = {4,1,4,3,2,1,2} -- Hirume
 BujinPrio[68601507] = {7,2,0,0,0,0,2} -- Crane
 BujinPrio[59251766] = {3,1,2,2,9,5,0} -- Hare
 BujinPrio[05818294] = {3,1,2,2,8,4,0} -- Turtle
-BujinPrio[69723159] = {2,1,2,2,7,3,0} -- Quilin
-BujinPrio[88940154] = {2,1,2,2,6,3,0} -- Centipede
+BujinPrio[69723159] = {2,1,1,1,7,3,0} -- Quilin
+BujinPrio[88940154] = {2,1,1,1,6,3,0} -- Centipede
 BujinPrio[50474354] = {3,1,0,0,2,2,5} -- Peacock
-BujinPrio[37742478] = {8,2,0,0,0,0,2} -- Honest
+BujinPrio[37742478] = {8,2,0,0,0,0,0} -- Honest
 
 BujinPrio[73906480] = {4,2,0,0,0,0,0} -- Bujincarnation
 BujinPrio[30338466] = {3,1,0,0,0,0,0} -- Bujin Regalia - The Sword
@@ -162,7 +162,10 @@ function UseRegaliaGrave()
   local cg = RemovalCheck()
 	if cg then
 		if cg:IsExists(function(c) return c:IsControler(player_ai) and c:IsCode(30338466) end, 1, nil) then
-      if BujinPriorityCheck(AIGrave())>2 then --and BujinPriorityCheck(AIBanish(),LOCATION_GRAVE)<=3 then
+      if BujinPriorityCheck(AIGrave())>2 
+      and (BujinPriorityCheck(AIBanish(),LOCATION_GRAVE) < BujinPriorityCheck(AIGrave()) 
+      or BujinPriorityCheck(UseLists({AIHand(),AIField()}),LOCATION_FIELD)<3 )
+      then
         GlobalCardMode=1
         return true 
       end
@@ -215,7 +218,7 @@ function UseRegaliaBanish()
 	local cg = RemovalCheck()
 	if cg then
 		if cg:IsExists(function(c) return c:IsControler(player_ai) and c:IsCode(30338466) end, 1, nil) then
-      return BujinPriorityCheck(AIGrave())<2 and BujinPriorityCheck(AIBanish(),LOCATION_GRAVE)>3
+      return BujinPriorityCheck(AIBanish(),LOCATION_GRAVE)>3 and BujinPriorityCheck(AIBanish(),LOCATION_GRAVE) >= BujinPriorityCheck(AIGrave())
     end	
   end
   return
@@ -236,7 +239,7 @@ function SharkKnightFilterBujin(c)
 	return c:IsPosition(POS_FACEUP_ATTACK) and not c:IsType(TYPE_TOKEN) 
   and bit.band(c:GetSummonType(),SUMMON_TYPE_SPECIAL)>0
   and c:IsHasEffect(EFFECT_INDESTRUCTABLE_EFFECT) and c:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE)
-  and c:IsCanBeEffectTarget()
+  and c:IsCanBeEffectTarget() and not c:GetCode(22110647)
 end
 function SummonSharkKnightBujin(cards)
   local cg=Duel.GetMatchingGroup(SharkKnightFilterBujin,1-player_ai,LOCATION_MZONE,0,nil)
@@ -683,15 +686,12 @@ function ChainOmega()
   return false
 end
 function BujinOnSelectChain(cards,only_chains_by_player)
-  if HasID(cards,30338466--[[,false,485415456]]) and UseRegaliaGrave() then
-    if CardsMatchingFilter(AIBanish(),AmaterasuFilter)>0 then
-      CurrentIndex = CurrentIndex-1
-    end
+  if HasID(cards,30338466,false,485415456) and UseRegaliaGrave() then
     return {1,CurrentIndex}
   end
-  --[[if HasID(cards,30338466,false,485415457) and UseRegaliaBanish() then
+  if HasID(cards,30338466,false,485415457) and UseRegaliaBanish() then
     return {1,CurrentIndex}
-  end]]
+  end
   if HasID(cards,68601507) and ChainCrane() then
     return {1,CurrentIndex}
   end
