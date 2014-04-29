@@ -73,7 +73,7 @@ function BestTargets(cards,count,DestroyCheck,filter)
         else
           cards[i].prio = math.max(cards[i].attack+1,cards[i].defense)+5
           if cards[i].owner==2 and cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE)==0 then
-            cards[i].prio = math.max(0,cards[i].prio-AIAtt*.75)
+            cards[i].prio = math.max(5,cards[i].prio-AIAtt*.75)
           end
         end
       else

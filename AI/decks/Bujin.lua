@@ -632,7 +632,7 @@ function ChainHonest()
       return false
     end
   end
-  if Duel.GetCurrentPhase() == PHASE_DAMAGE_CAL then
+  if Duel.GetCurrentPhase() == PHASE_DAMAGE then
 		local source = Duel.GetAttacker()
 		local target = Duel.GetAttackTarget()
     if source and target then

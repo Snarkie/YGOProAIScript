@@ -301,7 +301,13 @@ function NormalSummonBlacklist(CardId)
      CardId == 53678698 or CardId == 23979249 or  -- Bujin Mikazuchi, Arasuda
      CardId == 68601507 or CardId == 59251766 or  -- Bujin Crane, Hare
      CardId == 05818294 or CardId == 69723159 or  -- Turtle, Quilin
-     CardId == 88940154 or CardId == 50474354  -- Centipede, Peacock
+     CardId == 88940154 or CardId == 50474354 or  -- Centipede, Peacock
+     CardId == 37104630 or CardId == 00706925 or  -- Atlantean Heavy Infantry, Atlantean Marksman
+     CardId == 21954587 or CardId == 22446869 or  -- Mermail AbyssMegalo, Mermail Abyssteus
+     CardId == 37781520 or CardId == 74311226 or  -- Mermail Abyssleed, Atlantean Dragoons
+     CardId == 58471134 or CardId == 22076135 or  -- Mermail Apysspike, Mermail Abyssturge
+     CardId == 23899727 or CardId == 74298287 or  -- Mermail Abysslinde, Mermail Abyssdine
+     CardId == 78868119 or CardId == 26400609   -- Deep Sea Diva, Tidal, Dragon Ruler of Waterfalls
      then 
 	return 1 
   end
@@ -647,7 +653,14 @@ function CardIsScripted(CardId)
      CardId == 98645731 or CardId == 68618157 or  -- Pot of Duality, Bujin Amaterasu
      CardId == 26329679 or CardId == 95169481 or  -- Constellar Omega, Diamond Dire Wolf
      CardId == 73289035 or CardId == 01855932 or  -- Bujin Tsukuyomi, Kagutsuchi
-     CardId == 75840616  -- Bujintei Susanowo
+     CardId == 75840616 or CardId == 21954587 or  -- Bujintei Susanowo, Mermail AbyssMegalo
+     CardId == 22446869 or CardId == 37781520 or  -- Mermail Abyssteus, Mermail Abyssleed
+     CardId == 22076135 or CardId == 58471134 or  -- Mermail Abyssturge, Mermail Abysspike
+     CardId == 23899727 or CardId == 74298287 or  -- Mermail Abysslinde, Mermail Abyssdine
+     CardId == 74311226 or CardId == 78868119 or  -- Atlantean Dragoons, Deep Sea Diva
+     CardId == 26400609 or CardId == 96947648 or  -- Tidal, Salvage
+     CardId == 34707034 or CardId == 60202749 or  -- Abyss-squall, Abyss-sphere
+     CardId == 37576645 or CardId == 21954587   -- Reckless Greed, Mermail AbyssMegalo
     then  
 	return 1
   end
