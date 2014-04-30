@@ -60,7 +60,7 @@ end
 function OverExtendCheck()
   local cards = AIMon()
   local hand = AIHand()
-  return OppHasStrongestMonster() or #cards < 2 or #hand > 4 or AI.GetPlayerLP(2)<=800 and HasID(AIExtra(),12014404) -- Cowboy
+  return OppHasStrongestMonster() or #cards < 2 or #hand > 4 or AI.GetPlayerLP(2)<=800 and HasID(AIExtra(),12014404,true) -- Cowboy
 end
 function SummonChidori()
   local cards = UseLists({OppMon(),OppST()})

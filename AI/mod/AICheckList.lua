@@ -307,7 +307,8 @@ function NormalSummonBlacklist(CardId)
      CardId == 37781520 or CardId == 74311226 or  -- Mermail Abyssleed, Atlantean Dragoons
      CardId == 58471134 or CardId == 22076135 or  -- Mermail Apysspike, Mermail Abyssturge
      CardId == 23899727 or CardId == 74298287 or  -- Mermail Abysslinde, Mermail Abyssdine
-     CardId == 78868119 or CardId == 26400609   -- Deep Sea Diva, Tidal, Dragon Ruler of Waterfalls
+     CardId == 78868119 or CardId == 26400609 or  -- Deep Sea Diva, Tidal, Dragon Ruler of Waterfalls
+     CardId == 69293721
      then 
 	return 1 
   end
@@ -390,7 +391,7 @@ end
 
 SetBL={
   61314842,92365601,84220251, -- Advanced Heraldry Art, Rank-Up Magic - Limited Barian's Force, Heraldry Reborn
-  73906480 -- Bujincarnation
+  73906480,96947648 -- Bujincarnation, Salvage
 }
 
 ---------------------------------------------------------

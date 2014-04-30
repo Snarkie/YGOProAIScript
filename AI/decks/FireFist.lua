@@ -34,8 +34,8 @@ function HasIDNotNegated(cards,id,skipglobal,desc)
   end
   return result
 end
-function NeedsCard(id,cards,check) --checks if the card is in cards and not in check
-  return not HasID(check,id) and HasID(cards,id)
+function NeedsCard(id,cards,check,skipglobal) --checks if the card is in cards and not in check
+  return not HasID(check,id,true) and HasID(cards,id,skipglobal)
 end
 function IndexByID(cards,id)
   for i=1,#cards do
@@ -392,6 +392,9 @@ function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
   local Repositionable = cards.repositionable_cards
   local SetableMon = cards.monster_setable_cards
   if HasIDNotNegated(Activatable,46772449) and UseBelzebuth() then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Activatable,57774843) and UseBelzebuth() then -- Judgment Dragon
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(SpSummonable,12014404) and SummonCowboyDef() then -- Cowboy
