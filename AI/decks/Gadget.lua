@@ -248,7 +248,8 @@ function SummonNaturiaBeast()
   return Chance(50) and Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack") < 2200
 end
 function SummonArmades()
-  return true
+  return Duel.GetCurrentPhase() == PHASE_MAIN1 and Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack") < 2300 
+  and Duel.GetTurnCount()>1
 end
 function SummonStardustSpark()
   return true

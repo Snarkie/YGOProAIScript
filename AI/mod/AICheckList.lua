@@ -372,7 +372,9 @@ SSBL={
 05556499,39284521,39765958, -- Machina Fortress, Machina Cannon, Jeweled RDA
 09418365,68618157,75840616, -- Bujin Hirume, Amaterasu, Susanowo
 01855932,73289035,26329679, -- Bujin Kagutsuchi, Tsukuyomi, Constellar Omega
-95169481 -- Diamond Dire Wolf
+21044178,00440556,59170782, -- Abyss Dweller, Bahamut Shark, Mermail Abysstrite
+15914410,50789693,65749035, -- Mechquipped Angineer, Armored Kappa, Gugnir, Dragon of  the Ice Barrier
+95169481,70583986 -- Diamond Dire Wolf, Dewloren Tiger King of the Ice Barrier
 }
 
 
@@ -661,6 +663,10 @@ function CardIsScripted(CardId)
      CardId == 74311226 or CardId == 78868119 or  -- Atlantean Dragoons, Deep Sea Diva
      CardId == 26400609 or CardId == 96947648 or  -- Tidal, Salvage
      CardId == 34707034 or CardId == 60202749 or  -- Abyss-squall, Abyss-sphere
+     CardId == 00440556 or CardId == 21044178 or  -- Bahamut Shark, Abyss Dweller
+     CardId == 74371660 or CardId == 50789693 or  -- Mermail Abyssgaios, Armored Kappa
+     CardId == 70583986 or CardId == 65749035 or  -- Dewloren, Tiger King of the Ice Barrier, Gugnir, Dragon of the Ice Barrier
+     CardId == 15914410 or CardId == 59170782 or  -- Mechquipped Angineer, Mermail Abysstrite
      CardId == 37576645 or CardId == 21954587   -- Reckless Greed, Mermail AbyssMegalo
     then  
 	return 1

@@ -1609,7 +1609,7 @@ function ApplyATKBoosts(Cards)
         check = true
       end
     end
-    if HasID(AIHand(),27243130) and Duel.GetLocationCount(player_ai,LOCATION_SZONE)>0 then
+    if HasID(AIHand(),27243130,true) and Duel.GetLocationCount(player_ai,LOCATION_SZONE)>0 then
       check = true
     end
     if check then

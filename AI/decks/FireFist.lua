@@ -100,7 +100,7 @@ function CanXYZ(rank)
   local cards=UseLists({AIHand(),AIST()})
   return CardsMatchingFilter(AIMon(),function(c,lvl)return c.level==lvl end,rank)>0
   or CardsMatchingFilter(AIHand(),function(c,lvl)return c.level==lvl end,rank)>=2 
-  and HasID(cards,10719350) and not Duel.CheckNormalSummonActivity(player_ai)
+  and HasID(cards,10719350,true) and not Duel.CheckNormalSummonActivity(player_ai)
 end
 player_ai = nil
 GlobalTargetID = nil
@@ -230,7 +230,7 @@ function WolfbarkFilter(c)
   return bit32.band(c.race,RACE_BEASTWARRIOR)>0 and bit32.band(c.attribute,ATTRIBUTE_FIRE)>0 and c.level==4 
 end
 function GetWolfbark()
-  return CardsMatchingFilter(AIGrave(),WolfbarkFilter)>0 or HasID(UseLists({AIHand(),AIMon()}),06353603)
+  return CardsMatchingFilter(AIGrave(),WolfbarkFilter)>0 or HasID(UseLists({AIHand(),AIMon()}),06353603,true)
 end
 function SummonWolfbark()
   return CardsMatchingFilter(AIGrave(),WolfbarkFilter)>0 and Duel.GetFlagEffect(player_ai,03534077)==0
@@ -238,10 +238,10 @@ end
 function FireFormationSearch(cards)
   --returns the preferred Fire Formation to be searched
   local AICards=UseLists({AIHand(),AIMon(),AIST()})
-  if SummonSpirit() and HasID(AIDeck(),01662004) and HasID(cards,57103969) then
+  if SummonSpirit() and HasID(AIDeck(),01662004,true) and HasID(cards,57103969) then
     return {CurrentIndex}
   end
-  if SummonSpirit() and HasID(AIHand(),01662004) and NeedsCard(10719350,cards,AICards) then
+  if SummonSpirit() and HasID(AIHand(),01662004,true) and NeedsCard(10719350,cards,AICards,true) then
     return {IndexByID(cards,10719350)}
   end
   if NeedsCard(57103969,cards,AICards) and Duel.GetFlagEffect(player_ai,57103969)==0 then
@@ -286,16 +286,16 @@ end
 function SummonLeopard()
   local AICards=UseLists({AIHand(),AIMon(),AIST()})
   local result=0
-  if HasID(AIMon(),01662004) then
+  if HasID(AIMon(),01662004,true) then
     result=result+1
   end
-  if HasID(AIHand(),01662004) and not Duel.CheckNormalSummonActivity(player_ai) and not SummonSpirit() then
+  if HasID(AIHand(),01662004,true) and not Duel.CheckNormalSummonActivity(player_ai) and not SummonSpirit() then
     result=result+1
   end
-  if HasID(AICards,57103969) and HasID(AIDeck(),01662004) then
+  if HasID(AICards,57103969,true) and HasID(AIDeck(),01662004,true) then
     result=result+1
   end
-  if HasID(AICards,10719350) and HasID(AIDeck(),57103969) and HasID(AIDeck(),01662004) then
+  if HasID(AICards,10719350,true) and HasID(AIDeck(),57103969,true) and HasID(AIDeck(),01662004,true) then
     result=result+1
   end
   if CanXYZ(3) then
@@ -307,11 +307,11 @@ function VulcanFilter(c)
   return (bit32.band(c.type,TYPE_XYZ+TYPE_SYNCHRO+TYPE_FUSION+TYPE_RITUAL)>0 or c.level>4) and bit32.band(c.position,POS_FACEUP)>0
 end
 function SummonVulcan()
-  return HasID(AIST(),57103969) and CardsMatchingFilter(OppMon(),VulcanFilter)>0 and Chance(50)
+  return HasID(AIST(),57103969,true) and CardsMatchingFilter(OppMon(),VulcanFilter)>0 and Chance(50)
 end
 function SummonCowboyAtt()
   local OppAtt = Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack")
-  return OppAtt >= 2500 and OppAtt < 3000 and not HasIDNotNegated(AIST(),44920699) and Duel.GetCurrentPhase() ~= PHASE_MAIN2
+  return OppAtt >= 2500 and OppAtt < 3000 and not HasIDNotNegated(AIST(),44920699,true) and Duel.GetCurrentPhase() ~= PHASE_MAIN2
 end
 function SummonCowboyDef()
   return AI.GetPlayerLP(2)<=800 
@@ -356,12 +356,13 @@ end
 function SharkKnightFilter(c)
 	return c:IsPosition(POS_FACEUP_ATTACK) and not c:IsType(TYPE_TOKEN) 
   and bit.band(c:GetSummonType(),SUMMON_TYPE_SPECIAL)==SUMMON_TYPE_SPECIAL
+  and c:IsCanBeEffectTarget()
   and (c:IsType(TYPE_XYZ+TYPE_SYNCHRO+TYPE_RITUAL+TYPE_FUSION) or c:GetAttack()>=2000)
 end
 function SummonSharkKnight(cards)
   local cg=Duel.GetMatchingGroup(SharkKnightFilter,1-player_ai,LOCATION_MZONE,0,nil)
-  if HasID(cards,83994433) or HasID(cards,39765958) then return false end
-  if cg and cg:GetCount() > 0 and Duel.GetFlagEffect(player_ai,48739166)==0 then
+  if HasID(cards,83994433,true) or HasID(cards,39765958,true) then return false end
+  if cg and cg:GetCount() > 0 and Duel.GetFlagEffect(player_ai,48739166)==0 and not MermailCheck() then
     local g = cg:GetMaxGroup(Card.GetAttack)
     return Chance(50) or g:GetFirst():GetAttack()>=2400
   end
@@ -564,13 +565,13 @@ function TenkiTarget(cards)
   if NeedsCard(06353603,cards,AIcards) then
     result={CurrentIndex} --get Bear 
   end
-  if NeedsCard(39699564,cards,AICards) and HasID(AIHand(),01662004) and not SummonSpirit() then
+  if NeedsCard(39699564,cards,AICards) and HasID(AIHand(),01662004,true) and not SummonSpirit() then
     result={IndexByID(cards,39699564)} --get leopard when you need a spirit target
   end
   if HasID(cards,03534077) and GetWolfbark() then
     result={IndexByID(cards,03534077)}  --get wolfbark when available and he has targets in grave
   end                                   --or you have Bear already
-  if NeedsCard(39699564,cards,AICards) and HasID(AIHand(),06353603) and not SummonSpirit() then
+  if NeedsCard(39699564,cards,AICards) and HasID(AIHand(),06353603,true) and not SummonSpirit() then
     result={IndexByID(cards,39699564)} --get leopard when you need a spirit target
   end
   if NeedsCard(01662004,cards,AICards) then
@@ -980,7 +981,7 @@ function NegateBPCheck(card)
     return false
   end
   if card.id==22110647 then --Dracossack
-    return HasID(OppMon(),22110648) and not HasID(AIMon(),75840616)
+    return HasID(OppMon(),22110648,true) and not HasID(AIMon(),75840616,true)
   end
   if card.id==78156759 or card.id==25341652 or card.id==48739166 -- Zenmaines, Maestroke, SHArk Knight
   or card.id==10002346 -- Gachi
@@ -1076,7 +1077,7 @@ end
 function FireFistOnSelectEffectYesNo(id)
   local result=nil   
   if id == 96381979 then --Tiger King
-    if HasID(AIMon(),96381979) then
+    if HasID(AIMon(),96381979,true) then
       GlobalCardMode=1
       result = 1
     elseif FireFormationCostCheck(AIST(),3)>0 then

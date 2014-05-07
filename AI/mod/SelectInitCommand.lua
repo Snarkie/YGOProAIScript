@@ -197,7 +197,7 @@ if DeckCommand ~= nil then
     return DeckCommand[1],DeckCommand[2]
 end
 DeckCommand = MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
-if DeckCommand ~= nil then 
+if DeckCommand ~= nil and not BujinCheck() then 
     return DeckCommand[1],DeckCommand[2]
 end
   
@@ -1062,11 +1062,6 @@ end
     end
   end
     
-  -- for i=1,#ActivatableCards do
-    -- if ActivatableCards[i].id == 27970830 then -- Gateway of the Six
-     -- if Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") > Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") and 
-	    -- Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") < GetAIMonstersHighestATK()+500 or
-		-- Archetype_Card_Count(SetCode, AI.GetAIGraveyard(), AI.GetAIMainDeck())
    
 -------------------------------------------------
 -- **********************************************
@@ -2421,7 +2416,7 @@ end
 	      AIMonCountLowerLevelAndAttack(SummonableCards[i].level,SummonableCards[i].attack) >= AIMonGetTributeCountByLevel(SummonableCards[i].level) then
          if SummonableCards[i].type == TYPE_MONSTER + TYPE_EFFECT + TYPE_FLIP or 
            (SummonableCards[i].attack < Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") and 
-		    SummonableCards[i].defense >= GetAIMonstersHighestATK()) and 
+		    SummonableCards[i].defense >= Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack")) and 
 		    CanChangeOutcome(cards, SummonableCards, cards.activatable_cards) == 0 then   
 		    GlobalActivatedCardLevel = SummonableCards[i].level
             GlobalActivatedCardAttack = SummonableCards[i].attack
@@ -2563,8 +2558,8 @@ end
   --------------------------------------------------
   for i=1,#RepositionableCards do  
    if RepositionableCards[i] ~= false then
-    if RepositionableCards[i].id == 88241506 and -- Maiden with Eyes of Blue	
-       RepositionableCards[i].position == POS_FACEUP_DEFENCE then
+    if (RepositionableCards[i].id == 88241506 or RepositionableCards[i].id == 15914410) -- Maiden with Eyes of Blue, Mechquipped Angineer
+    and RepositionableCards[i].position == POS_FACEUP_DEFENCE then
 	   return COMMAND_CHANGE_POS,i
        end 
      end
@@ -2577,6 +2572,7 @@ end
     for i=1,#RepositionableCards do	  
 	  if RepositionableCards[i].position == POS_FACEUP_ATTACK then      
         if RepositionableCards[i].id ~= 88241506 and  -- Maiden with Eyes of Blue	
+        RepositionableCards[i].id ~= 15914410 and  -- Mechquipped Angineer	
 		   RepositionableCards[i].id ~= 23232295 then -- Battlin' Boxer Lead Yoke	
 		 if RepositionableCards[i].attack < Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack") and RepositionableCards[i].attack < 2400 and 
 		    isToonUndestroyable(RepositionableCards) == 0 then
@@ -2626,8 +2622,9 @@ end
   end
   if ChangePosOK == 1 then
     for i=1,#RepositionableCards do
-      if RepositionableCards[i].id ~= 21502796 and -- Any except Ryko!
-         RepositionableCards[i].attack > 0 then
+      if RepositionableCards[i].id ~= 21502796  -- Any except Ryko!
+      and RepositionableCards[i].id ~= 23899727 -- Mermail Abysslinde
+      and RepositionableCards[i].attack > 0 then
         if RepositionableCards[i].position == POS_FACEUP_DEFENCE or
            RepositionableCards[i].position == POS_FACEDOWN_DEFENCE then
 		  return COMMAND_CHANGE_POS,i
