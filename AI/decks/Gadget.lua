@@ -224,7 +224,7 @@ function SummonGearGigant()
   or Chance(70) or MP2Check()) and not (SummonRagnaZero() and HasID(AIExtra(),94380860))
 end
 function SummonDracossack()
-  return MP2Check()
+  return MP2Check() and not MermailCheck()
 end
 function SummonBigEye()
   return OppHasStrongestMonster() 
@@ -249,7 +249,7 @@ function SummonNaturiaBeast()
 end
 function SummonArmades()
   return Duel.GetCurrentPhase() == PHASE_MAIN1 and Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack") < 2300 
-  and Duel.GetTurnCount()>1
+  and Duel.GetTurnCount()>1 and not MermailCheck()
 end
 function SummonStardustSpark()
   return true
@@ -743,6 +743,7 @@ function ChainFiendish()
     if card and card:IsControler(1-player) and card:IsLocation(LOCATION_MZONE)
     and card:IsType(TYPE_EFFECT) and not card:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET) 
     and not card:IsHasEffect(EFFECT_IMMUNE_EFFECT) and NegateBlacklist(card:GetCode())==0
+    and not card:IsCode(50078509)
     then
       GlobalTargetID=card:GetCode()
       return true
@@ -814,16 +815,13 @@ function ChainStardustSpark()
       end
     end
   end
-  local cg = RemovalCheck()
-	if cg then
-		if cg:IsExists(function(c) return c:IsControler(player_ai) and c:IsCode(83994433) end, 1, nil) then
-      local g=Duel.GetMatchingGroup(StardustSparkFilter,player_ai,LOCATION_ONFIELD,0,nil,83994433):GetMaxGroup(Card.GetAttack)
-      if g then
-        GlobalTargetID = g:GetFirst():GetCode()
-        return true
-      end
-    end	
-  end
+  if RemovalCheck(83994433) then
+    local g=Duel.GetMatchingGroup(StardustSparkFilter,player_ai,LOCATION_ONFIELD,0,nil,83994433):GetMaxGroup(Card.GetAttack)
+    if g then
+      GlobalTargetID = g:GetFirst():GetCode()
+      return true
+    end
+  end	
   cg = NegateCheck()
   if cg then
 		if cg:IsExists(function(c) return c:IsControler(player_ai) and c:IsCode(83994433) end, 1, nil) then

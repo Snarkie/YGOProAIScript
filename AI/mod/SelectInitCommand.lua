@@ -179,7 +179,8 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
 --        Functions for specific decks
 -- **********************************************
 -------------------------------------------------
-
+MermailCheck()
+BujinCheck()
 local DeckCommand = FireFistInit(cards, to_bp_allowed, to_ep_allowed)
 if DeckCommand ~= nil and not BujinCheck() then 
     return DeckCommand[1],DeckCommand[2]
@@ -2588,21 +2589,25 @@ end
   -- monster with higher attack than players strongest defence position monster and attack position 
   -- monster, turn him to attack position.
   --------------------------------------------------  
-  for i=1,#RepositionableCards do
+  --[[for i=1,#RepositionableCards do
    if RepositionableCards[i].attack > 0 then
-    if RepositionableCards[i].attack >= Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") and Get_Card_Count_Pos(OppMon(), POS_FACEUP_ATTACK) > 0 or
-       RepositionableCards[i].attack > Get_Card_Att_Def(OppMon(),"defense",">",POS_FACEUP_DEFENCE,"defense") and  
-       RepositionableCards[i].attack >= Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack") or 
-	   RepositionableCards[i].attack < Get_Card_Att_Def(OppMon(), "attack", ">", POS_FACEUP_DEFENCE, "attack") and 
-	   RepositionableCards[i].attack > Get_Card_Att_Def(OppMon(),"attack", ">", POS_FACEUP_DEFENCE, "defense") and
-	   Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP_ATTACK,"attack") > Get_Card_Att_Def(OppMon(), "attack", ">", POS_FACEUP_DEFENCE, "defense") then
-	  if RepositionableCards[i].position == POS_FACEUP_DEFENCE or
-         RepositionableCards[i].position == POS_FACEDOWN_DEFENCE then
-		  return COMMAND_CHANGE_POS,i
-         end
-       end
-     end 
-   end
+    if RepositionableCards[i].attack >= Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") 
+    and Get_Card_Count_Pos(OppMon(), POS_FACEUP_ATTACK) > 0 
+    or  RepositionableCards[i].attack > Get_Card_Att_Def(OppMon(),"defense",">",POS_FACEUP_DEFENCE,"defense") 
+    and RepositionableCards[i].attack >= Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack") 
+    or  RepositionableCards[i].attack < Get_Card_Att_Def(OppMon(), "attack", ">", POS_FACEUP_DEFENCE, "attack") 
+    and RepositionableCards[i].attack > Get_Card_Att_Def(OppMon(),"attack", ">", POS_FACEUP_DEFENCE, "defense") 
+    and Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP_ATTACK,"attack") > Get_Card_Att_Def(OppMon(), "attack", ">", POS_FACEUP_DEFENCE, "defense") 
+    then
+      if RepositionableCards[i].position == POS_FACEUP_DEFENCE 
+      or RepositionableCards[i].position == POS_FACEDOWN_DEFENCE 
+      then
+        print(6)
+        return COMMAND_CHANGE_POS,i
+      end
+    end
+   end 
+  end]]--
  
  --------------------------------------------------
  -- If the AI controls a monster with higher attack,
@@ -2614,8 +2619,8 @@ end
  local AIMons = AI.GetAIMonsterZones()  
   for i=1,#AIMons do
 	if AIMons[i] ~= false then
-      if AIMons[i].attack > Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack") and
-        Get_Card_Count_Pos(OppMon(), POS_FACEUP_ATTACK) <= 1 and AIMons[i].attack > Get_Card_Att_Def(OppMon(),defense,">",POS_FACEUP_DEFENCE,defense) then
+      if AIMons[i].attack > Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack") 
+      and AIMons[i].attack > Get_Card_Att_Def(OppMon(),defense,">",POS_FACEUP_DEFENCE,defense) then
         ChangePosOK = 1
       end
     end

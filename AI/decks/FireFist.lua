@@ -909,8 +909,8 @@ function FireFistCard(cards, minTargets, maxTargets, triggeringID, triggeringCar
 end
 function ChainTensen()
 	local ex,cg = Duel.GetOperationInfo(0, CATEGORY_DESTROY)
-	if ex then
-		return cg:IsExists(function(c) return c:IsControler(player_ai) and c:IsCode(44920699) end, 1, nil)
+	if RemovalCheck(44920699) then
+    return true
 	end
   if Duel.GetCurrentPhase() == PHASE_DAMAGE then
 		local source = Duel.GetAttacker()
@@ -949,10 +949,8 @@ function TenkenFilter(card)
 end
 function ChainTenken()
 	local ex,cg = Duel.GetOperationInfo(0, CATEGORY_DESTROY)
-	if ex then
-		if cg:IsExists(function(c) return c:IsControler(player_ai) and c:IsCode(70329348) end, 1, nil) then
-      return true
-    end	
+	if RemovalCheck(70329348) then
+    return true
   end
   local cardtype = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_EXTTYPE)
   local ex,cg = Duel.GetOperationInfo(0, CATEGORY_DESTROY)

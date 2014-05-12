@@ -159,18 +159,15 @@ function UseRegaliaGrave()
       return false
     end
   end
-  local cg = RemovalCheck()
-	if cg then
-		if cg:IsExists(function(c) return c:IsControler(player_ai) and c:IsCode(30338466) end, 1, nil) then
-      if BujinPriorityCheck(AIGrave())>2 
-      and (BujinPriorityCheck(AIBanish(),LOCATION_GRAVE) < BujinPriorityCheck(AIGrave()) 
-      or BujinPriorityCheck(UseLists({AIHand(),AIField()}),LOCATION_FIELD)<3 )
-      then
-        GlobalCardMode=1
-        return true 
-      end
-    end	
-  end
+  if RemovalCheck(30338466) then
+    if BujinPriorityCheck(AIGrave())>2 
+    and (BujinPriorityCheck(AIBanish(),LOCATION_GRAVE) < BujinPriorityCheck(AIGrave()) 
+    or BujinPriorityCheck(UseLists({AIHand(),AIField()}),LOCATION_FIELD)<3 )
+    then
+      GlobalCardMode=1
+      return true 
+    end
+  end	
   if Duel.GetTurnPlayer()==player_ai and BujinPriorityCheck(AIHand(),LOCATION_FIELD)<2 
   and BujinPriorityCheck(AIGrave(),LOCATION_FIELD)>4 and OverExtendCheck() 
   and not Duel.CheckNormalSummonActivity(player_ai)
@@ -215,12 +212,9 @@ function UseRegaliaBanish()
       return false
     end
   end
-	local cg = RemovalCheck()
-	if cg then
-		if cg:IsExists(function(c) return c:IsControler(player_ai) and c:IsCode(30338466) end, 1, nil) then
-      return BujinPriorityCheck(AIBanish(),LOCATION_GRAVE)>3 and BujinPriorityCheck(AIBanish(),LOCATION_GRAVE) >= BujinPriorityCheck(AIGrave())
-    end	
-  end
+  if RemovalCheck(30338466) then
+    return BujinPriorityCheck(AIBanish(),LOCATION_GRAVE)>3 and BujinPriorityCheck(AIBanish(),LOCATION_GRAVE) >= BujinPriorityCheck(AIGrave())
+  end	
   return
 end
 function BujinXYZCheck()

@@ -374,7 +374,7 @@ SSBL={
 01855932,73289035,26329679, -- Bujin Kagutsuchi, Tsukuyomi, Constellar Omega
 21044178,00440556,59170782, -- Abyss Dweller, Bahamut Shark, Mermail Abysstrite
 15914410,50789693,65749035, -- Mechquipped Angineer, Armored Kappa, Gugnir, Dragon of  the Ice Barrier
-95169481,70583986 -- Diamond Dire Wolf, Dewloren Tiger King of the Ice Barrier
+95169481,70583986,74371660 -- Diamond Dire Wolf, Dewloren Tiger King of the Ice Barrier, Mermail Abyssgaios
 }
 
 

@@ -871,11 +871,20 @@ end
 function SafeZoneFilterEnemy(card)
   return card:IsControler(1-player_ai) and card:IsType(TYPE_MONSTER) and card:IsPosition(POS_FACEUP_ATTACK) and not card:IsHasEffect(EFFECT_INDESTRUCTABLE_EFFECT)
 end
-function RemovalCheck()
+function RemovalCheck(id)
   local c={CATEGORY_DESTROY,CATEGORY_REMOVE,CATEGORY_TOGRAVE,CATEGORY_TOHAND,CATEGORY_TODECK}
   for i=1,#c do
-    local ex,cg = Duel.GetOperationInfo(0,c[i])
-    if ex then return cg end
+    for j=1,Duel.GetCurrentChain() do
+      local ex,cg = Duel.GetOperationInfo(j,c[i])
+      if ex then
+        if id==nil then 
+          return cg 
+        end
+        if cg and id~=nil and cg:IsExists(function(c) return c:IsControler(player_ai) and c:IsCode(id) end, 1, nil) then
+          return true
+        end
+      end
+    end
   end
   return false
 end
@@ -885,16 +894,13 @@ function NegateCheck()
   return false
 end
 function ChainSafeZone()
-	local cg = RemovalCheck()
-	if cg then
-		if cg:IsExists(function(c) return c:IsControler(player_ai) and c:IsCode(38296564) end, 1, nil) then
-      local g=Duel.GetMatchingGroup(SafeZoneFilterEnemy,1-player_ai,LOCATION_MZONE,0,nil)
-      if g and g:GetCount()>0 then
-        GlobalCardMode=1
-        return true
-      end
-    end	
-  end
+  if RemovalCheck(38296564) then
+    local g=Duel.GetMatchingGroup(SafeZoneFilterEnemy,1-player_ai,LOCATION_MZONE,0,nil)
+    if g and g:GetCount()>0 then
+      GlobalCardMode=1
+      return true
+    end
+  end	
   local cardtype = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_EXTTYPE)
   local ex,cg = Duel.GetOperationInfo(0, CATEGORY_DESTROY)
   local tg = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TARGET_CARDS)

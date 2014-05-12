@@ -5,6 +5,20 @@ function MermailCheck()
   end 
   return Mermail
 end
+function IsSetCode(card_set_code, set_code)
+    local band = bit32.band
+    local rshift = bit32.rshift
+    local settype = band(set_code,0xfff);
+    local setsubtype = band(set_code,0xf000);
+    local setcode = card_set_code
+    while setcode > 0 do
+        if (band(setcode,0xfff) == settype and band(band(setcode,0xf000),setsubtype) == setsubtype) then
+            return true
+        end
+        setcode = rshift(setcode,16);
+    end
+    return false;
+end
 function InfantryFilter(c)
   return bit32.band(c.position,POS_FACEUP)>0 and c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0 
   and c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0 --and c.owner==2
@@ -36,29 +50,23 @@ function MarksmanCond(loc)
   return true
 end
 function GundeFilter(c)
-  --print("checking: "..c.id)
-  --print(c.setcode)
-  --print(bit32.band(c.setcode,0x74)==0x74)
-  return bit32.band(c.type,TYPE_MONSTER)>0 and bit32.band(c.setcode,0x74)==0x74 and c.id~=69293721
+  return bit32.band(c.type,TYPE_MONSTER)>0 and IsSetCode(c.setcode,0x74) and c.id~=69293721
 end
 function GundeCond(loc)
   if loc == PRIO_DISCARD then
-    --print("Check Gunde")
-    --print(CardsMatchingFilter(AIGrave(),GundeFilter))
-    --print(OPTCheck(69293721))
-    --print(Duel.GetLocationCount(tp,LOCATION_MZONE)>1)
     return CardsMatchingFilter(AIGrave(),GundeFilter)>0
     and OPTCheck(69293721)
-    and Duel.GetLocationCount(tp,LOCATION_MZONE)>1
+    and Duel.GetLocationCount(player_ai,LOCATION_MZONE)>1
   end
   return true
 end
 function PikeCond(loc)
   if loc == PRIO_TOFIELD then
-    return MermailPriorityCheck(AIHand(),PRIO_DISCARD) > 4 
+    return not GlobalSummonNegated
+    and (MermailPriorityCheck(AIHand(),PRIO_DISCARD) > 4 
     and OPTCheck(58471134)
     and Duel.GetCurrentChain()<=1
-    or FieldCheck(4)==1 and Duel.GetTurnPlayer()==player_ai
+    or FieldCheck(4)==1 and Duel.GetTurnPlayer()==player_ai)
   end
   return true
 end
@@ -67,19 +75,19 @@ function TurgeFilter(c)
 end
 function TurgeCond(loc)
   if loc == PRIO_TOFIELD then
-    return (MermailPriorityCheck(AIHand(),PRIO_DISCARD) > 4 
-    or MermailPriorityCheck(AIGrave(),PRIO_TOHAND) > 4
-    and MermailPriorityCheck(AIHand(),PRIO_DISCARD) > 1 )
+    return not GlobalSummonNegated 
+    and (MermailPriorityCheck(AIHand(),PRIO_DISCARD) > 4 
     and CardsMatchingFilter(AIGrave(),TurgeFilter)>0
     and OPTCheck(22076135)
     and Duel.GetCurrentChain()<=1
-    or FieldCheck(4)==1 and Duel.GetTurnPlayer()==player_ai
+    or FieldCheck(4)==1 and Duel.GetTurnPlayer()==player_ai)
   end
   return true
 end
 function LindeCond(loc)
   local cards=UseLists({AIHand(),AIMon()})
-  local check = not(HasID(cards,23899727,true) or (HasIDNotNegated(cards,23899727,true) and HasID(AIDeck(),23899727,true)))
+  local check = not(HasID(cards,23899727,true) 
+  or (HasIDNotNegated(cards,23899727,true) and HasID(AIDeck(),23899727,true)))
   if loc == PRIO_TOHAND then 
     return check
   end
@@ -90,7 +98,8 @@ function LindeCond(loc)
 end
 function MegaloCond(loc)
   if loc == PRIO_TOHAND then
-    return MermailPriorityCheck(AIHand(),PRIO_DISCARD,2)>5
+    return MermailPriorityCheck(AIHand(),PRIO_DISCARD,2)>5 
+    and not HasID(UseLists({AIHand(),AIMon()},21954587,true))
   end
   return true
 end
@@ -111,7 +120,7 @@ function TidalCond(loc)
   return true
 end
 function TriteFilter(c)
-  return bit32.band(c.type,TYPE_MONSTER)>0 and bit32.band(c.setcode,0x74)==0x74
+  return bit32.band(c.type,TYPE_MONSTER)>0 and IsSetCode(c.setcode,0x74)
 end
 function TriteCond(loc)
   if loc == PRIO_TOFIELD then
@@ -126,7 +135,7 @@ function KappaCond(loc)
   return true
 end
 function DineFilter(c)
-  return c.level<=3 and bit32.band(c.setcode,0x74)==0x74
+  return c.level<=3 and IsSetCode(c.setcode,0x74)
 end
 function DineCond(loc)
   if loc == PRIO_TOHAND then
@@ -140,7 +149,7 @@ function DineCond(loc)
   return true
 end
 function SquallFilter(c)
-  return bit32.band(c.type,TYPE_MONSTER)>0 and bit32.band(c.setcode,0x74)==0x74
+  return bit32.band(c.type,TYPE_MONSTER)>0 and IsSetCode(c.setcode,0x74)
 end
 function SquallCond(loc)
   if loc == PRIO_TOHAND then
@@ -148,8 +157,15 @@ function SquallCond(loc)
   end
   return true
 end
+function DivaCond(loc)
+  if loc == PRIO_TOHAND then
+    return HasID(UseLists({AIHand(),AIST()}),60202749,true) or FieldCheck(4)>1 
+    and Duel.GetTurnPlayer()==player_ai and not Duel.CheckNormalSummonActivity(player_ai)
+  end
+  return true
+end
 MermailPrio = {}
-MermailPrio[21954587] = {6,4,5,3,4,1,2,1,1,MegaloCond} -- Mermail Abyssmegalo
+MermailPrio[21954587] = {6,3,5,3,4,1,2,1,1,MegaloCond} -- Mermail Abyssmegalo
 MermailPrio[22446869] = {7,3,4,2,2,1,1,1,1,TeusCond} -- Mermail Abyssteus
 MermailPrio[37781520] = {7,1,6,4,6,1,3,1,1,LeedCond} -- Mermail Abyssleed
 MermailPrio[58471134] = {4,2,8,2,2,1,1,1,1,PikeCond} -- Mermail Abysspike
@@ -158,10 +174,10 @@ MermailPrio[69293721] = {7,5,0,0,0,0,7,0,0,GundeCond} -- Mermail Abyssgunde
 MermailPrio[23899727] = {5,2,3,2,1,1,1,1,1,LindeCond} -- Mermail Abysslinde
 MermailPrio[74298287] = {5,2,3,2,2,2,3,1,2,DineCond} -- Mermail Abyssdine
 MermailPrio[37104630] = {5,2,0,0,1,1,6,2,2,InfantryCond} -- Atlantean Heavy Infantry
-MermailPrio[00706925] = {5,2,5,1,1,1,6,2,2,MarksmanCond} -- Atlantean Marksman
+MermailPrio[00706925] = {4,2,5,1,1,1,6,2,2,MarksmanCond} -- Atlantean Marksman
 MermailPrio[74311226] = {7,5,2,1,1,1,6,4,2,nil} -- Atlantean Dragoons
 MermailPrio[26400609] = {6,3,4,2,5,4,5,4,0,TidalCond} -- Tidal
-MermailPrio[78868119] = {3,2,2,2,2,1,1,1,2,nil} -- Deep Sea Diva
+MermailPrio[78868119] = {6,4,2,2,2,1,1,1,2,DivaCond} -- Deep Sea Diva
 
 MermailPrio[60202749] = {3,3,1,1,1,1,1,1,1,nil} -- Abyss-sphere
 MermailPrio[34707034] = {4,2,1,1,1,1,1,1,1,SquallCond} -- Abyss-squall
@@ -210,11 +226,11 @@ function MermailGetPriority(id,loc)
     end
     result = checklist[loc]
   end
-  if GlobalSummonLinde and id==23899727 
+  if GlobalSummonNegated and id==23899727 
   and loc == PRIO_TOFIELD and OPTCheck(23899727) 
   then
     result = 10
-    GlobalSummonLinde=nil
+    GlobalSummonNegated=nil
   end
   return result
 end
@@ -304,11 +320,11 @@ function UseLeed(card)
 end
 function LeedFilter(c)
   return bit32.band(c.position,POS_FACEUP_ATTACK)>0 
-  and bit32.band(c.setcode,0x74)==0x74 and c.level<5
+  and IsSetCode(c.setcode,0x74) and c.level<5
 end
 function UseLeedField(card)
   return bit32.band(card.location,LOCATION_ONFIELD)>0 
-   and CardsMatchingFilter(AIMon(),MegaloFilter)>0
+   and CardsMatchingFilter(AIMon(),LeedFilter)>0
    and #OppHand()>0 and (Duel.GetCurrentPhase() == PHASE_MAIN2 or Duel.GetTurnCount()==1)
 end
 function UsePike()
@@ -318,7 +334,7 @@ function UseTurge()
   return TurgeCond(PRIO_TOFIELD)
 end
 function UseSalvage()
-  return MermailPriorityCheck(AIGrave(),PRIO_TOHAND,2,function(c) return bit32.band(c.attribute,ATTRIBUTE_WATER)>0 and c.attack<=1500 end)>2
+  return MermailPriorityCheck(AIGrave(),PRIO_TOHAND,2,function(c) return bit32.band(c.attribute,ATTRIBUTE_WATER)>0 and c.attack<=1500 end)>1
 end
 function SummonBahamut()
   return Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack")<2600
@@ -329,10 +345,15 @@ end
 function SummonGaios()
   return MP2Check() and Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack")<2800
 end
-function SummonDiva()
+function SummonDracossackMermail()
+  return MP2Check() and MermailCheck()
+end
+function SummonDiva1()
+  return HasIDNotNegated(AIST(),60202749,true) and Duel.GetLocationCount(player_ai,LOCATION_MZONE)>2 or FieldCheck(4)>1 and Duel.GetLocationCount(player_ai,LOCATION_MZONE)>1
+end
+function SummonDiva2()
   return OverExtendCheck() and Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack")<2300 
-  and Duel.GetTurnCount()>1 and Duel.GetCurrentPhase() == PHASE_MAIN1
-  or FieldCheck(4)==1 and HasIDNotNegated(AIST(),60202749,true)
+  and Duel.GetTurnCount()>1 and Duel.GetCurrentPhase() == PHASE_MAIN1 and Duel.GetLocationCount(player_ai,LOCATION_MZONE)>1
 end
 function SummonDewloren()
   return MermailPriorityCheck(UseLists({AIMon(),AIST()}),PRIO_TOHAND,3)>1
@@ -341,7 +362,15 @@ function UseDewloren()
   return (Duel.GetCurrentPhase() == PHASE_MAIN2 or Duel.GetTurnCount()==1) and MermailPriorityCheck(UseLists({AIMon(),AIST()}))>1
 end
 function UseSphere()
-  return HasID(AIMon(),70583986,true)
+  if HasID(AIMon(),70583986,true) then
+    GlobalSummonToHand = true
+    return true
+  end
+  if HasID(AIMon(),78868119,true) then
+    GlobalCardMode = 1
+    return true
+  end
+  return false
 end
 function GungnirFilter(c)
   return c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0 and c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
@@ -363,6 +392,10 @@ function SummonSharkKnightMermail(cards)
   end
   return false
 end
+function SummonArmadesMermail()
+  return Duel.GetCurrentPhase() == PHASE_MAIN1 and Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack") < 2300 
+  and Duel.GetTurnCount()>1
+end
 function MermailOpenFieldCheck()
   return #AIMon()==0 and not HasID(UseLists({AIHand(),AIST()}),60202749,true) 
   and (not HasID(AIHand(),23899727,true) or Duel.CheckNormalSummonActivity(player_ai))
@@ -377,11 +410,18 @@ function SummonTidal()
   or MermailOpenFieldCheck())
 end
 function UseSquall()
-  local cg = RemovalCheck()
-  if cg and cg:IsExists(function(c) return c:IsControler(player_ai) and c:IsCode(34707034) end, 1, nil) then
+  if RemovalCheck(34707034) then
     return true
   end
-  return Duel.GetTurnPlayer()==player_ai and OverExtendCheck()
+  if Duel.GetTurnPlayer()==player_ai then
+    if OverExtendCheck() then
+      return true
+    elseif HasID(AIMon(),70583986,true) then
+      GlobalSummonToHand = true
+      return true
+    end
+  end
+  return false
 end
 function SetLinde()
 return (Duel.GetCurrentPhase()==PHASE_MAIN2 or Duel.GetTurnCount()==1) and not HasID(AIMon(),23899727,true)
@@ -394,12 +434,8 @@ function MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local SetableMon = cards.monster_setable_cards
   local SetableST = cards.st_setable_cards
   MermailTargets = {}
-  GlobalSummonLinde=nil
-  GlobalSphereToHand=nil
-  if HasID(Activatable,26400609,false,422409746) and UseTidal() then
-    GlobalCardMode = 2
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
+  GlobalSummonNegated=nil
+  GlobalSummonToHand=nil
   if HasID(Activatable,70368879) then -- Upstart Goblin
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -427,7 +463,7 @@ function MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Activatable,60202749) and UseSphere() then
-    GlobalSphereToHand = true
+    GlobalSummonNegated=true
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Activatable,00440556) and UseBahamut() then
@@ -441,14 +477,20 @@ function MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(cards,34707034) and UseSquall() then
-    GlobalSummonLinde=true
+    GlobalSummonNegated=true
     return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasID(Summonable,78868119) and SummonDiva1() then
+    return {COMMAND_SUMMON,Summonable[CurrentIndex].index}
   end
   if HasID(Summonable,58471134) and (UsePike() or FieldCheck(4)==1) then
     return {COMMAND_SUMMON,Summonable[CurrentIndex].index}
   end
   if HasID(Summonable,22076135) and (UseTurge() or FieldCheck(4)==1) then
     return {COMMAND_SUMMON,Summonable[CurrentIndex].index}
+  end
+  if HasID(SpSummonable,22110647) and SummonDracossackMermail() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSummonable,74371660) and SummonGaios() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
@@ -471,11 +513,18 @@ function MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(SpSummonable,65749035) and UseGungnir() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
+  if HasID(SpSummonable,88033975) and SummonArmadesMermail() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
   if HasID(SetableMon,23899727) and SetLinde() then
     return {COMMAND_SET_MONSTER,CurrentIndex}
   end
-  if HasID(Summonable,78868119) and SummonDiva() then
+  if HasID(Summonable,78868119) and SummonDiva2() then
     return {COMMAND_SUMMON,Summonable[CurrentIndex].index}
+  end
+  if HasID(Activatable,26400609,false,422409746) and UseTidal() then
+    GlobalCardMode = 2
+    return {COMMAND_ACTIVATE,CurrentIndex}
   end
   local check = MermailPriorityCheck(AIHand(),PRIO_DISCARD)>1 and MermailOpenFieldCheck()
   if HasID(Activatable,22446869) and check then
@@ -488,7 +537,7 @@ function MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     GlobalCardMode=1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Summonable,58471134) and check then
+  if HasID(Summonable,58471134) and MermailOpenFieldCheck() then
     return {COMMAND_SUMMON,Summonable[CurrentIndex].index}
   end
   if HasID(Summonable,22076135) and MermailOpenFieldCheck() then
@@ -527,7 +576,15 @@ function BestTargetsMermail(cards,count)
   return result
 end
 function SphereTarget(cards)
-  if GlobalSphereToHand then
+  if GlobalCardMode == 1 then
+    GlobalCardMode=nil
+    for i=1,#cards do
+      if cards[i].level == 4 then
+        return {i}
+      end
+    end
+  end
+  if GlobalSummonToHand then
     return MermailAdd(cards,PRIO_TOHAND)
   else
     return MermailAdd(cards,PRIO_TOFIELD)
@@ -583,6 +640,18 @@ function TidalTarget(cards)
   end
   return result
 end
+function DivaTarget(cards)
+  return MermailAdd(cards,PRIO_TOFIELD)
+end
+function MechquippedTarget(cards)
+  local result = nil
+  if GlobalCardMode==nil then
+    result = IndexByID(cards,GlobalTargetID)
+  end
+  GlobalCardMode=nil
+  if result == nil then result = {math.random(#cards)} end
+  return result
+end
 function MermailOnSelectCard(cards, minTargets, maxTargets,triggeringID,triggeringCard)
   local ID 
   local result=nil
@@ -614,10 +683,13 @@ function MermailOnSelectCard(cards, minTargets, maxTargets,triggeringID,triggeri
     if result==nil then result = {math.random(#cards)} end
     return result
   end
-  if ID == 23899727 or ID == 69293721 or ID == 78868119 
+  if ID == 23899727 or ID == 69293721
   or ID == 37104630 or ID == 00440556 or ID == 59170782
   then
     return MermailAdd(cards,PRIO_TOFIELD)
+  end
+  if ID == 78868119 then
+    return DivaTarget(cards)
   end
   if ID == 60202749 then
     return SphereTarget(cards)
@@ -644,12 +716,14 @@ function MermailOnSelectCard(cards, minTargets, maxTargets,triggeringID,triggeri
   if ID == 26400609 then
     return TidalTarget(cards)
   end
+  if ID == 15914410 then
+    return MechquippedTarget(cards)
+  end
   return nil
 end
 
 function ChainSphere()
-  local cg = RemovalCheck()
-  if cg and cg:IsExists(function(c) return c:IsControler(player_ai) and c:IsCode(60202749) end, 1, nil) then
+  if RemovalCheck(60202749) then
     return true
   end
   local effect = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
@@ -665,17 +739,16 @@ function ChainSphere()
     return true
   end
   if Duel.GetCurrentPhase() == PHASE_BATTLE and Duel.GetTurnPlayer() == 1-player_ai
-  and HasID(AIDeck(),23899727,true) and LindeCond(PRIO_TOFIELD) 
+  --and HasID(AIDeck(),23899727,true) and LindeCond(PRIO_TOFIELD) 
   then
     return Duel.GetAttacker() and #AIMon()==0
   end
   return false
 end
 function ChainReckless()
-  local cg = RemovalCheck()
   local cards = AIMon()
-  if cg then
-    return cg:IsExists(function(c) return c:IsControler(player_ai) and c:IsCode(37576645) end, 1, nil)
+  if RemovalCheck(37576645) then
+    return true
   end
   if Duel.GetCurrentPhase() == PHASE_END and Duel.GetTurnPlayer() == 1-player_ai
   and (#AIHand()<3 or Duel.IsPlayerAffectedByEffect(player_ai,EFFECT_SKIP_DP)) 
@@ -729,15 +802,12 @@ function ChainMechquipped()
       end
     end
   end
-  local cg = RemovalCheck()
-	if cg then
-		if cg:IsExists(function(c) return c:IsControler(player_ai) and c:IsCode(15914410) end, 1, nil) then
-      local g=Duel.GetMatchingGroup(MechquippedFilter,player_ai,LOCATION_ONFIELD,0,nil,15914410):GetMaxGroup(Card.GetAttack)
-      if g then
-        GlobalTargetID = g:GetFirst():GetCode()
-        return true
-      end
-    end	
+  if RemovalCheck(15914410) then
+    local g=Duel.GetMatchingGroup(MechquippedFilter,player_ai,LOCATION_ONFIELD,0,nil,15914410):GetMaxGroup(Card.GetAttack)
+    if g then
+      GlobalTargetID = g:GetFirst():GetCode()
+      return true
+    end
   end
   cg = NegateCheck()
   if cg then
@@ -799,22 +869,22 @@ function MermailOnSelectChain(cards,only_chains_by_player)
   if HasID(cards,37576645) and ChainReckless() then
     return {1,CurrentIndex}
   end
-  if HasID(cards,58471134) and UsePike() then
+  if HasIDNotNegated(cards,58471134) and UsePike() then
     OPTSet(58471134)
     GlobalCardMode = 1
     return {1,CurrentIndex}
   end
-  if HasID(cards,22076135) and UseTurge() then
+  if HasIDNotNegated(cards,22076135) and UseTurge() then
     OPTSet(22076135)
     GlobalCardMode = 1
     return {1,CurrentIndex}
   end
   if HasID(cards,60202749) and ChainSphere() then
-    GlobalSummonLinde=true
+    GlobalSummonNegated=true
     return {1,CurrentIndex}
   end
   if HasID(cards,34707034) and UseSquall() then
-    GlobalSummonLinde=true
+    GlobalSummonNegated=true
     return {1,CurrentIndex}
   end
   if HasID(cards,21954587) then
@@ -831,6 +901,9 @@ function MermailOnSelectChain(cards,only_chains_by_player)
   end
   if HasID(cards,23899727) then
     OPTSet(23899727)
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,74298287) then
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,15914410) and ChainMechquipped() then
@@ -851,24 +924,36 @@ function MermailOnSelectEffectYesNo(id)
     OPTSet(id)
     result = 1
   end
-  if id==58471134 and UsePike() then
-    OPTSet(58471134)
-    GlobalCardMode = 1
-    result = 1
+  if id==58471134 then
+    if UsePike() then
+      OPTSet(58471134)
+      GlobalCardMode = 1
+      result = 1
+    else
+      result = 0
+    end
   end
-  if id==22076135 and UseTurge() then
-    OPTSet(22076135)
-    GlobalCardMode = 1
+  if id==22076135 then
+    if UseTurge() then
+      OPTSet(22076135)
+      GlobalCardMode = 1
+      result = 1
+    else
+      result = 0
+    end
+  end
+  if id==74298287 then
     result = 1
   end
   return result
 end
 
 MermailAtt={
-  21954587,15914410,22446869 -- Megalo,Mechquipped Angineer,Teus
+  21954587,15914410 -- Megalo,Mechquipped Angineer
 }
 MermailDef={
-  59170782,50789693  -- Trite, Kappa
+  59170782,50789693,22446869,  -- Trite, Kappa,Teus
+  23899727,37104630 -- Linde, Infantry
 }
 function MermailOnSelectPosition(id, available)
   result = nil
