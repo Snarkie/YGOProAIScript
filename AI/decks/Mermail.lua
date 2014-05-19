@@ -60,9 +60,9 @@ function GundeCond(loc)
   end
   return true
 end
-function PikeCond(loc)
+function PikeCond(loc,c)
   if loc == PRIO_TOFIELD then
-    return not GlobalSummonNegated
+    return (c==nil or c:is_affected_by(EFFECT_DISABLE)==0 and c:is_affected_by(EFFECT_DISABLE_EFFECT)==0)
     and (MermailPriorityCheck(AIHand(),PRIO_DISCARD) > 4 
     and OPTCheck(58471134)
     and Duel.GetCurrentChain()<=1
@@ -73,9 +73,9 @@ end
 function TurgeFilter(c)
   return c.level<=3 and bit32.band(c.attribute,ATTRIBUTE_WATER)>0
 end
-function TurgeCond(loc)
+function TurgeCond(loc,c)
   if loc == PRIO_TOFIELD then
-    return not GlobalSummonNegated 
+    return (c==nil or c:is_affected_by(EFFECT_DISABLE)==0 and c:is_affected_by(EFFECT_DISABLE_EFFECT)==0)
     and (MermailPriorityCheck(AIHand(),PRIO_DISCARD) > 4 
     and CardsMatchingFilter(AIGrave(),TurgeFilter)>0
     and OPTCheck(22076135)
@@ -327,11 +327,11 @@ function UseLeedField(card)
    and CardsMatchingFilter(AIMon(),LeedFilter)>0
    and #OppHand()>0 and (Duel.GetCurrentPhase() == PHASE_MAIN2 or Duel.GetTurnCount()==1)
 end
-function UsePike()
-  return PikeCond(PRIO_TOFIELD)
+function UsePike(c)
+  return PikeCond(PRIO_TOFIELD,c)
 end
-function UseTurge()
-  return TurgeCond(PRIO_TOFIELD)
+function UseTurge(c)
+  return TurgeCond(PRIO_TOFIELD,c)
 end
 function UseSalvage()
   return MermailPriorityCheck(AIGrave(),PRIO_TOHAND,2,function(c) return bit32.band(c.attribute,ATTRIBUTE_WATER)>0 and c.attack<=1500 end)>1
@@ -489,6 +489,12 @@ function MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(Summonable,22076135) and (UseTurge() or FieldCheck(4)==1) then
     return {COMMAND_SUMMON,Summonable[CurrentIndex].index}
   end
+  if HasID(SpSummonable,70583986) and SummonDewloren() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(SpSummonable,65749035) and UseGungnir() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
   if HasID(SpSummonable,22110647) and SummonDracossackMermail() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
@@ -505,12 +511,6 @@ function MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSummonable,15914410) and SummonMechquipped() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
-  end
-  if HasID(SpSummonable,70583986) and SummonDewloren() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
-  end
-  if HasID(SpSummonable,65749035) and UseGungnir() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSummonable,88033975) and SummonArmadesMermail() then
@@ -733,7 +733,7 @@ function ChainSphere()
       return false
     end
   end
-  if Duel.GetCurrentPhase() == PHASE_MAIN2 and Duel.GetTurnPlayer() == 1-player_ai 
+  if Duel.GetCurrentPhase()==PHASE_MAIN2 and Duel.CheckTiming(TIMING_MAIN_END) and Duel.GetTurnPlayer() == 1-player_ai 
   and HasID(AIDeck(),23899727,true) and LindeCond(PRIO_TOFIELD) 
   then
     return true
@@ -918,14 +918,14 @@ function MermailOnSelectChain(cards,only_chains_by_player)
   return nil
 end
 
-function MermailOnSelectEffectYesNo(id)
+function MermailOnSelectEffectYesNo(id,triggeringCard)
   local result = nil
   if id==37781520 or id==21954587 or id==22446869 or id==69293721 or id==23899727 then
     OPTSet(id)
     result = 1
   end
   if id==58471134 then
-    if UsePike() then
+    if UsePike(triggeringCard) then
       OPTSet(58471134)
       GlobalCardMode = 1
       result = 1
@@ -934,7 +934,7 @@ function MermailOnSelectEffectYesNo(id)
     end
   end
   if id==22076135 then
-    if UseTurge() then
+    if UseTurge(triggeringCard) then
       OPTSet(22076135)
       GlobalCardMode = 1
       result = 1

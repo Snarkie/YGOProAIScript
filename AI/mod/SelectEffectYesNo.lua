@@ -8,13 +8,16 @@
 -- Return: 
 -- 1 = yes
 -- 0 = no
-function OnSelectEffectYesNo(id)
-  local result = FireFistOnSelectEffectYesNo(id)
+function OnSelectEffectYesNo(id,triggeringCard)
+  local result = FireFistOnSelectEffectYesNo(id,triggeringCard)
   if result==nil then
-    result = BujinOnSelectEffectYesNo(id)
+    result = BujinOnSelectEffectYesNo(id,triggeringCard)
   end
   if result==nil then
-    result = MermailOnSelectEffectYesNo(id)
+    result = MermailOnSelectEffectYesNo(id,triggeringCard)
+  end
+  if result==nil then
+    result = ShadollOnSelectEffectYesNo(id,triggeringCard)
   end
   if result then return result end
   
@@ -73,8 +76,11 @@ function OnSelectEffectYesNo(id)
      id ~= 96381979 then  -- Tiger King           
 	 GlobalActivatedEffectID = id
 	 result = 1
-   end	 
- 
+   end
+
+  if CardIsScripted(id)>0 then
+    result = 0
+  end
   return result
 
 end

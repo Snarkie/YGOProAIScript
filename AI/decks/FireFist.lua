@@ -1,8 +1,11 @@
-function HasID(cards,id,skipglobal,desc)
+function HasID(cards,id,skipglobal,desc,loc)
   local result = false;
   if cards ~= nil then 
     for i=1,#cards do
-      if cards[i].id == id and (desc == nil or cards[i].description == desc) then
+      if cards[i].id == id 
+      and (desc == nil or cards[i].description == desc) 
+      and (loc == nil or bit32.band(cards[i].location,loc)>0)
+      then
         if not skipglobal then CurrentIndex = i end
         result = true      
       end
@@ -10,11 +13,14 @@ function HasID(cards,id,skipglobal,desc)
   end
   return result
 end
-function HasIDNotNegated(cards,id,skipglobal,desc)
+function HasIDNotNegated(cards,id,skipglobal,desc,loc)
   local result = false
   if cards ~= nil then 
     for i=1,#cards do
-      if cards[i].id == id and (desc == nil or cards[i].description == desc) then
+      if cards[i].id == id 
+      and (desc == nil or cards[i].description == desc) 
+      and (loc == nil or bit32.band(cards[i].location,loc)>0)
+      then
         if bit32.band(cards[i].type,TYPE_MONSTER)>0 
         and cards[i]:is_affected_by(EFFECT_DISABLE_EFFECT)==0 
         and cards[i]:is_affected_by(EFFECT_DISABLE)==0

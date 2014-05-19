@@ -82,6 +82,7 @@ function BestTargets(cards,count,DestroyCheck,filter)
     else
       if cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)>0 and DestroyCheck
       or cards[i]:is_affected_by(EFFECT_IMMUNE)>0
+      or bit32.band(cards[i].status,STATUS_LEAVE_CONFIRMED)>0
       then
         cards[i].prio = 1
       else    

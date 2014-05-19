@@ -181,6 +181,7 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
 -------------------------------------------------
 MermailCheck()
 BujinCheck()
+ShadollCheck()
 local DeckCommand = FireFistInit(cards, to_bp_allowed, to_ep_allowed)
 if DeckCommand ~= nil and not BujinCheck() then 
     return DeckCommand[1],DeckCommand[2]
@@ -198,6 +199,10 @@ if DeckCommand ~= nil then
     return DeckCommand[1],DeckCommand[2]
 end
 DeckCommand = MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
+if DeckCommand ~= nil and not BujinCheck() then 
+    return DeckCommand[1],DeckCommand[2]
+end
+DeckCommand = ShadollOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
 if DeckCommand ~= nil and not BujinCheck() then 
     return DeckCommand[1],DeckCommand[2]
 end

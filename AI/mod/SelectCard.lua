@@ -41,6 +41,10 @@ result = MermailOnSelectCard(cards, minTargets, maxTargets, triggeringID, trigge
 if result ~= nil then
   return result
 end
+result = ShadollOnSelectCard(cards, minTargets, maxTargets, triggeringID, triggeringCard)
+if result ~= nil then
+  return result
+end
 result = {}
 
   --------------------------------------------

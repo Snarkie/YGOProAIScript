@@ -308,7 +308,11 @@ function NormalSummonBlacklist(CardId)
      CardId == 58471134 or CardId == 22076135 or  -- Mermail Apysspike, Mermail Abyssturge
      CardId == 23899727 or CardId == 74298287 or  -- Mermail Abysslinde, Mermail Abyssdine
      CardId == 78868119 or CardId == 26400609 or  -- Deep Sea Diva, Tidal, Dragon Ruler of Waterfalls
-     CardId == 69293721
+     CardId == 37445295 or CardId == 04939890 or  -- Shadoll Falcon, Shadoll Hedgehog
+     CardId == 30328508 or CardId == 77723643 or  -- Shadoll Lizard, Shadoll Dragon
+     CardId == 03717252 or CardId == 24062258 or  -- Shadoll Beast, Secret Sect Druid Dru
+     CardId == 85103922 or CardId == 12697630 or  -- Artifact Moralltach, Artifact Beagalltach
+     CardId == 69293721 -- Mermail Abyssgunde
      then 
 	return 1 
   end
@@ -374,7 +378,10 @@ SSBL={
 01855932,73289035,26329679, -- Bujin Kagutsuchi, Tsukuyomi, Constellar Omega
 21044178,00440556,59170782, -- Abyss Dweller, Bahamut Shark, Mermail Abysstrite
 15914410,50789693,65749035, -- Mechquipped Angineer, Armored Kappa, Gugnir, Dragon of  the Ice Barrier
-95169481,70583986,74371660 -- Diamond Dire Wolf, Dewloren Tiger King of the Ice Barrier, Mermail Abyssgaios
+95169481,70583986,74371660, -- Diamond Dire Wolf, Dewloren Tiger King of the Ice Barrier, Mermail Abyssgaios
+73964868,29669359,82633039, -- Pleiades, Volcasaurus, Skyblaster Castel
+00581014,33698022,04779823, -- Emeral, Moonlight Rose, Michael
+31924889,08561192 -- Arcanite Magician, Leoh
 }
 
 
@@ -393,7 +400,8 @@ end
 
 SetBL={
   61314842,92365601,84220251, -- Advanced Heraldry Art, Rank-Up Magic - Limited Barian's Force, Heraldry Reborn
-  73906480,96947648 -- Bujincarnation, Salvage
+  73906480,96947648,74845897, -- Bujincarnation, Salvage, Rekindling
+  54447022,44394295 -- Soul Charge, Shadoll Fusion
 }
 
 ---------------------------------------------------------
@@ -667,6 +675,18 @@ function CardIsScripted(CardId)
      CardId == 74371660 or CardId == 50789693 or  -- Mermail Abyssgaios, Armored Kappa
      CardId == 70583986 or CardId == 65749035 or  -- Dewloren, Tiger King of the Ice Barrier, Gugnir, Dragon of the Ice Barrier
      CardId == 15914410 or CardId == 59170782 or  -- Mechquipped Angineer, Mermail Abysstrite
+     CardId == 37445295 or CardId == 04939890 or  -- Shadoll Falcon, Shadoll Hedgehog
+     CardId == 30328508 or CardId == 77723643 or  -- Shadoll Lizard, Shadoll Dragon
+     CardId == 03717252 or CardId == 24062258 or  -- Shadoll Beast, Secret Sect Druid Dru
+     CardId == 44394295 or CardId == 29223325 or  -- Shadoll Fusion, Artifact Ignition
+     CardId == 01845204 or CardId == 77505534 or  -- Instant Fusion, Facing the Shadows
+     CardId == 04904633 or CardId == 12444060 or  -- Facing the Shadows, Artifact Sanctum
+     CardId == 20366274 or CardId == 94977269 or  -- El-Shadoll Nephilim, El-Shadoll Midrash
+     CardId == 29669359 or CardId == 82633039 or  -- Volcasaurus, Skyblaster Castel
+     CardId == 00581014 or CardId == 33698022 or  -- Emeral, Moonlight Rose
+     CardId == 04779823 or CardId == 31924889 or  -- Michael, Arcanite Magician
+     CardId == 34507039 or CardId == 14087893 or  -- Wiretap, Book of Moon
+     CardId == 54447022 or CardId == 74845897 or  -- Soul Charge, Rekindling
      CardId == 37576645 or CardId == 21954587   -- Reckless Greed, Mermail AbyssMegalo
     then  
 	return 1
