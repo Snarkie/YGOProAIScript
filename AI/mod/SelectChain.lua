@@ -607,6 +607,14 @@ end
     return 1,CurrentIndex
   end
   
+  if Duel.GetCurrentPhase()==PHASE_END then
+    for i=1,#cards do -- Lightsworn monsters
+      if IsSetCode(cards[i].setcode,0x38) then
+        return 1,i
+      end
+    end  
+  end
+  
   ----------------------------------------------------------
   -- For now, chain anything else (not already listed above)
   -- that can be chained, except cards with the same ID as

@@ -404,6 +404,20 @@ SetBL={
   54447022,44394295 -- Soul Charge, Shadoll Fusion
 }
 
+
+function RepositionBlacklist(id)
+  for i=1,#RepoBL do
+    if RepoBL[i]==CardId then
+      return 1
+    end
+  end
+  return 0
+end
+RepoBL={
+  374452950,4939890,30328508,  -- Shadoll Falcon,Hedgehog,Lizard
+  777236430,3717252,21502796, -- Shadoll Dragon, Beast,Ryko
+  23899727 -- Mermail Abysslinde
+}
 ---------------------------------------------------------
 -- Checks if the specified card ID is in this "blacklist"
 -- of cards to never negate on the field via cards like
@@ -508,6 +522,10 @@ function isUnchainableTogether(CardId)
      CardId == 37412656 or -- Hero blast
      CardId == 19665973 or -- Battle Fader
      CardId == 18964575 or -- Swift Scarecrow
+     CardId == 29223325 or -- Artifact Ignition
+     CardId == 12444060 or -- Artifact Sanctum
+     CardId == 85103922 or -- Artifact Moralltach  - to prevent multiple ignitions
+     CardId == 12697630 or -- Artifact Beagalltach - chained in a row for no reason
      CardId == 53582587 then -- Torrential tribute   
 	return 1
   end

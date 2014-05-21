@@ -19,6 +19,12 @@ function OnSelectEffectYesNo(id,triggeringCard)
   if result==nil then
     result = ShadollOnSelectEffectYesNo(id,triggeringCard)
   end
+  if result==nil then
+    result = GadgetOnSelectEffectYesNo(id,triggeringCard)
+  end
+  if result==nil then
+    result = HeraldicOnSelectEffectYesNo(id,triggeringCard)
+  end
   if result then return result end
   
   if id  == 72989439 then  -- Black Luster Soldier - Envoy of the Beginning
@@ -66,17 +72,9 @@ function OnSelectEffectYesNo(id,triggeringCard)
     end
     return 0
   end
-	
-	------------------------------------------------------------
-    -- If effects activation conditions aren't specified above, return "yes"
-    ------------------------------------------------------------
-	if id ~= 72989439 and id ~= 84013237 and  -- Black Luster Soldier , Number 39: Utopia 
-     id ~= 40619825 and id ~= 79867938 and  -- Axe of Despair, Battlin' Boxer Headgeared
-	   id ~= 37742478 and id ~= 73580471 and  -- Honest, Black Rose Dragon 
-     id ~= 96381979 then  -- Tiger King           
-	 GlobalActivatedEffectID = id
-	 result = 1
-   end
+       
+  GlobalActivatedEffectID = id
+  result = 1
 
   if CardIsScripted(id)>0 then
     result = 0

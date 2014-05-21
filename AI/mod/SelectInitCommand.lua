@@ -2487,7 +2487,9 @@ end
   ---------------------------------------------------
   if #cards.monster_setable_cards > 0 then
     for i=1,#cards.monster_setable_cards do
-      if cards.monster_setable_cards[i].level < 5 and cards.monster_setable_cards[i].type == TYPE_MONSTER + TYPE_EFFECT + TYPE_FLIP then
+      if cards.monster_setable_cards[i].level < 5 and cards.monster_setable_cards[i].type == TYPE_MONSTER + TYPE_EFFECT + TYPE_FLIP
+      and NormalSummonBlacklist(cards.monster_setable_cards[i].id) == 0
+      then
         GlobalSummonedThisTurn = GlobalSummonedThisTurn+1
 		return COMMAND_SET_MONSTER,i
       end
@@ -2632,8 +2634,7 @@ end
   end
   if ChangePosOK == 1 then
     for i=1,#RepositionableCards do
-      if RepositionableCards[i].id ~= 21502796  -- Any except Ryko!
-      and RepositionableCards[i].id ~= 23899727 -- Mermail Abysslinde
+      if RepositionBlacklist(RepositionableCards[i].id) ==0 
       and RepositionableCards[i].attack > 0 then
         if RepositionableCards[i].position == POS_FACEUP_DEFENCE or
            RepositionableCards[i].position == POS_FACEDOWN_DEFENCE then

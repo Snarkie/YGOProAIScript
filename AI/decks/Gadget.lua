@@ -220,9 +220,18 @@ function SummonMachinaFortress(card)
   end
   return result and (OverExtendCheck() or FieldCheck(7)==1)
 end
+function SummonSharkKnightGadget(cards)
+  local cg=Duel.GetMatchingGroup(SharkKnightFilter,1-player_ai,LOCATION_MZONE,0,nil)
+  if cg and cg:GetCount() > 0 and Duel.GetFlagEffect(player_ai,48739166)==0 then
+    local g = cg:GetMaxGroup(Card.GetAttack)
+    return g:GetFirst():GetAttack()>=2300 and HasID(AIExtra(),48739166,true)
+  end
+  return false
+end
 function SummonGearGigant()
   return (Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack")< 2300 
   or Chance(70) or MP2Check()) and not (SummonRagnaZero() and HasID(AIExtra(),94380860))
+  and not SummonSharkKnightGadget(OppMon())
 end
 function SummonDracossack()
   return MP2Check() and not MermailCheck()
@@ -609,7 +618,7 @@ function RedoxTarget(cards)
   end
   GlobalCardMode=nil
   if result==nil then
-    table.sort(cards,function(a,b) return Chance(50) end)
+    Shuffle(cards)
     result={}
     for i=1,minTargets do
       result[i]=cards[i].index
@@ -858,7 +867,13 @@ function GadgetOnSelectChain(cards,only_chains_by_player)
   end
   return nil
 end
-
+function GadgetOnSelectEffectYesNo(id,triggeringCard)
+  local result = nil
+  if id == 42940404 then
+    result = 1
+  end
+  return result
+end
 function GadgetOnSelectOption(options)
   return nil
 end

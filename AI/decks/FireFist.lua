@@ -1,10 +1,11 @@
-function HasID(cards,id,skipglobal,desc,loc)
+function HasID(cards,id,skipglobal,desc,loc,pos)
   local result = false;
   if cards ~= nil then 
     for i=1,#cards do
       if cards[i].id == id 
       and (desc == nil or cards[i].description == desc) 
       and (loc == nil or bit32.band(cards[i].location,loc)>0)
+      and (pos == nil or bit32.band(cards[i].position,pos)>0)
       then
         if not skipglobal then CurrentIndex = i end
         result = true      
@@ -13,13 +14,14 @@ function HasID(cards,id,skipglobal,desc,loc)
   end
   return result
 end
-function HasIDNotNegated(cards,id,skipglobal,desc,loc)
+function HasIDNotNegated(cards,id,skipglobal,desc,loc,pos)
   local result = false
   if cards ~= nil then 
     for i=1,#cards do
       if cards[i].id == id 
       and (desc == nil or cards[i].description == desc) 
       and (loc == nil or bit32.band(cards[i].location,loc)>0)
+      and (pos == nil or bit32.band(cards[i].position,pos)>0)
       then
         if bit32.band(cards[i].type,TYPE_MONSTER)>0 
         and cards[i]:is_affected_by(EFFECT_DISABLE_EFFECT)==0 
@@ -60,6 +62,17 @@ function AIGetStrongestAttack()
   for i=1,#cards do
     if cards[i] and cards[i]:is_affected_by(EFFECT_CANNOT_ATTACK)==0 and cards[i].attack>result then
       result=cards[i].attack
+    end
+  end
+  return result
+end
+function OppGetStrongestAttack()
+  local cards=OppMon()
+  local result=0
+  ApplyATKBoosts(cards)
+  for i=1,#cards do
+    if cards[i] and cards[i]:is_affected_by(EFFECT_CANNOT_ATTACK)==0 and cards[i].attack>result then
+      result=cards[i].attack-cards[i].bonus
     end
   end
   return result
@@ -1078,16 +1091,20 @@ function FireFistOnChain(cards,only_chains_by_player)
   end
   return nil
 end
-function FireFistOnSelectEffectYesNo(id)
+function FireFistOnSelectEffectYesNo(id,triggeringCard)
   local result=nil   
-  if id == 96381979 then --Tiger King
-    if HasID(AIMon(),96381979,true) then
+  if id == 96381979 then
+    if bit32.band(triggeringCard.location,LOCATION_ONFIELD)>0 then --Tiger King
       GlobalCardMode=1
       result = 1
-    elseif FireFormationCostCheck(AIST(),3)>0 then
+    elseif bit32.band(triggeringCard.location,LOCATION_GRAVE )>0
+    and FireFormationCostCheck(AIST(),3)>0 then
       GlobalCardMode=1
       result = 1
     end
+  end
+  if id == 30929786 or id == 06353603 or id == 70355994 then
+    result = 1
   end
   return result
 end

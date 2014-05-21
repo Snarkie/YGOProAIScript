@@ -29,7 +29,7 @@ function InfantryCond(loc)
     > CardsMatchingFilter(AIHand(),function(c) return c.id==37104630 end)
   elseif loc == PRIO_DISCARD then
     return CardsMatchingFilter(UseLists({OppMon(),OppST()}),InfantryFilter)
-    > MermailGetMultiple(37104630)
+    > GetMultiple(37104630)
   end
   return true
 end
@@ -43,7 +43,7 @@ function MarksmanCond(loc)
     > CardsMatchingFilter(AIHand(),function(c) return c.id==00706925 end)
   elseif loc == PRIO_DISCARD then
     return CardsMatchingFilter(UseLists({OppMon(),OppST()}),MarksmanFilter)
-    > MermailGetMultiple(00706925)
+    > GetMultiple(00706925)
   elseif loc == PRIO_TOFIELD then
     return #OppMon()==0 and Duel.GetTurnCount()>1
   end
@@ -236,7 +236,7 @@ function MermailGetPriority(id,loc)
 end
 function MermailAssignPriority(cards,loc,filter)
   local index = 0
-  MermailMultiple = nil
+  Multiple = nil
   for i=1,#cards do
     cards[i].index=i
      if not MermailMultiTargetFilter(cards[i]) then
@@ -250,6 +250,7 @@ function MermailAssignPriority(cards,loc,filter)
     if loc==PRIO_BANISH and cards[i].location~=LOCATION_GRAVE then
       cards[i].prio=cards[i].prio-2
     end
+    SetMultiple(cards[i].id)
   end
 end
 function MermailPriorityCheck(cards,loc,count,filter)
@@ -276,18 +277,18 @@ end
 
 -- used to keep track of how many cards with the same id got a priority request
 -- so the AI does not discard multiple Marksmen to kill one card, for example
-MermailMultiple = nil
-function MermailSetMultiple(id)
-  if MermailMultiple == nil then
-    MermailMultiple = {}
+Multiple = nil
+function SetMultiple(id)
+  if Multiple == nil then
+    Multiple = {}
   end
-  MermailMultiple[#MermailMultiple+1]=id
+  Multiple[#Multiple+1]=id
 end
-function MermailGetMultiple(id)
+function GetMultiple(id)
   local result = 0
-  if MermailMultiple then
-    for i=1,#MermailMultiple do
-      if MermailMultiple[i]==id then
+  if Multiple then
+    for i=1,#Multiple do
+      if Multiple[i]==id then
         result = result + 1
       end
     end
@@ -891,7 +892,7 @@ function MermailOnSelectChain(cards,only_chains_by_player)
     return {1,CurrentIndex}
   end
   if HasID(cards,37781520) then
-    return {1,CurrentIndex}
+    return {1,CurrentIndex}   
   end
   if HasID(cards,22446869) then
     return {1,CurrentIndex}
@@ -942,7 +943,7 @@ function MermailOnSelectEffectYesNo(id,triggeringCard)
       result = 0
     end
   end
-  if id==74298287 then
+  if id==74298287 or id==59170782 then
     result = 1
   end
   return result

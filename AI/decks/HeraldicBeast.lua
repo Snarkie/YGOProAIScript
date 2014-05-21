@@ -9,7 +9,7 @@ function FieldCheck(level)
   local result=0
   local cards=AIMon()
   for i=1,#cards do
-    if cards[i].level==level then
+    if cards[i].level==level and bit32.band(cards[i].position,POS_FACEUP)>0 then
       result = result + 1
     end
   end
@@ -1031,6 +1031,13 @@ end
 
 function HeraldicOnSelectOption(options)
   return nil
+end
+function HeraldicOnSelectEffectYesNo(id,triggeringCard)
+  local result = nil
+  if id == 23649496 then
+    result = 1
+  end
+  return result
 end
 HeraldicAtt={
   65367484,60316373,87255382,61344030,
