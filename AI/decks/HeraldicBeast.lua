@@ -1034,7 +1034,7 @@ function HeraldicOnSelectOption(options)
 end
 function HeraldicOnSelectEffectYesNo(id,triggeringCard)
   local result = nil
-  if id == 23649496 then
+  if id == 23649496 or id == 11522979 or id == 12744567 then
     result = 1
   end
   return result

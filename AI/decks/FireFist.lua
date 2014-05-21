@@ -1103,7 +1103,11 @@ function FireFistOnSelectEffectYesNo(id,triggeringCard)
       result = 1
     end
   end
-  if id == 30929786 or id == 06353603 or id == 70355994 then
+  if id == 30929786 or id == 06353603 or id == 70355994 
+  or id == 43748308 or id == 66762372 or id == 17475251
+  or id == 44860890 or id == 93294869 or id == 89856523
+  or id == 74168099
+  then
     result = 1
   end
   return result

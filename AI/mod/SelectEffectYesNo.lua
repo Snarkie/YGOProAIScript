@@ -27,10 +27,16 @@ function OnSelectEffectYesNo(id,triggeringCard)
   end
   if result then return result end
   
+  if CardIsScripted(id)>0 then
+    result = 0
+  end
+  
   if id  == 72989439 then  -- Black Luster Soldier - Envoy of the Beginning
     result = 1
   end
-  
+  if id == 99365553 or id == 51858306 or id == 92661479 then -- Lightpulsar, Eclipse, Bounzer
+    result = 1
+  end
   if id  == 84013237 then -- Number 39: Utopia
     if GlobalIsAIsTurn == 0 and AI.GetCurrentPhase() == PHASE_BATTLE and Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") < Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") then 
       GlobalActivatedEffectID = id
@@ -72,12 +78,9 @@ function OnSelectEffectYesNo(id,triggeringCard)
     end
     return 0
   end
-       
-  GlobalActivatedEffectID = id
-  result = 1
 
-  if CardIsScripted(id)>0 then
-    result = 0
+  if result==1 then
+    GlobalActivatedEffectID = id
   end
   return result
 

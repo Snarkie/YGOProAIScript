@@ -2377,7 +2377,7 @@ end
          HandHighestATK = AIHand[x].attack       
         if AIHand[x].level >= 5 and
          HandHighestATK > Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") then 
-          if Get_Card_Count_ID(AIHand(),39552864,nil) > 0 or   -- Mystical Shine Ball
+          if Get_Card_Count_ID(AIHand,39552864,nil) > 0 or   -- Mystical Shine Ball
              Get_Card_Count_ID(AIDeck(),39552864,nil) > 0 then -- Mystical Shine Ball                 
              GlobalSummonedThisTurn = GlobalSummonedThisTurn+1
 			return COMMAND_SUMMON,i

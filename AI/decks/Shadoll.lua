@@ -396,10 +396,6 @@ function ShadollOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(Activatable,04904633) and UseRoots() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Activatable,44394295) and UseShadollFusion() then
-    GlobalCardMode=1
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
   if HasID(Activatable,82633039,false,1322128625) and UseSkyblaster() then
     GlobalCardMode=1
     return {COMMAND_ACTIVATE,CurrentIndex}
@@ -416,6 +412,11 @@ function ShadollOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(Activatable,01845204) and UseInstantFusion() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+  if HasID(Activatable,44394295) and UseShadollFusion() then
+    GlobalCardMode=1
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+
   
   if HasID(Repositionable,37445295,false,nil,nil,POS_FACEDOWN_DEFENCE) and UseFalcon() then
     return {COMMAND_CHANGE_POS,CurrentIndex}
