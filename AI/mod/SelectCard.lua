@@ -470,8 +470,8 @@ end
   --------------------------------------------
   -- Select Players random Spell or Trap card
   --------------------------------------------   
-  if GlobalActivatedCardID == 05318639 or -- Mystical Space Typhoon 
-	 GlobalActivatedCardID == 71413901 then -- Breaker the Magical Warrior 
+  --if GlobalActivatedCardID == 05318639 or -- Mystical Space Typhoon 
+	 if GlobalActivatedCardID == 71413901 then -- Breaker the Magical Warrior 
 	 GlobalActivatedCardID = nil
      return getRandomSTIndex(cards, 2)
    end
@@ -821,10 +821,10 @@ end
   --------------------------------------------     
   -- Select Players strongest lvl 5+ monster ot the field, or ritual summoned monster.
   --------------------------------------------   
-  if GlobalActivatedCardID == 94192409 then -- Compulsory Evacuation Device 
+  --[[if GlobalActivatedCardID == 94192409 then -- Compulsory Evacuation Device 
      GlobalActivatedCardID = nil
      return GetHighestATKMonByLevelOrSS(cards,TYPE_MONSTER+TYPE_RITUAL, 5, POS_FACEUP_ATTACK or POS_FACEUP_DEFENCE, 2)
-   end
+   end]]
  	  
   --------------------------------------------     
   -- Select AI's weakest monster by attack points on the field.

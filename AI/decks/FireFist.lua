@@ -405,6 +405,12 @@ function UseTigerKing()
   end
   return count>0
 end
+function RekindlingFilter(c)
+  return bit32.band(c.attribute,ATTRIBUTE_FIRE)>0 and c.defense==200
+end
+function UseRekindling()
+  return OverExtendCheck() and CardsMatchingFilter(AIGrave(),RekindlingFilter)
+end
 function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
   local Activatable = cards.activatable_cards
   local Summonable = cards.summonable_cards
@@ -521,6 +527,9 @@ function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
   end
   if HasID(Summonable,92572371) then --Buffalo
     return {COMMAND_SUMMON,CurrentIndex}
+  end
+  if HasID(Activatable,74845897) and UseRekindling() then
+    return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(SpSummonable,39765958) and SummonJeweledRDA(SpSummonable[CurrentIndex]) then
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,39765958)}
@@ -856,7 +865,17 @@ function BuffaloTarget(cards)
     if result == nil then result = {math.random(#cards)} end
     return result
 end
+function RekindlingTarget(cards,min,max)
+  local result = {}
+  for i=1,max do
+    result[i]=i
+  end
+  return result
+end
 function FireFistCard(cards, minTargets, maxTargets, triggeringID, triggeringCard)
+  if triggeringID == 74845897  then
+    return RekindlingTarget(cards,minTargets,maxTargets)
+  end
   if triggeringID == 57103969 then -- Tenki
     return TenkiTarget(cards)
   end
@@ -1106,7 +1125,7 @@ function FireFistOnSelectEffectYesNo(id,triggeringCard)
   if id == 30929786 or id == 06353603 or id == 70355994 
   or id == 43748308 or id == 66762372 or id == 17475251
   or id == 44860890 or id == 93294869 or id == 89856523
-  or id == 74168099
+  or id == 74168099 or id == 01662004
   then
     result = 1
   end

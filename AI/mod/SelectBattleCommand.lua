@@ -30,7 +30,7 @@ function OnSelectBattleCommand(cards)
 	
   local function GetStrongestAttackerIndex()
     local HighestIndex = 0
-    local HighestAttack = 0
+    local HighestAttack = -1
     for i=1,#cards do
       if cards[i].attack >= HighestAttack then
         HighestIndex = i
@@ -107,47 +107,45 @@ function OnSelectBattleCommand(cards)
   -- closest in ATK to the AI's monster (but weaker), and
   -- attack that.
   -------------------------------------------------------
-  if Get_Card_Count(AI.GetOppMonsterZones()) > 0 then
-    if #cards > 0 then
-      local i = GetStrongestAttackerIndex()
-      if i > 0 then
-        local OppMon = targets
-        local AttackTarget = 0
-        local AttackValue = 0
-        for x=1,#OppMon do
-          if OppMon[x].position == POS_FACEUP_ATTACK then
-            if OppMon[x].attack >= AttackValue 
-            and (OppMon[x].attack < cards[i].attack and OppMon[x]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE) == 0 
-            or OppMon[x].attack-OppMon[x].bonus < cards[i].attack-cards[i].bonus and OppMon[x]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE) > 0 )
-            then
-              AttackTarget = x
-              AttackValue = OppMon[x].attack
-            end
-          elseif OppMon[x].position == POS_FACEUP_DEFENCE then
-            if OppMon[x].defense >= AttackValue 
-            and OppMon[x].defense < cards[i].attack and OppMon[x]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE) == 0 
-            or OppMon[x].defense< cards[i].attack-cards[i].bonus and OppMon[x]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE) > 0 
-            then
-              AttackTarget = x
-              AttackValue = OppMon[x].attack
-            end
+  if #OppMon() > 0 and #cards > 0 then
+    local i = GetStrongestAttackerIndex()
+    if i > 0 then
+      local OppMon = targets
+      local AttackTarget = 0
+      local AttackValue = -1
+      for x=1,#OppMon do
+        if OppMon[x].position == POS_FACEUP_ATTACK then
+          if OppMon[x].attack >= AttackValue 
+          and (OppMon[x].attack < cards[i].attack and OppMon[x]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE) == 0 
+          or OppMon[x].attack-OppMon[x].bonus < cards[i].attack-cards[i].bonus and OppMon[x]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE) > 0 )
+          then
+            AttackTarget = x
+            AttackValue = OppMon[x].attack
           end
-         end
-        if AttackTarget > 0 then
-          GlobalCurrentATK = cards[i].attack
-          GlobalAIIsAttacking = 1
-		  return 1,i
-         end
-      end
-   end
-end
+        elseif OppMon[x].position == POS_FACEUP_DEFENCE then
+          if OppMon[x].defense >= AttackValue 
+          and OppMon[x].defense < cards[i].attack and OppMon[x]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE) == 0 
+          or OppMon[x].defense< cards[i].attack-cards[i].bonus and OppMon[x]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE) > 0 
+          then
+            AttackTarget = x
+            AttackValue = OppMon[x].attack
+          end
+        end
+       end
+      if AttackTarget > 0 then
+        GlobalCurrentATK = cards[i].attack
+        GlobalAIIsAttacking = 1
+        return 1,i
+       end
+    end
+  end
 
   -----------------------------------------------------------
   -- If the opponent controls a facedown monster, and none of
   -- the opponent's other monsters are a good attack target,
   -- attack the facedown with the AI's strongest monster.
   -----------------------------------------------------------
-  if Get_Card_Count(AI.GetOppMonsterZones()) > 0 then
+  if #OppMon() > 0 then
    local i = GetStrongestAttackerIndex() 
 	if #cards > 0 then
       if cards[i].attack > 0 then

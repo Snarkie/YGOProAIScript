@@ -1674,6 +1674,11 @@ function ApplyATKBoosts(Cards)
       Cards[i].attack=Cards[i].attack+1
     end
   end
+  
+  -- fix cards with attack < 0 after attack boosts
+  for i=1,#Cards do
+    Cards[i].attack=math.max(Cards[i].attack,0)
+  end
 end
 
 -------------------------------------------------

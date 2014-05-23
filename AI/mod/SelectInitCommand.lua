@@ -157,13 +157,13 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
   -- Activate Mystical Space Typhoon if
   -- the opponent has any existing S/T.
   -------------------------------------
-  for i=1,#ActivatableCards do
+  --[[for i=1,#ActivatableCards do
     if ActivatableCards[i].id == 05318639 and
        Get_Card_Count(OppST()) > 0 then
 	   GlobalActivatedCardID = ActivatableCards[i].id
 	  return COMMAND_ACTIVATE,i
     end
-  end
+  end]]
   
   ------------------------------------------
   -- Activate Dark Hole only if the opponent

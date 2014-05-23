@@ -949,7 +949,7 @@ function LanceFilter(card)
   and not card:IsHasEffect(EFFECT_IMMUNE_EFFECT)
 end
 function ChainLance()
-	local ex,cg = Duel.GetOperationInfo(0, CATEGORY_DESTROY)
+	local ex,cg = Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_DESTROY)
 	if ex then
 		if cg:IsExists(function(c) return c:IsControler(player_ai) and c:IsCode(27243130) end, 1, nil) then
       --return true
@@ -957,44 +957,46 @@ function ChainLance()
   end
   local cc=Duel.GetCurrentChain()
   local cardtype = Duel.GetChainInfo(cc, CHAININFO_EXTTYPE)
-  local ex,cg = Duel.GetOperationInfo(0, CATEGORY_DESTROY)
+  local ex,cg = Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_DESTROY)
   local tg = Duel.GetChainInfo(cc, CHAININFO_TARGET_CARDS)
   local e = Duel.GetChainInfo(cc, CHAININFO_TRIGGERING_EFFECT)
   local p = Duel.GetChainInfo(cc, CHAININFO_TRIGGERING_PLAYER)
+  local source = Duel.GetAttacker()
+	local target = Duel.GetAttackTarget()
   if e and e:GetHandler():GetCode()==27243130 then
     return false
   end
-  if ex then
-    local g = cg:Filter(LanceFilter, nil):GetMaxGroup(Card.GetAttack)
-    if g then
-      GlobalTargetID = g:GetFirst():GetCode()
-      GlobalPlayer=1
+  if source and target then
+    if source:IsControler(player_ai) then
+      target = Duel.GetAttacker()
+      source = Duel.GetAttackTarget()
     end
-    return bit32.band(cardtype, TYPE_SPELL+TYPE_TRAP) ~= 0 and g
-  elseif tg then
-    local g = tg:Filter(LanceFilter, nil):GetMaxGroup(Card.GetAttack)
-    if g then
-      GlobalTargetID = g:GetFirst():GetCode() 
-      GlobalPlayer=1
-    end
-    return bit32.band(cardtype, TYPE_SPELL+TYPE_TRAP) ~= 0 and g and p~=player_ai
   end
-  if Duel.GetCurrentPhase() == PHASE_DAMAGE then
-		local source = Duel.GetAttacker()
-		local target = Duel.GetAttackTarget()
-    if source and target then
-      if source:IsControler(player_ai) then
-        target = Duel.GetAttacker()
-        source = Duel.GetAttackTarget()
-      end
-      if source:GetAttack() >= target:GetAttack() and math.max(source:GetAttack()-800,0) <= target:GetAttack() 
-      and source:IsPosition(POS_FACEUP_ATTACK) and target:IsPosition(POS_FACEUP_ATTACK) and target:IsControler(player_ai)
-      and not source:IsHasEffect(EFFECT_IMMUNE_EFFECT) 
-      then
-        GlobalTargetID=source:GetCode()
-        GlobalPlayer=2
-        return true
-      end
+  local g
+  if ex then
+    g = cg:Filter(LanceFilter, nil):GetMaxGroup(Card.GetAttack)
+  elseif tg then
+    g = tg:Filter(LanceFilter, nil):GetMaxGroup(Card.GetAttack)
+  end
+  if g and bit32.band(cardtype, TYPE_SPELL+TYPE_TRAP)>0 then
+    if source and target and target:IsCode(g:GetFirst():GetCode())
+    and source:IsPosition(POS_FACEUP_ATTACK) and target:IsPosition(POS_FACEUP_ATTACK)
+    and source:GetAttack()>target:GetAttack()-800
+    then
+      return false
+    end
+    GlobalTargetID = g:GetFirst():GetCode()
+    GlobalPlayer=1
+    return true
+  end
+  if Duel.GetCurrentPhase() == PHASE_DAMAGE and source and target then
+    if source:GetAttack() >= target:GetAttack() and math.max(source:GetAttack()-800,0) <= target:GetAttack() 
+    and source:IsPosition(POS_FACEUP_ATTACK) and target:IsPosition(POS_FACEUP_ATTACK) and target:IsControler(player_ai)
+    and not source:IsHasEffect(EFFECT_IMMUNE_EFFECT) 
+    then
+      GlobalTargetID=source:GetCode()
+      GlobalPlayer=2
+      return true
     end
   end
   return false

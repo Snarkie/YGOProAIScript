@@ -435,6 +435,34 @@ end
 NegBL={
   53804307,26400609,89399912,90411554 -- the 4 Dragon Rulers
 }
+
+function ToHandBlacklist(id) -- cards to not return to your opponent's hand 
+  for i=1,#ToHandBL do
+    if ToHandBL[i]==id then
+      return true
+    end
+  end
+  return false
+end
+
+ToHandBL={
+  70095154,57774843,92841002 -- Cyber Dragon, JD, Mythic Water Dragon
+}
+
+function DestroyBlacklist(id) -- cards to not destroy in your opponent's possession
+  for i=1,#DestroyBL do
+    if DestroyBL[i]==id then
+      return true
+    end
+  end
+  return false
+end
+
+DestroyBL={
+  19337371,07452945,14745409, -- Hysteric Sign, Noble Arms of Destiny, Gallatin
+  23562407,83438826 -- Caliburn, Arfeudutyr
+}
+
 -----------------------------------------------------
 -- Checks if the card's ID is in a list of spell/trap
 -- cards that work well when multiple copies are
@@ -526,6 +554,8 @@ function isUnchainableTogether(CardId)
      CardId == 12444060 or -- Artifact Sanctum
      CardId == 85103922 or -- Artifact Moralltach  - to prevent multiple ignitions
      CardId == 12697630 or -- Artifact Beagalltach - chained in a row for no reason
+     CardId == 77505534 or -- Facing the Shadows
+     CardId == 05318639 or -- Mystical Space Typhoon
      CardId == 53582587 then -- Torrential tribute   
 	return 1
   end
@@ -705,7 +735,8 @@ function CardIsScripted(CardId)
      CardId == 04779823 or CardId == 31924889 or  -- Michael, Arcanite Magician
      CardId == 34507039 or CardId == 14087893 or  -- Wiretap, Book of Moon
      CardId == 54447022 or CardId == 74845897 or  -- Soul Charge, Rekindling
-     CardId == 37576645 or CardId == 21954587   -- Reckless Greed, Mermail AbyssMegalo
+     CardId == 37576645 or CardId == 21954587 or  -- Reckless Greed, Mermail AbyssMegalo
+     CardId == 19665973 or CardId == 18964575  -- Battle Fader, Swift Scarecrow
     then  
 	return 1
   end

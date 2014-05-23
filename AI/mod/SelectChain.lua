@@ -214,7 +214,7 @@ result = 0
   -- Activate Mystical Space Typhoon at the End Phase
   -- if the opponent has any existing Spells/Traps.
   ---------------------------------------------------
-  if AI.GetCurrentPhase() == PHASE_END then
+  --[[if AI.GetCurrentPhase() == PHASE_END then
     for i=1,#cards do
       if cards[i].id == 05318639 and
          Get_Card_Count(OppST()) > 0 and Get_Card_Count_ID(AIST(),05318639, POS_FACEUP) == 0 then
@@ -242,7 +242,7 @@ result = 0
           end
         end
       end
-    end
+    end]]--
 
   -------------------------------------------------
   -- Activate Torrential Tribute if the opponent
@@ -387,7 +387,7 @@ result = 0
   -- AI should activate: Compulsory Evacuation Device,
   -- only if player has level 5+ or special summon monster on the field
   ---------------------------------------------
-   for i=1,#cards do
+   --[[for i=1,#cards do
    if cards[i].id == 94192409 then -- Compulsory Evacuation Device
     if Get_Card_Count_Rank(OppMon(), 0, ">", POS_FACEUP) > 0 or
 	   Get_Card_Count_Level(OppMon(), 5, ">=", POS_FACEUP) > 0 or 
@@ -396,7 +396,7 @@ result = 0
       return 1,i
      end
    end
- end
+ end]]
    
   ---------------------------------------------
   -- AI should activate: Honest, if any AI's 

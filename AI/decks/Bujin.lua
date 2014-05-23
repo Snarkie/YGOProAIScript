@@ -405,10 +405,10 @@ function HareTarget(cards)
   return {IndexByID(cards,GlobalTargetID)}
 end
 function QuilinTarget(cards)
-  return BestTargets(cards)
+  return BestTargets(cards,1,TARGET_DESTROY)
 end
 function CentipedeTarget(cards)
-  return BestTargets(cards)
+  return BestTargets(cards,1,TARGET_DESTROY)
 end
 function HirumeTarget(cards)
   if GlobalCardMode==1 then

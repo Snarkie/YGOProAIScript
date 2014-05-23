@@ -55,9 +55,19 @@ function ExpectedDamage()
   end
   return result
 end
-function BestTargets(cards,count,DestroyCheck,filter)
+TARGET_DESTROY  = 1
+TARGET_TOGRAVE  = 2
+TARGET_BANISH   = 3
+TARGET_TOHAND   = 4
+TARGET_TODECK   = 5
+TARGET_FACEDOWN = 6
+function BestTargets(cards,count,target,filter,immuneCheck)
   local result = {}
   local AIMon=AIMon()
+  local DestroyCheck = false
+  if target == true then 
+    target=TARGET_DESTROY 
+  end
   if count == nil then count = 1 end
   ApplyATKBoosts(AIMon)
   local AIAtt=Get_Card_Att_Def(AIMon,"attack",">",nil,"attack")
@@ -65,8 +75,10 @@ function BestTargets(cards,count,DestroyCheck,filter)
     cards[i].index = i
     cards[i].prio = 0
     if bit32.band(cards[i].type,TYPE_MONSTER)>0 then
-      if bit32.band(cards[i].position, POS_FACEUP)>0 then
-        if cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)>0 and DestroyCheck
+      if bit32.band(cards[i].position, POS_FACEUP)>0
+      or bit32.band(cards[i].status,STATUS_IS_PUBLIC)>0
+      then
+        if cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)>0 and target==TARGET_DESTROY 
         or cards[i]:is_affected_by(EFFECT_IMMUNE)>0
         then
           cards[i].prio = 1
@@ -80,8 +92,8 @@ function BestTargets(cards,count,DestroyCheck,filter)
         cards[i].prio = 2
       end
     else
-      if cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)>0 and DestroyCheck
-      or cards[i]:is_affected_by(EFFECT_IMMUNE)>0
+      if cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)>0 and target==TARGET_DESTROY
+      or cards[i]:is_affected_by(EFFECT_IMMUNE)>0 
       or bit32.band(cards[i].status,STATUS_LEAVE_CONFIRMED)>0
       then
         cards[i].prio = 1
@@ -98,6 +110,12 @@ function BestTargets(cards,count,DestroyCheck,filter)
     end
     if cards[i].owner == 1 then 
       cards[i].prio = -1 * cards[i].prio
+    end
+    if (bit32.band(cards[i].position, POS_FACEUP)>0 or bit32.band(cards[i].status,STATUS_IS_PUBLIC)>0)
+    and (target == TARGET_TOHAND and ToHandBlacklist(cards[i].id)   
+    or target == TARGET_DESTROY and DestroyBlacklist(cards[i].id))
+    then
+      cards[i].prio = 0
     end
   end
   table.sort(cards,function(a,b) return a.prio > b.prio end)
@@ -869,7 +887,7 @@ function GadgetOnSelectChain(cards,only_chains_by_player)
 end
 function GadgetOnSelectEffectYesNo(id,triggeringCard)
   local result = nil
-  if id == 42940404 then
+  if id == 42940404 or IsGadget(id) or id == 18063928 then
     result = 1
   end
   return result

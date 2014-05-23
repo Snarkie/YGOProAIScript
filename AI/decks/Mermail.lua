@@ -548,9 +548,6 @@ function MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   cards=AIHand()
-  for i=1,#cards do
-    --print(i..": ID: "..cards[i].id..", Prio: "..MermailGetPriority(cards[i].id))
-  end
   --
   return nil
 end
@@ -943,14 +940,14 @@ function MermailOnSelectEffectYesNo(id,triggeringCard)
       result = 0
     end
   end
-  if id==74298287 or id==59170782 then
+  if id==74298287 or id==59170782 or id == 78868119 then
     result = 1
   end
   return result
 end
 
 MermailAtt={
-  21954587,15914410 -- Megalo,Mechquipped Angineer
+  21954587,15914410,70983986 -- Megalo,Mechquipped Angineer,Dewloren
 }
 MermailDef={
   59170782,50789693,22446869,  -- Trite, Kappa,Teus
