@@ -34,9 +34,11 @@ function HandCheck(level)
 end
 function SubGroup(cards,filter,opt)
   result = {}
-  for i=1,#cards do
-    if opt and filter(cards[i],opt) or opt==nil and filter(cards[i]) then
-      result[#result+1]=cards[i]
+  if cards then
+    for i=1,#cards do
+      if opt and filter(cards[i],opt) or opt==nil and filter(cards[i]) then
+        result[#result+1]=cards[i]
+      end
     end
   end
   return result
@@ -239,10 +241,10 @@ function SummonMachinaFortress(card)
   return result and (OverExtendCheck() or FieldCheck(7)==1)
 end
 function SummonSharkKnightGadget(cards)
-  local cg=Duel.GetMatchingGroup(SharkKnightFilter,1-player_ai,LOCATION_MZONE,0,nil)
-  if cg and cg:GetCount() > 0 and Duel.GetFlagEffect(player_ai,48739166)==0 then
-    local g = cg:GetMaxGroup(Card.GetAttack)
-    return g:GetFirst():GetAttack()>=2300 and HasID(AIExtra(),48739166,true)
+  local targets=SubGroup(OppMon(),SharkKnightFilter)
+  if MermailCheck() and #targets > 0 and Duel.GetFlagEffect(player_ai,48739166)==0 then
+    table.sort(targets,function(a,b) return a.attack>b.attack end)
+    return target[1].attack>=2300 and HasID(AIExtra(),48739166,true)
   end
   return false
 end
@@ -806,7 +808,7 @@ function StardustSparkFilter(card,id)
 end
 function ChainStardustSpark()
   local cardtype = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_EXTTYPE)
-  local ex,cg = Duel.GetOperationInfo(0, CATEGORY_DESTROY)
+  local ex,cg = Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_DESTROY)
   local tg = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TARGET_CARDS)
   local e = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
   if e and e:GetHandler():GetCode()==83994433 then
@@ -887,7 +889,9 @@ function GadgetOnSelectChain(cards,only_chains_by_player)
 end
 function GadgetOnSelectEffectYesNo(id,triggeringCard)
   local result = nil
-  if id == 42940404 or IsGadget(id) or id == 18063928 then
+  if id == 42940404 or IsGadget(id) or id == 18063928 
+  or id == 53573406 
+  then
     result = 1
   end
   return result

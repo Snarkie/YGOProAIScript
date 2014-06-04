@@ -34,7 +34,9 @@ function OnSelectEffectYesNo(id,triggeringCard)
   if id  == 72989439 then  -- Black Luster Soldier - Envoy of the Beginning
     result = 1
   end
-  if id == 99365553 or id == 51858306 or id == 92661479 then -- Lightpulsar, Eclipse, Bounzer
+  if id == 99365553 or id == 51858306 or id == 92661479 -- Lightpulsar, Eclipse, Bounzer
+  or id == 94283662 -- Trance Archfiend
+  then 
     result = 1
   end
   if id  == 84013237 then -- Number 39: Utopia

@@ -386,9 +386,8 @@ function SummonDweller()
   return false
 end
 function SummonSharkKnightMermail(cards)
-  local cg=Duel.GetMatchingGroup(SharkKnightFilter,1-player_ai,LOCATION_MZONE,0,nil)
-  if MermailCheck() and cg and cg:GetCount() > 0 and Duel.GetFlagEffect(player_ai,48739166)==0 then
-    local g = cg:GetMaxGroup(Card.GetAttack)
+  local targets=SubGroup(OppMon(),SharkKnightFilter)
+  if MermailCheck() and #targets > 0 and Duel.GetFlagEffect(player_ai,48739166)==0 then
     return true
   end
   return false
@@ -766,7 +765,7 @@ function MechquippedFilter(card,id)
 end
 function ChainMechquipped()
   local cardtype = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_EXTTYPE)
-  local ex,cg = Duel.GetOperationInfo(0, CATEGORY_DESTROY)
+  local ex,cg = Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_DESTROY)
   local tg = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TARGET_CARDS)
   local e = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
   if ex then

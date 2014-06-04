@@ -207,7 +207,7 @@ function UseFalcon()
   return OPTCheck(37445295) and ShadollPriorityCheck(AIGrave(),PRIO_TOFIELD,1,FalconFilter)>1
 end
 function UseHedgehog()
-  return OPTCheck(04939890) and NeedsCard(44394295,AIDeck(),AIHand(),true)
+  return OPTCheck(04939890) and HasID(AIDeck(),44394295,true)
 end
 function LizardFilter(c)
   return c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0

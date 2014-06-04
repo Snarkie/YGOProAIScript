@@ -230,14 +230,20 @@ function SummonOmegaBujin()
   and Duel.GetCurrentPhase() == PHASE_MAIN1 and Chance((#cards-2)*33) 
 end
 function SharkKnightFilterBujin(c)
-	return c:IsPosition(POS_FACEUP_ATTACK) and not c:IsType(TYPE_TOKEN) 
-  and bit.band(c:GetSummonType(),SUMMON_TYPE_SPECIAL)>0
-  and c:IsHasEffect(EFFECT_INDESTRUCTABLE_EFFECT) and c:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE)
-  and c:IsCanBeEffectTarget() and not c:GetCode(22110647)
+  return bit32.band(c.position,POS_FACEUP_ATTACK)>0 
+  and bit32.band(c.type,TYPE_TOKEN)==0
+  and bit32.band(c.summon_type,SUMMON_TYPE_SPECIAL)>0 
+  and c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0 
+  and c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)>0
+  and c:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE)>0 
+  and c.id~=22110647
 end
 function SummonSharkKnightBujin(cards)
-  local cg=Duel.GetMatchingGroup(SharkKnightFilterBujin,1-player_ai,LOCATION_MZONE,0,nil)
-  return cg and cg:GetCount() > 0
+  local targets=SubGroup(OppMon(),SharkKnightFilter)
+  if #targets > 0 and Duel.GetFlagEffect(player_ai,48739166)==0 then
+    return true
+  end
+  return false
 end
 function BujinOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local Activatable = cards.activatable_cards
@@ -531,7 +537,7 @@ function HareFilterBattle(card)
   --and not card:IsHasEffect(EFFECT_IMMUNE_EFFECT) 
 end
 function ChainHare()
-  local ex,cg = Duel.GetOperationInfo(0, CATEGORY_DESTROY)
+  local ex,cg = Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_DESTROY)
   local tg = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TARGET_CARDS)
   local e = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
   if e and e:GetHandler():GetCode()==30338466 and e:GetHandlerPlayer()==player_ai then
@@ -666,7 +672,7 @@ end
 function ChainOmega()
   local cc=Duel.GetCurrentChain()
   local cardtype = Duel.GetChainInfo(cc, CHAININFO_EXTTYPE)
-  local ex,cg = Duel.GetOperationInfo(0, CATEGORY_DESTROY)
+  local ex,cg = Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_DESTROY)
   local tg = Duel.GetChainInfo(cc, CHAININFO_TARGET_CARDS)
   local e = Duel.GetChainInfo(cc, CHAININFO_TRIGGERING_EFFECT)
   local p = Duel.GetChainInfo(cc, CHAININFO_TRIGGERING_PLAYER)

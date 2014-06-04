@@ -628,9 +628,10 @@ function AHATarget(cards)
   if HasID(cards,23649496) and SummonPlainCoat() then
     result=IndexByID(cards,23649496)
   end
-  --[[if HasID(cards,48739166) and SummonSharkKnight() then 
+  if HasID(cards,48739166) and SummonSharkKnight() then 
+    print("summon shark knight")
     result=IndexByID(cards,48739166)
-  end]]
+  end
   if HasID(cards,22653490) and SummonChidori() then
     result=IndexByID(cards,22653490)
   end
@@ -889,7 +890,7 @@ function RemovalCheck(id)
   return false
 end
 function NegateCheck()
-  local ex,cg = Duel.GetOperationInfo(0,CATEGORY_DISABLE)
+  local ex,cg = Duel.GetOperationInfo(Duel.GetCurrentChain(),CATEGORY_DISABLE)
   if ex then return cg end
   return false
 end
@@ -902,7 +903,7 @@ function ChainSafeZone()
     end
   end	
   local cardtype = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_EXTTYPE)
-  local ex,cg = Duel.GetOperationInfo(0, CATEGORY_DESTROY)
+  local ex,cg = Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_DESTROY)
   local tg = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TARGET_CARDS)
   local e = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
   if e and e:GetHandler():GetCode()==38296564 then
@@ -957,7 +958,7 @@ function ChainLance()
   end
   local cc=Duel.GetCurrentChain()
   local cardtype = Duel.GetChainInfo(cc, CHAININFO_EXTTYPE)
-  local ex,cg = Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_DESTROY)
+  local ex,cg = Duel.GetOperationInfo(cc, CATEGORY_DESTROY)
   local tg = Duel.GetChainInfo(cc, CHAININFO_TARGET_CARDS)
   local e = Duel.GetChainInfo(cc, CHAININFO_TRIGGERING_EFFECT)
   local p = Duel.GetChainInfo(cc, CHAININFO_TRIGGERING_PLAYER)

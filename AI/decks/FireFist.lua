@@ -373,17 +373,19 @@ function SummonBelzebuth()
   return #AICards<#OppCards and Chance(math.min(math.max(0,(#OppField-#AIField-1)*34),100))
 end
 function SharkKnightFilter(c)
-	return c:IsPosition(POS_FACEUP_ATTACK) and not c:IsType(TYPE_TOKEN) 
-  and bit.band(c:GetSummonType(),SUMMON_TYPE_SPECIAL)==SUMMON_TYPE_SPECIAL
-  and c:IsCanBeEffectTarget()
-  and (c:IsType(TYPE_XYZ+TYPE_SYNCHRO+TYPE_RITUAL+TYPE_FUSION) or c:GetAttack()>=2000)
+  return bit32.band(c.position,POS_FACEUP_ATTACK)>0 
+  and bit32.band(c.type,TYPE_TOKEN)==0
+  and (bit32.band(c.type,TYPE_XYZ+TYPE_SYNCHRO+TYPE_RITUAL+TYPE_FUSION)>0 or c.level>4)
+  and bit32.band(c.summon_type,SUMMON_TYPE_SPECIAL)>0 
+  and c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0 
+  and c.attack>=2000
 end
 function SummonSharkKnight(cards)
-  local cg=Duel.GetMatchingGroup(SharkKnightFilter,1-player_ai,LOCATION_MZONE,0,nil)
+  local targets=SubGroup(OppMon(),SharkKnightFilter)
   if HasID(cards,83994433,true) or HasID(cards,39765958,true) then return false end
-  if cg and cg:GetCount() > 0 and Duel.GetFlagEffect(player_ai,48739166)==0 and not MermailCheck() then
-    local g = cg:GetMaxGroup(Card.GetAttack)
-    return Chance(50) or g:GetFirst():GetAttack()>=2400
+  if #targets>0 and Duel.GetFlagEffect(player_ai,48739166)==0 and not MermailCheck() then
+    table.sort(targets,function(a,b) return a.attack>b.attack end)
+    return Chance(50) or targets[1].attack>=2400
   end
   return false
 end
@@ -946,7 +948,7 @@ function FireFistCard(cards, minTargets, maxTargets, triggeringID, triggeringCar
   return nil
 end
 function ChainTensen()
-	local ex,cg = Duel.GetOperationInfo(0, CATEGORY_DESTROY)
+	local ex,cg = Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_DESTROY)
 	if RemovalCheck(44920699) then
     return true
 	end
@@ -986,12 +988,12 @@ function TenkenFilter(card)
 	return card:IsControler(player_ai) and card:IsType(TYPE_MONSTER) and card:IsLocation(LOCATION_MZONE) and card:IsRace(RACE_BEASTWARRIOR) and card:IsPosition(POS_FACEUP)
 end
 function ChainTenken()
-	local ex,cg = Duel.GetOperationInfo(0, CATEGORY_DESTROY)
+	local ex,cg = Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_DESTROY)
 	if RemovalCheck(70329348) then
     return true
   end
   local cardtype = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_EXTTYPE)
-  local ex,cg = Duel.GetOperationInfo(0, CATEGORY_DESTROY)
+  local ex,cg = Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_DESTROY)
   local tg = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TARGET_CARDS)
   if ex then
     local g = cg:Filter(TenkenFilter, nil):GetMaxGroup(Card.GetAttack)
@@ -1010,7 +1012,7 @@ function ChainTenken()
   end
 end
 function ChainMaxxC()
-  return Duel.GetOperationInfo(0, CATEGORY_SPECIAL_SUMMON) and  Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_PLAYER)~=player_ai  
+  return Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_SPECIAL_SUMMON) and  Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_PLAYER)~=player_ai  
 end
 function NegateBPCheck(card)
   if card:is_affected_by(EFFECT_DISABLE)>0 or card:is_affected_by(EFFECT_DISABLE_EFFECT)>0 then
