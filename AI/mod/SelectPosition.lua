@@ -101,7 +101,9 @@ function OnSelectPosition(id, available)
  if Position then result=Position end
  Position = ShadollOnSelectPosition(id,available)
  if Position then result=Position end
-  
+ Position = SatellarknightOnSelectPosition(id,available)
+ if Position then result=Position end
+    
   -- check if the selected position is valid
   ----print("is the position valid?", band(result,available))
   if band(result,available) == 0 then

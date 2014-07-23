@@ -41,6 +41,10 @@ result=ShadollOnSelectChain(cards,only_chains_by_player)
 if result ~= nil then
   return result[1],result[2]
 end
+result=SatellarknightOnSelectChain(cards,only_chains_by_player)
+if result ~= nil then
+  return result[1],result[2]
+end
 result = 0
  
   ------------------------------------------

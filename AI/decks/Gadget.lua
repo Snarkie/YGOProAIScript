@@ -726,7 +726,7 @@ function GadgetOnSelectCard(cards, minTargets, maxTargets,ID,triggeringCard)
   if ID == 42940404 then
     return GearframeTarget(cards)
   end
-  if ID == 97077563 then
+  if ID == 97077563 and not SatellarknightCheck() then
     return CotHTarget(cards)
   end
   if ID == 50078509 then

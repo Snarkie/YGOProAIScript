@@ -269,7 +269,6 @@ function HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_ACTIVATE,IndexByID(Activatable,19310321)}
   end
   if HasID(Activatable,92365601) and UseRUM() then   -- Rank-Up Magic - Limited Barian's Force
-    GlobalCardMode = 1
     return {COMMAND_ACTIVATE,IndexByID(Activatable,92365601)}
   end
   if HasID(Activatable,84220251) and UseHeraldryReborn() then 
@@ -493,10 +492,11 @@ function HeraldicToHand(cards)
 end
 function LavalvalChainTarget(cards)
     local result = nil
-    if GlobalCardMode == 1 then
-      GlobalCardMode = nil
+    if SatellarknightCheck() then
+      result = SatellarknightAdd(cards,PRIO_TOGRAVE)
+    else
+      result = HeraldicToGrave(cards,1)
     end
-    result = HeraldicToGrave(cards,1)
     if result then return result end
     return {math.random(#cards)}
 end
@@ -629,7 +629,6 @@ function AHATarget(cards)
     result=IndexByID(cards,23649496)
   end
   if HasID(cards,48739166) and SummonSharkKnight() then 
-    print("summon shark knight")
     result=IndexByID(cards,48739166)
   end
   if HasID(cards,22653490) and SummonChidori() then

@@ -29,6 +29,7 @@ function GetAttacker()
 end
 
 function OnSelectYesNo(description_id)
+  print(description_id)
 	if description_id == 30 then
     GlobalAIIsAttacking = true
     local cards = nil
@@ -50,6 +51,13 @@ function OnSelectYesNo(description_id)
       return 0
     end
 	end
+  if description_id == 1457766049 then  -- Star Seraph Sovereign
+    if FieldCheck(4) == 1 then
+      return 1
+    else
+      return 0
+    end
+  end
 	return -1
 end
 

@@ -399,7 +399,6 @@ function ShadollOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Activatable,82633039,false,1322128625) and UseSkyblaster() then
-    GlobalCardMode=1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Activatable,00581014,false,9296225) then
@@ -616,16 +615,8 @@ function EmeralTarget(cards,count)
   for i=1,count do result[i] = cards[i].index end
   return result
 end
-function SkyblasterTarget(cards)
-  local result = nil
-  if GlobalCardMode == 1 then
-    result = {1,2}
-  else
-    result = BestTargets(cards)
-  end
-  GlobalCardMode=nil
-  if result==nil then result={math.random(#cards)} end
-  return result
+function SkyblasterTarget(cards,count)
+  return BestTargets(cards,count)
 end
 function InstantFusionTarget(cards)
   local result = nil
@@ -714,12 +705,16 @@ function SoulChargeTarget(cards,min,max)
   else
     count = 1
   end
-  for i=1,#cards do
-    cards[i].index=i
-  end
-  table.sort(cards,function(a,b) return a.attack>b.attack end)
-  for i=1,count do
-    result[i]=cards[i].index
+  if SatellarknightCheck() then
+    result = SatellarknightAdd(cards,PRIO_TOFIELD,count)
+  else
+    for i=1,#cards do
+      cards[i].index=i
+    end
+    table.sort(cards,function(a,b) return a.attack>b.attack end)
+    for i=1,count do
+      result[i]=cards[i].index
+    end
   end
   return result
 end
@@ -789,7 +784,7 @@ function ShadollOnSelectCard(cards, minTargets, maxTargets,triggeringID,triggeri
     return EmeralTarget(cards,minTargets)
   end
   if ID == 82633039 then
-    return SkyblasterTarget(cards)
+    return SkyblasterTarget(cards,minTargets)
   end
   if ID == 01845204 then
     return InstantFusionTarget(cards)

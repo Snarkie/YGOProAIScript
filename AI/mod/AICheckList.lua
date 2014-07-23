@@ -263,58 +263,40 @@ end
 -- of cards to never normal summon or set, and returns
 -- True or False depending on if it's in the list.
 ---------------------------------------------------------
+NSBL={
+   -- 
+19665973,98777036,50933533,18964575,   -- Battle Fader, Trag,AGG Dragon, Scarecrow
+53804307,89399912,44330098,26400609,   -- Blaster, Tempest,Gorz, Tidal
+53797637,89185742,90411554,27415516,   -- Burner, Lightning,Redox, Stream
+07902349,70903634,91020571,33396948,   -- Left Arm, Right Arm,Reactan, Exodia
+70095154,88264978,44519536,08124921,   -- CyDra, REDMD,Left Leg, Right Leg
+74530899,37742478,83039729,63176202,   -- Metaion, Honest,Grandmaster, Shogun                   
+40240595,40640057,75498415,51945556,   -- Cocoon of Evolution, Kuriboh,Sirocco, Zaborg the Thunder Monarch 
+74131780,91949988,57116033,00423585,   -- Exiled Force, Gaia Dragon, Winged Kuriboh, Summoner Monk 
+45812361,37742478,09748752,78364470,   -- Cardcar D, Honest, Caius the Shadow Monarch, Constellar Pollux
+66762372,92572371,23434538,03534077,   -- Boar, Buffalo, Maxx "C", Wolfbark
+01662004,06353603,43748308,39699564,   -- Spirit, Bear, Dragon, Leopard
+44860890,93294869,70355994,17475251,   -- Raven, Wolf, Gorilla, Hawk
+80344569,30929786,97268402,41269771,   -- Neo-Spacian Grand Mole, FF Chicken, Effect Veiler, Constellar Algiedi
+87255382,19310321,82293134,60316373,   -- Amphisbaena, Twin Eagle, Heraldic Beasts: Leo, Aberconway
+56921677,86445415,45705025,82315772,   -- Basilisk, Red Gadget, Unicorn, Eale
+42940404,05556499,41172955,13839120,   -- Machina Gearframe, Machina Fortress, Green Gadget, Yellow Gadget
+53573406,32339440,39284521,18063928,   -- Masked Chameleon, Bujin Yamato, Machina Cannon, Tin Goldfish
+68601507,59251766,53678698,23979249,  -- Bujin Crane, Hare, Bujin Mikazuchi, Arasuda
+88940154,50474354,05818294,69723159,  -- Centipede, Peacock, Turtle, Quilin
+21954587,22446869,37104630,00706925,  -- Mermail AbyssMegalo, Mermail Abyssteus, Atlantean Heavy Infantry, Atlantean Marksman
+58471134,22076135,37781520,74311226,  -- Mermail Apysspike, Mermail Abyssturge, Mermail Abyssleed, Atlantean Dragoons
+78868119,26400609,23899727,74298287,  -- Deep Sea Diva, Tidal, Dragon Ruler of Waterfalls Mermail Abysslinde, Mermail Abyssdine
+30328508,77723643,37445295,04939890,  -- Shadoll Lizard, Shadoll Dragon, Shadoll Falcon, Shadoll Hedgehog
+85103922,12697630,03717252,24062258,  -- Artifact Moralltach, Artifact Beagalltach, Shadoll Beast, Secret Sect Druid Dru
+75878039,02273734,38667773,00109227,  -- Satellarknights Deneb,Altair,Vega,Sirius
+38331564,91110378,69293721  -- Star Seraphs Scepter,Sovereign,Mermail Abyssgunde
+}
 function NormalSummonBlacklist(CardId) 
-  if CardId == 50933533 or CardId == 18964575 or   -- AGG Dragon, Scarecrow
-     CardId == 19665973 or CardId == 98777036 or   -- Battle Fader, Trag
-     CardId == 44330098 or CardId == 26400609 or   -- Gorz, Tidal
-     CardId == 53804307 or CardId == 89399912 or   -- Blaster, Tempest
-     CardId == 90411554 or CardId == 27415516 or   -- Redox, Stream
-     CardId == 53797637 or CardId == 89185742 or   -- Burner, Lightning
-     CardId == 91020571 or CardId == 33396948 or   -- Reactan, Exodia
-     CardId == 07902349 or CardId == 70903634 or   -- Left Arm, Right Arm
-     CardId == 44519536 or CardId == 08124921 or   -- Left Leg, Right Leg
-     CardId == 70095154 or CardId == 88264978 or   -- CyDra, REDMD
-     CardId == 83039729 or CardId == 63176202 or   -- Grandmaster, Shogun
-     CardId == 74530899 or CardId == 37742478 or   -- Metaion, Honest
-     CardId == 75498415 or CardId == 51945556 or   -- Sirocco, Zaborg the Thunder Monarch                      
-     CardId == 40240595 or CardId == 40640057 or   -- Cocoon of Evolution, Kuriboh
-     CardId == 57116033 or CardId == 00423585 or   -- Winged Kuriboh, Summoner Monk
-     CardId == 74131780 or CardId == 91949988 or   -- Exiled Force, Gaia Dragon - the Thunder Charger
-     CardId == 09748752 or CardId == 78364470 or   -- Caius the Shadow Monarch, Constellar Pollux    
-     CardId == 45812361 or CardId == 37742478 or   -- Cardcar D, Honest
-     CardId == 23434538 or CardId == 03534077 or   -- Maxx "C", Wolfbark
-     CardId == 66762372 or CardId == 92572371 or   -- Boar, Buffalo
-     CardId == 43748308 or CardId == 39699564 or   -- Dragon, Leopard
-     CardId == 01662004 or CardId == 06353603 or   -- Spirit, Bear
-     CardId == 70355994 or CardId == 17475251 or   -- Gorilla, Hawk
-     CardId == 44860890 or CardId == 93294869 or   -- Raven, Wolf
-     CardId == 97268402 or CardId == 41269771 or   -- Effect Veiler, Constellar Algiedi
-     CardId == 80344569 or CardId == 30929786 or   -- Neo-Spacian Grand Mole, FF Chicken
-     CardId == 82293134 or CardId == 60316373 or   -- Heraldic Beasts: Leo, Aberconway
-     CardId == 87255382 or CardId == 19310321 or   -- Amphisbaena, Twin Eagle
-     CardId == 45705025 or CardId == 82315772 or   -- Unicorn, Eale
-     CardId == 56921677 or CardId == 86445415 or   -- Basilisk, Red Gadget
-     CardId == 41172955 or CardId == 13839120 or   -- Green Gadget, Yellow Gadget
-     CardId == 42940404 or CardId == 05556499 or   -- Machina Gearframe, Machina Fortress
-     CardId == 39284521 or CardId == 18063928 or   -- Machina Cannon, Tin Goldfish
-     CardId == 53573406 or CardId == 32339440 or   -- Masked Chameleon, Bujin Yamato
-     CardId == 53678698 or CardId == 23979249 or  -- Bujin Mikazuchi, Arasuda
-     CardId == 68601507 or CardId == 59251766 or  -- Bujin Crane, Hare
-     CardId == 05818294 or CardId == 69723159 or  -- Turtle, Quilin
-     CardId == 88940154 or CardId == 50474354 or  -- Centipede, Peacock
-     CardId == 37104630 or CardId == 00706925 or  -- Atlantean Heavy Infantry, Atlantean Marksman
-     CardId == 21954587 or CardId == 22446869 or  -- Mermail AbyssMegalo, Mermail Abyssteus
-     CardId == 37781520 or CardId == 74311226 or  -- Mermail Abyssleed, Atlantean Dragoons
-     CardId == 58471134 or CardId == 22076135 or  -- Mermail Apysspike, Mermail Abyssturge
-     CardId == 23899727 or CardId == 74298287 or  -- Mermail Abysslinde, Mermail Abyssdine
-     CardId == 78868119 or CardId == 26400609 or  -- Deep Sea Diva, Tidal, Dragon Ruler of Waterfalls
-     CardId == 37445295 or CardId == 04939890 or  -- Shadoll Falcon, Shadoll Hedgehog
-     CardId == 30328508 or CardId == 77723643 or  -- Shadoll Lizard, Shadoll Dragon
-     CardId == 03717252 or CardId == 24062258 or  -- Shadoll Beast, Secret Sect Druid Dru
-     CardId == 85103922 or CardId == 12697630 or  -- Artifact Moralltach, Artifact Beagalltach
-     CardId == 69293721 -- Mermail Abyssgunde
-     then 
-	return 1 
+  for i=1,#NSBL do
+    if NSBL[i]==CardId then
+      return 1
+    end
   end
   return 0
 end
@@ -381,7 +363,9 @@ SSBL={
 95169481,70583986,74371660, -- Diamond Dire Wolf, Dewloren Tiger King of the Ice Barrier, Mermail Abyssgaios
 73964868,29669359,82633039, -- Pleiades, Volcasaurus, Skyblaster Castel
 00581014,33698022,04779823, -- Emeral, Moonlight Rose, Michael
-31924889,08561192 -- Arcanite Magician, Leoh
+31924889,08561192,63504681, -- Arcanite Magician, Leoh, Rhongomiant
+93568288,56638325,00109254, -- Number 80,Delteros, Triveil
+17412721,38273745,21501505 -- Noden, ouroboros, Cairngorgon
 }
 
 
@@ -612,133 +596,80 @@ end
 
 ----------------------------------------------------
 -- Checks if the selected card is already scripted 
--- in "OnSelectInitCommand" or "SelectChain" functions.
+-- in "OnSelectInitCommand", "SelectChain" functions.
 ----------------------------------------------------
+ScriptedCards ={
+27970830,54031490,15259703,79875176,  -- Gateway of the Six, Shien's Smoke Signal, Toon World, Toon Cannon Soldier 
+58775978,82878489,41426869,14536035,  -- Nightmare's Steelcage, Shine Palace,Black Illusion Ritual, Dark Grepher
+33420078,09411399,65192027,15561463,  -- Plaguespreader Zombie, Malicious, Dark Armed Dragon, Gauntlet Launcher
+06353603,73964868,38495396,44635489,  -- Fire Fist - Bear, Constellar Pleiades,Ptolemy M7, Siat
+70908596,41142615,68597372,47217354,  -- Constellar Kaust, The Cheerful CoffinWind-Up Zenmaister, Fabled Raven
+74131780,36916401,12014404,34086406,  -- Exiled Force, Burnin' Boxin' Spirit,Gagaga Gunman, Lavalval Chain
+00423585,40640057,95727991,71413901,  -- Summoner Monk, Kuriboh,Catapult Turtle, Breaker the Magical Warrior
+83133491,18807108,87880531,72302403,  -- Zero Gravity, Spellbinding Circle,Diffusion Wave-Motion, Swords of Revealing Light
+83746708,25774450,78156759,72892473,  -- Mage Power, Mystic Box,Wind-Up Zenmaines, Number 61: Volcasaurus		   
+72892473,72892473,22110647,16435215,  -- Tiras, Card Destruction,Dracossack, Dragged Down into the Grave		   
+93554166,74117290,81439173,40240595,  -- Dark World Lightning, Dark World Dealingd,Foolish Burial, Cocoon of Evolution		    		   
+72989439,23265313,68005187,98045062,  -- Black Luster Soldier - Envoy of the Beginning, Cost Down,Soul Exchange, Enemy Controller		   
+55713623,05758500,43973174,22046459,  -- Shrink, Soul Release,The Flute of Summoning Dragon, Megamorph		   
+46910446,12607053,70231910,59385322,  -- Chthonian Alliance, Waboku	,Dark Core, Core Blaster	   
+46009906,91595718,27174286,94192409,  -- Beast Fangs, Book of Secret Arts,Return from the Different Dimension, Compulsory Evacuation Device            
+19596712,72932673,53610653,69243953,  -- Abyss-scale of Cetus, Abyss-scale of the Mizuchi,Bound Wand, Butterfly Dagger - Elma         
+63851864,88190790,08719957,86198326,  -- Break! Draw!, Assault Armor, Abyss-scale of the Kraken, 7 Completed          
+40830387,37457534,79965360,84740193,  -- Ancient Gear Fist, Ancient Gear Tank,Amazoness Heirloom, Buster Rancher             
+05183693,90374791,00303660,53586134,  -- Amulet of Ambition, Armed Changer,Amplifier, Bubble Blaster          
+65169794,40619825,00242146,61127349,  -- Black Pendant, Axe of Despair,Ballista of Rampart Smashing, Big Bang Shot                
+50152549,41587307,18937875,24668830,  -- Paralyzing Potion, Broken Bamboo Sword,Burning Spear, Germ Infection           
+75560629,39897277,46967601,56948373,  -- Flint, Elf's Light,Cursed Bill, Mask of the accursed       
+53129443,07165085,05318639,19613556,  -- Dark Hole, Bait Doll, Mystical Space Typhoon, Heavy Storm           
+31036355,93816465,09596126,01475311,  -- Swap, Zero Gardna,Chaos Sorcerer, Allure of darkness        
+53567095,74848038,04178474,16255442,  -- Icarus, Monster Reincarnation,Raigeki Break, Beckoning                  
+47387961,82732705,95503687,22624373,  -- #8 Genome, Sin Truth,Lumina, Lyla         
+51452091,10026986,37742478,94283662,  -- Royal Decree, Worm King,Honest, Trance         
+57774843,53582587,55794644,500000090, -- Judgment Dragon, Torrential Tribute,Hyperion, Toon Kingdom 
+41420027,84749824,84013237,96216229,  -- Solemn Judgment, Solemn WarningNumber 39: Utopia, Gladiator Beast War Chariotthen
+61257789,35952884,44508094,58120309,  -- Stardust Dragon/Assault Mode, Shooting Quasar DragonStardust Dragon, Starlight Road
+50078509,14315573,24696097,50091196,  -- Fiendish Chain, Negate AttackShooting Star Dragon,Formula Synchron   
+44095762,67987611,29267084,59616123,  -- Mirror Force, Amazoness ArchersShadow Spell, Trap Stun	 
+70355994,10719350,39699564,30929786,  -- FireFormation Tenken, FireFist GorillaFireFist Leopard, Chicken
+21350571,23434538,44920699,70329348,  -- Horn of the Phantom Beast, Maxx "C"FireFormation Tensen 
+43748308,97268402,96381979,19059929,  -- FireFist Dragon, Effect VeilerFireFist Tiger King, FireFormation Gyokko
+58504745,36499284,92572371,78474168,  -- FireFist Cardinal, FireFormation YokoFireFist Buffalo, Breakthrough Skill
+46772449,58504745,77538567,70342110,  -- Noblswarm Belzebuth, FireFist Cardinal Dark Bribe, Dimensional Prison                       
+19310321,45705025,60316373,87255382,  -- Twin Eagle, UnicornHeraldic Beasts: Aberconway, Amphisbaena
+59048135,81439173,61314842,84220251,  -- Heraldry Augmentation, Foolish BurialAdvanced Heraldry Art, Heraldry Reborn
+38296564,92365601,47387961,23649496,  -- Safe Zone, Rank-Up Magic: Limited Barian's Force,Number 8, Number 18       
+44508094,90411554,27243130,94656263,  -- Stardust Dragon, Redox, Dragon Ruler of Boulders,Forbidden Lance, Kagetokage
+22110647,33198837,18964575,80117527,  -- Dracossack, Naturia Beast, Swift Scarecrow, Number 11: Big Eye
+97077563,94380860,83994433,76774528,  -- Call of the Haunted, Ragna Zero,Stardust Spark Dragon, Scrap Dragon
+42940404,39765958,48739166,12744567,  -- Machina Gearframe, Jeweled Red Dragon Archfiend,SHArk Knight, SHDark Knight
+09418365,68601507,53678698,23979249,  -- Bujin Hirume, Crane,Bujin Mikazuchi, Arasuda
+69723159,88940154,59251766,05818294,  -- Bujin Quilin, Centipede,Bujin Hare, Turtle
+32339440,30338466,50474354,73906480,  -- Bujin Yamato, Bujin Regalia - The Sword, Bujin Peacock, Bujincarnation
+26329679,95169481,98645731,68618157,  -- Constellar Omega, Diamond Dire Wolf, Pot of Duality, Bujin Amaterasu
+75840616,21954587,73289035,01855932,  -- Bujintei Susanowo, Mermail AbyssMegalo, Bujin Tsukuyomi, Kagutsuchi
+22076135,58471134,22446869,37781520,  -- Mermail Abyssturge, Mermail Abysspike, Mermail Abyssteus, Mermail Abyssleed
+74311226,78868119,23899727,74298287,  -- Atlantean Dragoons, Deep Sea Diva, Mermail Abysslinde, Mermail Abyssdine
+34707034,60202749,26400609,96947648,  -- Abyss-squall, Abyss-sphere, Tidal, Salvage
+74371660,50789693,00440556,21044178,  -- Mermail Abyssgaios, Armored Kappa, Bahamut Shark, Abyss Dweller
+15914410,59170782,70583986,65749035,  -- Mechquipped Angineer, Mermail Abysstrite, Dewloren, Gugnir
+30328508,77723643,37445295,04939890,  -- Shadoll Lizard, Shadoll Dragon, Shadoll Falcon, Shadoll Hedgehog
+44394295,29223325,03717252,24062258,  -- Shadoll Fusion, Artifact Ignition, Shadoll Beast, Secret Sect Druid Dru
+04904633,12444060,01845204,77505534,  -- Facing the Shadows, Artifact Sanctum, Instant Fusion, Facing the Shadows
+29669359,82633039,20366274,94977269,  -- Volcasaurus, Skyblaster Castel, El-Shadoll Nephilim, El-Shadoll Midrash
+04779823,31924889,00581014,33698022,  -- Michael, Arcanite Magician, Emeral, Moonlight Rose
+54447022,74845897,34507039,14087893,  -- Soul Charge, Rekindling, Wiretap, Book of Moon
+19665973,18964575,37576645,21954587,  -- Battle Fader, Swift Scarecrow, Reckless Greed, Mermail AbyssMegalo
+75878039,02273734,38667773,00109227,  -- Satellarknights Deneb,Altair,Vega,Sirius
+38331564,91110378,01845204,14087893,  -- Star Seraphs Scepter,Sovereign,Instant Fusion,Book of Moon
+25789292,41510920,93568288,17412721,  -- Forbidden Chalice,Celestial Factor,Number 80,Noden
+56638325,00109254,38273745  -- Stellarknights Delteros, Triveil,Evilswarm Ouroboros
+}
 function CardIsScripted(CardId)
-  if CardId == 27970830 or CardId == 54031490 or  -- Gateway of the Six, Shien's Smoke Signal
-     CardId == 15259703 or CardId == 79875176 or  -- Toon World, Toon Cannon Soldier 
-     CardId == 58775978 or CardId == 82878489 or  -- Nightmare's Steelcage, Shine Palace
-     CardId == 41426869 or CardId == 14536035 or  -- Black Illusion Ritual, Dark Grepher
-     CardId == 33420078 or CardId == 09411399 or  -- Plaguespreader Zombie, Destiny Hero - Malicious
-     CardId == 65192027 or CardId == 15561463 or  -- Dark Armed Dragon, Gauntlet Launcher
-     CardId == 06353603 or CardId == 73964868 or  -- Brotherhood of the Fire Fist - Bear, Constellar Pleiades
-     CardId == 38495396 or CardId == 44635489 or  -- Constellar Ptolemy M7, Constellar Siat
-     CardId == 70908596 or CardId == 41142615 or  -- Constellar Kaust, The Cheerful Coffin
-     CardId == 68597372 or CardId == 47217354 or  -- Wind-Up Zenmaister, Fabled Raven
-     CardId == 74131780 or CardId == 36916401 or  -- Exiled Force, Burnin' Boxin' Spirit
-     CardId == 12014404 or CardId == 34086406 or  -- Gagaga Gunman, Lavalval Chain
-     CardId == 00423585 or CardId == 40640057 or  -- Summoner Monk, Kuriboh
-     CardId == 95727991 or CardId == 71413901 or  -- Catapult Turtle, Breaker the Magical Warrior
-     CardId == 83133491 or CardId == 18807108 or  -- Zero Gravity, Spellbinding Circle
-     CardId == 87880531 or CardId == 72302403 or  -- Diffusion Wave-Motion, Swords of Revealing Light
-     CardId == 83746708 or CardId == 25774450 or  -- Mage Power, Mystic Box
-     CardId == 78156759 or CardId == 72892473 or  -- Wind-Up Zenmaines, Number 61: Volcasaurus		   
-     CardId == 72892473 or CardId == 72892473 or  -- Tiras, Keeper of Genesis, Card Destruction		   
-     CardId == 22110647 or CardId == 16435215 or  -- Mecha Phantom Beast Dracossack, Dragged Down into the Grave		   
-     CardId == 93554166 or CardId == 74117290 or  -- Dark World Lightning, Dark World Dealings		   
-     CardId == 81439173 or CardId == 40240595 or  -- Foolish Burial, Cocoon of Evolution		    		   
-     CardId == 72989439 or CardId == 23265313 or  -- Black Luster Soldier - Envoy of the Beginning, Cost Down		   
-     CardId == 68005187 or CardId == 98045062 or  -- Soul Exchange, Enemy Controller		   
-     CardId == 43973174 or CardId == 22046459 or  -- The Flute of Summoning Dragon, Megamorph		   
-     CardId == 55713623 or CardId == 05758500 or  -- Shrink, Soul Release		   
-     CardId == 70231910 or CardId == 59385322 or  -- Dark Core, Core Blaster 		   
-     CardId == 46910446 or CardId == 12607053 or  -- Chthonian Alliance, Waboku		   
-     CardId == 27174286 or CardId == 94192409 or  -- Return from the Different Dimension, Compulsory Evacuation Device  		   
-     CardId == 46009906 or CardId == 91595718 or  -- Beast Fangs, Book of Secret Arts           
-     CardId == 53610653 or CardId == 69243953 or  -- Bound Wand, Butterfly Dagger - Elma          
-     CardId == 19596712 or CardId == 72932673 or  -- Abyss-scale of Cetus, Abyss-scale of the Mizuchi         
-     CardId == 08719957 or CardId == 86198326 or  -- Abyss-scale of the Kraken, 7 Completed         
-     CardId == 63851864 or CardId == 88190790 or  -- Break! Draw!, Assault Armor         
-     CardId == 79965360 or CardId == 84740193 or  -- Amazoness Heirloom, Buster Rancher         
-     CardId == 40830387 or CardId == 37457534 or  -- Ancient Gear Fist, Ancient Gear Tank             
-     CardId == 00303660 or CardId == 53586134 or  -- Amplifier, Bubble Blaster           
-     CardId == 05183693 or CardId == 90374791 or  -- Amulet of Ambition, Armed Changer         
-     CardId == 00242146 or CardId == 61127349 or  -- Ballista of Rampart Smashing, Big Bang Shot        
-     CardId == 65169794 or CardId == 40619825 or  -- Black Pendant, Axe of Despair                
-     CardId == 18937875 or CardId == 24668830 or  -- Burning Spear, Germ Infection          
-     CardId == 50152549 or CardId == 41587307 or  -- Paralyzing Potion, Broken Bamboo Sword          
-     CardId == 46967601 or CardId == 56948373 or  -- Cursed Bill, Mask of the accursed            
-     CardId == 75560629 or CardId == 39897277 or  -- Flint, Elf's Light       
-     CardId == 05318639 or CardId == 19613556 or  -- Mystical Space Typhoon, Heavy Storm          
-     CardId == 53129443 or CardId == 07165085 or  -- Dark Hole, Bait Doll           
-     CardId == 09596126 or CardId == 01475311 or  -- Chaos Sorcerer, Allure of darkness          
-     CardId == 31036355 or CardId == 93816465 or  -- Swap, Zero Gardna        
-     CardId == 04178474 or CardId == 16255442 or  -- Raigeki Break, Beckoning          
-     CardId == 53567095 or CardId == 74848038 or  -- Icarus, Monster Reincarnation                 
-     CardId == 95503687 or CardId == 22624373 or  -- Lumina, Lyla         
-     CardId == 47387961 or CardId == 82732705 or  -- #8 Genome, Sin Truth         
-     CardId == 37742478 or CardId == 94283662 or  -- Honest, Trance          
-     CardId == 51452091 or CardId == 10026986 or  -- Royal Decree, Worm King         
-     CardId == 55794644 or CardId == 500000090 or -- Hyperion, Toon Kingdom        
-     CardId == 57774843 or CardId == 53582587 or  -- Judgment Dragon, Torrential Tribute
-     CardId == 84013237 or CardId == 96216229 or  -- Number 39: Utopia, Gladiator Beast War Chariotthen
-     CardId == 41420027 or CardId == 84749824 or  -- Solemn Judgment, Solemn Warning
-     CardId == 44508094 or CardId == 58120309 or  -- Stardust Dragon, Starlight Road
-     CardId == 61257789 or CardId == 35952884 or  -- Stardust Dragon/Assault Mode, Shooting Quasar Dragon
-     CardId == 24696097 or CardId == 50091196 or  -- Shooting Star Dragon,Formula Synchron
-     CardId == 50078509 or CardId == 14315573 or  -- Fiendish Chain, Negate Attack   
-     CardId == 29267084 or CardId == 59616123 or  -- Shadow Spell, Trap Stun
-     CardId == 44095762 or CardId == 67987611 or  -- Mirror Force, Amazoness Archers	 
-     CardId == 39699564 or CardId == 30929786 or  -- FireFist Leopard, Chicken
-     CardId == 70355994 or CardId == 10719350 or  -- FireFormation Tenken, FireFist Gorilla
-     CardId == 44920699 or CardId == 70329348 or  -- FireFormation Tensen 
-     CardId == 21350571 or CardId == 23434538 or  -- Horn of the Phantom Beast, Maxx "C"
-     CardId == 96381979 or CardId == 19059929 or  -- FireFist Tiger King, FireFormation Gyokko
-     CardId == 43748308 or CardId == 97268402 or  -- FireFist Dragon, Effect Veiler
-     CardId == 92572371 or CardId == 78474168 or  -- FireFist Buffalo, Breakthrough Skill
-     CardId == 58504745 or CardId == 36499284 or  -- FireFist Cardinal, FireFormation Yoko
-     CardId == 77538567 or CardId == 70342110 or  -- Dark Bribe, Dimensional Prison 
-     CardId == 46772449 or CardId == 58504745 or  -- Noblswarm Belzebuth, FireFist Cardinal                       
-     CardId == 60316373 or CardId == 87255382 or  -- Heraldic Beasts: Aberconway, Amphisbaena
-     CardId == 19310321 or CardId == 45705025 or  -- Twin Eagle, Unicorn
-     CardId == 61314842 or CardId == 84220251 or  -- Advanced Heraldry Art, Heraldry Reborn
-     CardId == 59048135 or CardId == 81439173 or  -- Heraldry Augmentation, Foolish Burial
-     CardId == 47387961 or CardId == 23649496 or  -- Number 8: Heraldic King Genom-Heritage, Number 18: heraldic Progenitor Plain-Coat
-     CardId == 38296564 or CardId == 92365601 or  -- Safe Zone, Rank-Up Magic: Limited Barian's Force       
-     CardId == 27243130 or CardId == 94656263 or  -- Forbidden Lance, Kagetokage
-     CardId == 44508094 or CardId == 90411554 or  -- Stardust Dragon, Redox, Dragon Ruler of Boulders
-     CardId == 18964575 or CardId == 80117527 or  -- Swift Scarecrow, Number 11: Big Eye
-     CardId == 22110647 or CardId == 33198837 or  -- Mecha Phantom Beast Dracossack, Naturia Beast 
-     CardId == 83994433 or CardId == 76774528 or  -- Stardust Spark Dragon, Scrap Dragon
-     CardId == 97077563 or CardId == 94380860 or  -- Call of the Haunted, Ragna Zero
-     CardId == 48739166 or CardId == 12744567 or  -- SHArk Knight, SHDark Knight
-     CardId == 42940404 or CardId == 39765958 or  -- Machina Gearframe, Jeweled Red Dragon Archfiend
-     CardId == 53678698 or CardId == 23979249 or  -- Bujin Mikazuchi, Arasuda
-     CardId == 09418365 or CardId == 68601507 or  -- Bujin Hirume, Crane
-     CardId == 59251766 or CardId == 05818294 or  -- Bujin Hare, Turtle
-     CardId == 69723159 or CardId == 88940154 or  -- Bujin Quilin, Centipede
-     CardId == 50474354 or CardId == 73906480 or  -- Bujin Peacock, Bujincarnation
-     CardId == 32339440 or CardId == 30338466 or  -- Bujin Yamato, Bujin Regalia - The Sword
-     CardId == 98645731 or CardId == 68618157 or  -- Pot of Duality, Bujin Amaterasu
-     CardId == 26329679 or CardId == 95169481 or  -- Constellar Omega, Diamond Dire Wolf
-     CardId == 73289035 or CardId == 01855932 or  -- Bujin Tsukuyomi, Kagutsuchi
-     CardId == 75840616 or CardId == 21954587 or  -- Bujintei Susanowo, Mermail AbyssMegalo
-     CardId == 22446869 or CardId == 37781520 or  -- Mermail Abyssteus, Mermail Abyssleed
-     CardId == 22076135 or CardId == 58471134 or  -- Mermail Abyssturge, Mermail Abysspike
-     CardId == 23899727 or CardId == 74298287 or  -- Mermail Abysslinde, Mermail Abyssdine
-     CardId == 74311226 or CardId == 78868119 or  -- Atlantean Dragoons, Deep Sea Diva
-     CardId == 26400609 or CardId == 96947648 or  -- Tidal, Salvage
-     CardId == 34707034 or CardId == 60202749 or  -- Abyss-squall, Abyss-sphere
-     CardId == 00440556 or CardId == 21044178 or  -- Bahamut Shark, Abyss Dweller
-     CardId == 74371660 or CardId == 50789693 or  -- Mermail Abyssgaios, Armored Kappa
-     CardId == 70583986 or CardId == 65749035 or  -- Dewloren, Tiger King of the Ice Barrier, Gugnir, Dragon of the Ice Barrier
-     CardId == 15914410 or CardId == 59170782 or  -- Mechquipped Angineer, Mermail Abysstrite
-     CardId == 37445295 or CardId == 04939890 or  -- Shadoll Falcon, Shadoll Hedgehog
-     CardId == 30328508 or CardId == 77723643 or  -- Shadoll Lizard, Shadoll Dragon
-     CardId == 03717252 or CardId == 24062258 or  -- Shadoll Beast, Secret Sect Druid Dru
-     CardId == 44394295 or CardId == 29223325 or  -- Shadoll Fusion, Artifact Ignition
-     CardId == 01845204 or CardId == 77505534 or  -- Instant Fusion, Facing the Shadows
-     CardId == 04904633 or CardId == 12444060 or  -- Facing the Shadows, Artifact Sanctum
-     CardId == 20366274 or CardId == 94977269 or  -- El-Shadoll Nephilim, El-Shadoll Midrash
-     CardId == 29669359 or CardId == 82633039 or  -- Volcasaurus, Skyblaster Castel
-     CardId == 00581014 or CardId == 33698022 or  -- Emeral, Moonlight Rose
-     CardId == 04779823 or CardId == 31924889 or  -- Michael, Arcanite Magician
-     CardId == 34507039 or CardId == 14087893 or  -- Wiretap, Book of Moon
-     CardId == 54447022 or CardId == 74845897 or  -- Soul Charge, Rekindling
-     CardId == 37576645 or CardId == 21954587 or  -- Reckless Greed, Mermail AbyssMegalo
-     CardId == 19665973 or CardId == 18964575  -- Battle Fader, Swift Scarecrow
-    then  
-	return 1
+  for i=1,#ScriptedCards do
+    if CardId == ScriptedCards[i] then
+      return 1
+    end
   end
   return 0
 end

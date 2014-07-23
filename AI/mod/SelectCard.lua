@@ -45,6 +45,10 @@ result = ShadollOnSelectCard(cards, minTargets, maxTargets, triggeringID, trigge
 if result ~= nil then
   return result
 end
+result = SatellarknightOnSelectCard(cards, minTargets, maxTargets, triggeringID, triggeringCard)
+if result ~= nil then
+  return result
+end
 result = {}
 
   --------------------------------------------
@@ -198,10 +202,17 @@ result = {}
       then   
         cards[i].index=i
         list[#list+1]=cards[i]
+        if cards[i].id == 38331564 and minTargets>=3 then
+          cards[i].attack = -1
+          GlobalScepterOverride = GlobalScepterOverride + 1
+        end
       end
     end
     table.sort(list,compare)
     result={}
+    if GlobalSSCardID == 63504681 then
+      minTargets=maxTargets
+    end
     for i=1,minTargets do
       result[i]=list[i].index
     end

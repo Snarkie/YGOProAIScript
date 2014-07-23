@@ -378,7 +378,6 @@ function SharkKnightFilter(c)
   and (bit32.band(c.type,TYPE_XYZ+TYPE_SYNCHRO+TYPE_RITUAL+TYPE_FUSION)>0 or c.level>4)
   and bit32.band(c.summon_type,SUMMON_TYPE_SPECIAL)>0 
   and c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0 
-  and c.attack>=2000
 end
 function SummonSharkKnight(cards)
   local targets=SubGroup(OppMon(),SharkKnightFilter)
@@ -848,9 +847,11 @@ function SharkKnightTarget(cards,targets)
   end
   return result
 end
-function GlobalTarget(cards)
-  if HasID(cards,GlobalTargetID) then
-    return {CurrentIndex}
+function GlobalTarget(cards,player)
+  for i=1,#cards do
+    if cards[i].id==GlobalTargetID and (player==nil or cards[i].owner==player) then
+      return {i}
+    end
   end
   return {math.random(#cards)}
 end

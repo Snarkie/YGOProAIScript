@@ -25,6 +25,9 @@ function OnSelectEffectYesNo(id,triggeringCard)
   if result==nil then
     result = HeraldicOnSelectEffectYesNo(id,triggeringCard)
   end
+  if result==nil then
+    result = SatellarknightOnSelectEffectYesNo(id,triggeringCard)
+  end
   if result then return result end
   
   if CardIsScripted(id)>0 then

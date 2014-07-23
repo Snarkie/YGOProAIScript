@@ -181,31 +181,37 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
 MermailCheck()
 BujinCheck()
 ShadollCheck()
+SatellarknightCheck()
+ExtraCheck=BujinCheck() or SatellarknightCheck()
 local DeckCommand = FireFistInit(cards, to_bp_allowed, to_ep_allowed)
-if DeckCommand ~= nil and not BujinCheck() then 
+if DeckCommand ~= nil and not ExtraCheck then 
     return DeckCommand[1],DeckCommand[2]
 end
 DeckCommand = HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
-if DeckCommand ~= nil and not BujinCheck() then 
+if DeckCommand ~= nil and not ExtraCheck then 
     return DeckCommand[1],DeckCommand[2]
 end
 DeckCommand = GadgetOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
-if DeckCommand ~= nil and not BujinCheck() then 
+if DeckCommand ~= nil and not ExtraCheck then 
     return DeckCommand[1],DeckCommand[2]
 end
 DeckCommand = BujinOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
-if DeckCommand ~= nil then 
+if DeckCommand ~= nil and not SatellarknightCheck() then 
     return DeckCommand[1],DeckCommand[2]
 end
 DeckCommand = MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
-if DeckCommand ~= nil and not BujinCheck() then 
+if DeckCommand ~= nil and not ExtraCheck then 
     return DeckCommand[1],DeckCommand[2]
 end
+DeckCommand = SatellarknightOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
+if DeckCommand ~= nil and not BujinCheck() then 
+    return DeckCommand[1],DeckCommand[2]
+end  
 DeckCommand = ShadollOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
-if DeckCommand ~= nil and not BujinCheck() then 
+if DeckCommand ~= nil and not ExtraCheck then 
     return DeckCommand[1],DeckCommand[2]
 end
-  
+
 -------------------------------------------------
 -- **********************************************
 --   Activate these cards before anything else :O
