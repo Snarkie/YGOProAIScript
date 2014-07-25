@@ -289,7 +289,7 @@ NSBL={
 78868119,26400609,23899727,74298287,  -- Deep Sea Diva, Tidal, Dragon Ruler of Waterfalls Mermail Abysslinde, Mermail Abyssdine
 30328508,77723643,37445295,04939890,  -- Shadoll Lizard, Shadoll Dragon, Shadoll Falcon, Shadoll Hedgehog
 85103922,12697630,03717252,24062258,  -- Artifact Moralltach, Artifact Beagalltach, Shadoll Beast, Secret Sect Druid Dru
-75878039,02273734,38667773,00109227,  -- Satellarknights Deneb,Altair,Vega,Sirius
+75878039,02273734,38667773,63274863,  -- Satellarknights Deneb,Altair,Vega,Sirius
 38331564,91110378,69293721  -- Star Seraphs Scepter,Sovereign,Mermail Abyssgunde
 }
 function NormalSummonBlacklist(CardId) 
@@ -364,7 +364,7 @@ SSBL={
 73964868,29669359,82633039, -- Pleiades, Volcasaurus, Skyblaster Castel
 00581014,33698022,04779823, -- Emeral, Moonlight Rose, Michael
 31924889,08561192,63504681, -- Arcanite Magician, Leoh, Rhongomiant
-93568288,56638325,00109254, -- Number 80,Delteros, Triveil
+93568288,56638325,42589641, -- Number 80,Delteros, Triveil
 17412721,38273745,21501505 -- Noden, ouroboros, Cairngorgon
 }
 
@@ -660,10 +660,10 @@ ScriptedCards ={
 04779823,31924889,00581014,33698022,  -- Michael, Arcanite Magician, Emeral, Moonlight Rose
 54447022,74845897,34507039,14087893,  -- Soul Charge, Rekindling, Wiretap, Book of Moon
 19665973,18964575,37576645,21954587,  -- Battle Fader, Swift Scarecrow, Reckless Greed, Mermail AbyssMegalo
-75878039,02273734,38667773,00109227,  -- Satellarknights Deneb,Altair,Vega,Sirius
+75878039,02273734,38667773,63274863,  -- Satellarknights Deneb,Altair,Vega,Sirius
 38331564,91110378,01845204,14087893,  -- Star Seraphs Scepter,Sovereign,Instant Fusion,Book of Moon
 25789292,41510920,93568288,17412721,  -- Forbidden Chalice,Celestial Factor,Number 80,Noden
-56638325,00109254,38273745  -- Stellarknights Delteros, Triveil,Evilswarm Ouroboros
+56638325,42589641,38273745,21501505  -- Stellarknights Delteros, Triveil,Evilswarm Ouroboros,Cairngorgon
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do

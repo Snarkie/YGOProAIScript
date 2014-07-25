@@ -38,19 +38,22 @@ function AltairCond(loc,loop)
     return OPTCheck(02273734)     
     and (not(loop) and HasID(AIGrave(),38667773,true) and VegaCond(PRIO_TOFIELD,true)
     or HasID(AIGrave(),75878039,true) and DenebCond(PRIO_TOFIELD)
-    or HasID(AIGrave(),00109227,true) and SiriusCond(PRIO_TOFIELD))
+    or HasID(AIGrave(),63274863,true) and SiriusCond(PRIO_TOFIELD))
   end
   if loc == PRIO_TOHAND then
     return not HasID(AIHand(),02273734,true)
   end
   return true
 end
+function VegaFilter(c)
+  return SatellarknightFilter(c) and c.id~=38667773
+end
 function VegaCond(loc,loop)
   if loc == PRIO_TOFIELD then
     return OPTCheck(38667773) 
     and (HasID(AIHand(),75878039,true) and DenebCond(PRIO_TOFIELD)
     or   not(loop) and HasID(AIHand(),02273734,true) and AltairCond(PRIO_TOFIELD,true)
-    or   HasID(AIHand(),00109227,true) and SiriusCond(PRIO_TOFIELD))
+    or   HasID(AIHand(),63274863,true) and SiriusCond(PRIO_TOFIELD))
   end
   if loc == PRIO_TOHAND then
     return not HasID(AIHand(),38667773,true)
@@ -59,20 +62,26 @@ function VegaCond(loc,loop)
 end
 function SiriusCond(loc)
   if loc == PRIO_TOHAND then
-    return OPTCheck(00109227) and CardsMatchingFilter(AIGrave(),SatellarknightFilter)>=8
+    return OPTCheck(63274863) and CardsMatchingFilter(AIGrave(),SatellarknightFilter)>=8
   end
   if loc == PRIO_TOFIELD then
-    return OPTCheck(00109227) and CardsMatchingFilter(AIGrave(),SatellarknightFilter)>=6
+    return OPTCheck(63274863) and CardsMatchingFilter(AIGrave(),SatellarknightFilter)>=6
   end
   return true
 end
 function ScepterCond(loc)
+  if loc == PRIO_TOHAND then
+    return HasID(AIHand(),91110378,true) and HasID(AIDeck(),91110378,true) and not HasID(AIHand(),38331564,true)
+  end
   if loc == PRIO_TOFIELD then
     return HasID(AIHand(),91110378,true) and HasID(AIDeck(),91110378,true) and Duel.GetCurrentChain()==0
   end
   return true
 end
 function SovereignCond(loc)
+  if loc == PRIO_TOHAND then
+    return HasID(AIHand(),38331564,true) and HasID(AIDeck(),91110378,true) and not HasID(AIHand(),91110378,true)
+  end
   if loc == PRIO_TOFIELD then
     return FieldCheck(4)==2 or FieldCheck(4)==1 and CardsMatchingFilter(AIHand(),function(c) return c.id==91110378 end)>1
   end
@@ -92,11 +101,11 @@ function NodenCond(loc)
 end
 SatellarknightPrio = {
 [75878039] = {8,1,5,4,8,5,4,2,1,DenebCond},  -- Satellarknight Deneb
-[02273734] = {6,4,7,3,3,1,6,1,1,AltairCond}, -- Satellarknight Altair
+[02273734] = {6,4,7,1,3,1,6,1,1,AltairCond}, -- Satellarknight Altair
 [38667773] = {5,3,8,2,4,1,5,1,1,VegaCond},   -- Satellarknight Vega
-[00109227] = {7,2,6,1,6,1,1,1,1,SiriusCond}, -- Satellarknight Sirius
+[63274863] = {7,2,6,3,6,1,1,1,1,SiriusCond}, -- Satellarknight Sirius
 [38331564] = {8,4,9,4,3,1,1,1,1,ScepterCond},-- Star Seraph Scepter
-[91110378] = {5,3,4,0,4,1,1,1,1,SovereignCond}, -- Star Seraph Sovereign
+[91110378] = {7,3,4,0,4,1,1,1,1,SovereignCond}, -- Star Seraph Sovereign
 [37742478] = {6,4,5,0,1,1,1,1,1,HonestCond}, -- Honest
 
 [32807846] = {9,3,1,1,1,1,1,1,1,nil},       -- RotA
@@ -125,7 +134,7 @@ SatellarknightPrio = {
 [48739166] = {1,1,1,1,1,1,1,1,1,nil},       -- Number 101: Silent Honor ARK
 [82633039] = {1,1,1,1,1,1,1,1,1,nil},       -- Castel the Avian Skyblaster
 [02061963] = {1,1,1,1,1,1,1,1,1,nil},       -- Number 104: Masquerade
-[00109254] = {1,1,1,1,6,2,8,1,1,nil},       -- Stellarknight Triveil
+[42589641] = {1,1,1,1,6,2,8,1,1,nil},       -- Stellarknight Triveil
 [56638325] = {1,1,1,1,8,8,7,1,1,nil},       -- Stellarknight Delteros
 [17412721] = {1,1,7,1,1,1,1,1,1,nil},       -- Elder God Noden
 }
@@ -157,6 +166,12 @@ function SatellarknightAssignPriority(cards,loc,filter)
     end
     if loc==PRIO_TOFIELD and cards[i].location==LOCATION_DECK then
       cards[i].prio=cards[i].prio+2
+    end
+    if loc==PRIO_TOFIELD and cards[i].id==38667773 
+    and CardsMatchingFilter(AIHand(),VegaFilter)>0 
+    and #AIMon()==0
+    then
+      cards[i].prio=math.max(cards[i].prio,5)
     end
     --if loc==PRIO_GRAVE and cards[i].location==LOCATION_ONFIELD then
       --cards[i].prio=cards[i].prio-1
@@ -255,27 +270,30 @@ function UseCotH2()
   or FieldCheck(4)<2 and SatellarknightPriorityCheck(AIGrave(),PRIO_TOFIELD,1)>0)
 end
 function RhongomiantFilter(c)
-  return bit32.band(c.race,RACE_WARRIOR)>0 and bit32.band(c.position,POS_FACEUP)>0
+  return bit32.band(c.race,RACE_WARRIOR)>0 and bit32.band(c.position,POS_FACEUP)>0 and c.level==4
 end
 function SummonRhongomiant()
-  return CardsMatchingFilter(AIMon(),RhongomiantFilter)==5
+  return CardsMatchingFilter(AIMon(),RhongomiantFilter)>=4
 end
 function SummonRhapsody()
   local cards=AIMon()
   for i=1,#cards do
     if bit32.band(cards[i].type,TYPE_XYZ)>0 and cards[i].attack+1200 > OppGetStrongestAttack() and  #OppGrave()>=2 then
-      return true
+      return MP2Check()
     end
   end
   return false
 end
 function SummonCairngorgon()
-  return OppGetStrongestAttack()<2450 and MP2Check() and (#UseLists({AIMon(),AIST()})>4 or OppHasStrongestMonster())
+  return OppGetStrongestAttack()<2450 and MP2Check() and (#UseLists({AIMon(),AIST()})>4 or OppHasStrongestMonster() or Duel.GetTurnCount()==1)
 end
 function SummonSharkKnight1(cards)
   if not SatellarknightCheck() then return false end
   local targets=SubGroup(OppMon(),SharkKnightFilter)
   return #targets>0 
+end
+function SummonLavalvalChain1()
+  return MP2Check() and (not HasAccess(75878039) or OppGetStrongestAttack()<1800)
 end
 function SatellarknightOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local Activatable = cards.activatable_cards
@@ -285,6 +303,9 @@ function SatellarknightOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local SetableMon = cards.monster_setable_cards
   local SetableST = cards.st_setable_cards
   GlobalScepterOverride = 0
+  if HasIDNotNegated(Activatable,37742478) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   if HasIDNotNegated(Activatable,46772449) and UseBelzebuth() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -294,13 +315,17 @@ function SatellarknightOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasIDNotNegated(Activatable,56638325) and UseDelteros() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasIDNotNegated(Activatable,00109254) then
+  if HasIDNotNegated(Activatable,42589641) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Activatable,48739166) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasIDNotNegated(Activatable,34086406,false,545382497) then
+  if HasIDNotNegated(Activatable,34086406,false,545382497) and not HasAccess(75878039) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Activatable,34086406,false,545382498) then
+    GlobalCardMode = 2
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Activatable,93568288,false,1497092609) then
@@ -329,15 +354,22 @@ function SatellarknightOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   end
   if HasID(SpSummonable,63504681) and SummonRhongomiant() then
     GlobalSSCardID = 63504681
+    GlobalSSCardType = TYPE_XYZ
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasID(SpSummonable,00109254) and SummonTriveil() then
+  if HasID(SpSummonable,42589641) and SummonTriveil() then
+    GlobalSSCardID = 42589641
+    GlobalSSCardType = TYPE_XYZ
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSummonable,56638325) and SummonDelteros() then
+    GlobalSSCardID = 56638325
+    GlobalSSCardType = TYPE_XYZ
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSummonable,38273745) and SummonOuroboros() then
+    GlobalSSCardID = 38273745
+    GlobalSSCardType = TYPE_XYZ
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   
@@ -356,19 +388,18 @@ function SatellarknightOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(SpSummonable,93568288) and SummonRhapsody() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
+  if HasID(SpSummonable,34086406) and SummonLavalvalChain1() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
   if HasID(SpSummonable,21501505) and SummonCairngorgon() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasID(SpSummonable,34086406) and not HasAccess(75878039) then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
-  end
-  
+
   SatellarknightAssignPriority(Summonable,PRIO_TOFIELD)
   table.sort(Summonable,function(a,b) return a.prio>b.prio end)
   if #Summonable>0 and (Summonable[1].prio > 4 or Summonable[1].prio > 0 and (HasBackrow(SetableST) or FieldCheck(4)==1))then
     return {COMMAND_SUMMON,Summonable[1].index}
   end
-  
   if HasID(Activatable,01845204) and UseInstantFusion() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -420,7 +451,7 @@ function SatellarknightOnSelectCard(cards, minTargets, maxTargets,triggeringID,t
   if ID == 38667773 then
     return SatellarknightAdd(cards,PRIO_TOFIELD)
   end
-  if ID == 00109227 then
+  if ID == 63274863 then
     return SatellarknightAdd(cards,PRIO_DISCARD,5)
   end
   if ID == 38331564 then
@@ -435,7 +466,7 @@ function SatellarknightOnSelectCard(cards, minTargets, maxTargets,triggeringID,t
   if ID == 56638325 then
     return DelterosTarget(cards,triggeringCard)
   end
-  if ID == 00109254 then
+  if ID == 42589641 then
     return TriveilTarget(cards,triggeringCard)
   end
   if ID == 41510920 then
@@ -461,11 +492,11 @@ end
 
 function ChainFactor()
  local p = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_PLAYER)
- return p and p ~= player_ai 
+ return (p and p ~= player_ai) 
 end
 function ChainCairngorgon()
  local p = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_PLAYER)
- return p and p ~= player_ai 
+ return (p and p ~= player_ai)
 end
 function ChainCotH2()
   if not SatellarknightCheck() then
@@ -479,20 +510,32 @@ function ChainCotH2()
   end
 end
 function ChainChalice()
-  local effect = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
-	if effect then
-    card=effect:GetHandler()
+  local e = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
+	if e then
+    c=e:GetHandler()
     if player_ai==nil then
       player=1
     else
       player=player_ai
     end
-    if card and card:IsControler(1-player) and card:IsLocation(LOCATION_MZONE) 
-    and NegateBlacklist(card:GetCode())==0 and card:IsCanBeEffectTarget()
+    if c and c:IsControler(1-player) and c:IsLocation(LOCATION_MZONE) 
+    and NegateBlacklist(c:GetCode())==0 and c:IsCanBeEffectTarget()
+    and not c:IsHasEffect(EFFECT_IMMUNE_EFFECT)
     then
-      GlobalTargetID=card:GetCode()
+      GlobalTargetID=c:GetCode()
       GlobalPlayer=2
       return true
+    end
+  end
+  if c and (c:GetCode()==27243130 or c:GetCode()==37742478) then
+    return false
+  end
+  local source = Duel.GetAttacker()
+	local target = Duel.GetAttackTarget()
+  if source and target then
+    if source:IsControler(player_ai) then
+      target = Duel.GetAttacker()
+      source = Duel.GetAttackTarget()
     end
   end
   if Duel.GetCurrentPhase() == PHASE_DAMAGE and source and target then
@@ -500,29 +543,27 @@ function ChainChalice()
     and source:IsPosition(POS_FACEUP_ATTACK) and target:IsPosition(POS_FACEUP_ATTACK) and target:IsControler(player_ai)
     and not target:IsHasEffect(EFFECT_IMMUNE_EFFECT) 
     then
-      GlobalTargetID=source:GetCode()
-      GlobalPlayer=2
+      GlobalTargetID=target:GetCode()
+      GlobalPlayer=1
       return true
     end
   end
   return false
 end
 function SatellarknightOnSelectChain(cards,only_chains_by_player)
-  if GlobalScepterOverride>0 and UseScepter() then
-    return {1,i}
-  end
   for i=1,#cards do
     if SatellarknightFilter(cards[i]) and NotNegated(cards[i]) then
+      OPTSet(cards[i].id)
       return {1,i}
     end
   end
-  if HasIDNotNegated(cards,38331564) then
+  if HasIDNotNegated(cards,38331564) then   -- Scepter
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,91110378) then
+  if HasIDNotNegated(cards,91110378) then   -- Sovereign
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,17412721) then
+  if HasIDNotNegated(cards,17412721) then   -- Elder God Noden
     return {1,CurrentIndex}
   end
   if HasID(cards,41510920) and ChainFactor() then
@@ -560,15 +601,18 @@ function SatellarknightOnSelectEffectYesNo(id,card)
   if id==17412721 and NotNegated(card) then
     result = 1
   end
+  if id==21501505 and ChainCairngorgon() and NotNegated(card) then
+    result = 1
+  end
   return result
 end
 
 
 SatellarknightAtt={
-  00109254,63504681
+  42589641,63504681,82633039,21501505
 }
 SatellarknightDef={
-  91110378,38667773,17412721
+  91110378,38667773,17412721,93568288
 }
 function SatellarknightOnSelectPosition(id, available)
   result = nil

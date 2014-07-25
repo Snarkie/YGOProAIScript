@@ -182,34 +182,50 @@ MermailCheck()
 BujinCheck()
 ShadollCheck()
 SatellarknightCheck()
-ExtraCheck=BujinCheck() or SatellarknightCheck()
-local DeckCommand = FireFistInit(cards, to_bp_allowed, to_ep_allowed)
-if DeckCommand ~= nil and not ExtraCheck then 
+ExtraCheck=(BujinCheck() or SatellarknightCheck())
+local DeckCommand = nil
+if not ExtraCheck then 
+  DeckCommand = FireFistInit(cards, to_bp_allowed, to_ep_allowed)
+  if DeckCommand ~= nil then
     return DeckCommand[1],DeckCommand[2]
+  end
 end
-DeckCommand = HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
-if DeckCommand ~= nil and not ExtraCheck then 
+
+if not ExtraCheck then 
+  DeckCommand = HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
+  if DeckCommand ~= nil then
     return DeckCommand[1],DeckCommand[2]
+  end
 end
-DeckCommand = GadgetOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
-if DeckCommand ~= nil and not ExtraCheck then 
+if not ExtraCheck then 
+  DeckCommand = GadgetOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
+  if DeckCommand ~= nil then
     return DeckCommand[1],DeckCommand[2]
+  end
 end
-DeckCommand = BujinOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
-if DeckCommand ~= nil and not SatellarknightCheck() then 
+if not SatellarknightCheck() then 
+  DeckCommand = BujinOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
+  if DeckCommand ~= nil then
     return DeckCommand[1],DeckCommand[2]
+  end
 end
-DeckCommand = MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
-if DeckCommand ~= nil and not ExtraCheck then 
+if not ExtraCheck then 
+  DeckCommand = MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
+  if DeckCommand ~= nil then
     return DeckCommand[1],DeckCommand[2]
+  end
 end
-DeckCommand = SatellarknightOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
-if DeckCommand ~= nil and not BujinCheck() then 
+if not BujinCheck() then 
+  DeckCommand = SatellarknightOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
+  if DeckCommand ~= nil then
     return DeckCommand[1],DeckCommand[2]
+  end
 end  
-DeckCommand = ShadollOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
-if DeckCommand ~= nil and not ExtraCheck then 
+if not ExtraCheck then 
+  DeckCommand = ShadollOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
+  if DeckCommand ~= nil then
     return DeckCommand[1],DeckCommand[2]
+  end
 end
 
 -------------------------------------------------

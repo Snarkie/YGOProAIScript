@@ -192,6 +192,9 @@ result = {}
     if GlobalSSCardID == 44505297 then    --Inzektor Exa-Beetle
       GlobalActivatedCardID = GlobalSSCardID
     end
+    if GlobalSSCardID == 63504681 then
+      minTargets=maxTargets
+    end
     GlobalSSCardID = nil
     GlobalSSCardType = nil
 	PtolemySSMode = nil
@@ -206,13 +209,14 @@ result = {}
           cards[i].attack = -1
           GlobalScepterOverride = GlobalScepterOverride + 1
         end
+        if cards[i].id == 91110378 and minTargets>=3 then
+          cards[i].attack = -2
+          GlobalScepterOverride = GlobalScepterOverride + 1
+        end
       end
     end
     table.sort(list,compare)
     result={}
-    if GlobalSSCardID == 63504681 then
-      minTargets=maxTargets
-    end
     for i=1,minTargets do
       result[i]=list[i].index
     end

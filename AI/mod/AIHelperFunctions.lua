@@ -1614,7 +1614,10 @@ function ApplyATKBoosts(Cards)
     end
     if check then
       for i=1,#Cards do
-        if Cards[i].owner==2 then
+        if Cards[i].owner==2
+        and Cards[i]:is_affected_by(EFFECT_IMMUNE_EFFECT)==0
+        and Cards[i]:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
+        then
           Cards[i].attack = Cards[i].attack -800
           Cards[i].bonus = -800
         end
@@ -1622,6 +1625,32 @@ function ApplyATKBoosts(Cards)
     end
   end
   
+  ------------------------------------------
+  -- Apply Forbidden Chalice 400 ATK boost
+  ------------------------------------------
+  if #Cards > 0 then
+    local ST = AIST()
+    local check = false
+    for i=1,#ST do
+      if ST[i].id == 25789292 and bit32.band(ST[i].status,STATUS_SET_TURN)==0 then
+        check = true
+      end
+    end
+    if HasID(AIHand(),25789292,true) and Duel.GetLocationCount(player_ai,LOCATION_SZONE)>0 then
+      check = true
+    end
+    if check then
+      for i=1,#Cards do
+        if Cards[i].owner==1 
+        and Cards[i]:is_affected_by(EFFECT_IMMUNE_EFFECT)==0
+        and Cards[i]:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
+        then
+          Cards[i].attack = Cards[i].attack+400
+          Cards[i].bonus = 400
+        end
+      end
+    end
+  end 
   ------------------------------------------
   -- Apply Vampire Empire's Attack Boost
   ------------------------------------------

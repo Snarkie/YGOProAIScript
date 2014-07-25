@@ -493,7 +493,15 @@ end
 function LavalvalChainTarget(cards)
     local result = nil
     if SatellarknightCheck() then
-      result = SatellarknightAdd(cards,PRIO_TOGRAVE)
+      if GlobalCardMode == 2 then
+        GlobalCardMode = 1
+        result = SatellarknightAdd(cards,PRIO_TOGRAVE)
+      elseif GlobalCardMode == 1 then
+        GlobalCardMode = nil
+        result = SatellarknightAdd(cards,PRIO_TOHAND)
+      else
+        result = SatellarknightAdd(cards,PRIO_TOGRAVE)
+      end
     else
       result = HeraldicToGrave(cards,1)
     end
