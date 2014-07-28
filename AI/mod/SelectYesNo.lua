@@ -29,7 +29,6 @@ function GetAttacker()
 end
 
 function OnSelectYesNo(description_id)
-  print(description_id)
 	if description_id == 30 then
     GlobalAIIsAttacking = true
     local cards = nil

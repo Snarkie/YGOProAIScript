@@ -240,7 +240,7 @@ function SharkKnightFilterBujin(c)
 end
 function SummonSharkKnightBujin(cards)
   local targets=SubGroup(OppMon(),SharkKnightFilter)
-  if #targets > 0 and Duel.GetFlagEffect(player_ai,48739166)==0 then
+  if #targets > 0 and OPTCheck(48739166) then
     return true
   end
   return false
@@ -299,6 +299,7 @@ function BujinOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Activatable,48739166) then  -- SHArk Knight
+    OPTSet(48739166)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Activatable,96381979) and UseTigerKing() then  

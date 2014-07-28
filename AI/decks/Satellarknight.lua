@@ -36,7 +36,7 @@ end
 function AltairCond(loc,loop)
   if loc == PRIO_TOFIELD then
     return OPTCheck(02273734)     
-    and (not(loop) and HasID(AIGrave(),38667773,true) and VegaCond(PRIO_TOFIELD,true)
+    and (loop==nil and HasID(AIGrave(),38667773,true) and VegaCond(PRIO_TOFIELD,true)
     or HasID(AIGrave(),75878039,true) and DenebCond(PRIO_TOFIELD)
     or HasID(AIGrave(),63274863,true) and SiriusCond(PRIO_TOFIELD))
   end
@@ -52,7 +52,7 @@ function VegaCond(loc,loop)
   if loc == PRIO_TOFIELD then
     return OPTCheck(38667773) 
     and (HasID(AIHand(),75878039,true) and DenebCond(PRIO_TOFIELD)
-    or   not(loop) and HasID(AIHand(),02273734,true) and AltairCond(PRIO_TOFIELD,true)
+    or   loop==nil and HasID(AIHand(),02273734,true) and AltairCond(PRIO_TOFIELD,true)
     or   HasID(AIHand(),63274863,true) and SiriusCond(PRIO_TOFIELD))
   end
   if loc == PRIO_TOHAND then
@@ -102,8 +102,8 @@ end
 SatellarknightPrio = {
 [75878039] = {8,1,5,4,8,5,4,2,1,DenebCond},  -- Satellarknight Deneb
 [02273734] = {6,4,7,1,3,1,6,1,1,AltairCond}, -- Satellarknight Altair
-[38667773] = {5,3,8,2,4,1,5,1,1,VegaCond},   -- Satellarknight Vega
-[63274863] = {7,2,6,3,6,1,1,1,1,SiriusCond}, -- Satellarknight Sirius
+[38667773] = {5,3,8,3,4,1,5,1,1,VegaCond},   -- Satellarknight Vega
+[63274863] = {7,2,6,2,6,1,1,1,1,SiriusCond}, -- Satellarknight Sirius
 [38331564] = {8,4,9,4,3,1,1,1,1,ScepterCond},-- Star Seraph Scepter
 [91110378] = {7,3,4,0,4,1,1,1,1,SovereignCond}, -- Star Seraph Sovereign
 [37742478] = {6,4,5,0,1,1,1,1,1,HonestCond}, -- Honest
@@ -136,7 +136,7 @@ SatellarknightPrio = {
 [02061963] = {1,1,1,1,1,1,1,1,1,nil},       -- Number 104: Masquerade
 [42589641] = {1,1,1,1,6,2,8,1,1,nil},       -- Stellarknight Triveil
 [56638325] = {1,1,1,1,8,8,7,1,1,nil},       -- Stellarknight Delteros
-[17412721] = {1,1,7,1,1,1,1,1,1,nil},       -- Elder God Noden
+[17412721] = {1,1,6,1,1,1,1,1,1,NodenCond}, -- Elder God Noden
 }
 --{hand,hand+,field,field+,grave,grave+,discard,discard+,banish} //discard = to deck
 
@@ -199,16 +199,22 @@ function SatellarknightAdd(cards,loc,count,filter)
   end
   return result
 end
+function SeraphCheck()
+  return (HasID(AIMon(),38331564,true) and CardsMatchingFilter(UseLists({OppMon(),OppST()}),ScepterFilter)>0) or HasID(AIMon(),91110378,true)
+end
 function DelterosFilter(c)
   return c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0
   and bit32.band(c.status,STATUS_LEAVE_CONFIRMED)==0
-  and not DestroyBlacklist(c.id)
+  and not (DestroyBlacklist(c.id)
+  and (bit32.band(c.position, POS_FACEUP)>0 
+  or bit32.band(c.status,STATUS_IS_PUBLIC)>0))
 end
 function UseDelteros()
   return CardsMatchingFilter(UseLists({OppMon(),OppST()}),DelterosFilter)>0
 end
 function SummonDelteros()
-  return MP2Check() and (UseDelteros() or HasID(UseLists({AIHand(),AIST()}),41510920,true))
+  return (MP2Check() or SeraphCheck()) 
+  and (UseDelteros() or HasID(UseLists({AIHand(),AIST()}),41510920,true))
 end
 function SummonTriveil()
   local result = 0
@@ -240,6 +246,8 @@ function ScepterFilter(c)
   return c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0
   and bit32.band(c.status,STATUS_LEAVE_CONFIRMED)==0
   and not DestroyBlacklist(c.id)
+  and (bit32.band(c.position, POS_FACEUP)>0 
+  or bit32.band(c.status,STATUS_IS_PUBLIC)>0)
 end
 function UseScepter()
   return CardsMatchingFilter(UseLists({OppMon(),OppST()}),ScepterFilter)>0 or HasID(AIMon(),91110378,true)
@@ -257,10 +265,10 @@ function UseOuroboros3()
   return #OppGrave > 0
 end
 function SummonOuroboros()
-  return Duel.GetTurnCount()==1 or MP2Check() and (UseOuroboros1() or UseOuroboros2())
+  return (MP2Check() or SeraphCheck())  and (UseOuroboros1() or UseOuroboros2())
 end
 function NodenFilter(c)
-  return c.level==4
+  return c.level==4 and c.id~=17412721
 end
 function UseInstantFusion()
   return CardsMatchingFilter(AIGrave(),NodenFilter)>0 and (FieldCheck(4)==1 and OverExtendCheck() or #AIMon()==0)
@@ -285,12 +293,12 @@ function SummonRhapsody()
   return false
 end
 function SummonCairngorgon()
-  return OppGetStrongestAttack()<2450 and MP2Check() and (#UseLists({AIMon(),AIST()})>4 or OppHasStrongestMonster() or Duel.GetTurnCount()==1)
+  return OppGetStrongestAttack()<2450 and MP2Check()
 end
 function SummonSharkKnight1(cards)
   if not SatellarknightCheck() then return false end
   local targets=SubGroup(OppMon(),SharkKnightFilter)
-  return #targets>0 
+  return #targets>0 and OPTCheck(48739166)
 end
 function SummonLavalvalChain1()
   return MP2Check() and (not HasAccess(75878039) or OppGetStrongestAttack()<1800)
@@ -319,6 +327,7 @@ function SatellarknightOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Activatable,48739166) then
+    OPTSet(48739166)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Activatable,34086406,false,545382497) and not HasAccess(75878039) then
@@ -487,6 +496,9 @@ function SatellarknightOnSelectCard(cards, minTargets, maxTargets,triggeringID,t
   if ID == 21501505 then
     return BestTargets(cards)
   end
+  if ID == 38273745 then
+    return BestTargets(cards,1,TARGET_TOHAND)
+  end
   return nil
 end
 
@@ -590,6 +602,7 @@ function SatellarknightOnSelectEffectYesNo(id,card)
     return 1
   end
   if SatellarknightFilter(card) and NotNegated(card) then
+    OPTSet(card.id)
     result = 1
   end
   if id==38331564 and NotNegated(card) then

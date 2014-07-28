@@ -29,7 +29,7 @@ function HeraldicCanXYZ()
     if HasID(AIHand(),94656263) and handcount>0 then --Kagetokage
       result=true
     end
-    if HasID(AIHand(),87255382) and (handcount>2 or HasID(AIHand(),82293134) and Duel.GetFlagEffect(player_ai,82293134)==0) then
+    if HasID(AIHand(),87255382) and (handcount>2 or HasID(AIHand(),82293134) and OPTCheck(82293134)) then
       result=true
     end
     if HasID(UseLists({AIHand(),AIST()}),84220251) and handcount>0 and gravecount >0 then
@@ -77,7 +77,7 @@ function SummonChidori()
   or Get_Card_Att_Def(OppMon(),"defense",">",POS_FACEUP_DEFENCE,"defense") >= 2300
 end
 function SummonLavalvalChain() 
-  return (HasID(AIDeck(),82293134) or HasID(AIDeck(),90411554) and not (HasID(UseLists({AIGrave(),AIHand(),AIMon()}),82293134) or Duel.GetFlagEffect(player_ai,82293134)==1))
+  return (HasID(AIDeck(),82293134) or HasID(AIDeck(),90411554) and not (HasID(UseLists({AIGrave(),AIHand(),AIMon()}),82293134) or not OTPCheck(82293134)))
   and (Chance(30) or Duel.GetCurrentPhase() == PHASE_MAIN2 or Duel.GetTurnCount()==1)
 end
 function SummonImpKing()
@@ -171,7 +171,7 @@ function UseTwinEagle()
   local cards=AIMon()
   for i=1,#cards do
     if cards[i].id==48739166 and cards[i].xyz_material_count==0 
-    and Duel.GetFlagEffect(player_ai,48739166)==0 and SummonSharkKnight() then
+    and SummonSharkKnight() then
       return true
     end
     if cards[i].id==23649496 and cards[i].xyz_material_count==0 
@@ -181,7 +181,7 @@ function UseTwinEagle()
       return true
     end
     if cards[i].id==34086406 and cards[i].xyz_material_count==0
-    and Duel.GetFlagEffect(player_ai,82293134)==0 then
+    and OPTCheck(82293134) then
       return true
     end
     if cards[i].id==94380860 and SummonRagnaZero() 
@@ -236,6 +236,7 @@ function HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Activatable,48739166) then  -- SHArk Knight
+    OPTSet(48739166)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Activatable,12744567) then  -- SHDark Knight
@@ -365,7 +366,7 @@ function HeraldicToGravePriority(card)
     return 3
   end
   if id==82293134 then
-    if Duel.GetFlagEffect(player_ai,82293134)==0 and Duel.GetTurnCount()~=GlobalLeoCheck and card.location ~= LOCATION_REMOVED then
+    if OPTCheck(82293134) and Duel.GetTurnCount()~=GlobalLeoCheck and card.location ~= LOCATION_REMOVED then
       GlobalLeoCheck=Duel.GetTurnCount()
       return 10
     elseif card.location == LOCATION_REMOVED then
@@ -677,8 +678,7 @@ function TwinEagleTarget(cards,minTargets)
   return HeraldicToField(cards,2)
  else
    for i=1,#cards do
-    if cards[i].id==48739166 and cards[i].xyz_material_count==0 
-    and Duel.GetFlagEffect(player_ai,48739166)==0 then
+    if cards[i].id==48739166 and cards[i].xyz_material_count==0 then
       result=IndexByID(cards,48739166)
     end
     if cards[i].id==23649496 and cards[i].xyz_material_count==0 
@@ -688,7 +688,7 @@ function TwinEagleTarget(cards,minTargets)
       result=IndexByID(cards,23649496)
     end
     if cards[i].id==34086406 and cards[i].xyz_material_count==0
-    and Duel.GetFlagEffect(player_ai,82293134)==0 then
+    and OPTCheck(82293134) then
       result=IndexByID(cards,34086406)
     end
     if cards[i].id==55888045 then
@@ -1036,6 +1036,10 @@ function HeraldicOnSelectChain(cards,only_chains_by_player)
     GlobalCardMode = 1
     return {1,CurrentIndex}
   end
+  if HasID(cards,82293134) then
+    OPTSet(82293134)
+    return {1,CurrentIndex}
+  end
   return nil
 end
 
@@ -1045,6 +1049,10 @@ end
 function HeraldicOnSelectEffectYesNo(id,triggeringCard)
   local result = nil
   if id == 23649496 or id == 11522979 or id == 12744567 then
+    result = 1
+  end
+  if id == 82293134 then
+    OPTSet(82293134)
     result = 1
   end
   return result

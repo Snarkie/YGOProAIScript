@@ -252,7 +252,7 @@ function GetWolfbark()
   return CardsMatchingFilter(AIGrave(),WolfbarkFilter)>0 or HasID(UseLists({AIHand(),AIMon()}),06353603,true)
 end
 function SummonWolfbark()
-  return CardsMatchingFilter(AIGrave(),WolfbarkFilter)>0 and Duel.GetFlagEffect(player_ai,03534077)==0
+  return CardsMatchingFilter(AIGrave(),WolfbarkFilter)>0 and OPTCheck(03534077)
 end
 function FireFormationSearch(cards)
   --returns the preferred Fire Formation to be searched
@@ -263,7 +263,7 @@ function FireFormationSearch(cards)
   if SummonSpirit() and HasID(AIHand(),01662004,true) and NeedsCard(10719350,cards,AICards,true) then
     return {IndexByID(cards,10719350)}
   end
-  if NeedsCard(57103969,cards,AICards) and Duel.GetFlagEffect(player_ai,57103969)==0 then
+  if NeedsCard(57103969,cards,AICards) and OPTCheck(57103969) then
     return {CurrentIndex}
   end
   if NeedsCard(10719350,cards,AICards) and CardsMatchingFilter(AIHand(),function(c) return c.race==RACE_BEASTWARRIOR end)>0 then
@@ -382,7 +382,7 @@ end
 function SummonSharkKnight(cards)
   local targets=SubGroup(OppMon(),SharkKnightFilter)
   if HasID(cards,83994433,true) or HasID(cards,39765958,true) then return false end
-  if #targets>0 and Duel.GetFlagEffect(player_ai,48739166)==0 and not MermailCheck() then
+  if #targets>0 and not MermailCheck() then
     table.sort(targets,function(a,b) return a.attack>b.attack end)
     return Chance(50) or targets[1].attack>=2400
   end
@@ -445,6 +445,7 @@ function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_ACTIVATE,IndexByID(Activatable,10719350)}
   end
   if HasID(Activatable,57103969) then -- Tenki
+    OPTSet(57103969)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Activatable,36499284) and UseYoko() then
@@ -456,6 +457,7 @@ function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
   end
   if HasIDNotNegated(Activatable,39699564) and UseLeopard() then
     GlobalCardMode = 1
+    OPTSet(39699564)
     return {COMMAND_ACTIVATE,IndexByID(Activatable,39699564)}
   end
   if HasIDNotNegated(Activatable,96381979) and UseTigerKing() then  
@@ -466,6 +468,7 @@ function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Activatable,03534077) then -- Wolfbark
+    OPTSet(03534077)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Activatable,43748308) and UseDragon() then
@@ -511,7 +514,7 @@ function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(Summonable,92572371) and CanXYZ(4) then --Buffalo
     return {COMMAND_SUMMON,IndexByID(Summonable,92572371)}
   end
-  if HasID(Summonable,39699564) and Duel.GetFlagEffect(player_ai,39699564)==0 then 
+  if HasID(Summonable,39699564) and OPTCheck(39699564) then 
     return {COMMAND_SUMMON,CurrentIndex} --Leopard           
   end
   if HasID(Summonable,43748308) then --Dragon              
@@ -717,7 +720,7 @@ function HorsePrinceTarget(cards)
   if HasID(cards,17475251) then
     result=CurrentIndex
   end
-  if HasID(cards,30929786) and Duel.GetFlagEffect(player_ai,30929786)==0 then
+  if HasID(cards,30929786) and OPTCheck(30929786) then
     result=CurrentIndex
   end
   if result==nil then result=math.random(#cards) end
@@ -1111,6 +1114,14 @@ function FireFistOnChain(cards,only_chains_by_player)
   if HasIDNotNegated(cards,46772449) and UseBelzebuth() then
     return {1,CurrentIndex}
   end
+  if HasIDNotNegated(cards,01662004) then
+    OPTSet(01662004)
+    return {1,CurrentIndex}
+  end
+  if HasIDNotNegated(cards,30929786) then
+    OPTSet(30929786)
+    return {1,CurrentIndex}
+  end
   return nil
 end
 function FireFistOnSelectEffectYesNo(id,triggeringCard)
@@ -1125,11 +1136,16 @@ function FireFistOnSelectEffectYesNo(id,triggeringCard)
       result = 1
     end
   end
-  if id == 30929786 or id == 06353603 or id == 70355994 
+  if id == 06353603 or id == 70355994 
   or id == 43748308 or id == 66762372 or id == 17475251
   or id == 44860890 or id == 93294869 or id == 89856523
-  or id == 74168099 or id == 01662004
+  or id == 74168099 
   then
+    result = 1
+  end
+  if id == 30929786 or id == 01662004 
+  and NotNegated(triggeringCard) then
+    OPTSet(triggeringCard.id)
     result = 1
   end
   return result

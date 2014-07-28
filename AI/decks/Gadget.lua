@@ -242,7 +242,7 @@ function SummonMachinaFortress(card)
 end
 function SummonSharkKnightGadget(cards)
   local targets=SubGroup(OppMon(),SharkKnightFilter)
-  if MermailCheck() and #targets > 0 and Duel.GetFlagEffect(player_ai,48739166)==0 then
+  if MermailCheck() and #targets > 0 and OPTCheck(48739166) then
     table.sort(targets,function(a,b) return a.attack>b.attack end)
     return target[1].attack>=2300 and HasID(AIExtra(),48739166,true)
   end

@@ -957,7 +957,10 @@ function ArtifactCheck(sanctum)
 end
 function MSTFilter(c)
   return c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0 
-  and c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0 and not DestroyBlacklist(c.id)
+  and c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0 
+  and not (DestroyBlacklist(c.id)
+  and (bit32.band(c.position, POS_FACEUP)>0 
+  or bit32.band(c.status,STATUS_IS_PUBLIC)>0))
 end
 function MSTEndPhaseFilter(c)
   return MSTFilter(c) and bit32.band(c.status,STATUS_SET_TURN)>0
