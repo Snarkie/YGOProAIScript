@@ -79,7 +79,7 @@ COMMAND_ACTIVATE       = 5
 COMMAND_TO_NEXT_PHASE  = 6
 COMMAND_TO_END_PHASE   = 7
 
-
+GlobalBPAllowed = nil
 function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
   ------------------------------------------
   -- The first time around, it sets the AI's
@@ -96,10 +96,12 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
     end
 
   set_player_turn()
+  GlobalBPAllowed = to_bp_allowed
   ---------------------------------------
   -- Don't do anything if the AI controls
   -- a face-up Light and Darkness Dragon.
   ---------------------------------------
+  
   if Get_Card_Count_ID(AIMon(), 47297616, POS_FACEUP) > 0 then
     return COMMAND_TO_NEXT_PHASE,1
   end

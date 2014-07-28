@@ -171,7 +171,8 @@ end
 -- to get some additional damage in or trigger Bear/Gorilla/etc effects
 function MP2Check()
   result = false
-  if AI.GetCurrentPhase() == PHASE_MAIN2 or Duel.GetTurnCount() == 1 or OppHasStrongestMonster() then
+  if AI.GetCurrentPhase() == PHASE_MAIN2 or Duel.GetTurnCount() == 1 
+  or OppHasStrongestMonster() or not(GlobalBPAllowed) then
     result = true
   end
   return result
