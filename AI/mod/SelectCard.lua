@@ -49,6 +49,10 @@ result = SatellarknightOnSelectCard(cards, minTargets, maxTargets, triggeringID,
 if result ~= nil then
   return result
 end
+result = ChaosDragonOnSelectCard(cards, minTargets, maxTargets, triggeringID, triggeringCard)
+if result ~= nil then
+  return result
+end
 result = {}
 
   --------------------------------------------

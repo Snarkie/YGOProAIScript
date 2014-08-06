@@ -239,7 +239,7 @@ function SharkKnightFilterBujin(c)
   and c.id~=22110647
 end
 function SummonSharkKnightBujin(cards)
-  local targets=SubGroup(OppMon(),SharkKnightFilter)
+  local targets=SubGroup(OppMon(),SharkKnightFilterBujin)
   if #targets > 0 and OPTCheck(48739166) then
     return true
   end

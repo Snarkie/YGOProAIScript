@@ -22,6 +22,9 @@ function OnSelectTribute(cards,minTributes, maxTributes)
   local result = {}
   local preferred = {}
   local valid = {}
+  if ChaosDragonCheck() then
+    return Add(cards,PRIO_TOGRAVE,minTributes)
+  end
   for i=1,#cards do
 	if cards[i].owner == 2 or TributeWhitelist(cards[i].id) > 0 or 
 	   bit32.band(cards[i].type,TYPE_TOKEN) > 0  then      

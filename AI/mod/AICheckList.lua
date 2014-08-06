@@ -290,7 +290,9 @@ NSBL={
 30328508,77723643,37445295,04939890,  -- Shadoll Lizard, Shadoll Dragon, Shadoll Falcon, Shadoll Hedgehog
 85103922,12697630,03717252,24062258,  -- Artifact Moralltach, Artifact Beagalltach, Shadoll Beast, Secret Sect Druid Dru
 75878039,02273734,38667773,63274863,  -- Satellarknights Deneb,Altair,Vega,Sirius
-38331564,91110378,69293721  -- Star Seraphs Scepter,Sovereign,Mermail Abyssgunde
+38331564,91110378,69293721,99365553,  -- Star Seraphs Scepter,Sovereign,Mermail Abyssgunde, Lightpulsar
+77558536,22624373,95503687,16404809,  -- LS Raiden, Lyla, Lumina, Kuribandit
+33420078,51858306,10802915,13700001,  -- Plaguespreader, Eclipse Wyvern, Tour Guide, Burning Abyss Scarm
 }
 function NormalSummonBlacklist(CardId) 
   for i=1,#NSBL do
@@ -365,7 +367,10 @@ SSBL={
 00581014,33698022,04779823, -- Emeral, Moonlight Rose, Michael
 31924889,08561192,63504681, -- Arcanite Magician, Leoh, Rhongomiant
 93568288,56638325,42589641, -- Number 80,Delteros, Triveil
-17412721,38273745,21501505 -- Noden, ouroboros, Cairngorgon
+17412721,38273745,21501505, -- Noden, ouroboros, Cairngorgon
+34408491,15561463,07391448, -- Beelze, Gauntlet Launcher, Goyo Guardian
+61901281,99234526,13700001, -- Collapserpent, Wyverbuster, Scarm
+25460258 -- Darkflare Dragon
 }
 
 
@@ -639,7 +644,7 @@ ScriptedCards ={
 19310321,45705025,60316373,87255382,  -- Twin Eagle, UnicornHeraldic Beasts: Aberconway, Amphisbaena
 59048135,81439173,61314842,84220251,  -- Heraldry Augmentation, Foolish BurialAdvanced Heraldry Art, Heraldry Reborn
 38296564,92365601,47387961,23649496,  -- Safe Zone, Rank-Up Magic: Limited Barian's Force,Number 8, Number 18       
-44508094,90411554,27243130,94656263,  -- Stardust Dragon, Redox, Dragon Ruler of Boulders,Forbidden Lance, Kagetokage
+76774528,90411554,27243130,94656263,  -- Scrap Dragon, Redox, Dragon Ruler of Boulders,Forbidden Lance, Kagetokage
 22110647,33198837,18964575,80117527,  -- Dracossack, Naturia Beast, Swift Scarecrow, Number 11: Big Eye
 97077563,94380860,83994433,76774528,  -- Call of the Haunted, Ragna Zero,Stardust Spark Dragon, Scrap Dragon
 42940404,39765958,48739166,12744567,  -- Machina Gearframe, Jeweled Red Dragon Archfiend,SHArk Knight, SHDark Knight
@@ -663,7 +668,12 @@ ScriptedCards ={
 75878039,02273734,38667773,63274863,  -- Satellarknights Deneb,Altair,Vega,Sirius
 38331564,91110378,01845204,14087893,  -- Star Seraphs Scepter,Sovereign,Instant Fusion,Book of Moon
 25789292,41510920,93568288,17412721,  -- Forbidden Chalice,Celestial Factor,Number 80,Noden
-56638325,42589641,38273745,21501505  -- Stellarknights Delteros, Triveil,Evilswarm Ouroboros,Cairngorgon
+56638325,42589641,38273745,21501505,  -- Stellarknights Delteros, Triveil,Evilswarm Ouroboros,Cairngorgon
+88264978,98777036,44330098,99365553,  -- REDMD, Tragoedia, Gorz, Lightpulsar
+61901281,99234526,77558536,16404809,  -- Wyverbuster, Collapserpent, LS Raiden, Kuribandit
+51858306,10802915,13700001,00691925,  -- Eclipse Wyvern, Tour Guide, Burning Abyss Scarm, Solar Recharge
+94886282,13700002,95992081,07391448,  -- Charge of the Light Brigade, Dante,Leviair, Goyo Guardian
+25460258 -- Darkflare Dragon
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do

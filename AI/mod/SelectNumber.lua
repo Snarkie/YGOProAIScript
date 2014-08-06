@@ -13,11 +13,12 @@ function OnSelectNumber(choices)
   -- The AI should always try to mill as many
   -- cards as possible with Card Trooper.
   -------------------------------------------
-  if GlobalActivatedCardID == 85087012 then
+  if GlobalActivatedCardID == 85087012 
+  or GlobalActivatedCardID == 13700002
+  then
     GlobalActivatedCardID = nil
     return #choices
   end
-
 
   -------------------------------------------
   -- Reset this variable if it gets this far.

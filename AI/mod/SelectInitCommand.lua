@@ -142,7 +142,6 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
   local SpSummonableCards = cards.spsummonable_cards
   local RepositionableCards = cards.repositionable_cards
   
-  
   --------------------------------------------
   -- Activate Heavy Storm only if the opponent
   -- controls 2 more S/T cards than the AI.
@@ -153,18 +152,6 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
       return COMMAND_ACTIVATE,i
     end
   end
-
-  -------------------------------------
-  -- Activate Mystical Space Typhoon if
-  -- the opponent has any existing S/T.
-  -------------------------------------
-  --[[for i=1,#ActivatableCards do
-    if ActivatableCards[i].id == 05318639 and
-       Get_Card_Count(OppST()) > 0 then
-	   GlobalActivatedCardID = ActivatableCards[i].id
-	  return COMMAND_ACTIVATE,i
-    end
-  end]]
   
   ------------------------------------------
   -- Activate Dark Hole only if the opponent
@@ -184,15 +171,21 @@ MermailCheck()
 BujinCheck()
 ShadollCheck()
 SatellarknightCheck()
+ChaosDragonCheck()
 ExtraCheck=(BujinCheck() or SatellarknightCheck())
 local DeckCommand = nil
+if not ExtraCheck then 
+  DeckCommand = ChaosDragonOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
+  if DeckCommand ~= nil then
+    return DeckCommand[1],DeckCommand[2]
+  end
+end
 if not ExtraCheck then 
   DeckCommand = FireFistInit(cards, to_bp_allowed, to_ep_allowed)
   if DeckCommand ~= nil then
     return DeckCommand[1],DeckCommand[2]
   end
 end
-
 if not ExtraCheck then 
   DeckCommand = HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if DeckCommand ~= nil then
@@ -405,20 +398,6 @@ end
       end
     end
   end     
-
-  ------------------------------------------
-  -- Activate Allure of Darkness only
-  -- if the AI has cards in hand it can banish
-  ------------------------------------------
-  for i=1,#ActivatableCards do
-    if ActivatableCards[i].id == 01475311 then	  
-	  local DarkMonsters = Sort_List_By(AIHand(),nil,ATTRIBUTE_DARK,nil,">",TYPE_MONSTER)
-      if Card_Count_From_List(BanishBlacklist,DarkMonsters,"~=") > 0 then
-		GlobalActivatedCardID = ActivatableCards[i].id
-        return COMMAND_ACTIVATE,i
-      end
-    end
-  end
     
   ------------------------------------------------
   -- Activate Soul Exchange only in Main Phase 1
@@ -1174,70 +1153,6 @@ end
 --       Monster card effect activation :B
 -- **********************************************
 -------------------------------------------------  
-   
-  -----------------------------------------------------
-  -- Activate Lumina, Lightsworn Summoner's effect only
-  -- if there's at least 1 level 5 or lower monster in
-  -- hand to discard.
-  -----------------------------------------------------
-  for i=1,#ActivatableCards do
-    if ActivatableCards[i].id == 95503687 then
-      local AIHand = AIHand()
-      for x=1,#AIHand do
-        if AIHand[x].level <= 5 then
-           GlobalCardMode = 1
-           GlobalActivatedCardID = ActivatableCards[i].id
-           return COMMAND_ACTIVATE,i
-         end
-       end
-     end
-   end
-  
-  
- ---------------------------------------------------
-  -- Activate Chaos Sorcerer's effect if the opponent
-  -- controls a stronger monster than the AI
-  -- or if its Main Phase 2 and he has a faceup monster
-  ---------------------------------------------------
-  for i=1,#ActivatableCards do
-    if ActivatableCards[i].id == 09596126 then
-      if Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") <= Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack") or
-       AI.GetCurrentPhase() == PHASE_MAIN2 and OppHasFaceupMonster(0) > 0 then
-        GlobalActivatedCardID = ActivatableCards[i].id
-        return COMMAND_ACTIVATE,i
-      end
-    end
-  end
-  
-  ----------------------------------------------------------
-  -- Activate Lyla, Lightsworn Summoner's S/T destroy effect
-  -- only if it hasn't already been attempted this turn.
-  -- That's to prevent infinite loops from Skill Drain, etc.
-  ----------------------------------------------------------
-  if Global1PTLylaST ~= 1 then
-    for i=1,#ActivatableCards do
-      if ActivatableCards[i].id == 22624373 then
-         Global1PTLylaST = 1
-         GlobalActivatedCardID = ActivatableCards[i].id
-        return COMMAND_ACTIVATE,i
-      end
-    end
-  end
-
-  --------------------------------------------
-  -- Activate Honest's "bounce to hand" effect
-  -- only if the AI didn't already try to
-  -- activate it already this turn.
-  --------------------------------------------
-  if Global1PTHonest ~= 1 then
-	for i=1,#ActivatableCards do
-      if ActivatableCards[i].id == 37742478 then
-         Global1PTHonest = 1
-         GlobalActivatedCardID = ActivatableCards[i].id
-        return COMMAND_ACTIVATE,i
-      end
-    end
-  end
 
 
   ------------------------------------------
@@ -1292,22 +1207,6 @@ end
      end
    end
   
-  -----------------------------------------------------
-  -- Activate BLS Envoy's banish effect if the opponent
-  -- controls a stronger monster than the AI
-  -- or if its Main Phase 2 and he has any monster
-  -----------------------------------------------------
-  for i=1,#ActivatableCards do
-    if ActivatableCards[i].id == 72989439 then
-      if Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") <= Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") or 
-         AI.GetCurrentPhase() == PHASE_MAIN2 and Get_Card_Count(AI.GetOppMonsterZones()) > 0 
-      then
-        GlobalActivatedCardID = ActivatableCards[i].id
-        return COMMAND_ACTIVATE,i
-      end
-    end
-  end
-  
   ---------------------------------------------
   -- AI should activate:  Cocoon of Evolution, 
   -- only if AI controls face up Petit Moth.
@@ -1321,20 +1220,6 @@ end
      end
    end
  end
- 
-  ---------------------------------------------
-  -- AI should activate: Number 61: Volcasaurus effect only if 
-  -- Player controls stronger monster than any of AI's
-  ---------------------------------------------
-  for i=1,#ActivatableCards do  
-   if ActivatableCards[i].id == 29669359 then -- Number 61: Volcasaurus
-	if Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") < Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") then 
-	   GlobalActivatedCardID = ActivatableCards[i].id
-	   GlobalCardMode = 1
-	  return COMMAND_ACTIVATE,i
-     end
-   end
- end 
  
   ---------------------------------------------
   -- AI should activate: Breaker the Magical Warrior's 
@@ -1372,21 +1257,6 @@ end
        GlobalCardMode = 1
       GlobalActivatedCardID = ActivatableCards[i].id
       return COMMAND_ACTIVATE,i
-     end
-   end
- end
- 
-  ---------------------------------------------
-  -- AI should activate: Lavalval Chain, 
-  -- only if AI has "Battlin' Boxer Glassjaw"
-  -- in deck.
-  --------------------------------------------- 
-  for i=1,#ActivatableCards do  
-   if ActivatableCards[i].id == 34086406 then  -- Lavalval Chain
-    if Get_Card_Count_ID(AIDeck(),05361647,nil) > 0 then -- Battlin' Boxer Glassjaw
-       GlobalCardMode = 1
-	   GlobalActivatedCardID = ActivatableCards[i].id
-	  return COMMAND_ACTIVATE,i
      end
    end
  end
@@ -1482,20 +1352,6 @@ end
      end
    end
    
-  ------------------------------------------
-  -- Activate "Constellar Ptolemy M7"
-  -- if the AI has boss monsters in the graveyard
-  -- or the enemy has a stronger monster
-  ------------------------------------------
-  for i=1,#ActivatableCards do
-   if ActivatableCards[i].id == 38495396 then  
-     if Card_Count_From_List(BanishBlacklist, AIGrave(),"==") > 0 or 
-	    Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") >= Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") then
-        GlobalCardMode = 1
-       return COMMAND_ACTIVATE,i
-      end
-    end
-  end
   
   ------------------------------------------
   -- Activate "Constellar Pleiades"
@@ -1511,30 +1367,6 @@ end
     end
   end
   
-  -----------------------------------------------------
-  -- Activate Plaguespreader Zombie only, if a synchro 
-  -- summon can be performed.
-  -----------------------------------------------------
-  for i=1,#ActivatableCards do
-    if ActivatableCards[i].id == 33420078 then
-      if Get_Card_Count_ID(AIGrave(),09411399,nil) > 0 and Cards_Available(AIExtra(), TYPE_SYNCHRO, 8) > 0 -- can activate Destiny Hero - Malicious to perform a lvl 8 synchro
-      and (Get_Card_Count_ID(AIDeck(),09411399,nil) > 0 or Get_Card_Count_ID(AIHand(),09411399,nil) > 0)  -- (if he is in hand, the effect of Plaguespreader will put him back into the deck)
-      then                                                              
-        GlobalActivatedCardID = ActivatableCards[i].id
-        return COMMAND_ACTIVATE,i
-      end
-      local AIMons=AIMon()
-      for j=1,#AIMons do
-        if bit32.band(AIMons[j].position,POS_FACEUP)> 0 then
-          local lvl = AIMons[j].level
-          if Cards_Available(AIExtra(),TYPE_SYNCHRO,AIMons[j].level+2) > 0 then
-            GlobalActivatedCardID = ActivatableCards[i].id
-            return COMMAND_ACTIVATE,i
-          end
-        end
-      end
-    end
-  end
   
    -----------------------------------------------------
   -- Activate Destiny Hero - Malicious only, if a lvl
@@ -1553,36 +1385,7 @@ end
     end
   end
   
-  -----------------------------------------------------
-  -- Activate Gauntlet Launcher, if the opponent has monsters
-  -----------------------------------------------------
-  for i=1,#ActivatableCards do
-    if ActivatableCards[i].id == 15561463 then
-      if Get_Card_Count(AI.GetOppMonsterZones()) > 0 then
-        GlobalActivatedCardID = ActivatableCards[i].id
-        return COMMAND_ACTIVATE,i
-      end
-    end
-  end
 
-  ------------------------------------------
-  -- Activate Dark Armed Dragon only, if the
-  -- player has backrow or stronger monsters
-  -- than the AI and the AI has non-boss DARK 
-  -- monsters in the graveyard
-  ------------------------------------------
-  for i=1,#ActivatableCards do
-    if ActivatableCards[i].id == 65192027 then
-      local DarkMonsters = Sort_List_By(AIGrave(),nil,ATTRIBUTE_DARK,nil,">",TYPE_MONSTER)
-	  if (Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") >= Get_Card_Att_Def_Pos(AIMon()) or
-        Get_Card_Count(OppST()) > 0) and Card_Count_From_List(BanishBlacklist,DarkMonsters,"~=") > 0 
-      then
-        GlobalActivatedCardID = ActivatableCards[i].id
-        GlobalCardMode = 1
-        return COMMAND_ACTIVATE,i
-      end
-    end
-  end
   
   ------------------------------------------
   -- Activate Dark Grepher only if the AI has 
@@ -1761,31 +1564,6 @@ end
   end
 
 
-  ----------------------------------------------------
-  -- Xyz Summon Leviair the Sea Dragon only if there's
-  -- a Level 4 or lower monster currently banished.
-  ----------------------------------------------------
-  for i=1,#SpSummonableCards do
-    if SpSummonableCards[i].id == 95992081 then
-      local AIBanished = AI.GetAIBanished()
-      local OppBanished = AI.GetOppBanished()
-      for i=1,#AIBanished do
-        if AIBanished[i] ~= false then
-          if AIBanished[i].level <= 4 then
-            return COMMAND_SPECIAL_SUMMON,i
-          end
-        end
-      end
-      for i=1,#OppBanished do
-        if OppBanished[i] ~= false then
-          if OppBanished[i].level <= 4 then
-            return COMMAND_SPECIAL_SUMMON,i
-          end
-        end
-      end
-    end
-  end
-
 
   -------------------------------------------------------  
   -- AI should summon Perfectly Ultimate Great Moth only if he 
@@ -1836,17 +1614,6 @@ end
       end
     end
   
-  --------------------------------------------------
-  -- Special Summon: Lavalval Chain if AI controls
-  -- "Battlin' Boxer Switchitter" and "Summoner Monk"
-  --------------------------------------------------
-  for i=1,#SpSummonableCards do
-    if SpSummonableCards[i].id == 34086406 then -- Lavalval Chain
-      if Get_Card_Count_ID(UseLists({AIMon(),AIST()}),00423585,POS_FACEUP) > 0 and Get_Card_Count_ID(UseLists({AIMon(),AIST()}),68144350,POS_FACEUP) > 0 then
-		return COMMAND_SPECIAL_SUMMON,i
-      end
-    end
-  end
   
   -----------------------------------------
   -- Set Global1PTSparSSed variable to 1 when spar is special summoned
@@ -1887,76 +1654,8 @@ end
       end
     end
   
-  --------------------------------------------------
-  -- Summon Chaos monsters only, if there are
-  -- valid targets to banish. For summoning 
-  -- Lightpulsar Dragon from the grave, 
-  -- check the hand instead
-  --------------------------------------------------
-    for i=1,#SpSummonableCards do
-      local id = SpSummonableCards[i].id
-      if id == 72989439 or id == 09596126 or id == 99365553 -- BLS, Chaos Sorcerer, Lightpulsar Dragon
-      then 
-        local cards = AI.GetAIGraveyard()
-        if id == 99365553 and SpSummonableCards[i].location == LOCATION_GRAVE then
-          cards = AI.GetAIHand()
-        end
-        local DarkMonsters = Sort_List_By(cards,nil,ATTRIBUTE_DARK,nil,">",TYPE_MONSTER)
-        local LightMonsters = Sort_List_By(cards,nil,ATTRIBUTE_LIGHT,nil,">",TYPE_MONSTER)
-        if Card_Count_From_List(BanishBlacklist,DarkMonsters,"~=") > 0 and Card_Count_From_List(BanishBlacklist,LightMonsters,"~=") > 0 then		  
-		  GlobalActivatedCardID = id
-          GlobalCardMode = 2
-          if id == 99365553 and SpSummonableCards[i].location == LOCATION_GRAVE then
-            GlobalCardMode = 4
-          end
-          return COMMAND_SPECIAL_SUMMON,i
-        end
-      end
-    end
   
-  --------------------------------------------------
-  -- Special Summon Red-Eyes Darkness Metal Dragon
-  -- only, if there are valid targets to banish
-  --------------------------------------------------   
-    for i=1,#SpSummonableCards do
-      if SpSummonableCards[i].id == 88264978 then     -- Red-Eyes Darkness Metal Dragon       		
-		local dragons = Sort_List_By(AIMon(),nil,nil,RACE_DRAGON,">",TYPE_MONSTER)
-        if Card_Count_From_List(BanishBlacklist,dragons,"~=") > 0 then         
-			GlobalActivatedCardID = SpSummonableCards[i].id
-	    GlobalCardMode = 1
-            return COMMAND_SPECIAL_SUMMON,i
-        end
-      end
-    end
     
-  -------------------------------------------------------  
-  -- Constellar Ptolemy M7 74168099
-  -------------------------------------------------------
-  for i=1,#SpSummonableCards do   
-	if SpSummonableCards[i].id == 38495396 then -- Constellar Ptolemy M7  
-	  local AIMons = AIMon()
-       local Result = 0
-        for x=1,#AIMons do
-          if bit32.band(AIMons[x].type,TYPE_XYZ)> 0 and AIMons[x].setcode == 83 and AIMons[x].xyz_material_count == 0 then
-		  PtolemySSMode = 2
-		  GlobalSSCardID = SpSummonableCards[i].id
-		  return COMMAND_SPECIAL_SUMMON,i
-          end
-       end
-    end
-    for i=1,#SpSummonableCards do   
-	 if SpSummonableCards[i].id == 38495396 then -- Constellar Ptolemy M7   
-	  local AIMons = AIMon()
-       local Result = 0
-		if Get_Card_Count_Level(AIMon(), 6, "==", POS_FACEUP)  >= GetXYZRequiredMatCount()
-    and (not HasID(AIMon(),74168099) or AI.GetCurrentPhase() == PHASE_MAIN2) then
-		  PtolemySSMode = 1
-		  GlobalSSCardID = SpSummonableCards[i].id
-		  return COMMAND_SPECIAL_SUMMON,i
-          end
-        end
-      end
-    end
   
   -------------------------------------------------------
   -- *************************************************
@@ -2088,8 +1787,7 @@ end
   -- when the opponent controls Spells/Traps.
   --------------------------------------------
   for i=1,#SummonableCards do
-    if SummonableCards[i].id == 71413901 or   -- Breaker
-       SummonableCards[i].id == 22624373 then -- Lyla
+    if SummonableCards[i].id == 71413901 then  -- Breaker
       if Get_Card_Count(OppST()) > 0 then
         GlobalSummonedThisTurn = GlobalSummonedThisTurn+1
 		return COMMAND_SUMMON,i
@@ -2175,18 +1873,6 @@ end
     end
   end
   
-  -------------------------------------------------------  
-  -- AI should summon Tour Guide From the Underworld if he
-  -- has any level 3 fiend type monsters in deck or hand.
-  -------------------------------------------------------
-  for i=1,#SummonableCards do   
-	if SummonableCards[i].id == 10802915 then -- Tour Guide From the Underworld
-	 if Card_Count_Specified(AI.GetAIMainDeck(), AI.GetAIHand(), nil, nil, nil, "==", 3, RACE_FIEND, nil, nil) > 0 then
-        GlobalSummonedThisTurn = GlobalSummonedThisTurn+1
-	   return COMMAND_SUMMON,i
-      end
-    end
-  end
   
   -------------------------------------------------------  
   -- AI should summon Winged Kuriboh if he
@@ -2362,31 +2048,6 @@ end
       end
     end
   
-  -------------------------------------------------------  
-  -- AI should normal summon Plaguespreader Zombie 
-  -- if a synchro summon can be performed
-  -- Otherwise, let normal summoning logic handle it
-  -------------------------------------------------------
-  for i=1,#SummonableCards do   
-    if SummonableCards[i].id == 33420078 then -- Plaguespreader Zombie
-      if Get_Card_Count_ID(AIGrave(),09411399,nil) >0 and Get_Card_Count_ID(AIDeck(),09411399,nil) > 0 -- can activate Destiny Hero - Malicious to perform a lvl 8 synchro
-      and Cards_Available(AIExtra(), TYPE_SYNCHRO, 8) > 0
-      then 
-        GlobalSummonedThisTurn = GlobalSummonedThisTurn+1
-		return COMMAND_SUMMON,i
-	  end
-      local AIMons=AI.GetAIMonsterZones()
-      for j=1,#AIMons do
-        if AIMons[j] and bit32.band(AIMons[j].position,POS_FACEUP)> 0 then
-          local lvl = AIMons[j].level
-          if Cards_Available(AIExtra(),TYPE_SYNCHRO,AIMons[j].level+2) > 0 then
-            GlobalSummonedThisTurn = GlobalSummonedThisTurn+1
-			return COMMAND_SUMMON,i
-          end
-        end
-      end
-    end
-  end
   
   -------------------------------------------------------
   -- Venus should be summoned if AI can bring out stronger monster to the field 

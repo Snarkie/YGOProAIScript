@@ -240,8 +240,9 @@ function SummonTriveil()
       result = result + 1
     end
   end
-  return result >= 6
-end
+  return result >= 6 or (AI.GetPlayerLP(2)<=2100 
+  and Duel.GetCurrentPhase()==PHASE_MAIN1 and GlobalBPAllowed)
+end 
 function ScepterFilter(c)
   return c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0
   and bit32.band(c.status,STATUS_LEAVE_CONFIRMED)==0

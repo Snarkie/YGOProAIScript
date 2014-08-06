@@ -103,6 +103,8 @@ function OnSelectPosition(id, available)
  if Position then result=Position end
  Position = SatellarknightOnSelectPosition(id,available)
  if Position then result=Position end
+ Position = ChaosDragonOnSelectPosition(id,available)
+ if Position then result=Position end
     
   -- check if the selected position is valid
   ----print("is the position valid?", band(result,available))

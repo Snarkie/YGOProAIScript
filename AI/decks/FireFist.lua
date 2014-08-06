@@ -71,7 +71,7 @@ function OppGetStrongestAttack()
   local result=0
   ApplyATKBoosts(cards)
   for i=1,#cards do
-    if cards[i] and cards[i]:is_affected_by(EFFECT_CANNOT_ATTACK)==0 and cards[i].attack>result then
+    if cards[i] and cards[i].attack>result then
       result=cards[i].attack-cards[i].bonus
     end
   end

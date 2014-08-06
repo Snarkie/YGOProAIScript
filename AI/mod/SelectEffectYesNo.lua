@@ -28,17 +28,16 @@ function OnSelectEffectYesNo(id,triggeringCard)
   if result==nil then
     result = SatellarknightOnSelectEffectYesNo(id,triggeringCard)
   end
+  if result==nil then
+    result = ChaosDragonOnSelectEffectYesNo(id,triggeringCard)
+  end
   if result then return result end
   
   if CardIsScripted(id)>0 then
     result = 0
   end
   
-  if id  == 72989439 then  -- Black Luster Soldier - Envoy of the Beginning
-    result = 1
-  end
-  if id == 99365553 or id == 51858306 or id == 92661479 -- Lightpulsar, Eclipse, Bounzer
-  or id == 94283662 -- Trance Archfiend
+  if id == 92661479 or id == 94283662-- Bounzer, Trance Archfiend
   then 
     result = 1
   end
@@ -69,13 +68,6 @@ function OnSelectEffectYesNo(id,triggeringCard)
 	  result = 1
       end
    end
-    
-	if id == 37742478 then -- Honest
-      if Global1PTHonest ~= 1 then  
-	    Global1PTHonest = 1
-        result = 1
-      end
-    end
 
 	if id == 15028680 then  -- HTS Psyhemuth
     if Get_Card_Att_Def_Pos(OppMon()) >= 2400 then
