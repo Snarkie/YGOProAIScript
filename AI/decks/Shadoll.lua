@@ -239,9 +239,12 @@ function ArtifactFilter(c)
   return bit32.band(c.attribute,ATTRIBUTE_LIGHT)>0 and bit32.band(c.type,TYPE_MONSTER)>0
 end
 function UseShadollFusion()
-  return OverExtendCheck() and (ShadollPriorityCheck(UseLists({AIHand(),AIMon()}),PRIO_TOGRAVE,2,ShadollFilter)>2
+  return OverExtendCheck()
+  and (ShadollPriorityCheck(UseLists({AIHand(),AIMon()}),PRIO_TOGRAVE,2,ShadollFilter)>2
+  and not HasID(AIMon(),94977269,true)
   or ShadollPriorityCheck(UseLists({AIHand(),AIMon()}),PRIO_TOGRAVE,1,ShadollFilter)>2
   and ShadollPriorityCheck(UseLists({AIHand(),AIMon()}),PRIO_TOGRAVE,1,ArtifactFilter)>2
+  and not HasID(AIMon(),20366274,true)
   or Duel.IsExistingMatchingCard(ShadollFusionFilter,1-player_ai,LOCATION_MZONE,0,1,nil))
 end
 function UseRoots()
@@ -1239,7 +1242,7 @@ function ShadollOnSelectEffectYesNo(id,triggeringCard)
   return result
 end
 ShadollAtt={
-  85103922 -- Moralltach
+  85103922,94977269 -- Moralltach,Midrash
 }
 ShadollDef={
   12697630,31924889,04904633 -- Beagalltach,Arcanite Magician,Shadoll Roots

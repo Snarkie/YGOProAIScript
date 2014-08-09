@@ -50,11 +50,11 @@ function DestroyFilter(c)
   or bit32.band(c.status,STATUS_IS_PUBLIC)>0))
 end
 function DestroyCheck(cards)
-  return CardsMatchingFilter(UseLists({OppMon(),OppST()}),DestroyFilter)
+  return CardsMatchingFilter(cards,DestroyFilter)
 end
 function DADCond(loc,c)
   if loc == PRIO_TOFIELD then
-    return DestroyCheck(UseLists({OppMon(),OppST()}))>1 
+    return DestroyCheck(OppField())>1 
     and PriorityCheck(AIGrave(),PRIO_BANISH,2,FilterAttribute,ATTRIBUTE_DARK)>4
   end
   if loc == PRIO_TOHAND then
@@ -147,6 +147,9 @@ function LylaCond(loc,c)
   return true
 end
 function LuminaCond(loc,c)
+  if loc == PRIO_TOFIELD then
+    return not HasID(AIMon(),95503687,true)
+  end
   return true
 end
 function KuribanditCond(loc,c)
@@ -247,10 +250,10 @@ Prio = {
 [77558536] = {6,4,7,4,5,2,0,0,5,0,RaidenCond},        -- Lightsworn Raiden
 [22624373] = {4,2,4,2,6,3,0,0,8,0,LylaCond},          -- Lightsworn Lyla
 [95503687] = {5,3,8,3,4,3,0,0,7,0,LuminaCond},        -- Lightsworn Lumina
-[16404809] = {3,2,3,2,6,3,0,0,8,0,KuribanditCond},    -- Kuribandit
-[33420078] = {5,3,3,2,9,0,0,0,9,9,WyvernCond},        -- Eclipse Wyvern
-[51858306] = {2,1,6,2,6,0,0,0,3,1,PSZCond},           -- Plaguespreader Zombie
-[10802915] = {7,5,7,4,2,1,0,0,8,3,TourGuideCond},     -- Tour Guide of the Underworld
+[16404809] = {3,2,4,2,6,3,0,0,8,0,KuribanditCond},    -- Kuribandit
+[51858306] = {5,3,3,2,9,0,0,0,9,9,WyvernCond},        -- Eclipse Wyvern
+[33420078] = {2,1,6,2,6,0,0,0,3,1,PSZCond},           -- Plaguespreader Zombie
+[10802915] = {5,2,3,2,2,1,0,0,8,3,TourGuideCond},     -- Tour Guide of the Underworld
 [13700001] = {4,2,8,3,8,2,0,0,5,2,ScarmCond},         -- Scarm, Malebranche of the Burning Abyss
 [00691925] = {8,3,0,0,3,0,0,0,0,0,nil},               -- Solar Recharge
 [94886282] = {7,2,0,0,1,0,0,0,0,0,nil},               -- Charge of the Light Brigade
@@ -325,6 +328,12 @@ function AssignPriority(cards,loc,filter,opt)
     --if loc==PRIO_GRAVE and cards[i].location==LOCATION_ONFIELD then
       --cards[i].prio=cards[i].prio-1
     --end
+    if loc==PRIO_TOHAND and bit32.band(cards[i].location,LOCATION_ONFIELD)>0 then
+      cards[i].prio=-1
+    end
+    if cards[i].owner==2 then
+      cards[i].prio=-1*cards[i].prio
+    end
     SetMultiple(cards[i].id)
   end
 end
@@ -343,6 +352,9 @@ function Add(cards,loc,count,filter,opt)
   local compare = function(a,b) return a.prio>b.prio end
   AssignPriority(cards,loc,filter,opt)
   table.sort(cards,compare)
+  for i=1,#cards do
+    --print(cards[i].id..", prio:"..cards[i].prio)
+  end
   for i=1,count do
     result[i]=cards[i].index
   end
@@ -354,8 +366,9 @@ function SSLightpulsar(c)
     return ChaosSummonCheck()>4 and OverExtendCheck() and #OppMon()>0  --and LightpulsarSummonCheck()>4
   elseif bit32.band(c.location,LOCATION_GRAVE)>0 then
     GlobalCardMode=2
-    return LightpulsarSummonCheck()>4 or (LightpulsarSummonCheck()>2 
-    and #AIHand()>4) and OverExtendCheck()and #OppMon()>0 
+    return (LightpulsarSummonCheck()>4 or (LightpulsarSummonCheck()>2 
+    and #AIHand()>4) and OverExtendCheck() and #OppMon()>0)
+    and not (HasID(AIHand(),99365553,true) and ChaosSummonCheck()>4)
   end
 end
 function NSLightpulsar(c)
@@ -371,8 +384,11 @@ end
 function SummonDante()
   return #AIDeck()>20
 end
+function LeviairFilter(c)
+  return bit32.band(c.type,TYPE_MONSTER)>0 and c.level<5 and c:is_affected_by(EFFECT_SPSUMMON_CONDITION)==0
+end
 function SummonLeviair()
-  return PriorityCheck(AIBanish(),PRIO_TOFIELD)>4
+  return PriorityCheck(AIBanish(),PRIO_TOFIELD,1,LeviairFilter)>4 
 end
 function UseLeviair()
   return true
@@ -398,7 +414,7 @@ function SummonScrapDragon()
   return DestroyCheck(OppField())>0 and (HasID(AIMon(),34408491,true) or PriorityCheck(AIField(),PRIO_TOGRAVE,2)>4)
 end
 function UseScrapDragon()
-  return DestroyCheck(OppField())>0 and (HasID(AIMon(),34408491,true) or PriorityCheck(AIField(),PRIO_TOGRAVE)>4)
+  return DestroyCheck(OppField())>0 and (HasID(AIMon(),34408491,true) or (PriorityCheck(AIField(),PRIO_TOGRAVE)>4 and MP2Check()) or (HasID(AIMon(),99365553,true) and LightpulsarCond(PRIO_TOFIELD)))
 end
 function SummonBLS()
   return OverExtendCheck() and #OppMon()>0 and ChaosSummonCheck()>4
@@ -410,7 +426,7 @@ end
 function BLSFilter2(c)
   return BLSFilter(c)
   and (c.attack>=3000 or c:is_affected_by(EFFECT_CANNOT_BE_BATTLE_TARGET)==1 
-  or c:is_affected_by(EFFECT_INDESTRUCTABLE)==1)
+  or c:is_affected_by(EFFECT_INDESTRUCTABLE)==1 or bit32.band(c.position,POS_FACEDOWN)>0)
 end
 function UseBLS()
   return CardsMatchingFilter(OppMon(),BLSFilter2)>0 or ((OppHasStrongestMonster() 
@@ -483,15 +499,18 @@ function ChaosSorcFilter2(c)
   or c:is_affected_by(EFFECT_INDESTRUCTABLE)==1)
 end
 function SummonDarkflare()
-  return ChaosSummonCheck()>4 and OverExtendCheck()
+  return ChaosSummonCheck()>4 and OverExtendCheck() and #OppMon()>0
 end
 function UseDarkflare()
-  return PriorityCheck(AIHand(),PRIO_TOGRAVE,1,RaceFilter,RACE_DRAGON)>4 and #OppGrave()>0
+  return false--PriorityCheck(AIHand(),PRIO_TOGRAVE,1,RaceFilter,RACE_DRAGON)>4 and #OppGrave()>0
 end
 function SummonMini()
-  return HasID(AIMon(),77558536,true) and OppHasStrongestMonster() 
-  or HasID(AIHand(),99365553,true) and PriorityCheck(AIField(),PRIO_TOGRAVE)<4 and not Duel.CheckNormalSummonActivity(player_ai)
+  return HasID(AIMon(),77558536,true) and FieldCheck(4)==1 and ExtraDeckCheck(TYPE_SYNCHRO,8)>0 and #OppMon()>0 --and OppHasStrongestMonster()
+  or OppHasStrongestMonster() and FieldCheck(4)==1 and ExtraDeckCheck(TYPE_XYZ,4)>0
+  or HasID(AIMon(),33420078,true) and OppHasStrongestMonster() and FieldCheck(4)==0 and ExtraDeckCheck(TYPE_SYNCHRO,6)>0
+  or HasID(AIHand(),99365553,true) and PriorityCheck(AIField(),PRIO_TOGRAVE)<4 and not Duel.CheckNormalSummonActivity(player_ai) and OverExtendCheck() and #OppMon()>0
   or HasID(AIHand(),88264978,true) and UseREDMD() and OverExtendCheck()
+  or HasID(AIMon(),76774528,true) and DestroyCheck(OppField())>0 
 end
 function SummonCollapserpent()
   return PriorityCheck(AIGrave(),PRIO_BANISH,1,FilterAttribute,ATTRIBUTE_LIGHT)>4 and SummonMini()
@@ -515,7 +534,10 @@ function SummonLyla()
   return CardsMatchingFilter(OppST(),DestroyFilter)>0 and OverExtendCheck()
 end
 function UseLyla()
-  return CardsMatchingFilter(OppST(),DestroyFilter)>0 and (Duel.GetCurrentPhase()==PHASE_MAIN2 or FieldCheck(4)>1 or HasID(AIMon(),33420078,false))
+  return CardsMatchingFilter(OppST(),DestroyFilter)>0 
+  and (Duel.GetCurrentPhase()==PHASE_MAIN2 or FieldCheck(4)>1 
+  or HasID(AIMon(),33420078,true) or HasID(AIHand(),99365553,true) 
+  and not Duel.CheckNormalSummonActivity(player_ai))
 end
 function SummonRaiden()
   return OverExtendCheck()
@@ -640,25 +662,30 @@ function ChaosDragonOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasIDNotNegated(Activatable,76774528) and UseScrapDragon() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+  if HasID(SpSummonable,88264978) and SummonREDMD() then
+    GlobalSSCardID = 88264978
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasIDNotNegated(Activatable,88264978) and UseREDMD() then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   for i=1,#SpSummonable do
     if SpSummonable[i].id == 99365553 and SSLightpulsar(SpSummonable[i]) then
+      GlobalSSCardID = 99365553
       return {COMMAND_SPECIAL_SUMMON,i}
     end
   end
   if HasID(SpSummonable,09596126) and SummonChaosSorc() then
+    GlobalSSCardID = 09596126
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
 
   if HasID(SpSummonable,72989439) and SummonBLS() then
+    GlobalCardMode=1
+    GlobalSSCardID = 72989439
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasIDNotNegated(Activatable,72989439) and UseBLS() then
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
-  if HasID(SpSummonable,88264978) and SummonREDMD() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
-  end
-  if HasIDNotNegated(Activatable,88264978) and UseREDMD() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Activatable,98777036,false,1580432577) and UseTrag1() then
@@ -668,6 +695,8 @@ function ChaosDragonOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(SpSummonable,25460258) and SummonDarkflare() then
+    GlobalCardMode=4
+    GlobalSSCardID = 25460258
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasIDNotNegated(Activatable,25460258) and UseDarkflare() then
@@ -675,9 +704,11 @@ function ChaosDragonOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(SpSummonable,61901281) and SummonCollapserpent() then
+    GlobalSSCardID = 61901281
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSummonable,99234526) and SummonWyverbuster() then
+    GlobalSSCardID = 99234526
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
 
@@ -718,7 +749,14 @@ function ChaosDragonOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   return nil
 end
 function DarkflareTarget(cards)
-  if GlobalCardMode == 2 then
+  if GlobalCardMode == 4 then
+    GlobalCardMode = 3
+    return Add(cards,PRIO_BANISH)
+  elseif GlobalCardMode == 3 then
+    GlobalCardMode = nil
+    GlobalSSCardID = nil
+    return Add(cards,PRIO_BANISH)
+  elseif GlobalCardMode == 2 then
     GlobalCardMode = 1
     return Add(cards,PRIO_TOGRAVE)
   elseif GlobalCardMode == 1 then
@@ -776,25 +814,28 @@ function PtolemyTarget(cards)
   end
 end
 function LightpulsarTarget(cards)
-  if GlobalcardMode == 4 then
+  if GlobalCardMode == 4 then
     GlobalCardMode = 3
     return Add(cards,PRIO_BANISH)
-  elseif GlobalcardMode == 3 then
+  elseif GlobalCardMode == 3 then
     GlobalCardMode = nil
+    GlobalSSCardID = nil
     return Add(cards,PRIO_BANISH)
-  elseif GlobalcardMode == 2 then
+  elseif GlobalCardMode == 2 then
     GlobalCardMode = 1
     return Add(cards,PRIO_TOGRAVE)
-  elseif GlobalcardMode == 1 then
+  elseif GlobalCardMode == 1 then
     GlobalCardMode = nil
+    GlobalSSCardID = nil
     return Add(cards,PRIO_TOGRAVE)
   else
+    GlobalSSCardID = nil
     return Add(cards,PRIO_TOFIELD)
   end
 end
 function TragTarget(cards)
   local result={}
-  if GlobalCardMode then
+  if GlobalCardMode and GlobalCardMode>0 then
     for i=1,#cards do
       if cards[i].level==GlobalcardMode then
         result[1]=i
@@ -807,6 +848,24 @@ function TragTarget(cards)
   if #result~=1 then result={math.random(#cards)} end
   return result
 end
+function BLSTarget(cards)
+  if GlobalCardMode == 2 then
+    GlobalCardMode = 1
+    return Add(cards,PRIO_BANISH)
+  elseif GlobalCardMode == 1 then
+    GlobalCardMode = nil
+    GlobalSSCardID = nil
+    return Add(cards,PRIO_BANISH)
+  else
+    return BestTargets(cards,1,TARGET_BANISH)
+  end 
+end
+function ScrapDragonTarget(cards)
+  if HasID(cards,99365553) and LightpulsarCond(PRIO_TOFIELD) then
+    return {CurrentIndex}
+  end
+  return BestTargets(cards,1,TARGET_DESTROY)
+end
 function ChaosDragonOnSelectCard(cards, minTargets, maxTargets,triggeringID,triggeringCard)
   local ID 
   local result=nil
@@ -815,8 +874,15 @@ function ChaosDragonOnSelectCard(cards, minTargets, maxTargets,triggeringID,trig
   else
     ID = triggeringID
   end
+  --print("selecting target")
+  --if ID then print("ID: "..ID) end
+  --if GlobalSSCardID then print("GlobalSSID: "..GlobalSSCardID) end
+  --if GlobalActivatedCardID then print("GlobalCardID: "..GlobalActivatedCardID) end
   if ID == 65192027 then -- DAD
     return DADTarget(cards)
+  end
+  if GlobalSSCardID == 72989439 then -- BLS
+    return BLSTarget(cards)
   end
   if ID == 72989439 then -- BLS
     return BestTargets(cards,1,TARGET_BANISH)
@@ -824,19 +890,34 @@ function ChaosDragonOnSelectCard(cards, minTargets, maxTargets,triggeringID,trig
   if ID == 88264978 then -- REDMD
     return Add(cards,PRIO_TOFIELD)
   end
+  if GlobalSSCardID == 88264978 then -- REDMD
+    GlobalSSCardID = nil
+    return BestTargets(cards,1,TARGET_BANISH)
+  end
   if ID == 98777036 then
     return TragTarget(cards)
   end
   if ID == 09596126 then -- Chaos Sorc
     return BestTargets(cards,1,TARGET_BANISH)
   end
+  if GlobalSSCardID == 09596126 then -- Chaos Sorc
+    GlobalSSCardID = nil
+    return BestTargets(cards,1,TARGET_BANISH)
+  end
   if ID == 99365553 then -- Lightpulsar
+    return Add(cards,PRIO_TOFIELD)
+  end
+  if GlobalSSCardID == 99365553 then -- Lightpulsar
     return LightpulsarTarget(cards)
   end
   if ID == 25460258 then -- Darkflare
     return DarkflareTarget(cards)
   end
-  if ID == 61901281 or ID == 99234526  then -- Collapserpent, Wyverbuster
+  if GlobalSSCardID == 25460258 then -- Darkflare
+    return DarkflareTarget(cards)
+  end
+  if GlobalSSCardID == 61901281 or GlobalSSCardID == 99234526  then -- Collapserpent, Wyverbuster
+    GlobalSSCardID = nil
     return Add(cards,PRIO_BANISH)
   end
   if ID == 22624373 then -- Lyla
@@ -876,7 +957,7 @@ function ChaosDragonOnSelectCard(cards, minTargets, maxTargets,triggeringID,trig
     return PtolemyTarget(cards)
   end
   if ID == 76774528 then 
-    return BestTargets(cards,1,TARGET_DESTROY)
+    return ScrapDragonTarget(cards)
   end
   return nil
 end

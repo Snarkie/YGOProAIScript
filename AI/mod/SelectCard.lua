@@ -425,25 +425,6 @@ end
   end
 
   
-  --------------------------------------------     
-  -- Select Players strongest face-up monster by attack points on the field.
-  -- If there are none, select a random face-down of the player 
-  -- (only relevant for BLS)
-  --------------------------------------------   
-  if (GlobalActivatedCardID == 09596126 or GlobalActivatedCardID == 72989439) -- Chaos Sorcerer, BLS
-    and GlobalCardMode == nil then 
-    GlobalActivatedCardID = nil
-    if OppHasFaceupMonster(0) then 
-      return Get_Card_Index(cards, 2, "Highest", nil, POS_FACEUP)
-    else
-      for i=1,#cards do
-        if cards[i] and (cards[i].owner == Owner or CurrentMonOwner(cards[i].cardid) == Owner) then 
-          result[#result+1]=i
-        end
-      end
-    end
-    return {result[math.random(#result)]}
-  end	
   
   --------------------------------------------     
   -- Select AI's weakest monster by attack points in hand.
@@ -806,28 +787,6 @@ end
        end
     end
 
-  
-  --------------------------------------------     
-  -- Select any material to detach.
-  --------------------------------------------   
-  if GlobalActivatedCardID == 29669359 then -- Number 61: Volcasaurus
-    if GlobalCardMode == 1 then
-	   GlobalCardMode = nil
-       return {1}	
-      end
-   end
-
-  
-  --------------------------------------------     
-  -- Select Players strongest monster by attack points on the field.
-  --------------------------------------------   
-  if GlobalActivatedCardID == 29669359 then -- Number 61: Volcasaurus 
-    if GlobalCardMode == nil then
-       GlobalActivatedCardID = nil
-       return Get_Card_Index(cards, 2, "Highest", TYPE_MONSTER, POS_FACEUP)
-      end
-   end
-
   --------------------------------------------     
   -- Select Players strongest monster by attack points on the field.
   --------------------------------------------   
@@ -836,15 +795,7 @@ end
      return Get_Card_Index(cards, 2, "Highest", TYPE_MONSTER, POS_FACEUP)
    end
 
-    
-  --------------------------------------------     
-  -- Select Players strongest lvl 5+ monster ot the field, or ritual summoned monster.
-  --------------------------------------------   
-  --[[if GlobalActivatedCardID == 94192409 then -- Compulsory Evacuation Device 
-     GlobalActivatedCardID = nil
-     return GetHighestATKMonByLevelOrSS(cards,TYPE_MONSTER+TYPE_RITUAL, 5, POS_FACEUP_ATTACK or POS_FACEUP_DEFENCE, 2)
-   end]]
- 	  
+   
   --------------------------------------------     
   -- Select AI's weakest monster by attack points on the field.
   --------------------------------------------   
@@ -934,127 +885,6 @@ end
     end
 	
   
-  --------------------------------------------     
-  -- Chaos summons, check the cards to banish
-  -- with the banish blacklist
-  -- Check Lightpulsar Dragon separately when
-  -- summoned from grave and discard cards
-  -- that work well in the graveyard
-  --------------------------------------------   
-  if(GlobalActivatedCardID == 72989439      -- BLS
-  or GlobalActivatedCardID == 09596126      -- Chaos Sorcerer
-  or GlobalActivatedCardID == 99365553)     -- Lightpulsar Dragon
-    and GlobalCardMode ~= nil then
-    local discarding = 0
-    if GlobalCardMode > 2 then
-      discarding = 1
-    end
-    GlobalCardMode = GlobalCardMode - 1
-    if GlobalCardMode <= 0 or GlobalCardMode == 2 then
-      GlobalCardMode = nil 
-      GlobalActivatedCardID = nil 
-    end
-    for i=1,#cards do
-      if cards[i] and BanishBlacklist(cards[i].id) == 0 then 
-        if discarding > 0 then
-          if (cards[i].id == 09411399 and Get_Card_Count_ID(AIGrave(),cards[i].id,nil) == 0)    -- Destiny Hero - Malicious
-          or cards[i].id == 33420078 or cards[i].id == 51858306             -- Plaguespreader Zombie, Eclipse Wyvern
-          then
-            return {i}
-          end
-        else
-          if BanishWhitelist(cards[i].id) > 0 then
-            return {i}
-          end
-        end
-        result[#result+1] = i
-      end
-    end
-    return {result[math.random(#result)]}
-  end
-  
-  --------------------------------------------     
-  -- Always put Destiny Hero - Malicious back in the deck
-  -- if able. Otherwise one at random.
-  --------------------------------------------   
-  if GlobalActivatedCardID == 33420078 then -- Plaguespreader Zombie 
-     GlobalActivatedCardID = nil
-    if Get_Card_Count_ID(AIHand(),09411399,nil) > 0 and Get_Card_Count_ID(AIGrave(),09411399,nil) > 0 then
-      for i=1,#cards do
-        if cards[i] and cards[i].id == 09411399 then -- Destiny Hero - Malicious
-          return {i}
-        end
-     end
-    else
-    return {math.random(#cards)}
-   end
-end
-
-  --------------------------------------------     
-  -- Select Players strongest face-up monster 
-  -- otherwise select a random one
-  --------------------------------------------   
-  if GlobalActivatedCardID == 15561463 then -- Gauntlet Launcher
-    if GlobalCardMode == nil then
-       GlobalCardMode = 1
-      return {math.random(#cards)}
-    end
-    GlobalActivatedCardID = nil
-    GlobalCardMode = nil
-    if Get_Card_Count_Pos(OppMon(), POS_FACEUP) > 0 then
-      return Get_Card_Index(cards, 2, "Highest", nil, POS_FACEUP)
-    else
-      for i=1,#cards do
-        if cards[i] and (cards[i].owner == 2 or CurrentMonOwner(cards[i].cardid) == 2) then
-          result[#result+1]=i
-        end
-      end
-      return {result[math.random(#result)]}
-    end
-  end	
-
-  --------------------------------------------
-  -- For the banish, try to avoid monsters, that
-  -- work well in the grave and check the banish blacklist
-  --
-  -- For the destruction, select players strongest monster, if 
-  -- he controls any stronger monsters than AI or only monsters, 
-  -- otherwise select any spell or trap card player controls
-  --------------------------------------------   
-  if GlobalActivatedCardID == 65192027 then -- Dark Armed Dragon
-    if GlobalCardMode == 1 then  --banish from grave
-      for i=1,#cards do
-        if cards[i] then
-          if BanishBlacklist(cards[i].id)==0 and cards[i].id ~= 33420078  -- Plaguespreader Zombie
-            and (cards[i].id ~= 09411399 or Get_Card_Count_ID(AIDeck(),cards[i].id,nil) == 0) -- Destiny Hero - Malicious 
-          then
-            result[#result+1]=i
-          end
-        end
-      end
-      if #result <= 0 then
-        for i=1,#cards do
-          if cards[i] and BanishBlacklist(cards[i].id)==0 then
-            result[#result+1]=i
-          end
-        end
-      end
-      result = {result[math.random(#result)]}
-      GlobalCardMode = nil
-      return result
-    else              --destroy player card
-      for i=1,#cards do
-        if cards[i] ~= false then 
-          if Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") < Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") or Get_Card_Count(OppST()) == 0 then
-            return Get_Card_Index(cards, 2, "Highest", nil, POS_FACEUP)
-          else
-            return getRandomSTIndex(cards, 2)
-          end
-          GlobalActivatedCardID = nil
-        end
-      end
-    end
-  end
 
  --------------------------------------------     
   -- Select monsters that work well in the grave, 
@@ -1085,40 +915,6 @@ end
     end
     result={result[math.random(#result)]}
     return result
-  end
-
-  --------------------------------------------------------
-  -- For the banish on summon, check for banish blacklist, 
-  -- select random valid target. Try to avoid XYZ dragons
-  -- who still have materials, but use them if you have to.
-  -- For the summoned dragon, prefer Lightpulsar (he can
-  -- revive REDMD when destroyed) otherwise select at random
-  --------------------------------------------------------
-  if GlobalActivatedCardID == 88264978 then     -- Red-Eyes Darkness Metal Dragon
-    GlobalActivatedCardID = nil
-    if GlobalCardMode == 1 then
-      for i=1,#cards do
-        if BanishBlacklist(cards[i].id) == 0 and cards[i].xyz_material_count == 0 then
-          result[#result+1]=i
-        end
-      end
-      if #result == 0 then
-        for i=1,#cards do
-          if BanishBlacklist(cards[i].id) == 0 then
-            result[#result+1]=i
-          end
-        end
-      end
-      GlobalCardMode = nil
-      return {result[math.random(#result)]}
-    else
-      for i=1,#cards do
-        if cards[i] and cards[i].id == 99365553 then --Lightpulsar Dragon
-          return {i}
-        end
-      end
-      return {math.random(#cards)}
-    end
   end
   
   --------------------------------------------     
@@ -1428,9 +1224,6 @@ end
   -- it choose the monster with the highest ATK for now.
   -----------------------------------------------------------
   if GlobalActivatedCardID == 83764718 or   -- Reborn
-     GlobalActivatedCardID == 97077563 or   -- Call
-     GlobalActivatedCardID == 88264978 or   -- REDMD
-     GlobalActivatedCardID == 78868119 or   -- Diva
      GlobalActivatedCardID == 09622164 or   -- D.D.R.
      GlobalActivatedCardID == 71453557 or   -- Autonomous Action Unit
 	 GlobalActivatedCardID == 42534368 or   -- Silent Doom
@@ -1450,17 +1243,6 @@ end
     return result
   end
   
-  
-  -------------------------------------------------------
-  -- If the AI activates Tour Guide from the Underworld's
-  -- effect, attempt to special summon something other
-  -- than another Tour Guide.
-  -------------------------------------------------------
-  if GlobalActivatedCardID == 10802915 then
-     GlobalActivatedCardID = nil          
-     return Index_By_ID(cards, 1,"Highest",TYPE_MONSTER,nil,"~=",10802915)
-    end
-
   -----------------------------------------------------
   -- When Monster Reincarnation resolves, the AI should
   -- always choose the monster with the highest ATK
@@ -1472,21 +1254,6 @@ end
        return Get_Card_Index(cards,1,"Highest",TYPE_MONSTER+TYPE_EFFECT,nil)
       end
    end
-
-  -----------------------------------------------------------
-  -- When Lumina, Lightsworn Summoner resolves, the AI should
-  -- always choose the monster with the highest ATK for now.
-  --
-  -- To do: choose the right monster depending on the situation.
-  -- (Wulf/Jain for ATK, Lyla for S/T, Ehren for DEF monsters,
-  --  Garoth for draw power if no threats are present, more?)
-  -----------------------------------------------------------
-  if GlobalActivatedCardID == 95503687 then
-    if GlobalCardMode == nil then
-       GlobalActivatedCardID = nil
-       return Get_Card_Index(cards,1,"Highest",TYPE_MONSTER+TYPE_EFFECT,nil)
-     end
-   end
  
   ------------------------------------------------------------
   -- For the Monster Reincarnation discard cost, the AI should
@@ -1497,17 +1264,6 @@ end
        GlobalCardMode = nil
        return Get_Card_Index(cards, nil, "Lowest", nil, nil)
       end
-   end
-
-  ----------------------------------------------------------------
-  -- For Lumina, Lightsworn Summoner's discard cost, the AI should
-  -- discard the lowest ATK monster whose level is 5 or lower.
-  ----------------------------------------------------------------
-  if GlobalActivatedCardID == 95503687 then
-    if GlobalCardMode == 1 then
-       GlobalCardMode = nil
-       return Index_By_Level(cards,1,"Lowest",TYPE_MONSTER,nil,"<=",5)
-      end 
    end
 
   ----------------------------------------------------------------

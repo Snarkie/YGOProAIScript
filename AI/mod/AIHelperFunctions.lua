@@ -1673,6 +1673,7 @@ function ApplyATKBoosts(Cards)
     end
   end
   
+  
   ------------------------------------------
   -- Apply Honest's Attack Bonus
   ------------------------------------------
@@ -1683,6 +1684,14 @@ function ApplyATKBoosts(Cards)
       local OppAtt = Get_Card_Att_Def(OppMon(),"attack",">",nil,"attack")
       Cards[i].attack = Cards[i].attack + OppAtt
       Cards[i].bonus = OppAtt
+    end
+  end
+  
+  
+  for i=1,#Cards do
+    if Cards[i].id == 20366274 then
+      local OppAtt=OppGetStrongestAttDef(NephilimFilter)
+      Cards[i].attack = OppAtt+1
     end
   end
   

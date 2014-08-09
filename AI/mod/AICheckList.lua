@@ -370,7 +370,7 @@ SSBL={
 17412721,38273745,21501505, -- Noden, ouroboros, Cairngorgon
 34408491,15561463,07391448, -- Beelze, Gauntlet Launcher, Goyo Guardian
 61901281,99234526,13700001, -- Collapserpent, Wyverbuster, Scarm
-25460258 -- Darkflare Dragon
+25460258,65192027 -- Darkflare Dragon, Dark Armed Dragon
 }
 
 

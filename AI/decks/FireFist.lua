@@ -77,6 +77,20 @@ function OppGetStrongestAttack()
   end
   return result
 end
+function OppGetStrongestAttDef(filter)
+  local cards=OppMon()
+  local result=0
+  ApplyATKBoosts(cards)
+  for i=1,#cards do
+    if cards[i] and (filter==nil or filter(cards[i])) 
+    and (bit32.band(cards[i].position,POS_ATTACK) and cards[i].attack>result 
+    or  bit32.band(cards[i].position,POS_DEFENCE) and cards[i].defense>result)
+    then
+      result=cards[i].attack-cards[i].bonus
+    end
+  end
+  return result
+end
 function OppHasStrongestMonster()
   local att=AIGetStrongestAttack()
   local mon=OppMon()
