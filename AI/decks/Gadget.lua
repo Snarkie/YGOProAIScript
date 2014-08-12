@@ -12,120 +12,7 @@ function GadgetCount(cards)
   end
   return count
 end
-function GraveCheck(level)
-  local result=0
-  local cards=AIGrave()
-  for i=1,#cards do
-    if cards[i].level==level then
-      result = result + 1
-    end
-  end
-  return result
-end
-function HandCheck(level)
-  local result=0
-  local cards=AIHand()
-  for i=1,#cards do
-    if cards[i].level==level then
-      result = result + 1
-    end
-  end
-  return result
-end
-function SubGroup(cards,filter,opt)
-  result = {}
-  if cards then
-    for i=1,#cards do
-      if opt and filter(cards[i],opt) or opt==nil and filter(cards[i]) then
-        result[#result+1]=cards[i]
-      end
-    end
-  end
-  return result
-end
-function ExpectedDamageFilter(card)
-  return card:IsControler(1-player_ai) and card:IsType(TYPE_MONSTER) and card:IsPosition(POS_FACEUP_ATTACK)
-  and card:GetAttackedCount()==0 and not card:IsHasEffect(EFFECT_CANNOT_ATTACK_ANNOUNCE) and not card:IsHasEffect(EFFECT_CANNOT_ATTACK)
-end
-function ExpectedDamage()
-  local result=0
-  local g=Duel.GetMatchingGroup(ExpectedDamageFilter,1-player_ai,LOCATION_MZONE,0,nil)  
-  local c=g:GetFirst()
-  while c do
-    result=result+c:GetAttack()
-    c=g:GetNext()
-  end
-  return result
-end
-TARGET_DESTROY  = 1
-TARGET_TOGRAVE  = 2
-TARGET_BANISH   = 3
-TARGET_TOHAND   = 4
-TARGET_TODECK   = 5
-TARGET_FACEDOWN = 6
-function BestTargets(cards,count,target,filter,immuneCheck)
-  local result = {}
-  local AIMon=AIMon()
-  local DestroyCheck = false
-  if target == true then 
-    target=TARGET_DESTROY 
-  end
-  if count == nil then count = 1 end
-  ApplyATKBoosts(AIMon)
-  local AIAtt=Get_Card_Att_Def(AIMon,"attack",">",nil,"attack")
-  for i=1,#cards do
-    cards[i].index = i
-    cards[i].prio = 0
-    if bit32.band(cards[i].type,TYPE_MONSTER)>0 then
-      if bit32.band(cards[i].position, POS_FACEUP)>0
-      or bit32.band(cards[i].status,STATUS_IS_PUBLIC)>0
-      then
-        if cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)>0 and target==TARGET_DESTROY 
-        or cards[i]:is_affected_by(EFFECT_IMMUNE)>0
-        then
-          cards[i].prio = 1
-        else
-          cards[i].prio = math.max(cards[i].attack+1,cards[i].defense)+5
-          if cards[i].owner==2 and cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE)==0 then
-            cards[i].prio = math.max(5,cards[i].prio-AIAtt*.75)
-          end
-        end
-      else
-        cards[i].prio = 2
-      end
-    else
-      if cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)>0 and target==TARGET_DESTROY
-      or cards[i]:is_affected_by(EFFECT_IMMUNE)>0 
-      or bit32.band(cards[i].status,STATUS_LEAVE_CONFIRMED)>0
-      then
-        cards[i].prio = 1
-      else    
-        if bit32.band(cards[i].position, POS_FACEUP)>0 then
-          cards[i].prio = 4
-        else
-          cards[i].prio = 3
-        end
-      end
-    end
-    if filter and not filter(cards[i]) then
-      cards[i].prio = 0
-    end
-    if cards[i].owner == 1 then 
-      cards[i].prio = -1 * cards[i].prio
-    end
-    if (bit32.band(cards[i].position, POS_FACEUP)>0 or bit32.band(cards[i].status,STATUS_IS_PUBLIC)>0)
-    and (target == TARGET_TOHAND and ToHandBlacklist(cards[i].id)   
-    or target == TARGET_DESTROY and DestroyBlacklist(cards[i].id))
-    then
-      cards[i].prio = 0
-    end
-  end
-  table.sort(cards,function(a,b) return a.prio > b.prio end)
-  for i=1,count do
-    result[i]=cards[i].index
-  end
-  return result
-end
+
 function SetBanishPriority(cards)
   for i=1,#cards do
     local c=cards[i]
@@ -233,68 +120,30 @@ end
 function SummonMachinaFortress(card)
   local result = false
   if card.location == LOCATION_GRAVE then
-    result = HasID(AIHand(),39284521) or GadgetCount(AIHand())>1
+    result = HasID(AIHand(),39284521,true) or GadgetCount(AIHand())>1
   else
-    result = HasID(AIHand(),18964575) or GadgetCount(AIHand())>1
+    result = HasID(AIHand(),18964575,true) or GadgetCount(AIHand())>1
     or Get_Card_Count_ID(AIHand(),05556499)>1
   end
   return result and (OverExtendCheck() or FieldCheck(7)==1)
 end
-function SummonSharkKnightGadget(cards)
-  local targets=SubGroup(OppMon(),SharkKnightFilter)
-  if MermailCheck() and #targets > 0 and OPTCheck(48739166) then
-    table.sort(targets,function(a,b) return a.attack>b.attack end)
-    return target[1].attack>=2300 and HasID(AIExtra(),48739166,true)
-  end
-  return false
-end
-function SummonGearGigant()
-  return (Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack")< 2300 
-  or Chance(70) or MP2Check()) and not (SummonRagnaZero() and HasID(AIExtra(),94380860))
-  and not SummonSharkKnightGadget(OppMon())
-end
-function SummonDracossack()
-  return MP2Check() and not MermailCheck()
-end
-function SummonBigEye()
-  return OppHasStrongestMonster() 
-  and (Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack") > 2300
-  or Get_Card_Att_Def(OppMon(),"defense",">",POS_FACEUP_DEFENSE,"defense") > 2300)
-end
+
 function SummonTinGoldfish()
   return GadgetCount(AIHand())>0 and FieldCheck(4)==0
 end
 function SummonGearframe()
-  return HasID(AIHand(),94656263) or FieldCheck(4)==1
+  return HasID(AIHand(),94656263,true) or FieldCheck(4)==1
 end
 function SummonMaskedChameleon()
   return not(Get_Card_Count_Att_Def(AIGrave(),"==",nil,0,nil)>0 and not Duel.CheckSpecialSummonActivity(player_ai)) == (FieldCheck(4)==1)
 end
 function SummonGadget()
-  return HasID(AIHand(),94656263) or FieldCheck(4)==1 
+  return HasID(AIHand(),94656263,true) or FieldCheck(4)==1 
   --or HasIDNotNegated(AIST(),97077563) and GraveCheck(4)>0
-end
-function SummonNaturiaBeast()
-  return Chance(50) and Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack") < 2200
-end
-function SummonArmades()
-  return Duel.GetCurrentPhase() == PHASE_MAIN1 and Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack") < 2300 
-  and Duel.GetTurnCount()>1 and not MermailCheck()
-end
-function SummonStardustSpark()
-  return true
-end
-function SummonJeweledRDA(card)
-  local OppAtt=Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack")
-  return UseJeweledRDA(card,1) or OppAtt > 2500
-end
-
-function IsMonster(card)
-  return bit32.band(card.type,TYPE_MONSTER)>0
 end
 
 function UseCotH(card)
-  if HasID(AIGrave(),05556499) then
+  if HasID(AIGrave(),05556499,true) then
     return true
   end
   if GadgetCount(AIGrave())>0 and GadgetCount(AIHand())==0 then
@@ -312,9 +161,6 @@ function UseCotH(card)
   end
   return false
 end
-function UseBigEye()
-  return true
-end
 function OnSelectSum(cards, sum)
 	local result = {}
 	local num_levels = 0
@@ -325,13 +171,13 @@ function OnSelectSum(cards, sum)
       cards[i].prio = 10
     end
     if cards[i].id == 39284521 then
-      if HasID(cards,05556499) then
+      if HasID(cards,05556499,true) then
         cards[i].prio = 1
       else
         cards[i].prio = 9
       end
     end
-    if cards[i].id == 18964575 and HasID(cards,05556499) then
+    if cards[i].id == 18964575 and HasID(cards,05556499,true) then
       cards[i].prio = 8
     end
     if cards[i].id == 86445415 or cards[i].id == 41172955 or cards[i].id == 13839120 then
@@ -394,7 +240,8 @@ function UseGearframe(card)
   if bit32.band(card.type,TYPE_SPELL)>0 then
     return true
   else
-    return AI.GetCurrentPhase()==PHASE_MAIN2
+    return (AI.GetCurrentPhase()==PHASE_MAIN2 or Duel.GetTurnCount()==1)
+    and not(FieldCheck(7)>1 or FieldCheck(4)>1)
   end
 end
 function MPBTokenCount(cards)
@@ -418,41 +265,10 @@ function JeweledRDAFilter(card,id)
   return card.cardid~=id and bit32.band(card.position,POS_FACEUP_ATTACK)>0 
   and card:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0 and card:is_affected_by(EFFECT_IMMUNE)==0
 end
-function UseJeweledRDA(card,mod)
-  local aimon=AIMon()
-  local AITargets=SubGroup(aimon,JeweledRDAFilter,card.cardid)
-  local OppTargets=SubGroup(OppMon(),JeweledRDAFilter,card.cardid)
-  local diff=(#OppTargets+mod)-#AITargets
-  if HasIDNotNegated(aimon,83994433) and GlobalStardustSparkActivation[aimon[CurrentIndex].cardid]~=Duel.GetTurnCount() then
-    diff = diff+1
-  end
-  AITargets[#AITargets+1]=card
-  ApplyATKBoosts(AITargets)
-  ApplyATKBoosts(OppTargets)
-  local AIAtt=Get_Card_Att_Def(AITargets,"attack",">",nil,"attack")
-  local OppAtt=Get_Card_Att_Def(OppTargets,"attack",">",nil,"attack")
-  return #AITargets==1 or diff>1 or (diff<=1 and AIAtt-OppAtt < diff*500)
+function SummonGearGigant()
+  return OppGetStrongestAttDef()<2300 and MP2Check()
 end
-function DarkHoleFilter(card)
-  return card:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0 and card:is_affected_by(EFFECT_IMMUNE)==0
-end
-function UseDarkHole(card)
-  local aimon=AIMon()
-  local AITargets=SubGroup(aimon,DarkHoleFilter)
-  local OppTargets=SubGroup(OppMon(),DarkHoleFilter)
-  local diff=#OppTargets-#AITargets
-  if HasIDNotNegated(aimon,83994433) and GlobalStardustSparkActivation[aimon[CurrentIndex].cardid]~=Duel.GetTurnCount() then
-    diff = diff+1
-  end
-  if HasIDNotNegated(AIST(),27243130) or HasID(AIHand(),27243130) then
-    diff = diff+1
-  end
-  ApplyATKBoosts(AITargets)
-  ApplyATKBoosts(OppTargets)
-  local AIAtt=Get_Card_Att_Def(AITargets,"attack",">",nil,"attack")
-  local OppAtt=Get_Card_Att_Def(OppTargets,"attack",">",nil,"attack")
-  return (#AITargets==0 and OppAtt >= 2000) or diff>1 or (OppAtt >= 2000 and diff<=1 and AIAtt-OppAtt < diff*500)
-end
+
 function GadgetOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local Activatable = cards.activatable_cards
   local Summonable = cards.summonable_cards
@@ -463,36 +279,14 @@ function GadgetOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasIDNotNegated(Activatable,28912357) then -- GGX
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasIDNotNegated(Activatable,22110647,false,353770352) and UseDracossack1(Activatable[CurrentIndex]) then
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
-  if HasIDNotNegated(Activatable,22110647,false,353770353) and UseDracossack2(Activatable[CurrentIndex]) then
-    GlobalCardMode=2
-    return {COMMAND_ACTIVATE,CurrentIndex}
+  if HasID(SpSummonable,28912357) and SummonGearGigant() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(Activatable,97077563) and UseCotH() and OverExtendCheck() then
     return {COMMAND_ACTIVATE,IndexByID(Activatable,97077563)}
   end
-  if HasIDNotNegated(Activatable,80117527) and UseBigEye() then
-    return {COMMAND_ACTIVATE,IndexByID(Activatable,80117527)}
-  end
-  if HasIDNotNegated(Activatable,39765958) and UseJeweledRDA(Activatable[CurrentIndex],0) then
-    return {COMMAND_ACTIVATE,IndexByID(Activatable,39765958)}
-  end
-  if HasID(SpSummonable,80117527) and SummonBigEye() then
-    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,80117527)}
-  end
-  if HasID(SpSummonable,22110647) and SummonDracossack() then
-    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,22110647)}
-  end
   if HasID(Activatable,42940404) and UseGearframe(Activatable[CurrentIndex]) then
     return {COMMAND_ACTIVATE,IndexByID(Activatable,42940404)}
-  end
-  if HasID(SpSummonable,33198837) and SummonNaturiaBeast() then
-    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,33198837)}
-  end
-  if HasID(SpSummonable,88033975) and SummonArmades() then
-    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,88033975)}
   end
   if HasID(Summonable,18063928) and SummonTinGoldfish() and OverExtendCheck() then
     return {COMMAND_SUMMON,IndexByID(Summonable,18063928)}
@@ -726,7 +520,7 @@ function GadgetOnSelectCard(cards, minTargets, maxTargets,ID,triggeringCard)
   if ID == 42940404 then
     return GearframeTarget(cards)
   end
-  if ID == 97077563 and not SatellarknightCheck() then
+  if ID == 97077563 and not DeckCheck(DECK_TELLARKNIGHT) then
     return CotHTarget(cards)
   end
   if ID == 50078509 then

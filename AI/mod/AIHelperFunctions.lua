@@ -169,7 +169,6 @@ local OppExtra = AI.GetOppExtraDeck()
    end
   return list
 end
-
 function UseLists(lists)
 local cards
 local Result={}
@@ -185,6 +184,13 @@ if lists then
   end
   return Result
 end
+function AIField() 
+  return UseLists({AIMon(),AIST()})
+end
+function OppField() 
+  return UseLists({OppMon(),OppST()})
+end
+
 
 -------------------------------------------------
 -- **********************************************
@@ -1687,10 +1693,18 @@ function ApplyATKBoosts(Cards)
     end
   end
   
-  
+  -- Nephilim
   for i=1,#Cards do
-    if Cards[i].id == 20366274 then
+    if Cards[i].id == 20366274 and NotNegated(Cards[i]) then
       local OppAtt=OppGetStrongestAttDef(NephilimFilter)
+      Cards[i].attack = OppAtt+1
+    end
+  end
+  
+  -- Catastor
+  for i=1,#Cards do
+    if Cards[i].id == 26593852 and NotNegated(Cards[i]) then
+      local OppAtt=OppGetStrongestAttDef(CatastorFilter)
       Cards[i].attack = OppAtt+1
     end
   end
@@ -1707,7 +1721,8 @@ function ApplyATKBoosts(Cards)
   end
   for i=1,#Cards do
     if Cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE)>0
-    or Cards[i].owner==1 and StardustSparkCheck 
+    or Cards[i].owner==1 and (StardustSparkCheck 
+    or Cards[i].id==23649496)
     then
       Cards[i].attack=Cards[i].attack+1
     end
@@ -1718,7 +1733,12 @@ function ApplyATKBoosts(Cards)
     Cards[i].attack=math.max(Cards[i].attack,0)
   end
 end
-
+function CatastorFilter(c)
+  return bit32.band(c.attribute,ATTRIBUTE_DARK)==0 
+  and bit32.band(c.position,POS_FACEUP)>0
+  and c:is_affected_by(EFFECT_CANNOT_BE_BATTLE_TARGET)==0
+  and c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0
+end
 -------------------------------------------------
 -- **********************************************
 -- Set of global functions to serve general purposes

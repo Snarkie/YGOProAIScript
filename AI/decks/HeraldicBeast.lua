@@ -5,16 +5,6 @@ function HeraldicCount(cards)
   end
   return result
 end
-function FieldCheck(level)
-  local result=0
-  local cards=AIMon()
-  for i=1,#cards do
-    if cards[i].level==level and bit32.band(cards[i].position,POS_FACEUP)>0 then
-      result = result + 1
-    end
-  end
-  return result
-end
 function HeraldicCanXYZ()
   local AIMon=AIMon()
   local cards=UseLists({AIHand(),AIMon})
@@ -41,50 +31,6 @@ function HeraldicCanXYZ()
   end
   return result
 end
-function HasBackrow(Setable)
-  local cards=AIST()
-  for i=1,#Setable do
-    if SetBlacklist(Setable[i].id)==0 then
-      return true
-    end
-  end
-  for i=1,#cards do
-    if bit32.band(cards[i].position,POS_FACEDOWN)>0 then
-      return true
-    end
-  end
-  return false
-end
--- check, if the AI is already controlling the field, 
--- so it doesn't overcommit as much
-function OverExtendCheck()
-  local cards = AIMon()
-  local hand = AIHand()
-  return OppHasStrongestMonster() or #cards < 2 or #hand > 4 or AI.GetPlayerLP(2)<=800 and HasID(AIExtra(),12014404,true) -- Cowboy
-end
-function SummonChidori()
-  local cards = UseLists({OppMon(),OppST()})
-  local result={0,0}
-  for i=1,#cards do
-    if bit32.band(cards[i].position,POS_FACEUP)>0 then result[1]=1 end
-    if bit32.band(cards[i].position,POS_FACEDOWN)>0 then result[2]=1 end
-  end
-  if cg and cg:GetCount() > 0 then
-    return true
-  end
-  return result[1]+result[2]>=2 
-  or Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack") >= 2300 --for now
-  or Get_Card_Att_Def(OppMon(),"defense",">",POS_FACEUP_DEFENCE,"defense") >= 2300
-end
-function SummonLavalvalChain() 
-  return (HasID(AIDeck(),82293134) or HasID(AIDeck(),90411554) and not (HasID(UseLists({AIGrave(),AIHand(),AIMon()}),82293134) or not OPTCheck(82293134)))
-  and (Chance(30) or Duel.GetCurrentPhase() == PHASE_MAIN2 or Duel.GetTurnCount()==1)
-end
-function SummonImpKing()
-  return (HasID(AIDeck(),94656263) or HasID(AIDeck(),53573406)) and (Chance(30) 
-  or HasID(AIMon(),23649496) or Chance(70) and HasID(AIGrave(),42940404)
-  or Duel.GetCurrentPhase() == PHASE_MAIN2 or Duel.GetTurnCount()==1)
-end
 function UsePlainCoat()
   local cards=UseLists({AIMon(),OppMon()})
   local check={}
@@ -98,38 +44,10 @@ function UsePlainCoat()
   return result
 end
 function SummonPlainCoat()
-  return UsePlainCoat() or not (HasID(UseLists({AIMon(),AIGrave()}),23649496)) and (Chance(50) or HasID(AIHand(),92365601))
+  return UsePlainCoat() or not(HasAccess(23649496)) and (HasID(AIHand(),92365601,true) or OppGetStrongestAttDef()<=2200)
 end
 function SummonGenomHeritage()
   return UseGenomHeritage()
-end
-function SummonPaladynamo()
-  local cards = OppMon()
-  local c
-  for i=1,#cards do
-    c=cards[i]
-    if c.attack>=2000 and bit32.band(c.position,POS_FACEUP_ATTACK)>0
-    and c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
-    then
-      return true
-    end 
-  end
-  return false
-end
-function SummonRagnaZero()
-  local cards = OppMon()
-  local c
-  for i=1,#cards do
-    c=cards[i]
-    if c.attack~=c.base_attack
-    and bit32.band(c.position,POS_FACEUP_ATTACK)>0    
-    and c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0
-    and c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
-    then
-      return true
-    end 
-  end
-  return false
 end
 function SummonLeo()
   return FieldCheck(4)==1 or FieldCheck(4)==0 and HasID(AIHand(),94656263)
@@ -198,6 +116,7 @@ end
 function GenomHeritageFilter(c)
 	return bit.band(c:GetType(),TYPE_XYZ)>0 and c:IsCanBeEffectTarget() 
   and c:IsControler(1-player_ai) and (c:GetOriginalCode()~=47387961 or c:GetAttack()>0)
+  and c:IsPosition(POS_FACEUP_ATTACK)
 end
 function UseGenomHeritage() 
   return Duel.IsExistingMatchingCard(GenomHeritageFilter,1-player_ai,LOCATION_MZONE,0,1,nil)
@@ -216,36 +135,11 @@ function HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(Activatable,32807846) then   -- Reinforcement of the Army
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  --[[if HasIDNotNegated(Activatable,34086406) then   -- Lavalval Chain
-    if Activatable[CurrentIndex-1].id==34086406 then
-      GlobalCardMode = 1
-      GlobalActivatedCardID = 34086406
-      return {COMMAND_ACTIVATE,CurrentIndex-1}
-    end
-  end]]
-  if HasIDNotNegated(Activatable,34086406,false,545382497) then   -- Lavalval Chain
-    GlobalCardMode = 1
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
-  if HasIDNotNegated(Activatable,94380860) then  -- Ragna Zero
-    GlobalCardMode = 1
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
-  if HasIDNotNegated(Activatable,22653490) then  -- Chidori
-    GlobalCardMode = 2
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
-  if HasIDNotNegated(Activatable,48739166) then  -- SHArk Knight
-    OPTSet(48739166)
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
+  
   if HasIDNotNegated(Activatable,12744567) then  -- SHDark Knight
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasIDNotNegated(Activatable,11398059) then   -- Imp King
-    GlobalCardMode = 1
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
+
   if HasIDNotNegated(Activatable,47387961) and UseGenomHeritage() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -275,33 +169,14 @@ function HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(Activatable,84220251) and UseHeraldryReborn() then 
     return {COMMAND_ACTIVATE,IndexByID(Activatable,84220251)}
   end
-  if HasID(SpSummonable,94380860) and SummonRagnaZero() then
-    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,94380860)}
-  end  
+ 
   if HasID(SpSummonable,47387961) and SummonGenomHeritage() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
-  end
-  if HasID(SpSummonable,22653490) and SummonChidori() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
-  end
-  if HasID(SpSummonable,61344030) and SummonPaladynamo() and Chance (50) then
-    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,61344030)}
   end
   if HasID(SpSummonable,23649496) and SummonPlainCoat() then
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,23649496)}
   end
-  if HasID(SpSummonable,34086406) and SummonLavalvalChain() and MP2Check() then
-    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,34086406)}
-  end
-  if HasID(SpSummonable,11398059) and SummonImpKing() and MP2Check() then
-    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,11398059)}
-  end
-  if HasID(SpSummonable,23649496) and not HasID(AIMon(),23649496) and MP2Check() then -- Plain Coat
-    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,23649496)}
-  end
-  if HasID(SpSummonable,12014404) and SummonCowboyAtt() then -- Cowboy
-    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,12014404)}
-  end
+
   if HasID(Summonable,82293134) and SummonLeo() then   -- Leo
     return {COMMAND_SUMMON,IndexByID(Summonable,82293134)}
   end
@@ -493,7 +368,7 @@ function HeraldicToHand(cards)
 end
 function LavalvalChainTarget(cards)
     local result = nil
-    if SatellarknightCheck() then
+    if DeckCheck(DECK_TELLARKNIGHT) then
       if GlobalCardMode == 2 then
         GlobalCardMode = 1
         result = SatellarknightAdd(cards,PRIO_TOGRAVE)
@@ -555,7 +430,6 @@ function AberconwayTarget(cards)
   if result == nil then result={math.random(#cards)} end
   return result
 end
-
 function SafeZoneTarget(cards)
   result = {}
   if GlobalCardMode == 1 then
@@ -783,9 +657,9 @@ function PaladynamoTarget(cards,minTargets)
   return result
 end
 function FoolishTarget(cards)
-  if BujinCheck() then
+  if DeckCheck(DECK_BUJIN) then
     return BujinAdd(cards,LOCATION_GRAVE)
-  elseif ChaosDragonCheck() then
+  elseif DeckCheck(DECK_CHAOSDRAGON) then
     return Add(cards,PRIO_TOGRAVE)
   else
     return HeraldicToGrave(cards,1)
@@ -881,28 +755,7 @@ end
 function SafeZoneFilterEnemy(card)
   return card:IsControler(1-player_ai) and card:IsType(TYPE_MONSTER) and card:IsPosition(POS_FACEUP_ATTACK) and not card:IsHasEffect(EFFECT_INDESTRUCTABLE_EFFECT)
 end
-function RemovalCheck(id)
-  local c={CATEGORY_DESTROY,CATEGORY_REMOVE,CATEGORY_TOGRAVE,CATEGORY_TOHAND,CATEGORY_TODECK}
-  for i=1,#c do
-    for j=1,Duel.GetCurrentChain() do
-      local ex,cg = Duel.GetOperationInfo(j,c[i])
-      if ex then
-        if id==nil then 
-          return cg 
-        end
-        if cg and id~=nil and cg:IsExists(function(c) return c:IsControler(player_ai) and c:IsCode(id) end, 1, nil) then
-          return true
-        end
-      end
-    end
-  end
-  return false
-end
-function NegateCheck()
-  local ex,cg = Duel.GetOperationInfo(Duel.GetCurrentChain(),CATEGORY_DISABLE)
-  if ex then return cg end
-  return false
-end
+
 function ChainSafeZone()
   if RemovalCheck(38296564) then
     local g=Duel.GetMatchingGroup(SafeZoneFilterEnemy,1-player_ai,LOCATION_MZONE,0,nil)

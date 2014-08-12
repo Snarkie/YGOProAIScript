@@ -1,28 +1,6 @@
-Satellarknight = nil
 GlobalScepterOverride = 0
-function SatellarknightCheck()
-  if Satellarknight == nil then
-    Satellarknight = HasID(UseLists({AIDeck(),AIHand()}),75878039,true) -- check if the deck has Satellarknight Deneb
-  end 
-  return Satellarknight
-end
 function SatellarknightFilter(c)
   return IsSetCode(c.setcode,0x9c) and bit32.band(c.type,TYPE_MONSTER)>0
-end
-function NotNegated(card)
-  return card:is_affected_by(EFFECT_DISABLE)==0 and card:is_affected_by(EFFECT_DISABLE_EFFECT)==0
-end
-function HasAccess(id)
-  -- returns true, if the AI has a card of this ID in hand, field, grave, or as an XYZ material
-  for i=1,#AIMon() do
-    local cards = AIMon()[i].xyz_materials
-    if cards and #cards>0 then
-      for j=1,#cards do
-        if cards[j].id==id then return true end
-      end
-    end
-  end
-  return HasID(UseLists({AIHand(),AIMon(),AIGrave()}),id,true) 
 end
 function DenebCond(loc)
   if loc == PRIO_TOFIELD then
@@ -205,7 +183,7 @@ end
 function DelterosFilter(c)
   return c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0
   and bit32.band(c.status,STATUS_LEAVE_CONFIRMED)==0
-  and not (DestroyBlacklist(c.id)
+  and not (DestroyBlacklist(c)
   and (bit32.band(c.position, POS_FACEUP)>0 
   or bit32.band(c.status,STATUS_IS_PUBLIC)>0))
 end
@@ -232,21 +210,24 @@ function SummonTriveil()
   cards=UseLists({OppMon(),OppST()})
   for i=1,#cards do
     if bit32.band(cards[i].type,TYPE_XYZ+TYPE_SYNCHRO+TYPE_RITUAL+TYPE_FUSION)>0 then
+      result = result + 3
+    elseif bit32.band(cards[i].type,TYPE_MONSTER)>0 and cards[i].level>4 then
       result = result + 2
     elseif bit32.band(cards[i].type,TYPE_CONTINUOUS)>0 and bit32.band(cards[i].position,POS_FACEUP)>0 then
       result = result - 1 
     elseif bit32.band(cards[i].type,TYPE_SPELL+TYPE_TRAP)>0 and bit32.band(cards[i].position,POS_FACEDOWN)>0 then
+      result = result + 1
     else
       result = result + 1
     end
   end
-  return result >= 6 or (AI.GetPlayerLP(2)<=2100 
+  return result >= 8 or (AI.GetPlayerLP(2)<=2100 
   and Duel.GetCurrentPhase()==PHASE_MAIN1 and GlobalBPAllowed)
 end 
 function ScepterFilter(c)
   return c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0
   and bit32.band(c.status,STATUS_LEAVE_CONFIRMED)==0
-  and not DestroyBlacklist(c.id)
+  and not DestroyBlacklist(c)
   and (bit32.band(c.position, POS_FACEUP)>0 
   or bit32.band(c.status,STATUS_IS_PUBLIC)>0)
 end
@@ -271,8 +252,9 @@ end
 function NodenFilter(c)
   return c.level==4 and c.id~=17412721
 end
-function UseInstantFusion()
-  return CardsMatchingFilter(AIGrave(),NodenFilter)>0 and (FieldCheck(4)==1 and OverExtendCheck() or #AIMon()==0)
+function UseInstantFusion2()
+  return CardsMatchingFilter(AIGrave(),NodenFilter)>0 and (FieldCheck(4)==1 
+  and OverExtendCheck() or #AIMon()==0) and not DeckCheck(DECK_SHADOLL)
 end
 function UseCotH2()
   return OverExtendCheck() and (SatellarknightPriorityCheck(AIGrave(),PRIO_TOFIELD,1)>4 
@@ -297,12 +279,12 @@ function SummonCairngorgon()
   return OppGetStrongestAttack()<2450 and MP2Check()
 end
 function SummonSharkKnight1(cards)
-  if not SatellarknightCheck() then return false end
+  if not DeckCheck(DECK_TELLARKNIGHT) then return false end
   local targets=SubGroup(OppMon(),SharkKnightFilter)
   return #targets>0 and OPTCheck(48739166)
 end
 function SummonLavalvalChain1()
-  return MP2Check() and (not HasAccess(75878039) or OppGetStrongestAttack()<1800)
+  return DeckCheck(DECK_TELLARKNIGHT) and MP2Check() and (not HasAccess(75878039) or OppGetStrongestAttack()<1800)
 end
 function SatellarknightOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local Activatable = cards.activatable_cards
@@ -313,9 +295,6 @@ function SatellarknightOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local SetableST = cards.st_setable_cards
   GlobalScepterOverride = 0
   if HasIDNotNegated(Activatable,37742478) then
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
-  if HasIDNotNegated(Activatable,46772449) and UseBelzebuth() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Activatable,63504681) then
@@ -410,7 +389,7 @@ function SatellarknightOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if #Summonable>0 and (Summonable[1].prio > 4 or Summonable[1].prio > 0 and (HasBackrow(SetableST) or FieldCheck(4)==1))then
     return {COMMAND_SUMMON,Summonable[1].index}
   end
-  if HasID(Activatable,01845204) and UseInstantFusion() then
+  if HasID(Activatable,01845204) and UseInstantFusion2() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Activatable,54447022) and UseSoulCharge() then
@@ -485,7 +464,7 @@ function SatellarknightOnSelectCard(cards, minTargets, maxTargets,triggeringID,t
   if ID == 17412721 then
     return NodenTarget(cards)
   end
-  if ID == 97077563 and SatellarknightCheck() then
+  if ID == 97077563 and DeckCheck(DECK_TELLARKNIGHT) then
     return SatellarknightAdd(cards,PRIO_TOFIELD)
   end
   if ID == 25789292 then
@@ -512,7 +491,7 @@ function ChainCairngorgon()
  return (p and p ~= player_ai)
 end
 function ChainCotH2()
-  if not SatellarknightCheck() then
+  if not DeckCheck(DECK_TELLARKNIGHT) then
     return false
   end
   if RemovalCheck(97077563) and SatellarknightPriorityCheck(AIGrave(),PRIO_TOFIELD)>1 then

@@ -1,29 +1,8 @@
-Shadoll = nil
-function ShadollCheck()
-  if Shadoll == nil then
-    Shadoll = HasID(UseLists({AIDeck(),AIHand()}),44394295,true) -- check if the deck has Shadoll Fusion
-  end 
-  return Shadoll
-end
-function Shuffle(t)
-  local n = #t
-  while n >= 2 do
-    local k = math.random(n)
-    t[n], t[k] = t[k], t[n]
-    n = n - 1
-  end
-  return t
-end
-function WinsBattle(source,target)
-  return source and target 
-  and (target:IsPosition(POS_ATTACK) and source:GetAttack()>=target.GetAttack()
-  or target:IsPosition(POS_DEFENCE) and source:GetAttack()>target.GetDefence())
-end
 function MoralltachFilter(c)
   return bit32.band(c.position,POS_FACEUP)>0 
   and c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0
   and bit32.band(c.status,STATUS_LEAVE_CONFIRMED)==0
-  and not DestroyBlacklist(c.id)
+  and not DestroyBlacklist(c)
 end
 function MoralltachCond(loc)
   if loc == PRIO_TOFIELD then 
@@ -61,7 +40,7 @@ end
 function LizardCond(loc)
   if loc == PRIO_TOGRAVE then
     return OPTCheck(30328508) and (HasID(AIGrave(),44394295,true) and HasID(AIDeck(),04904633,true)
-    or CardsMatchingFilter(AIGrave(),ShadollFilter)<2) and GetMultiple(30328508)==0
+    or CardsMatchingFilter(AIGrave(),ShadollFilter)<6) and GetMultiple(30328508)==0
   end
   return true
 end
@@ -83,13 +62,14 @@ function BeastCond(loc)
   return true
 end
 function NephilimFilter(c)
-  return bit.band(c:GetSummonType(),SUMMON_TYPE_SPECIAL)==SUMMON_TYPE_SPECIAL
-  and c:IsHasEffect(EFFECT_INDESTRUCTABLE_EFFECT)==0 or c:GetAttack()<2800
+  return bit32.band(c.summon_type,SUMMON_TYPE_SPECIAL)>0
+  and c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0 or c.attack<2800
 end
 function NephilimCond(loc)
   if loc == PRIO_TOFIELD then
     return OppGetStrongestAttack() < 2800 or HasID(AIMon(),94977269,true)
-    or Duel.IsExistingMatchingCard(NephilimFilter,1-player_ai,0,LOCATION_MZONE,1,nil)
+    or CardsMatchingFilter(OppMon(),NephilimFilter)>0
+    and not HasID(AIMon(),20366274,true)
   end
   return true
 end
@@ -97,6 +77,7 @@ function MidrashCond(loc)
   if loc == PRIO_TOFIELD then
     return OppGetStrongestAttack() < 2200 or HasID(AIMon(),20366274,true)
     and ShadollPriorityCheck(UseLists({AIHand(),AIMon()}),PRIO_TOGRAVE,2,ShadollFilter)>2
+    and not HasID(AIMon(),94977269,true)
   end
   return true
 end
@@ -109,9 +90,9 @@ end
 ShadollPrio = {
 [37445295] = {6,3,3,1,6,1,6,1,1,FalconCond}, -- Shadoll Falcon
 [04939890] = {5,2,2,1,5,4,5,4,1,HedgehogCond}, -- Shadoll Hedgehog
-[30328508] = {4,1,5,1,8,1,8,1,1,LizardCond}, -- Shadoll Lizard
+[30328508] = {4,1,5,1,9,1,9,1,1,LizardCond}, -- Shadoll Lizard
 [77723643] = {3,1,4,1,7,1,7,1,1,DragonCond}, -- Shadoll Dragon
-[03717252] = {2,1,6,1,9,1,9,1,1,BeastCond}, -- Shadoll Beast
+[03717252] = {2,1,6,1,8,1,8,1,1,BeastCond}, -- Shadoll Beast
 [85103922] = {1,1,6,5,3,1,3,1,1,MoralltachCond}, -- Artifact Moralltach
 [12697630] = {1,1,7,4,4,1,4,1,1,BeagalltachCond}, -- Artifact Beagalltach
 [24062258] = {1,1,1,1,1,1,1,1,1,nil}, -- Secret Sect Druid Dru
@@ -239,6 +220,7 @@ function ArtifactFilter(c)
   return bit32.band(c.attribute,ATTRIBUTE_LIGHT)>0 and bit32.band(c.type,TYPE_MONSTER)>0
 end
 function UseShadollFusion()
+  if HasID(AIMon(),94977269,true) and HasID(AIMon(),20366274,true) then return false end
   return OverExtendCheck()
   and (ShadollPriorityCheck(UseLists({AIHand(),AIMon()}),PRIO_TOGRAVE,2,ShadollFilter)>2
   and not HasID(AIMon(),94977269,true)
@@ -264,16 +246,6 @@ end
 function SummonEmeral()
   return CardsMatchingFilter(AIGrave(),EmeralFilter)>7 and HasID(AIExtra(),00581014,true)
 end
-function SkyblasterFilter(c)
-  return (bit32.band(c.type,TYPE_FUSION+TYPE_RITUAL+TYPE_SYNCHRO+TYPE_XYZ)>0 or c.attack>= 2800)
-  and bit32.band(c.position,POS_FACEUP)>0 and c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
-end
-function SummonSkyblaster()
-  return CardsMatchingFilter(OppMon(),SkyblasterFilter)>0 and HasID(AIExtra(),82633039,true)
-end
-function UseSkyblaster()
-  return CardsMatchingFilter(OppMon(),SkyblasterFilter)>0
-end
 function SetArtifacts()
   return Duel.GetTurnCount()==1 or Duel.GetCurrentPhase()==PHASE_MAIN2
 end
@@ -297,7 +269,7 @@ function SummonVolcasaurusFinish()
   return HasID(AIExtra(),29669359,true) and CardsMatchingFilter(OppMon(),VolcasaurusFilter,true)>0
 end
 function SummonPleiades()
-  return true
+  return HasID(AIExtra(),73964868,true)
 end
 function MoonlightRoseFilter(c)
   return bit.band(c:GetSummonType(),SUMMON_TYPE_SPECIAL)==SUMMON_TYPE_SPECIAL 
@@ -392,25 +364,10 @@ function ShadollOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local Repositionable = cards.repositionable_cards
   local SetableMon = cards.monster_setable_cards
   local SetableST = cards.st_setable_cards
-  if HasID(SpSummonable,29669359) and SummonVolcasaurusFinish() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
-  end
-  if HasID(Activatable,29669359) then
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
   if HasID(Activatable,04904633) and UseRoots() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Activatable,82633039,false,1322128625) and UseSkyblaster() then
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
   if HasID(Activatable,00581014,false,9296225) then
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
-  if HasID(Activatable,04779823) and UseMichael() then
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
-  if HasID(Activatable,31924889) and UseArcanite() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Activatable,01845204) and UseInstantFusion() then
@@ -447,30 +404,6 @@ function ShadollOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_CHANGE_POS,CurrentIndex}
   end
 
-  
-  
-  if HasID(SpSummonable,08561192) and SummonLeoh() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
-  end
-  if HasID(SpSummonable,31924889) and SummonArcanite() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
-  end
-  if HasID(SpSummonable,04779823) and SummonMichael() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
-  end
-  if HasID(SpSummonable,00581014) and SummonEmeral() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
-  end
-  if HasID(SpSummonable,82633039) and SummonSkyblaster() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
-  end
-  if HasID(SpSummonable,73964868) and SummonPleiades() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
-  end
-  if HasID(SpSummonable,29669359) and SummonVolcasaurus() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
-  end
-  
   if HasID(Summonable,24062258) and SummonDru() then
     return {COMMAND_SUMMON,CurrentIndex}
   end
@@ -558,7 +491,7 @@ function LizardTarget(cards,onField)
   end
 end
 function DragonTarget(cards)
-  return BestTargets(cards)
+  return BestTargets(cards,1,TARGET_DESTROY)
 end
 function BeastTarget(cards)
   return ShadollAdd(cards,PRIO_TOGRAVE)
@@ -609,6 +542,7 @@ function FacingTheShadowsTarget(cards,min,max)
   GlobalCardMode=nil
   if result == nil then result = {math.random(#cards)} end
   if #result>max then result = ShadollAdd(cards,PRIO_TOGRAVE) end
+  OPTSet(cards[result[1]].id)
   return result
 end
 function EmeralTarget(cards,count)
@@ -708,7 +642,7 @@ function SoulChargeTarget(cards,min,max)
   else
     count = 1
   end
-  if SatellarknightCheck() then
+  if DeckCheck(DECK_TELLARKNIGHT) then
     result = SatellarknightAdd(cards,PRIO_TOFIELD,count)
   else
     for i=1,#cards do
@@ -857,15 +791,28 @@ end
 
 function ChainFacingTheShadows()
   local result = false
-  if RemovalCheck(77505534) then 
+  local e = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
+  if RemovalCheck(77505534)  then 
     result = true
   end
-  if RemovalCheck(37445295) and UseFalcon()
-  or RemovalCheck(04939890) and UseHedgehog()
-  or RemovalCheck(30328508) and UseLizard()
-  or RemovalCheck(77723643) and UseDragon2()
-  or RemovalCheck(03717252) and UseBeast()
-  then
+  if RemovalCheck(37445295) and UseFalcon() then
+    OPTSet(37445295)
+    result = true
+  end
+  if RemovalCheck(04939890) and UseHedgehog() then
+    OPTSet(04939890)
+    result = true
+  end
+  if RemovalCheck(30328508) and UseLizard() then
+    OPTSet(30328508)
+    result = true
+  end
+  if RemovalCheck(77723643) and UseDragon2() then
+    OPTSet(77723643)
+    result = true
+  end
+  if RemovalCheck(03717252) and UseBeast() then
+    OPTSet(03717252)
     result = true
   end
   if Duel.GetCurrentPhase()==PHASE_END 
@@ -881,9 +828,13 @@ function ChainFacingTheShadows()
       and source:GetAttack()>target:GetDefence() and target:IsControler(player_ai)
       and (target:IsCode(77723643) and UseDragon2() or target:IsCode(30328508) and UseLizard())
       then
+        OPTSet(target:GetCode())
         result = true
       end
     end
+  end
+  if result and e then
+    result = (c and c:GetCode()~=12697630)
   end
   return result
 end
@@ -919,7 +870,6 @@ function ChainCompulse()
       and (target:IsPosition(POS_DEFENCE) and source:GetAttack()>target:GetDefence() 
       or target:IsPosition(POS_ATTACK) and source:GetAttack()>=target:GetAttack())
       and not source:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET)
-      and not source:IsHasEffect(EFFECT_IMMUNE_EFFECT)
       and not source:IsHasEffect(EFFECT_IMMUNE_EFFECT)
       then
         GlobalCardMode = 1
@@ -961,7 +911,7 @@ end
 function MSTFilter(c)
   return c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0 
   and c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0 
-  and not (DestroyBlacklist(c.id)
+  and not (DestroyBlacklist(c)
   and (bit32.band(c.position, POS_FACEUP)>0 
   or bit32.band(c.status,STATUS_IS_PUBLIC)>0))
 end
@@ -1020,7 +970,7 @@ function ChainMST()
     and not c:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET)
     and not c:IsHasEffect(EFFECT_INDESTRUCTABLE_EFFECT)
     and not c:IsHasEffect(EFFECT_IMMUNE_EFFECT)
-    and (not DestroyBlacklist(c:GetCode()) or c:GetCode()==19337371)
+    and (not DestroyBlacklist(c) or c:GetCode()==19337371)
     then
       GlobalTargetID=c:GetCode()
       GlobalPlayer=2
@@ -1082,7 +1032,7 @@ local targets=CardsMatchingFilter(OppST(),MSTFilter)
     and not c:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET)
     and not c:IsHasEffect(EFFECT_INDESTRUCTABLE_EFFECT)
     and not c:IsHasEffect(EFFECT_IMMUNE_EFFECT)
-    and (not DestroyBlacklist(c:GetCode()) or c:GetCode()==19337371)
+    and (not DestroyBlacklist(c) or c:GetCode()==19337371)
     then
       GlobalTargetID=c:GetCode()
       GlobalPlayer=2
@@ -1178,7 +1128,7 @@ function ShadollOnSelectChain(cards,only_chains_by_player)
   return nil
 end
 function SanctumYesNo()
-  return CardsMatchingFilter(UseLists({OppMon(),OppST()}),IgnitionFilter)>0
+  return DestroyCheck(OppField())>0
 end
 function ShadollOnSelectEffectYesNo(id,triggeringCard)
   local result = nil

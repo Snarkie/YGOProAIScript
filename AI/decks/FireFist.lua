@@ -1,196 +1,11 @@
-function HasID(cards,id,skipglobal,desc,loc,pos)
-  local result = false;
-  if cards ~= nil then 
-    for i=1,#cards do
-      if cards[i].id == id 
-      and (desc == nil or cards[i].description == desc) 
-      and (loc == nil or bit32.band(cards[i].location,loc)>0)
-      and (pos == nil or bit32.band(cards[i].position,pos)>0)
-      then
-        if not skipglobal then CurrentIndex = i end
-        result = true      
-      end
-    end
-  end
-  return result
-end
-function HasIDNotNegated(cards,id,skipglobal,desc,loc,pos)
-  local result = false
-  if cards ~= nil then 
-    for i=1,#cards do
-      if cards[i].id == id 
-      and (desc == nil or cards[i].description == desc) 
-      and (loc == nil or bit32.band(cards[i].location,loc)>0)
-      and (pos == nil or bit32.band(cards[i].position,pos)>0)
-      then
-        if bit32.band(cards[i].type,TYPE_MONSTER)>0 
-        and cards[i]:is_affected_by(EFFECT_DISABLE_EFFECT)==0 
-        and cards[i]:is_affected_by(EFFECT_DISABLE)==0
-        then
-          if not skipglobal then CurrentIndex = i end
-          result = true  
-        end
-        if bit32.band(cards[i].type,TYPE_SPELL+TYPE_TRAP)>0
-        and bit32.band(cards[i].status,STATUS_SET_TURN)==0        
-        and cards[i]:is_affected_by(EFFECT_CANNOT_TRIGGER)==0
-        then
-          if not skipglobal then CurrentIndex = i end
-          result = true 
-        end
-      end
-    end
-  end
-  return result
-end
-function NeedsCard(id,cards,check,skipglobal) --checks if the card is in cards and not in check
-  return not HasID(check,id,true) and HasID(cards,id,skipglobal)
-end
-function IndexByID(cards,id)
-  for i=1,#cards do
-    if cards[i].id==id then return i end
-  end
-  return nil
-end
-function OppHasMonster()
-  local cards=OppMon()
-  return #cards>0
-end
-function AIGetStrongestAttack()
-  local cards=AIMon()
-  local result=0
-  ApplyATKBoosts(cards)
-  for i=1,#cards do
-    if cards[i] and cards[i]:is_affected_by(EFFECT_CANNOT_ATTACK)==0 and cards[i].attack>result then
-      result=cards[i].attack
-    end
-  end
-  return result
-end
-function OppGetStrongestAttack()
-  local cards=OppMon()
-  local result=0
-  ApplyATKBoosts(cards)
-  for i=1,#cards do
-    if cards[i] and cards[i].attack>result then
-      result=cards[i].attack-cards[i].bonus
-    end
-  end
-  return result
-end
-function OppGetStrongestAttDef(filter)
-  local cards=OppMon()
-  local result=0
-  ApplyATKBoosts(cards)
-  for i=1,#cards do
-    if cards[i] and (filter==nil or filter(cards[i])) 
-    and (bit32.band(cards[i].position,POS_ATTACK) and cards[i].attack>result 
-    or  bit32.band(cards[i].position,POS_DEFENCE) and cards[i].defense>result)
-    then
-      result=cards[i].attack-cards[i].bonus
-    end
-  end
-  return result
-end
-function OppHasStrongestMonster()
-  local att=AIGetStrongestAttack()
-  local mon=OppMon()
-  ApplyATKBoosts(mon)
-  return #mon>0 and (att <= Get_Card_Att_Def(mon,"attack",">",POS_FACEUP_ATTACK,"attack")
-  or att <= Get_Card_Att_Def(mon,"defense",">",POS_FACEUP_DEFENCE,"defense"))
-end
-function OppHasFacedownMonster()
-  local cards=OppMon()
-  for i=1,#cards do
-    if bit32.band(cards[i].position,POS_FACEDOWN) > 0 then
-      return true
-    end
-  end
-  return false
-end
-function OppHasMonsterInMP2()
-  return AI.GetCurrentPhase() == PHASE_MAIN2 and OppHasMonster()
-end
-function CardsMatchingFilter(cards,filter,opt)
-  result = 0
-  for i=1,#cards do
-    if opt and filter(cards[i],opt) or opt==nil and filter(cards[i]) then
-      result = result + 1
-    end
-  end
-  return result
-end
-function RandomIndexFilter(cards,filter,opt)
-  result={}
-  for i=1,#cards do
-    if opt and filter(cards[i],opt) or opt==nil and filter(cards[i]) then
-      result[#result+1]=i
-    end
-  end
-  if #result>0 then return {result[math.random(#result)]} end
-  return {0}
-end
+-- returns true, if the AI can XYZ summon with its current cards
 function CanXYZ(rank)
   local cards=UseLists({AIHand(),AIST()})
   return CardsMatchingFilter(AIMon(),function(c,lvl)return c.level==lvl end,rank)>0
   or CardsMatchingFilter(AIHand(),function(c,lvl)return c.level==lvl end,rank)>=2 
   and HasID(cards,10719350,true) and not Duel.CheckNormalSummonActivity(player_ai)
 end
-player_ai = nil
-GlobalTargetID = nil
-GlobalCheating = false
-function set_player_turn()
-	if player_ai == nil then
-		player_ai = Duel.GetTurnPlayer()
-    SaveState()
-    if GlobalCheating then
-      EnableCheats()
-    end
-	end
-end
-function EnableCheats()
-  local e1=Effect.GlobalEffect()
-  e1:SetType(EFFECT_TYPE_CONTINUOUS+EFFECT_TYPE_FIELD)
-  e1:SetCode(EVENT_PHASE+PHASE_DRAW)
-  e1:SetCountLimit(1)
-  e1:SetOperation(function(e,tp,eg,ep,ev,re,r,rp) 
-    if Duel.GetTurnPlayer()==player_ai then 
-      --AI.Chat("Oh yeah, cheating feels good.")
-      Duel.Draw(player_ai,1,REASON_RULE) 
-    end 
-  end)
-  Duel.RegisterEffect(e1,0)
-  local e2=Effect.GlobalEffect()
-  e2:SetType(EFFECT_TYPE_CONTINUOUS+EFFECT_TYPE_FIELD)
-  e2:SetCode(EVENT_PHASE+PHASE_DRAW)
-  e2:SetCountLimit(1)
-  e2:SetOperation(function(e,tp,eg,ep,ev,re,r,rp) 
-    if Duel.GetTurnPlayer()==player_ai then 
-      Duel.Recover(player_ai,1000,REASON_RULE) 
-    end 
-  end)
-  Duel.RegisterEffect(e2,0)
-end
-function get_owner_by_controler(controler)
-	if controler == player_ai then
-		return 1
-	else
-		return 2
-	end
-end
-function Chance(chance)
-  return math.random(100)<=chance
-end
 
--- check, if the AI can wait for an XYZ/Synchro summon until Main Phase 2
--- to get some additional damage in or trigger Bear/Gorilla/etc effects
-function MP2Check()
-  result = false
-  if AI.GetCurrentPhase() == PHASE_MAIN2 or Duel.GetTurnCount() == 1 
-  or OppHasStrongestMonster() or not(GlobalBPAllowed) then
-    result = true
-  end
-  return result
-end
 FF={}          
 FF[57103969]=5  --Tenki       Priority for using Fire Formations as a cost.
 FF[10719350]=1  --Tensu       Higher priority = gets used earlier
@@ -343,13 +158,8 @@ end
 function SummonVulcan()
   return HasID(AIST(),57103969,true) and CardsMatchingFilter(OppMon(),VulcanFilter)>0 and Chance(50)
 end
-function SummonCowboyAtt()
-  local OppAtt = Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack")
-  return OppAtt >= 2500 and OppAtt < 3000 and not HasIDNotNegated(AIST(),44920699,true) and Duel.GetCurrentPhase() ~= PHASE_MAIN2
-end
-function SummonCowboyDef()
-  return AI.GetPlayerLP(2)<=800 
-end
+
+
 function SummonCardinal()
   local cards=UseLists({OppMon(),OppST()})
   local result=0;
@@ -375,34 +185,8 @@ function UseTensu()
   and Duel.CheckNormalSummonActivity(player_ai)
   and CardsMatchingFilter(AIST(),function(c) return c.id==10719350 and bit32.band(c.position,POS_FACEUP)>0 end)==0
 end
-function UseBelzebuth()
-  local AIField=UseLists({AIMon(),AIST()})
-  local OppField=UseLists({OppMon(),OppST()})
-  return #OppField-#AIField>=0  
-end
-function SummonBelzebuth()
-  local AIField=UseLists({AIMon(),AIST()})
-  local OppField=UseLists({OppMon(),OppST()})
-  local AICards=UseLists({AIHand(),AIField})
-  local OppCards=UseLists({OppHand(),OppField})
-  return #AICards<#OppCards and Chance(math.min(math.max(0,(#OppField-#AIField-1)*34),100))
-end
-function SharkKnightFilter(c)
-  return bit32.band(c.position,POS_FACEUP_ATTACK)>0 
-  and bit32.band(c.type,TYPE_TOKEN)==0
-  and (bit32.band(c.type,TYPE_XYZ+TYPE_SYNCHRO+TYPE_RITUAL+TYPE_FUSION)>0 or c.level>4)
-  and bit32.band(c.summon_type,SUMMON_TYPE_SPECIAL)>0 
-  and c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0 
-end
-function SummonSharkKnight(cards)
-  local targets=SubGroup(OppMon(),SharkKnightFilter)
-  if HasID(cards,83994433,true) or HasID(cards,39765958,true) then return false end
-  if #targets>0 and not MermailCheck() then
-    table.sort(targets,function(a,b) return a.attack>b.attack end)
-    return Chance(50) or targets[1].attack>=2400
-  end
-  return false
-end
+
+
 function TigerKingFilter(c)
 	return c:IsPosition(POS_FACEUP_ATTACK) and not c:IsType(TYPE_TOKEN) 
   and (c:IsType(TYPE_XYZ+TYPE_SYNCHRO+TYPE_RITUAL+TYPE_FUSION) or c:GetAttack()>=2000)
@@ -433,18 +217,6 @@ function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
   local SpSummonable = cards.spsummonable_cards
   local Repositionable = cards.repositionable_cards
   local SetableMon = cards.monster_setable_cards
-  if HasIDNotNegated(Activatable,46772449) and UseBelzebuth() then
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
-  if HasIDNotNegated(Activatable,57774843) and UseBelzebuth() then -- Judgment Dragon
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
-  if HasID(SpSummonable,12014404) and SummonCowboyDef() then -- Cowboy
-    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,12014404)}
-  end
-  if HasID(SpSummonable,46772449) and SummonBelzebuth() then
-    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,46772449)}
-  end
   if HasIDNotNegated(Activatable,58504745) then -- Cardinal
     GlobalCardMode = 2
     return {COMMAND_ACTIVATE,CurrentIndex}
@@ -550,21 +322,10 @@ function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(Activatable,74845897) and UseRekindling() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(SpSummonable,39765958) and SummonJeweledRDA(SpSummonable[CurrentIndex]) then
-    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,39765958)}
-  end
-  if HasID(SpSummonable,83994433) and SummonStardustSpark() then
-    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,83994433)}
-  end
-  if HasID(SpSummonable,28912357) and SummonGearGigant() then
-    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,28912357)}
-  end
+
   if HasID(SpSummonable,98012938) and SummonVulcan() then
     GlobalCardMode = 1
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,98012938)}
-  end
-  if HasID(SpSummonable,95992081) and HasID(AIBanish(),01662004) then -- Leviair               
-    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,95992081)}
   end
   if HasID(SpSummonable,74168099) then -- Horse Prince                
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
@@ -575,15 +336,11 @@ function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(SpSummonable,58504745) and SummonCardinal() then -- Cardinal           
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,58504745)}
   end
-  if HasID(SpSummonable,48739166) and SummonSharkKnight() -- SHark Knight            
-  and not (HasID(SpSummonable,94380860) and SummonRagnaZero())  
-  then
-    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,48739166)}
-  end
+
   if HasID(SpSummonable,89856523) and MP2Check() and Chance(50) then -- Kirin            
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasID(SpSummonable,96381979) and MP2Check() then -- Tiger King 
+  if HasID(SpSummonable,96381979) and MP2Check() and not DeckCheck(DECK_BUJIN) then -- Tiger King 
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SetableMon,93294869) then --Wolf
@@ -1126,7 +883,7 @@ function FireFistOnChain(cards,only_chains_by_player)
   if HasID(cards,23434538) and ChainMaxxC() then
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,46772449) and UseBelzebuth() then
+  if HasIDNotNegated(cards,46772449) and UseFieldNuke(1) then
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,01662004) then

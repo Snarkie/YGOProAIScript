@@ -363,20 +363,6 @@ end
       end
    end
   
-  --------------------------------------------     
-  -- Check for banished blacklist, 
-  -- select the first not on it
-  -- TODO: Maybe sort by level or attack, not sure
-  --------------------------------------------   
-  if GlobalActivatedCardID == 01475311 then -- Allure of Darkness
-    for i=1,#cards do
-      if cards[i] and BanishBlacklist(cards[i].id) == 0 then 
-        result[1]=i
-        GlobalActivatedCardID = nil
-       return result
-      end
-    end
-  end
   
   --------------------------------------------     
   -- Check, if there are boss monsters in the

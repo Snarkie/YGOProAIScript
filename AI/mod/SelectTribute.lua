@@ -22,7 +22,7 @@ function OnSelectTribute(cards,minTributes, maxTributes)
   local result = {}
   local preferred = {}
   local valid = {}
-  if ChaosDragonCheck() then
+  if DeckCheck(DECK_CHAOSDRAGON) then
     return Add(cards,PRIO_TOGRAVE,minTributes)
   end
   for i=1,#cards do

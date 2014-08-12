@@ -1,10 +1,3 @@
-Bujin = nil
-function BujinCheck()
-  if Bujin == nil then
-    Bujin = HasID(UseLists({AIDeck(),AIHand()}),32339440) -- check if the deck has Yamato
-  end 
-  return Bujin
-end
 
 BujinPrio = {}
 -- {hand,hand+,field,field+,grave,grave+,banished}
@@ -99,11 +92,14 @@ end
 function SummonSusanowo()
   local cards=OppMon()
   return #cards>2 or not HasID(UseLists({AIMon(),AIHand()}),32339440,true)
-  or OppHasStrongestMonster() and Get_Card_Att_Def(cards,"attack",">",POS_FACEUP_ATTACK,"attack")<4800
+  or OppHasStrongestMonster() and OppGetStrongestAttack()<4800
+  or OppHasStrongestMonster(true) and OppGetStrongestAttack()<2400
+end
+function KagutsuchiFilter(c)
+  return bit32.band(c.race,RACE_BEASTWARRIOR)>0 and not c.id==32339440
 end
 function SummonKagutsuchi()
-  local cards=AIMon()
-  return Chance(30) and not HasID(AIMon(),32339440,true) 
+  return CardsMatchingFilter(AIMon(),KagutsuchiFilter)>1 and MP2Check()
 end
 function SummonTsukuyomi()
   return UseTsukuyomi(AIHand())
@@ -196,6 +192,8 @@ function UseRegaliaGrave()
       and not source:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE) 
       and not target:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE) 
       and not target:IsHasEffect(EFFECT_IMMUNE_EFFECT) 
+      and target:IsSetCard(0x88)
+      and target:IsRace(RACE_BEASTWARRIOR)
       then
         GlobalCardMode=3
         return true
@@ -218,15 +216,15 @@ function UseRegaliaBanish()
   return
 end
 function BujinXYZCheck()
-  return BujinCheck() and (not HasID(AIMon(),32339440) or OppHasStrongestMonster())
+  return DeckCheck(DECK_BUJIN) and (not HasID(AIMon(),32339440) or OppHasStrongestMonster())
 end
 function SummonTigerKingBujin()
-  return BujinCheck() and not HasID(UseLists({AIMon(),AIHand()}),32339440) 
+  return DeckCheck(DECK_BUJIN) and not HasID(UseLists({AIMon(),AIHand()}),32339440) 
   and HasID(AIDeck(),32339440) and HasID(AIDeck(),57103969) and MP2Check()
 end
 function SummonOmegaBujin()
   local cards=OppST()
-  return BujinCheck() and Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack")<2400 
+  return DeckCheck(DECK_BUJIN) and Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack")<2400 
   and Duel.GetCurrentPhase() == PHASE_MAIN1 and Chance((#cards-2)*33) 
 end
 function SharkKnightFilterBujin(c)
@@ -253,9 +251,6 @@ function BujinOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local SetableMon = cards.monster_setable_cards
   local SetableST = cards.st_setable_cards
   --
-  if HasIDNotNegated(Activatable,46772449) and UseBelzebuth() then
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
   if HasID(Activatable,30338466,false,485415456) and UseRegaliaGrave() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -358,8 +353,8 @@ function BujinOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(SpSummonable,26329679) and BujinXYZCheck() and SummonOmegaBujin() then
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,26329679)}
   end
-  if HasID(SpSummonable,48739166) and BujinXYZCheck() and SummonCowboyAtt() then
-    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,48739166)}
+  if HasID(SpSummonable,12014404) and BujinXYZCheck() and SummonCowboyAtt() then
+    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,12014404)}
   end
   GlobalBujinSS=nil
   return nil

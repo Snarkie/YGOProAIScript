@@ -1,34 +1,3 @@
-ChaosDragon = nil
-function ChaosDragonCheck()
-  if ChaosDragon == nil then
-    ChaosDragon = HasID(UseLists({AIDeck(),AIHand()}),99365553,true) -- check if the deck has Lightpulsar Dragon
-    MergePriorities()
-  end 
-  return ChaosDragon
-end
-function AIField() 
-  return UseLists({AIMon(),AIST()})
-end
-function OppField() 
-  return UseLists({OppMon(),OppST()})
-end
-function OppGetStrongestAttDef()
-  local cards=OppMon()
-  local result=0
-  ApplyATKBoosts(cards)
-  for i=1,#cards do
-    if cards[i] then
-      if bit32.band(cards[i].position,POS_ATTACK)>0 and cards[i].attack>result then
-        result=cards[i].attack-cards[i].bonus
-      elseif bit32.band(cards[i].position,POS_DEFENCE)>0 and cards[i].defense>result 
-      and (bit32.band(cards[i].position,POS_FACEUP)>0 or bit32.band(cards[i].status,STATUS_IS_PUBLIC)>0)
-      then
-        result=cards[i].defense
-      end
-    end
-  end
-  return result
-end
 function FilterAttribute(c,att)
   return bit32.band(c.type,TYPE_MONSTER)>0 and bit32.band(c.attribute,att)>0
 end
@@ -41,17 +10,7 @@ end
 function LightsInGrave()
   return CardsMatchingFilter(AIGrave(),FilterAttribute,ATTRIBUTE_LIGHT)
 end
-function DestroyFilter(c)
-  return c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0
-  and bit32.band(c.status,STATUS_LEAVE_CONFIRMED)==0
-  and c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
-  and not (DestroyBlacklist(c.id)
-  and (bit32.band(c.position, POS_FACEUP)>0 
-  or bit32.band(c.status,STATUS_IS_PUBLIC)>0))
-end
-function DestroyCheck(cards)
-  return CardsMatchingFilter(cards,DestroyFilter)
-end
+
 function DADCond(loc,c)
   if loc == PRIO_TOFIELD then
     return DestroyCheck(OppField())>1 
@@ -236,44 +195,7 @@ function WyverbusterCond(loc,c)
   end
   return true
 end
-Prio = {
-[65192027] = {8,5,8,2,1,0,0,0,2,0,DADCond},           -- Dark Armed Dragon 
-[72989439] = {9,5,6,3,1,0,0,0,2,0,BLSCond},           -- BLS Envoy
-[88264978] = {9,5,7,0,2,0,0,0,0,0,REDMDCond},         -- REDMD
-[98777036] = {2,1,0,0,4,0,0,0,8,0,nil},               -- Tragoedia
-[09596126] = {8,4,6,3,1,0,0,0,3,0,SorcCond},          -- Chaos Sorcerer
-[44330098] = {2,1,0,0,4,0,0,0,8,0,nil},               -- Gorz
-[99365553] = {6,4,5,4,4,3,0,0,1,0,LightpulsarCond},   -- Lightpulsar Dragon
-[25460258] = {5,3,4,3,5,3,0,0,1,0,DarkflareCond},     -- Darkflare Dragon
-[61901281] = {6,3,6,2,6,2,0,0,8,3,CollapserpentCond}, -- Black Dragon Collapserpent
-[99234526] = {6,3,6,2,6,2,0,0,8,3,WyverbusterCond},   -- Light Dragon Wyverbuster
-[77558536] = {6,4,7,4,5,2,0,0,5,0,RaidenCond},        -- Lightsworn Raiden
-[22624373] = {4,2,4,2,6,3,0,0,8,0,LylaCond},          -- Lightsworn Lyla
-[95503687] = {5,3,8,3,4,3,0,0,7,0,LuminaCond},        -- Lightsworn Lumina
-[16404809] = {3,2,4,2,6,3,0,0,8,0,KuribanditCond},    -- Kuribandit
-[51858306] = {5,3,3,2,9,0,0,0,9,9,WyvernCond},        -- Eclipse Wyvern
-[33420078] = {2,1,6,2,6,0,0,0,3,1,PSZCond},           -- Plaguespreader Zombie
-[10802915] = {5,2,3,2,2,1,0,0,8,3,TourGuideCond},     -- Tour Guide of the Underworld
-[13700001] = {4,2,8,3,8,2,0,0,5,2,ScarmCond},         -- Scarm, Malebranche of the Burning Abyss
-[00691925] = {8,3,0,0,3,0,0,0,0,0,nil},               -- Solar Recharge
-[94886282] = {7,2,0,0,1,0,0,0,0,0,nil},               -- Charge of the Light Brigade
-[01475311] = {5,3,0,0,4,0,0,0,0,0,nil},               -- Allure of Darkness
-[81439173] = {4,2,0,0,2,0,0,0,0,0,nil},               -- Foolish Burial
-[78474168] = {3,2,0,0,7,0,0,0,0,0,nil},               -- Breakthrough Skill
 
-[13700002] = {0,0,0,0,5,2,0,0,8,0,DanteCond},         -- Dante, Traveler of the Burning Abyss
-[15914410] = {0,0,0,0,5,2,0,0,8,0,AngineerCond},      -- Mechquipped Angineer
-[95992081] = {0,0,0,0,5,2,0,0,8,0,LeviairCond},       -- Leviair the Sea Dragon
-[34086406] = {0,0,0,0,5,2,0,0,8,0,ChainCond},         -- Lavalval Chain
-[48739166] = {0,0,0,0,5,2,0,0,8,0,SharkCond},         -- SHArk
-[15561463] = {0,0,0,0,4,2,0,0,8,0,GauntletCond},      -- Gauntlet Launcher
-[38495396] = {0,0,0,0,4,2,0,0,8,0,PtolemyCond},       -- Constellar Ptolemy M7
-[07391448] = {0,0,0,0,2,0,0,0,8,0,nil},               -- Goyo Guardian
-[04779823] = {0,0,8,0,2,0,0,0,5,0,nil},               -- Michael, Lightsworn Ark
-[44508094] = {0,0,8,0,2,0,0,0,5,0,nil},               -- Stardust Dragon
-[76774528] = {0,0,7,0,2,0,0,0,5,0,nil},               -- Scrap Dragon
-[34408491] = {0,0,9,0,2,0,0,0,4,0,nil},               -- Beelze of the Diabolic Dragons
-}
 --{hand,hand+,field,field+,grave,grave+,other,other+,banish,banish+} 
 function MergePriorities()
   --[[for i,line in pairs(BujinPrio) do
@@ -289,77 +211,7 @@ function MergePriorities()
     Prio[i]=line2
   end]]
 end
-function GetPriority(card,loc)
-  local id=card.id
-  local checklist = nil
-  local result = 0
-  if loc == nil then
-    loc = PRIO_TOHAND
-  end
-  checklist = Prio[id]
-  if checklist then
-    if checklist[11] and not(checklist[11](loc,card)) then
-      loc = loc + 1
-    end
-    result = checklist[loc]
-  end
-  return result
-end
-function AssignPriority(cards,loc,filter,opt)
-  local index = 0
-  Multiple = nil
-  for i=1,#cards do
-    cards[i].index=i
-    cards[i].prio=GetPriority(cards[i],loc)
-    if filter then
-      if opt then
-        if not filter(cards[i],opt) then 
-          cards[i].prio=-1
-        end
-      else
-        if not filter(cards[i]) then 
-          cards[i].prio=-1
-        end
-      end
-    end
-    if loc==PRIO_TOFIELD and cards[i].location==LOCATION_DECK then
-      cards[i].prio=cards[i].prio+2
-    end
-    --if loc==PRIO_GRAVE and cards[i].location==LOCATION_ONFIELD then
-      --cards[i].prio=cards[i].prio-1
-    --end
-    if loc==PRIO_TOHAND and bit32.band(cards[i].location,LOCATION_ONFIELD)>0 then
-      cards[i].prio=-1
-    end
-    if cards[i].owner==2 then
-      cards[i].prio=-1*cards[i].prio
-    end
-    SetMultiple(cards[i].id)
-  end
-end
-function PriorityCheck(cards,loc,count,filter,opt)
-  if count == nil then count = 1 end
-  if loc==nil then loc=PRIO_TOHAND end
-  if cards==nil or #cards<count then return -1 end
-  AssignPriority(cards,loc,filter,opt)
-  table.sort(cards,function(a,b) return a.prio>b.prio end)
-  return cards[count].prio
-end
-function Add(cards,loc,count,filter,opt)
-  local result={}
-  if count==nil then count=1 end
-  if loc==nil then loc=PRIO_TOHAND end
-  local compare = function(a,b) return a.prio>b.prio end
-  AssignPriority(cards,loc,filter,opt)
-  table.sort(cards,compare)
-  for i=1,#cards do
-    --print(cards[i].id..", prio:"..cards[i].prio)
-  end
-  for i=1,count do
-    result[i]=cards[i].index
-  end
-  return result
-end
+
 function SSLightpulsar(c)
   if bit32.band(c.location,LOCATION_HAND)>0 then
     GlobalCardMode=4
@@ -395,26 +247,29 @@ function UseLeviair()
 end
 function UseChaosSorc()
   return CardsMatchingFilter(OppMon(),ChaosSorcFilter2)>0 or ((OppHasStrongestMonster() 
-  or AI.GetCurrentPhase() == PHASE_MAIN2 or FieldCheck(6)>1 or HasID(AIMon(),33420078,false))
+  or AI.GetCurrentPhase() == PHASE_MAIN2 or FieldCheck(6)>1 or HasID(AIMon(),33420078,true))
   and CardsMatchingFilter(OppMon(),ChaosSorcFilter)>0)
 end
 function SummonGauntletLauncher()
-  return DestroyCheck(OppMon())>1 
+  return DestroyCheck(OppMon())>1 and MP2Check()
 end
 function UseGauntletLauncher()
   return DestroyCheck(OppMon())>0 
 end
 function SummonPtolemy()
-  return true
+  return MP2Check()
 end
 function UsePtolemy()
   return true
 end
 function SummonScrapDragon()
-  return DestroyCheck(OppField())>0 and (HasID(AIMon(),34408491,true) or PriorityCheck(AIField(),PRIO_TOGRAVE,2)>4)
+  return DestroyCheck(OppField())>0 and (HasID(AIMon(),34408491,true) 
+  or PriorityCheck(AIField(),PRIO_TOGRAVE,2)>4)
 end
 function UseScrapDragon()
-  return DestroyCheck(OppField())>0 and (HasID(AIMon(),34408491,true) or (PriorityCheck(AIField(),PRIO_TOGRAVE)>4 and MP2Check()) or (HasID(AIMon(),99365553,true) and LightpulsarCond(PRIO_TOFIELD)))
+  return DestroyCheck(OppField())>0 and (HasID(AIMon(),34408491,true) 
+  or (PriorityCheck(AIField(),PRIO_TOGRAVE)>4 and MP2Check()) 
+  or (HasID(AIMon(),99365553,true) and LightpulsarCond(PRIO_TOFIELD)))
 end
 function SummonBLS()
   return OverExtendCheck() and #OppMon()>0 and ChaosSummonCheck()>4
@@ -448,7 +303,7 @@ function LevelFilter(c,level)
   return bit32.band(c.type,TYPE_MONSTER)>0 and c.level==level
 end
 function TragCheck(level)
-  return CardsMatchingFilter(AIGrave(),LevelFilter,level)>0
+  return HasID(AIMon(),98777036,true,nil,nil,nil,LevelFilter,10) and CardsMatchingFilter(AIGrave(),LevelFilter,level)>0
 end
 function ExtraDeckCheck(type,level)
   local cards=AIExtra()
@@ -471,7 +326,7 @@ function UseTrag2() -- change level
   elseif FieldCheck(3)>0 and TragCheck(3) and ExtraDeckCheck(TYPE_XYZ,3)>0 then
     GlobalCardMode=3
     return true
-  elseif HasID(AIMon(),33420078,false) then
+  elseif HasID(AIMon(),33420078,true) then
     if TragCheck(6) and ExtraDeckCheck(TYPE_SYNCHRO,8)>0 then
       GlobalCardMode=6
       return true
@@ -506,7 +361,7 @@ function UseDarkflare()
 end
 function SummonMini()
   return HasID(AIMon(),77558536,true) and FieldCheck(4)==1 and ExtraDeckCheck(TYPE_SYNCHRO,8)>0 and #OppMon()>0 --and OppHasStrongestMonster()
-  or OppHasStrongestMonster() and FieldCheck(4)==1 and ExtraDeckCheck(TYPE_XYZ,4)>0
+  or OppHasStrongestMonster() and (FieldCheck(4)==1 or TragCheck(4)) and ExtraDeckCheck(TYPE_XYZ,4)>0
   or HasID(AIMon(),33420078,true) and OppHasStrongestMonster() and FieldCheck(4)==0 and ExtraDeckCheck(TYPE_SYNCHRO,6)>0
   or HasID(AIHand(),99365553,true) and PriorityCheck(AIField(),PRIO_TOGRAVE)<4 and not Duel.CheckNormalSummonActivity(player_ai) and OverExtendCheck() and #OppMon()>0
   or HasID(AIHand(),88264978,true) and UseREDMD() and OverExtendCheck()
@@ -546,8 +401,10 @@ function UseRaiden()
   return #AIDeck()>10
 end
 function SummonPSZ()
-  return FieldCheck(6)==1 or FieldCheck(4)==1 and Duel.GetCurrentPhase==PHASE_MAIN1 
-  and OppGetStrongestAttDef()<2800 and not HasID(AIMon(),77558536,false)
+  return (FieldCheck(6)==1 or TragCheck(6)) 
+  or (FieldCheck(4)==1 or TragCheck(4)) 
+  and Duel.GetCurrentPhase==PHASE_MAIN1 
+  and OppGetStrongestAttDef()<2800 and not HasID(AIMon(),77558536,true)
 end
 function UsePSZ()
   return SummonPSZ() and #AIHand()>4
@@ -623,30 +480,11 @@ function ChaosDragonOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     GlobalActivatedCardID = 13700002
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(SpSummonable,95992081) and SummonLeviair() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
-  end
-  if HasIDNotNegated(Activatable,95992081) and UseLeviair() then
-    GlobalCardMode = 1
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
+
   --if HasIDNotNegated(Activatable,34086406) and UseLavalvalChain() then
   --  return {COMMAND_ACTIVATE,CurrentIndex}
   --end
-  if HasID(SpSummonable,38495396) and SummonPtolemy() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
-  end
-  if HasIDNotNegated(Activatable,38495396) and UsePtolemy() then
-    GlobalCardMode = 1
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
-  if HasID(SpSummonable,15561463) and SummonGauntletLauncher() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
-  end
-  if HasIDNotNegated(Activatable,15561463) and UseGauntletLauncher() then
-    GlobalCardMode = 1
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
+
   if HasID(SpSummonable,34408491) and SummonBeelze() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
@@ -677,6 +515,7 @@ function ChaosDragonOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   end
   if HasID(SpSummonable,09596126) and SummonChaosSorc() then
     GlobalSSCardID = 09596126
+    GlobalCardMode = 1
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
 
@@ -837,7 +676,7 @@ function TragTarget(cards)
   local result={}
   if GlobalCardMode and GlobalCardMode>0 then
     for i=1,#cards do
-      if cards[i].level==GlobalcardMode then
+      if cards[i].level==GlobalCardMode then
         result[1]=i
       end
     end
@@ -865,6 +704,14 @@ function ScrapDragonTarget(cards)
     return {CurrentIndex}
   end
   return BestTargets(cards,1,TARGET_DESTROY)
+end
+function ChaosSorcTarget(cards)
+  if GlobalCardMode == 1 then
+    GlobalCardMode = nil
+  else
+    GlobalSSCardID = nil
+  end
+  return Add(cards,PRIO_BANISH)
 end
 function ChaosDragonOnSelectCard(cards, minTargets, maxTargets,triggeringID,triggeringCard)
   local ID 
@@ -901,8 +748,7 @@ function ChaosDragonOnSelectCard(cards, minTargets, maxTargets,triggeringID,trig
     return BestTargets(cards,1,TARGET_BANISH)
   end
   if GlobalSSCardID == 09596126 then -- Chaos Sorc
-    GlobalSSCardID = nil
-    return BestTargets(cards,1,TARGET_BANISH)
+    return ChaosSorcTarget(cards)
   end
   if ID == 99365553 then -- Lightpulsar
     return Add(cards,PRIO_TOFIELD)
@@ -965,6 +811,11 @@ function ChainGorz()
   return true
 end
 function ChainTrag()
+  local c=Duel.GetAttacker()
+  print(c.GetCode)
+  c=OppMon()
+  if #c>0 then c=c[1] end
+  print(c.GetCode)
   return true
 end
 function ChaosDragonOnSelectChain(cards,only_chains_by_player)
@@ -1044,7 +895,7 @@ function ChaosDragonOnSelectPosition(id, available)
     if ChaosDragonDef[i]==id then result=POS_FACEUP_DEFENCE end
   end
   if id == 13700002 then -- Dante
-    if GlobalBPAllowed and Duel.GetCurrentPhase()==PHASE_MAIN1 and OppGetStrongestAttDef()<2500 then
+    if GlobalBPAllowed and Duel.GetCurrentPhase()==PHASE_MAIN1 and OppGetWeakestAttDef()<2500 then
       result=POS_FACEUP_ATTACK
     else
       result=POS_FACEUP_DEFENCE

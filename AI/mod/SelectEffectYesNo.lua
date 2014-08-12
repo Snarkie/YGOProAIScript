@@ -8,6 +8,7 @@
 -- Return: 
 -- 1 = yes
 -- 0 = no
+
 function OnSelectEffectYesNo(id,triggeringCard)
   local result = FireFistOnSelectEffectYesNo(id,triggeringCard)
   if result==nil then

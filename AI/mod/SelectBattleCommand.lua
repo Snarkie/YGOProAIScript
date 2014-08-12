@@ -44,12 +44,26 @@ function OnSelectBattleCommand(cards)
   -- Temporarily increase the ATK of monster cards that
   -- either have built-in ATK boosts while attacking or
   -- are affected that way by another card.
+  -- Filter for cards that cannot be attack targets
   -----------------------------------------------------
   ApplyATKBoosts(cards)
   local targets = OppMon()
+  local attackable = {}
+  local mustattack = {}
+  for i=1,#targets do
+    if targets[i]:is_affected_by(EFFECT_CANNOT_BE_BATTLE_TARGET)==0 then
+      attackable[#attackable+1]=targets[i]
+    end
+    if targets[i]:is_affected_by(EFFECT_MUST_BE_ATTACKED)>0 then
+      mustattack[#mustattack+1]=targets[i]
+    end
+  end
+  if #mustattack>0 then
+    targets = mustattack
+  else
+    targets = attackable
+  end
   ApplyATKBoosts(targets)
-
-
   ------------------------------------------------
   -- Neo-Spacian Grand Mole, Exploder Dragon,
   -- Metaion, D.D. Warrior Lady, D.D Assailant, D.D Warrior
@@ -58,9 +72,10 @@ function OnSelectBattleCommand(cards)
   ------------------------------------------------
   for i=1,#cards do
     if cards[i] ~= false then
-      if cards[i].id == 80344569 or cards[i].id == 20586572 or -- Mole, Exp
-         cards[i].id == 74530899 or cards[i].id == 07572887 or -- Metaion, D.D. Warrior Lady, 
-         cards[i].id == 37043180 or cards[i].id == 70074904 then --D.D Assailant, D.D Warrior
+      if (cards[i].id == 80344569 or cards[i].id == 20586572 or -- Mole, Exp
+         cards[i].id == 74530899 or cards[i].id == 07572887 or  -- Metaion, D.D. Warrior Lady, 
+         cards[i].id == 37043180 or cards[i].id == 70074904)    --D.D Assailant, D.D Warrior
+         and NotNegated(cards[i]) then 
         GlobalCurrentATK = 99999999
         GlobalAIIsAttacking = 1
         return 1,i
@@ -73,18 +88,27 @@ function OnSelectBattleCommand(cards)
   -- opponent controls any non dark type monster.
   ---------------------------------------------------------------
   for i=1,#cards do
-   if cards[i] ~= false then
-     if cards[i].id == 26593852 then 
-	  if Get_Card_Count_ATT(targets,"~=",ATTRIBUTE_DARK,POS_FACEUP_ATTACK) > 0 then
-         GlobalCurrentATK = 99999999
-         GlobalAIIsAttacking = 1
-         GlobalAttackerID = cards[i].id
-		return 1,i
-       end
-     end
-   end
- end
- 
+    if cards[i].id == 26593852 and NotNegated(cards[i]) and CardsMatchingFilter(targets,CatastorFilter)>0 then 
+      GlobalCurrentATK = cards[i].attack
+      GlobalAIIsAttacking = 1
+      GlobalAttackerID = cards[i].id
+      return 1,i
+    end
+  end
+
+  ---------------------------------------------------------------
+  -- Always attack with "El-Shaddoll Nephilim" if
+  -- opponent controls any non dark type monster.
+  ---------------------------------------------------------------
+  for i=1,#cards do
+    if cards[i].id == 20366274 and NotNegated(cards[i]) and CardsMatchingFilter(targets,NephilimFilter)>0 then 
+      GlobalCurrentATK = cards[i].attack
+      GlobalAIIsAttacking = 1
+      GlobalAttackerID = cards[i].id
+      return 1,i
+    end
+  end
+  
   ---------------------------------------------------------------
   -- Always attack with "Toon" monsters if AI controls "Toon World" 
   -- and opponent does not control any "Toon" monsters.
@@ -99,8 +123,7 @@ function OnSelectBattleCommand(cards)
         end
      end
   end
-   
-   
+  
   -------------------------------------------------------
   -- If the opponent has a monster with more ATK than any
   -- of the AI's monsters, look for an opponent's monster

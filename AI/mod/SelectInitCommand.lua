@@ -167,13 +167,13 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
 --        Functions for specific decks
 -- **********************************************
 -------------------------------------------------
-MermailCheck()
-BujinCheck()
-ShadollCheck()
-SatellarknightCheck()
-ChaosDragonCheck()
-ExtraCheck=(BujinCheck() or SatellarknightCheck())
+DeckCheck()
+ExtraCheck=(DeckCheck(DECK_BUJIN) or DeckCheck(DECK_TELLARKNIGHT))
 local DeckCommand = nil
+DeckCommand = SummonExtraDeck(cards,true)
+if DeckCommand ~= nil then
+  return DeckCommand[1],DeckCommand[2]
+end
 if not ExtraCheck then 
   DeckCommand = ChaosDragonOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if DeckCommand ~= nil then
@@ -198,7 +198,7 @@ if not ExtraCheck then
     return DeckCommand[1],DeckCommand[2]
   end
 end
-if not SatellarknightCheck() then 
+if not DeckCheck(DECK_TELLARKNIGHT) then 
   DeckCommand = BujinOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if DeckCommand ~= nil then
     return DeckCommand[1],DeckCommand[2]
@@ -210,7 +210,7 @@ if not ExtraCheck then
     return DeckCommand[1],DeckCommand[2]
   end
 end
-if not BujinCheck() then 
+if not DeckCheck(DECK_BUJIN) then 
   DeckCommand = SatellarknightOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if DeckCommand ~= nil then
     return DeckCommand[1],DeckCommand[2]
@@ -218,6 +218,12 @@ if not BujinCheck() then
 end  
 if not ExtraCheck then 
   DeckCommand = ShadollOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
+  if DeckCommand ~= nil then
+    return DeckCommand[1],DeckCommand[2]
+  end
+end
+if not ExtraCheck then 
+  DeckCommand = SummonExtraDeck(cards)
   if DeckCommand ~= nil then
     return DeckCommand[1],DeckCommand[2]
   end
@@ -884,19 +890,6 @@ end
      end
    end
  end
-    
-  ---------------------------------------------
-  -- AI should activate: Foolish Burial, if he 
-  -- has "Grapha, Dragon Lord of Dark World" in deck.
-  ---------------------------------------------
-  for i=1,#ActivatableCards do  
-   if ActivatableCards[i].id == 81439173 then -- Foolish Burial
-    if Get_Card_Count_ID(AIDeck(),34230233,nil) > 0 then
-	   GlobalActivatedCardID = ActivatableCards[i].id
-	  return COMMAND_ACTIVATE,i
-     end
-   end
- end
   
   ---------------------------------------------
   -- AI should activate: Dark World Dealings,
@@ -1257,23 +1250,6 @@ end
        GlobalCardMode = 1
       GlobalActivatedCardID = ActivatableCards[i].id
       return COMMAND_ACTIVATE,i
-     end
-   end
- end
- 
-   ---------------------------------------------
-  -- AI should activate: Gagaga Gunman, 
-  -- only if opponent has face up card's on field
-  -- and "Spar" wasn't special summoned this turn
-  ---------------------------------------------  
-  for i=1,#ActivatableCards do  
-   if ActivatableCards[i].id == 12014404 then  -- Gagaga Gunman
-	if Global1PTSparSSed ~= 1 and Get_Card_Count_Pos(OppMon(), POS_FACEUP) > 0 
-  or AI.GetPlayerLP(2)<=800
-  then  
-	   GlobalActivatedCardID = ActivatableCards[i].id
-	   Global1PTGunman = 1
-	  return COMMAND_ACTIVATE,i
      end
    end
  end

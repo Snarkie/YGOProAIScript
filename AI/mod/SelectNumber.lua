@@ -13,8 +13,8 @@ function OnSelectNumber(choices)
   -- The AI should always try to mill as many
   -- cards as possible with Card Trooper.
   -------------------------------------------
-  if GlobalActivatedCardID == 85087012 
-  or GlobalActivatedCardID == 13700002
+  if GlobalActivatedCardID == 85087012 -- Card Trooper
+  or GlobalActivatedCardID == 13700002 -- Dante
   then
     GlobalActivatedCardID = nil
     return #choices

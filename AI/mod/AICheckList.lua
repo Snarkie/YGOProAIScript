@@ -293,6 +293,7 @@ NSBL={
 38331564,91110378,69293721,99365553,  -- Star Seraphs Scepter,Sovereign,Mermail Abyssgunde, Lightpulsar
 77558536,22624373,95503687,16404809,  -- LS Raiden, Lyla, Lumina, Kuribandit
 33420078,51858306,10802915,13700001,  -- Plaguespreader, Eclipse Wyvern, Tour Guide, Burning Abyss Scarm
+04904812,68505803  -- Genex Undine, Genex Controller
 }
 function NormalSummonBlacklist(CardId) 
   for i=1,#NSBL do
@@ -438,18 +439,42 @@ ToHandBL={
   70095154,57774843,92841002 -- Cyber Dragon, JD, Mythic Water Dragon
 }
 
-function DestroyBlacklist(id) -- cards to not destroy in your opponent's possession
+function DestroyBlacklist(c) -- cards to not destroy in your opponent's possession
+  local AICard = true
+  local id = nil
+  if c.GetCode then
+    AICard = false
+    id = c:GetCode()
+    if c:IsSetCard(0x97) and c:GetOwner()==1-player_ai 
+    and Duel.GetTurnPlayer()==player_ai and c:IsLocation(LOCATION_SZONE)
+    then
+      return true
+    end
+  else
+    id = c.id
+    if IsSetCode(c.setcode,0x97) and c.owner==2 
+    and Duel.GetTurnPlayer()==player_ai and bit32.band(c.location,LOCATION_SZONE)>0
+    then
+      return true
+    end
+  end
   for i=1,#DestroyBL do
     if DestroyBL[i]==id then
       return true
     end
   end
+  if id == 68535320 and #AIMon()>0 then -- Fire Hand
+    return true
+  end
+  if id == 95929069 and #AIST()>0 then -- Ice Hand
+    return true
+  end
   return false
 end
 
 DestroyBL={
-  19337371,07452945,14745409, -- Hysteric Sign, Noble Arms of Destiny, Gallatin
-  23562407,83438826 -- Caliburn, Arfeudutyr
+  07452945,14745409,23562407,83438826, --  Noble Arms of Destiny, Gallatin, Caliburn, Arfeudutyr
+  19337371,29223325,12444060 -- Hysteric Sign, Artifact Ignition, Sanctum
 }
 
 -----------------------------------------------------
@@ -673,7 +698,7 @@ ScriptedCards ={
 61901281,99234526,77558536,16404809,  -- Wyverbuster, Collapserpent, LS Raiden, Kuribandit
 51858306,10802915,13700001,00691925,  -- Eclipse Wyvern, Tour Guide, Burning Abyss Scarm, Solar Recharge
 94886282,13700002,95992081,07391448,  -- Charge of the Light Brigade, Dante,Leviair, Goyo Guardian
-25460258 -- Darkflare Dragon
+25460258,04904812 -- Darkflare Dragon, Genex Undine
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do
