@@ -49,6 +49,10 @@ result=ChaosDragonOnSelectChain(cards,only_chains_by_player)
 if result ~= nil then
   return result[1],result[2]
 end
+result=HATChain(cards)
+if result ~= nil then
+  return result[1],result[2]
+end
 result = 0
  
   ------------------------------------------

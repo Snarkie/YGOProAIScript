@@ -15,7 +15,9 @@
 function OnSelectBattleCommand(cards)
   local execute_attack = 0
   local index = 1
-
+  if cards and #cards>0 then
+    --for i=1,#cards do print(cards[i].id) end
+  end
   local function GetWeakestAttackerIndex()
     local LowestIndex = 0
     local LowestAttack = 99999999
@@ -102,6 +104,20 @@ function OnSelectBattleCommand(cards)
   ---------------------------------------------------------------
   for i=1,#cards do
     if cards[i].id == 20366274 and NotNegated(cards[i]) and CardsMatchingFilter(targets,NephilimFilter)>0 then 
+      GlobalCurrentATK = cards[i].attack
+      GlobalAIIsAttacking = 1
+      GlobalAttackerID = cards[i].id
+      return 1,i
+    end
+  end
+  
+  ---------------------------------------------------------------
+  -- Always attack with the Hands if they can get their effects
+  ---------------------------------------------------------------
+  for i=1,#cards do
+    if cards[i].id == 68535320 and FireHandCheck()
+    or cards[i].id == 95929069 and IceHandCheck()
+    then 
       GlobalCurrentATK = cards[i].attack
       GlobalAIIsAttacking = 1
       GlobalAttackerID = cards[i].id

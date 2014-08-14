@@ -53,6 +53,10 @@ result = ChaosDragonOnSelectCard(cards, minTargets, maxTargets, triggeringID, tr
 if result ~= nil then
   return result
 end
+result = HATCard(cards, minTargets, maxTargets, triggeringID, triggeringCard)
+if result ~= nil then
+  return result
+end
 result = {}
 
   --------------------------------------------

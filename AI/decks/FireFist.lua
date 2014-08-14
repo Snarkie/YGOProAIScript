@@ -49,14 +49,12 @@ function FireFormationCost(cards,count)
 end
 function UseBear()
   local cost=FireFormationCostCheck(AIST(),1)
+  if DestroyCheck(OppMon())==0 then return false end
   return cost>1 and OppHasStrongestMonster() or cost>2 and OppHasFacedownMonster() or cost>4 and OppHasMonsterInMP2()
 end 
-function GorillaFilter(card)
-  return card.owner==2 --and card:is_affected_by(EFFECT_CANNOT_TRIGGER)
-end
 function UseGorilla()
   local cards=OppST()
-  return FireFormationCostCheck(AIST(),1)>1 and CardsMatchingFilter(OppST(),GorillaFilter)>0
+  return FireFormationCostCheck(AIST(),1)>1 and DestroyCheck(OppST())>0
 end
 function GyokkoFilter(card)
   return bit32.band(card.position,POS_FACEDOWN)>0 and card:is_affected_by(EFFECT_CANNOT_TRIGGER)==0
@@ -113,12 +111,12 @@ function FireFormationSearch(cards)
   end
   return {math.random(#cards)}
 end
-function DragonFilter(card,level)
-  return card.level==level and (card.location==LOCATION_MZONE or card.setcode==0x79 and card.id~=43748308)
+function FFDragonFilter(card,level)
+  return card.level==level and (card.location==LOCATION_MZONE or IsSetCode(card.setcode,0x79) and card.id~=43748308)
 end
-function UseDragon()
-  return FireFormationCostCheck(AIST(),2)>0 and (CardsMatchingFilter(AIGrave(),DragonFilter,4)>0
-  or CardsMatchingFilter(AIMon(),DragonFilter,3)>0 and CardsMatchingFilter(AIGrave(),DragonFilter,3)>0)
+function UseFFDragon()
+  return FireFormationCostCheck(AIST(),2)>0 and (CardsMatchingFilter(AIGrave(),FFDragonFilter,4)>0
+  or CardsMatchingFilter(AIMon(),FFDragonFilter,3)>0 and CardsMatchingFilter(AIGrave(),FFDragonFilter,3)>0)
 end
 function UseLeopard()
   if CardsMatchingFilter(AIMon(),function(c) return c.level==3 end)==2 then
@@ -258,7 +256,7 @@ function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
     OPTSet(03534077)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasIDNotNegated(Activatable,43748308) and UseDragon() then
+  if HasIDNotNegated(Activatable,43748308) and UseFFDragon() then
     GlobalCardMode = 2
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -274,7 +272,7 @@ function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(Summonable,03534077) and SummonWolfbark() then
     return {COMMAND_SUMMON,CurrentIndex}
   end
-  if HasID(Summonable,43748308) and (UseDragon() or CanXYZ(4)) then              
+  if HasID(Summonable,43748308) and (UseFFDragon() or CanXYZ(4)) then              
     return {COMMAND_SUMMON,IndexByID(Summonable,43748308)}           --Dragon 
   end
   if HasID(Summonable,06353603) and (UseBear() or CanXYZ(4)) then 
@@ -575,7 +573,7 @@ function LeviairTarget(cards)
   end
   return {math.random(#cards)}
 end
-function DragonTarget(cards)
+function FFDragonTarget(cards)
   local result=nil
   if GlobalCardMode==2 then
     GlobalCardMode=1
@@ -667,7 +665,7 @@ function FireFistCard(cards, minTargets, maxTargets, triggeringID, triggeringCar
     return BuffaloTarget(cards)
   end
   if triggeringID == 43748308 then -- Dragon
-    return DragonTarget(cards)
+    return FFDragonTarget(cards)
   end
   if triggeringID == 39699564 then -- Leopard
     return LeopardTarget(cards)

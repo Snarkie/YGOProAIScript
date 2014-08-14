@@ -32,6 +32,9 @@ function OnSelectEffectYesNo(id,triggeringCard)
   if result==nil then
     result = ChaosDragonOnSelectEffectYesNo(id,triggeringCard)
   end
+  if result==nil then
+    result = HATEffectYesNo(id,triggeringCard)
+  end
   if result then return result end
   
   if CardIsScripted(id)>0 then

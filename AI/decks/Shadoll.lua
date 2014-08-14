@@ -1,21 +1,3 @@
-function MoralltachFilter(c)
-  return bit32.band(c.position,POS_FACEUP)>0 
-  and c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0
-  and bit32.band(c.status,STATUS_LEAVE_CONFIRMED)==0
-  and not DestroyBlacklist(c)
-end
-function MoralltachCond(loc)
-  if loc == PRIO_TOFIELD then 
-    return CardsMatchingFilter(UseLists({OppMon(),OppST()}),MoralltachFilter)>0
-  end
-  return true
-end
-function BeagalltachCond(loc)
-  if loc == PRIO_TOFIELD then 
-    return MidrashCheck() and HasID(AIST(),85103922,true) and MoralltachCond(PRIO_TOFIELD)
-  end
-  return true
-end
 function ShadollFusionCond(loc)
   if loc == PRIO_TOHAND then
     return not HasID(AIHand(),44394295,true)
@@ -87,51 +69,16 @@ function RootsCond(loc)
   end
   return true
 end
-ShadollPrio = {
-[37445295] = {6,3,3,1,6,1,6,1,1,FalconCond}, -- Shadoll Falcon
-[04939890] = {5,2,2,1,5,4,5,4,1,HedgehogCond}, -- Shadoll Hedgehog
-[30328508] = {4,1,5,1,9,1,9,1,1,LizardCond}, -- Shadoll Lizard
-[77723643] = {3,1,4,1,7,1,7,1,1,DragonCond}, -- Shadoll Dragon
-[03717252] = {2,1,6,1,8,1,8,1,1,BeastCond}, -- Shadoll Beast
-[85103922] = {1,1,6,5,3,1,3,1,1,MoralltachCond}, -- Artifact Moralltach
-[12697630] = {1,1,7,4,4,1,4,1,1,BeagalltachCond}, -- Artifact Beagalltach
-[24062258] = {1,1,1,1,1,1,1,1,1,nil}, -- Secret Sect Druid Dru
 
-[05318639] = {1,1,1,1,1,1,1,1,1,nil}, -- Mystical Space Typhoon
-[44394295] = {9,5,1,1,1,1,1,1,1,ShadollFusionCond}, -- Shadoll Fusion
-[29223325] = {1,1,1,1,1,1,1,1,1,nil}, -- Artifact Ignition
-[01845204] = {1,1,1,1,1,1,1,1,1,nil}, -- Instant Fusion
-[77505534] = {3,1,1,1,1,1,1,1,1,nil}, -- Facing the Shadows
-[04904633] = {4,2,1,1,9,1,9,1,1,RootsCond}, -- Shadoll Roots
-[53582587] = {1,1,1,1,1,1,1,1,1,nil}, -- Torrential Tribute
-[29401950] = {1,1,1,1,1,1,1,1,1,nil}, -- Bottomless Trap Hole
-[84749824] = {1,1,1,1,1,1,1,1,1,nil}, -- Solemn Warning
-[94192409] = {1,1,1,1,1,1,1,1,1,nil}, -- Compulsory Evacuation Device
-[12444060] = {1,1,1,1,1,1,1,1,1,nil}, -- Artifact Sanctum
-[78474168] = {1,1,1,1,1,1,4,1,1,nil}, -- Breakthrough Skill
-
-[20366274] = {1,1,6,4,2,1,2,1,1,NephilimCond}, -- El-Shadoll Nephilim
-[94977269] = {1,1,7,3,2,1,2,1,1,MidrashCond}, -- El-Shadoll Midrash
-[72959823] = {1,1,1,1,1,1,1,1,1,nil}, -- Panzer Dragon
-[73964868] = {1,1,1,1,1,1,1,1,1,nil}, -- Constellar Pleiades
-[29669359] = {1,1,1,1,1,1,1,1,1,nil}, -- Number 61: Volcasaurus
-[82633039] = {1,1,1,1,1,1,1,1,1,nil}, -- Skyblaster Castel
-[00581014] = {1,1,1,1,1,1,1,1,1,nil}, -- Daigusto Emeral
-[33698022] = {1,1,1,1,1,1,1,1,1,nil}, -- Moonlight Rose Dragon
-[88033975] = {1,1,1,1,1,1,1,1,1,nil}, -- Armades
-[04779823] = {1,1,1,1,1,1,1,1,1,nil}, -- Michael, Lightsworn Ark
-[31924889] = {1,1,1,1,1,1,1,1,1,nil}, -- Arcanite Magician
-[08561192] = {1,1,1,1,1,1,1,1,1,nil}, -- Leoh, Keeper of the Sacred Tree
-}
 function ShadollGetPriority(id,loc)
   local checklist = nil
   local result = 0
   if loc == nil then
     loc = PRIO_TOHAND
   end
-  checklist = ShadollPrio[id]
+  checklist = Prio[id]
   if checklist then
-    if checklist[10] and not(checklist[10](loc)) then
+    if checklist[11] and not(checklist[11](loc)) then
       loc = loc + 1
     end
     result = checklist[loc]
@@ -240,14 +187,9 @@ function SummonDru()
   return CardsMatchingFilter(AIGrave(),DruFilter)>0 and MidrashCheck() 
   and (SummonSkyblaster() or SummonEmeral())
 end
-function EmeralFilter(c)
-  return bit32.band(c.type,TYPE_MONSTER)>0
-end
-function SummonEmeral()
-  return CardsMatchingFilter(AIGrave(),EmeralFilter)>7 and HasID(AIExtra(),00581014,true)
-end
 function SetArtifacts()
-  return Duel.GetTurnCount()==1 or Duel.GetCurrentPhase()==PHASE_MAIN2
+  return (Duel.GetTurnCount()==1 or Duel.GetCurrentPhase()==PHASE_MAIN2)
+  and #AIST()<4
 end
 function InstantFusionFilter(c)
   return bit32.band(c.attribute,ATTRIBUTE_LIGHT)>0 and c.level==5
@@ -268,9 +210,6 @@ end
 function SummonVolcasaurusFinish()
   return HasID(AIExtra(),29669359,true) and CardsMatchingFilter(OppMon(),VolcasaurusFilter,true)>0
 end
-function SummonPleiades()
-  return HasID(AIExtra(),73964868,true)
-end
 function MoonlightRoseFilter(c)
   return bit.band(c:GetSummonType(),SUMMON_TYPE_SPECIAL)==SUMMON_TYPE_SPECIAL 
   and not c:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET)
@@ -280,9 +219,7 @@ function SummonMoonlightRose()
   return (MidrashCheck() or FieldCheck(5)>1)and HasID(AIExtra(),33698022,true)
   and Duel.IsExistingMatchingCard(MoonlightRoseFilter,1-player_ai,LOCATION_MZONE,0,1,nil) 
 end
-function SummonLeoh()
-  return OppGetStrongestAttack() < 3100 and MP2Check and HasID(AIExtra(),08561192,true)
-end
+
 function MichaelFilter(c)
   return c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
 end
@@ -441,22 +378,6 @@ function ShadollOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   
   if HasID(SetableST,77505534) and SetFacingTheShadows() then
     return {COMMAND_SET_ST,CurrentIndex}
-  end
-  if HasID(SetableST,85103922) and SetArtifacts() then
-    return {COMMAND_SET_ST,CurrentIndex}
-  end
-  if HasID(SetableST,12697630) and SetArtifacts() then
-    return {COMMAND_SET_ST,CurrentIndex}
-  end
-  if HasID(SetableST,12444060) and SetArtifacts() then
-    return {COMMAND_SET_ST,CurrentIndex}
-  end
-  if HasID(SetableST,29223325) and SetArtifacts() then
-    return {COMMAND_SET_ST,CurrentIndex}
-  end
-  
-  if HasID(Activatable,54447022) and UseSoulCharge() then
-    return {COMMAND_ACTIVATE,CurrentIndex}
   end
   return nil
 end
@@ -642,8 +563,8 @@ function SoulChargeTarget(cards,min,max)
   else
     count = 1
   end
-  if DeckCheck(DECK_TELLARKNIGHT) then
-    result = SatellarknightAdd(cards,PRIO_TOFIELD,count)
+  if DeckCheck(DECK_TELLARKNIGHT) or DeckCheck(DECK_HAT) then
+    result = Add(cards,PRIO_TOFIELD,count)
   else
     for i=1,#cards do
       cards[i].index=i
@@ -754,8 +675,8 @@ end
 function SanctumFilter(c)
   return (c.level>=5 or bit32.band(c.type,TYPE_FUSION+TYPE_RITUAL+TYPE_SYNCHRO+TYPE_XYZ)>0)
   and c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0 and bit32.band(c.position,POS_FACEUP)>0 
+  and DestroyFilter(c,true)
 end
-
 function ChainSanctum()
   if RemovalCheck(12444060) and (HasID(AIDeck(),85103922,true) or HasID(AIDeck(),12697630,true) and HasID(AIST(),85103922,true) and MidrashCheck())then
     GlobalCardMode = 1

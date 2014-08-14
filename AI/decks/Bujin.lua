@@ -243,6 +243,9 @@ function SummonSharkKnightBujin(cards)
   end
   return false
 end
+function UseDualityBujin()
+  return DeckCheck(DECK_BUJIN)
+end
 function BujinOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local Activatable = cards.activatable_cards
   local Summonable = cards.summonable_cards
@@ -276,7 +279,7 @@ function BujinOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasIDNotNegated(Activatable,73289035) and UseTsukuyomi(AIHand()) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Activatable,98645731) then -- Duality
+  if HasID(Activatable,98645731) and UseDualityBujin() then -- Duality
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Activatable,50474354) then -- Peacock
@@ -461,7 +464,10 @@ function BujinXYZTarget(cards,count)
   return result
 end
 function BujinOnSelectCard(cards, minTargets, maxTargets,ID,triggeringCard)
-  if ID == 98645731 or ID == 50474354  -- Duality, Peacock
+  if ID == 98645731 and DeckCheck(DECK_BUJIN) then -- Duality
+    return BujinAdd(cards)
+  end
+  if ID == 50474354  -- Peacock
   or ID == 53678698 then -- Mikazuchi
     return BujinAdd(cards)
   end

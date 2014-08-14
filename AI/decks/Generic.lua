@@ -29,6 +29,9 @@ function SummonExtraDeck(cards,prio)
   if HasIDNotNegated(Activatable,39765958) and UseJeweledRDA(Activatable[CurrentIndex],0) then 
     return {COMMAND_ACTIVATE,CurrentIndex}                                -- Hot Red Dragon Archfiend
   end
+  if HasID(ActivatableCards,53129443) and UseDarkHole() then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
     
 ---- 
 -- summon certain monsters before anything else
@@ -156,7 +159,9 @@ function SummonExtraDeck(cards,prio)
 
 
 -- Rank 5
-
+  if HasID(SpSummonable,73964868) and SummonPleiades() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
   if HasID(SpSummonable,29669359) and SummonVolcasaurus() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
@@ -177,6 +182,16 @@ function SummonExtraDeck(cards,prio)
   end
   if HasID(SpSummonable,61344030) and SummonPaladynamo() then
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,61344030)}
+  end
+  if HasID(SpSummonable,63746411) and SummonGiantHand() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(SpSummonable,91499077) and SummonGagagaSamurai() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(Activatable,91499077) and UseGagagaSamurai() then
+    Global1PTGunman = 1
+    return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(SpSummonable,34086406) and SummonLavalvalChain() then -- Lavalval Chain
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
@@ -201,6 +216,12 @@ function SummonExtraDeck(cards,prio)
   if HasID(Activatable,00581014,false,9296225) and UseEmeral() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+  if HasID(SpSummonable,21501505) and SummonCairngorgon() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(SpSummonable,93568288) and SummonRhapsody() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
   if HasID(SpSummonable,12014404) and SummonCowboyAtt() then -- Cowboy
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
@@ -214,16 +235,21 @@ function SummonExtraDeck(cards,prio)
   if HasID(SpSummonable,15914410) and SummonMechquipped() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasID(SpSummonable,73964868) and SummonPleiades() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
-  end
-    if HasID(SpSummonable,95992081) and SummonLeviair() then
+  if HasID(SpSummonable,95992081) and SummonLeviair() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasIDNotNegated(Activatable,95992081) and UseLeviair() then
     GlobalCardMode = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+  
+  
+-- use Soul Charge when other plays have been exhausted
+  
+  if HasID(Activatable,54447022) and UseSoulCharge() then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  
   return nil
 end
 
@@ -252,20 +278,30 @@ function SummonPaladynamo()
   end
   return false
 end
-function SummonLavalvalChain() 
-  return (HasID(AIDeck(),82293134,true) or HasID(AIDeck(),90411554,true) and not (HasID(UseLists({AIGrave(),AIHand(),AIMon()}),82293134,true) or not OPTCheck(82293134)))
-  and (Duel.GetCurrentPhase() == PHASE_MAIN2 or Duel.GetTurnCount()==1)
+function SummonLavalvalChain()
+  if DeckCheck(DECK_HAT) then
+    return false
+  else
+    return MP2Check() and OppGetStrongestAttDef()<1800 and #AIGrave()<10
+  end
 end
 function SummonChidori()
   local cards = UseLists({OppMon(),OppST()})
   local result={0,0}
   for i=1,#cards do
-    if bit32.band(cards[i].position,POS_FACEUP)>0 then result[1]=1 end
-    if bit32.band(cards[i].position,POS_FACEDOWN)>0 then result[2]=1 end
+    if bit32.band(cards[i].position,POS_FACEUP)>0 
+    and cards[i]:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0 
+    then 
+      result[1]=1 
+    end
+    if bit32.band(cards[i].position,POS_FACEDOWN)>0 
+    and cards[i]:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0 
+    then 
+      result[2]=1
+    end
   end
   return result[1]+result[2]>=2 
-  or Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack") >= 2300 --for now
-  or Get_Card_Att_Def(OppMon(),"defense",">",POS_FACEUP_DEFENCE,"defense") >= 2300
+  or OppGetStrongestAttDef() >= 2300
 end
 function SummonRagnaZero()
   local cards = OppMon()
@@ -282,27 +318,26 @@ function SummonRagnaZero()
   return false
 end
 function SummonImpKing()
-  return (HasID(AIDeck(),94656263,true) or HasID(AIDeck(),53573406,true)) and (Chance(30) 
-  or HasID(AIMon(),23649496,true) or Chance(70) and HasID(AIGrave(),42940404,true)
-  and MP2Check())
+  return MP2Check() and CardsMatchingFilter(AIDeck(),RaceFilter,RACE_REPTILE)>0
 end
 function SummonDracossack()
-  return MP2Check() and not DeckCheck(DECK_MERMAIL)
+  return MP2Check() and Duel.GetLocationCount(player_ai,LOCATION_MZONE)>0
+end
+function BigEyeFilter(c)
+  return c.attack>=2600 and c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0 
 end
 function SummonBigEye()
-  return OppHasStrongestMonster() 
-  and (Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack") > 2300
-  or Get_Card_Att_Def(OppMon(),"defense",">",POS_FACEUP_DEFENSE,"defense") > 2300)
+  return CardsMatchingFilter(OppMon(),BigEyeFilter)>0 and MP2Check()
 end
 function SummonNaturiaBeast()
-  return Chance(50) and Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack") < 2200
+  return OppGetStrongestAttDef()<2200
 end
 function SummonArmades()
-  return Duel.GetCurrentPhase() == PHASE_MAIN1 and Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack") < 2300 
-  and Duel.GetTurnCount()>1 and not DeckCheck(DECK_MERMAIL)
+  return Duel.GetCurrentPhase() == PHASE_MAIN1 and OppGetStrongestAttDef()<2300 
+  and GlobalBPAllowed
 end
 function SummonStardustSpark()
-  return true
+  return MP2Check()
 end
 function JeweledRDAFilter(card,id)
   return card.cardid~=id and bit32.band(card.position,POS_FACEUP_ATTACK)>0 
@@ -324,8 +359,7 @@ function UseJeweledRDA(card,mod)
   return #AITargets==1 or diff>1 or (diff<=1 and AIAtt-OppAtt < diff*500)
 end
 function SummonJeweledRDA(card)
-  local OppAtt=Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack")
-  return UseJeweledRDA(card,1) or OppAtt > 2500
+  return UseJeweledRDA(card,1) or OppGetStrongestAttDef() > 2500
 end
 function UseBigEye()
   return true
@@ -352,6 +386,13 @@ function UseDarkHole(card)
 end
 function UseEmeral()
   return true
+end
+function EmeralFilter(c)
+  return bit32.band(c.type,TYPE_MONSTER)>0
+end
+function SummonEmeral()
+  return HasID(AIExtra(),00581014,true) and MP2Check() 
+  and CardsMatchingFilter(AIGrave(),EmeralFilter)>10 and OppGetStrongestAttDef()<1800
 end
 function UseCowboyDef()
   return AI.GetPlayerLP(2) < 1600
@@ -380,6 +421,8 @@ function SharkKnightFilter(c)
   and c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0 
 end
 function SummonSharkKnight(cards)
+  print("Shark")
+  print("targets: "..CardsMatchingFilter(OppMon(),SharkKnightFilter))
   return CardsMatchingFilter(OppMon(),SharkKnightFilter)>0 and OppHasStrongestMonster()
   and HasID(AIExtra(),48739166,true) and MP2Check()
 end
@@ -406,4 +449,40 @@ function SummonSkyblaster()
 end
 function UseSkyblaster()
   return CardsMatchingFilter(OppField(),SkyblasterFilter)>0
+end
+function SummonLeoh()
+  return OppGetStrongestAttDef() < 3100 and MP2Check() and HasID(AIExtra(),08561192,true)
+end
+function SummonMechquipped()
+  return Duel.GetCurrentPhase() == PHASE_MAIN2 or Duel.GetTurnCount()==1
+end
+function DwellerFilter(c)
+  return FilterAttribute(c,ATTRIBUTE_WATER) and FilterLevel(c,4)
+end
+function SummonDweller()
+  return MP2Check() and CardsMatchingFilter(AIMon(),DwellerFilter)>0 and OppGetStrongestAttDef()<2200
+end
+function SummonPleiades()
+  return HasID(AIExtra(),73964868,true)
+end
+function SummonGiantHand()
+  return MP2Check() and OppGetStrongestAttDef()<2000
+end
+function SummonCairngorgon()
+  return OppGetStrongestAttDef()<2450 and MP2Check()
+end
+function SummonRhapsody()
+  local cards=AIMon()
+  for i=1,#cards do
+    if bit32.band(cards[i].type,TYPE_XYZ)>0 and cards[i].attack+1200 > OppGetStrongestAttack() and  #OppGrave()>=2 then
+      return MP2Check()
+    end
+  end
+  return false
+end
+function SummonGagagaSamurai()
+  return Duel.GetCurrentPhase()==PHASE_MAIN1 and GlobalBPAllowed and #OppMon()==0 and ExpectedDamage(2)<2000
+end
+function UseGagagaSamurai()
+  return Duel.GetCurrentPhase()==PHASE_MAIN1 and GlobalBPAllowed and not OppHasStrongestMonster()
 end

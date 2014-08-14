@@ -182,7 +182,8 @@ function OppGetWeakestAttDef()
   return result
 end
 function OppHasStrongestMonster(skipbonus)
-  return #OppMon()>0 and AIGetStrongestAttack(skipbonus) <= OppGetStrongestAttDef()
+  return #OppMon()>0 and ((AIGetStrongestAttack(skipbonus) <= OppGetStrongestAttDef()) 
+  or HasID(AIMon(),68535320) and FireHandCheck() or HasID(AIMon(),95929069) and IceHandCheck())
 end
 function OppHasFacedownMonster()
   local cards=OppMon()
@@ -259,6 +260,17 @@ function HandCheck(level)
   end
   return result
 end
+function ExtraDeckCheck(type,level)
+  local cards=AIExtra()
+  local result = 0
+  for i=1,#cards do
+    if bit32.band(cards[i].type,type)>0 
+    and (cards[i].level==level or cards[i].rank==level) then
+      result = result + 1
+    end
+  end
+  return result
+end
 -- returns the cards in the list that match the filter
 function SubGroup(cards,filter,opt)
   result = {}
@@ -321,11 +333,21 @@ function ExpectedDamageFilter(card)
   return card:IsControler(1-player_ai) and card:IsType(TYPE_MONSTER) and card:IsPosition(POS_FACEUP_ATTACK)
   and card:GetAttackedCount()==0 and not card:IsHasEffect(EFFECT_CANNOT_ATTACK_ANNOUNCE) and not card:IsHasEffect(EFFECT_CANNOT_ATTACK)
 end
--- checks the damage the AI is expected to take during this turn
-function ExpectedDamage()
+function ExpectedDamageFilter2(card)
+  return card:IsControler(player_ai) and card:IsType(TYPE_MONSTER) and card:IsPosition(POS_FACEUP_ATTACK)
+  and card:GetAttackedCount()==0 and not card:IsHasEffect(EFFECT_CANNOT_ATTACK_ANNOUNCE) and not card:IsHasEffect(EFFECT_CANNOT_ATTACK)
+end
+-- checks the damage the AI is expected to take or dish out during this turn
+function ExpectedDamage(player)
   local result=0
-  local g=Duel.GetMatchingGroup(ExpectedDamageFilter,1-player_ai,LOCATION_MZONE,0,nil)  
-  local c=g:GetFirst()
+  local g = nil
+  if player and player == 2 then
+    g=Duel.GetMatchingGroup(ExpectedDamageFilter2,p,LOCATION_MZONE,0,nil,p) 
+  else
+    g=Duel.GetMatchingGroup(ExpectedDamageFilter,p,LOCATION_MZONE,0,nil,p) 
+  end
+  local c=nil
+  if g then c=g:GetFirst() end
   while c do
     result=result+c:GetAttack()
     c=g:GetNext()
@@ -477,10 +499,24 @@ function DestroyFilter(c,nontarget)
   and not (DestroyBlacklist(c)
   and (bit32.band(c.position, POS_FACEUP)>0 
   or bit32.band(c.status,STATUS_IS_PUBLIC)>0))
+  and (filter == nil or (opt == nil and filter(c) or filter(c,opt)))
 end
 -- returns the amount of cards that can be safely destroyed in a list of cards
-function DestroyCheck(cards,nontarget)
-  return CardsMatchingFilter(cards,DestroyFilter,nontarget)
+function DestroyCheck(cards,nontarget,filter,opt)
+  return CardsMatchingFilter(cards,DestroyFilter,nontarget,filter,opt)
 end
-
-
+function FilterAttribute(c,att)
+  return bit32.band(c.type,TYPE_MONSTER)>0 and bit32.band(c.attribute,att)>0
+end
+function FilterRace(c,race)
+  return bit32.band(c.type,TYPE_MONSTER)>0 and bit32.band(c.race,race)>0
+end
+function FilterLevel(c,level)
+  return bit32.band(c.type,TYPE_MONSTER)>0 and c.level==level
+end
+function FilterType(c,type)
+  return bit32.band(c.type,type)>0
+end
+function FilterAttack(c,attack)
+  return bit32.band(c.type,TYPE_MONSTER)>0 and c.attack>=attack
+end

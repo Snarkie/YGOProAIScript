@@ -49,6 +49,9 @@ end
 function SummonGenomHeritage()
   return UseGenomHeritage()
 end
+function SummonChainHeraldic()
+  return DeckCheck(DECK_HERALDIC) and not(HasAccess(84220251))
+end
 function SummonLeo()
   return FieldCheck(4)==1 or FieldCheck(4)==0 and HasID(AIHand(),94656263)
   or HeraldicCount(AIGrave())>0 and HasID(AIHand(),84220251)
@@ -169,7 +172,10 @@ function HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(Activatable,84220251) and UseHeraldryReborn() then 
     return {COMMAND_ACTIVATE,IndexByID(Activatable,84220251)}
   end
- 
+  
+  if HasID(SpSummonable,34086406) and SummonChainHeraldic() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
   if HasID(SpSummonable,47387961) and SummonGenomHeritage() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
@@ -177,6 +183,7 @@ function HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,23649496)}
   end
 
+  
   if HasID(Summonable,82293134) and SummonLeo() then   -- Leo
     return {COMMAND_SUMMON,IndexByID(Summonable,82293134)}
   end
@@ -502,7 +509,7 @@ function AHATarget(cards)
   if HasID(cards,12014404) and SummonCowboyAtt() then
     result=IndexByID(cards,12014404)
   end
-  if HasID(cards,34086406) and SummonLavalvalChain() then
+  if HasID(cards,34086406) and SummonChainHeraldic() then
     result=IndexByID(cards,34086406)
   end
   if HasID(cards,11398059) and SummonImpKing() then

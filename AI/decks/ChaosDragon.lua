@@ -1,9 +1,4 @@
-function FilterAttribute(c,att)
-  return bit32.band(c.type,TYPE_MONSTER)>0 and bit32.band(c.attribute,att)>0
-end
-function FilterRace(c,race)
-  return bit32.band(c.type,TYPE_MONSTER)>0 and bit32.band(c.race,race)>0
-end
+
 function DarksInGrave()
   return CardsMatchingFilter(AIGrave(),FilterAttribute,ATTRIBUTE_DARK)
 end
@@ -305,17 +300,7 @@ end
 function TragCheck(level)
   return HasID(AIMon(),98777036,true,nil,nil,nil,LevelFilter,10) and CardsMatchingFilter(AIGrave(),LevelFilter,level)>0
 end
-function ExtraDeckCheck(type,level)
-  local cards=AIExtra()
-  local result = 0
-  for i=1,#cards do
-    if bit32.band(cards[i].type,type)>0 
-    and (cards[i].level==level or cards[i].rank==level) then
-      result = result + 1
-    end
-  end
-  return result
-end
+
 function UseTrag2() -- change level
   if FieldCheck(6)>0 and TragCheck(6) and ExtraDeckCheck(TYPE_XYZ,6)>0 then
     GlobalCardMode=6

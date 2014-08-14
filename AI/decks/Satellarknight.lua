@@ -77,46 +77,6 @@ function NodenCond(loc)
   end
   return true
 end
-SatellarknightPrio = {
-[75878039] = {8,1,5,4,8,5,4,2,1,DenebCond},  -- Satellarknight Deneb
-[02273734] = {6,4,7,1,3,1,6,1,1,AltairCond}, -- Satellarknight Altair
-[38667773] = {5,3,8,3,4,1,5,1,1,VegaCond},   -- Satellarknight Vega
-[63274863] = {7,2,6,2,6,1,1,1,1,SiriusCond}, -- Satellarknight Sirius
-[38331564] = {8,4,9,4,3,1,1,1,1,ScepterCond},-- Star Seraph Scepter
-[91110378] = {7,3,4,0,4,1,1,1,1,SovereignCond}, -- Star Seraph Sovereign
-[37742478] = {6,4,5,0,1,1,1,1,1,HonestCond}, -- Honest
-
-[32807846] = {9,3,1,1,1,1,1,1,1,nil},       -- RotA
-[01845204] = {4,1,1,1,1,1,1,1,1,nil},       -- Instant Fusion
-[14087893] = {3,1,1,1,1,1,1,1,1,nil},       -- Book of Moon
-[54447022] = {5,1,1,1,1,1,1,1,1,nil},       -- Soul Charge
-[05318639] = {3,1,1,1,1,1,1,1,1,nil},       -- MST
-[25789292] = {3,1,1,1,1,1,1,1,1,nil},       -- Forbidden Chalice
-
-[41510920] = {6,2,1,1,1,1,1,1,1,nil},       -- Celestial Factor
-[97077563] = {4,1,1,1,1,1,1,1,1,nil},       -- Call of the Haunted
-[34507039] = {3,1,1,1,1,1,1,1,1,nil},       -- Wiretap
-[78474168] = {3,1,1,1,1,1,1,1,1,nil},       -- Breakthrough Skill
-[94192409] = {3,1,1,1,1,1,1,1,1,nil},       -- Compulsory Evacuation Device
-[29401950] = {3,1,1,1,1,1,1,1,1,nil},       -- Bottomless Trap Hole
-[84749824] = {3,1,1,1,1,1,1,1,1,nil},       -- Solemn Warning
-[53582587] = {3,1,1,1,1,1,1,1,1,nil},       -- Torrential Tribute
-
-[63504681] = {1,1,1,1,1,1,1,1,1,nil},       -- Heroic Champion - Rhongomiant
-[21044178] = {1,1,1,1,1,1,1,1,1,nil},       -- Abyss Dweller
-[21501505] = {1,1,1,1,1,1,1,1,1,nil},       -- Cairngorgon, Antiluminescent Knight
-[93568288] = {1,1,1,1,1,1,1,1,1,nil},       -- Number 80: Rhapsody in Berserk
-[46772449] = {1,1,1,1,1,1,1,1,1,nil},       -- Evilswarm Exciton Knight
-[94380860] = {1,1,1,1,1,1,1,1,1,nil},       -- Number 103: Ragnazero
-[34076406] = {1,1,1,1,1,1,1,1,1,nil},       -- Lavalval Chain
-[48739166] = {1,1,1,1,1,1,1,1,1,nil},       -- Number 101: Silent Honor ARK
-[82633039] = {1,1,1,1,1,1,1,1,1,nil},       -- Castel the Avian Skyblaster
-[02061963] = {1,1,1,1,1,1,1,1,1,nil},       -- Number 104: Masquerade
-[42589641] = {1,1,1,1,6,2,8,1,1,nil},       -- Stellarknight Triveil
-[56638325] = {1,1,1,1,8,8,7,1,1,nil},       -- Stellarknight Delteros
-[17412721] = {1,1,6,1,1,1,1,1,1,NodenCond}, -- Elder God Noden
-}
---{hand,hand+,field,field+,grave,grave+,discard,discard+,banish} //discard = to deck
 
 function SatellarknightGetPriority(id,loc)
   local checklist = nil
@@ -124,9 +84,9 @@ function SatellarknightGetPriority(id,loc)
   if loc == nil then
     loc = PRIO_TOHAND
   end
-  checklist = SatellarknightPrio[id]
+  checklist = Prio[id]
   if checklist then
-    if checklist[10] and not(checklist[10](loc)) then
+    if checklist[11] and not(checklist[11](loc)) then
       loc = loc + 1
     end
     result = checklist[loc]
@@ -275,9 +235,6 @@ function SummonRhapsody()
   end
   return false
 end
-function SummonCairngorgon()
-  return OppGetStrongestAttack()<2450 and MP2Check()
-end
 function SummonSharkKnight1(cards)
   if not DeckCheck(DECK_TELLARKNIGHT) then return false end
   local targets=SubGroup(OppMon(),SharkKnightFilter)
@@ -341,6 +298,7 @@ function SatellarknightOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(Activatable,32807846) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+if DeckCheck(DECK_TELLARKNIGHT) then
   if HasID(SpSummonable,63504681) and SummonRhongomiant() then
     GlobalSSCardID = 63504681
     GlobalSSCardType = TYPE_XYZ
@@ -361,7 +319,6 @@ function SatellarknightOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     GlobalSSCardType = TYPE_XYZ
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  
   if HasID(SpSummonable,94380860) and SummonRagnaZero() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
@@ -383,7 +340,6 @@ function SatellarknightOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(SpSummonable,21501505) and SummonCairngorgon() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-
   SatellarknightAssignPriority(Summonable,PRIO_TOFIELD)
   table.sort(Summonable,function(a,b) return a.prio>b.prio end)
   if #Summonable>0 and (Summonable[1].prio > 4 or Summonable[1].prio > 0 and (HasBackrow(SetableST) or FieldCheck(4)==1))then
@@ -395,6 +351,7 @@ function SatellarknightOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(Activatable,54447022) and UseSoulCharge() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+end
   return nil
 end
 
@@ -565,6 +522,7 @@ function SatellarknightOnSelectChain(cards,only_chains_by_player)
     return {1,CurrentIndex}
   end
   if HasID(cards,97077563) and ChainCotH2() then
+    print("ChainCotHNutella")
     return {1,CurrentIndex}
   end
   if HasID(cards,25789292) and ChainChalice() then

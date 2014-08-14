@@ -153,15 +153,6 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
     end
   end
   
-  ------------------------------------------
-  -- Activate Dark Hole only if the opponent
-  -- controls at least 2 more monsters than
-  -- the AI.
-  ------------------------------------------
-  if HasID(ActivatableCards,53129443) and UseDarkHole() then
-    return COMMAND_ACTIVATE,IndexByID(ActivatableCards,53129443)
-  end
-
  -------------------------------------------------
 -- **********************************************
 --        Functions for specific decks
@@ -218,6 +209,12 @@ if not DeckCheck(DECK_BUJIN) then
 end  
 if not ExtraCheck then 
   DeckCommand = ShadollOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
+  if DeckCommand ~= nil then
+    return DeckCommand[1],DeckCommand[2]
+  end
+end
+if not ExtraCheck then 
+  DeckCommand = HATInit(cards)
   if DeckCommand ~= nil then
     return DeckCommand[1],DeckCommand[2]
   end
@@ -2324,7 +2321,10 @@ end
       end
     end
     for i=1,#setCards do
-      if setThisTurn < 2 and SetBlacklist(setCards[i].id)==0 and (bit32.band(setCards[i].type,TYPE_TRAP) > 0 or bit32.band(setCards[i].type,TYPE_QUICKPLAY) > 0 )then
+      if (setThisTurn < 2 or DeckCheck(DECK_HAT)) and #AIST()<4
+      and SetBlacklist(setCards[i].id)==0 
+      and (bit32.band(setCards[i].type,TYPE_TRAP) > 0 
+      or bit32.band(setCards[i].type,TYPE_QUICKPLAY) > 0 )then
         return COMMAND_SET_ST,i
       end
     end
@@ -2339,7 +2339,7 @@ end
   if Get_Card_Count_ID(AIHand(), 12538374, nil) == 0 and -- Gorz
 	 Get_Card_Count_ID(UseLists({AIMon(),AIGrave()}), 12538374, nil) == 0 and   -- Treeborn Frog
 	 Get_Card_Count_ID(AIMon(), 98777036, POS_FACEUP) == 0 then  -- Tragoedia
-	if #cards.st_setable_cards > 0 and AI.GetCurrentPhase() == PHASE_MAIN2 then
+	if #cards.st_setable_cards > 0 and (AI.GetCurrentPhase() == PHASE_MAIN2 or Duel.GetTurnCount() == 1) then
       local setCards = cards.st_setable_cards
       for i=1,#setCards do
         if bit32.band(setCards[i].type,TYPE_SPELL) > 0 and SetBlacklist(setCards[i].id)==0 then

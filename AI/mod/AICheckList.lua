@@ -293,7 +293,8 @@ NSBL={
 38331564,91110378,69293721,99365553,  -- Star Seraphs Scepter,Sovereign,Mermail Abyssgunde, Lightpulsar
 77558536,22624373,95503687,16404809,  -- LS Raiden, Lyla, Lumina, Kuribandit
 33420078,51858306,10802915,13700001,  -- Plaguespreader, Eclipse Wyvern, Tour Guide, Burning Abyss Scarm
-04904812,68505803  -- Genex Undine, Genex Controller
+04904812,68505803,91812341,45803070,  -- Genex Undine, Genex Controller, Traptrix Myrmeleo, Dioena
+68535320,95929069 -- Fire Hand, Ice Hand
 }
 function NormalSummonBlacklist(CardId) 
   for i=1,#NSBL do
@@ -371,7 +372,8 @@ SSBL={
 17412721,38273745,21501505, -- Noden, ouroboros, Cairngorgon
 34408491,15561463,07391448, -- Beelze, Gauntlet Launcher, Goyo Guardian
 61901281,99234526,13700001, -- Collapserpent, Wyverbuster, Scarm
-25460258,65192027 -- Darkflare Dragon, Dark Armed Dragon
+25460258,65192027,91499077, -- Darkflare Dragon, Dark Armed Dragon, Gagaga Samurai
+63746411 -- Giant Hand
 }
 
 
@@ -570,7 +572,8 @@ function isUnchainableTogether(CardId)
      CardId == 12697630 or -- Artifact Beagalltach - chained in a row for no reason
      CardId == 77505534 or -- Facing the Shadows
      CardId == 05318639 or -- Mystical Space Typhoon
-     CardId == 53582587 then -- Torrential tribute   
+     CardId == 53582587 or -- Torrential tribute   
+     CardId == 97077563 then -- Call of the Haunted
 	return 1
   end
   return 0
@@ -698,7 +701,9 @@ ScriptedCards ={
 61901281,99234526,77558536,16404809,  -- Wyverbuster, Collapserpent, LS Raiden, Kuribandit
 51858306,10802915,13700001,00691925,  -- Eclipse Wyvern, Tour Guide, Burning Abyss Scarm, Solar Recharge
 94886282,13700002,95992081,07391448,  -- Charge of the Light Brigade, Dante,Leviair, Goyo Guardian
-25460258,04904812 -- Darkflare Dragon, Genex Undine
+25460258,04904812,91812341,45803070,  -- Darkflare Dragon, Genex Undine, Traptrix Myrmeleo,Dioena
+68535320,95929069,29616929,91499077,  -- Fire Hand, Ice Hand, Traptrix Trap Hole Nightmare, Gagaga Samurai
+63746411  -- Giant Hand
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do

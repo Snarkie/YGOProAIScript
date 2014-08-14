@@ -142,7 +142,8 @@ function SummonGadget()
   --or HasIDNotNegated(AIST(),97077563) and GraveCheck(4)>0
 end
 
-function UseCotH(card)
+function UseCotHGadget(card)
+  if not DeckCheck(DECK_GADGET) then return false end
   if HasID(AIGrave(),05556499,true) then
     return true
   end
@@ -268,7 +269,9 @@ end
 function SummonGearGigant()
   return OppGetStrongestAttDef()<2300 and MP2Check()
 end
-
+function SummonChainGadget()
+  return DeckCheck(DECK_GADGET) and not HasAccess(90411554)
+end
 function GadgetOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local Activatable = cards.activatable_cards
   local Summonable = cards.summonable_cards
@@ -282,7 +285,10 @@ function GadgetOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(SpSummonable,28912357) and SummonGearGigant() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasID(Activatable,97077563) and UseCotH() and OverExtendCheck() then
+  if HasID(SpSummonable,34086406) and SummonChainGadget() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(Activatable,97077563) and UseCotHGadget() and OverExtendCheck() then
     return {COMMAND_ACTIVATE,IndexByID(Activatable,97077563)}
   end
   if HasID(Activatable,42940404) and UseGearframe(Activatable[CurrentIndex]) then
@@ -428,7 +434,7 @@ function RedoxTarget(cards)
   elseif GlobalCardMode==1 then
     result=DiscardCost(cards,1)
   else
-    result=CotHTarget(cards) 
+    result=CotHTargetGadget(cards) 
   end
   GlobalCardMode=nil
   if result==nil then
@@ -440,7 +446,7 @@ function RedoxTarget(cards)
   end
   return result
 end
-function CotHTarget(cards)
+function CotHTargetGadget(cards) 
   local result=nil
   local compare = function(a,b) if a.prio==b.prio then return a.attack>b.attack end return a.prio>b.prio end
   for i=1,#cards do
@@ -520,8 +526,8 @@ function GadgetOnSelectCard(cards, minTargets, maxTargets,ID,triggeringCard)
   if ID == 42940404 then
     return GearframeTarget(cards)
   end
-  if ID == 97077563 and not DeckCheck(DECK_TELLARKNIGHT) then
-    return CotHTarget(cards)
+  if ID == 97077563 and DeckCheck(DECK_GADGET) then
+    return CotHTargetGadget(cards)
   end
   if ID == 50078509 then
     return FiendishChainTarget(cards)
@@ -534,8 +540,8 @@ end
 function ChainSwiftScarecrow(id)
   return UnchainableCheck(id) and ExpectedDamage() >= 0.35*AI.GetPlayerLP(1)
 end
-function ChainCotH()
-  if Duel.GetCurrentPhase() == PHASE_BATTLE then
+function ChainCotHGadget()
+  if Duel.GetCurrentPhase() == PHASE_BATTLE and DeckCheck(DECK_GADGET) then
 		local source = Duel.GetAttacker()
     local graveatt = Get_Card_Att_Def(AIGrave(),"attack",">",nil,"attack")
     local oppatt = Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack")
@@ -666,7 +672,8 @@ function GadgetOnSelectChain(cards,only_chains_by_player)
   if HasID(cards,19665973) and ChainSwiftScarecrow(19665973) then -- Battle Fader
     return {1,IndexByID(cards,19665973)}
   end
-  if HasID(cards,97077563) and ChainCotH() then
+  if HasID(cards,97077563) and ChainCotHGadget() then
+    print("ChainCotHGadget")
     return {1,IndexByID(cards,97077563)}
   end
   if HasID(cards,50078509) and ChainFiendish() then
