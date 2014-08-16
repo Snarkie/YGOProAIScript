@@ -706,10 +706,6 @@ function ChaosDragonOnSelectCard(cards, minTargets, maxTargets,triggeringID,trig
   else
     ID = triggeringID
   end
-  --print("selecting target")
-  --if ID then print("ID: "..ID) end
-  --if GlobalSSCardID then print("GlobalSSID: "..GlobalSSCardID) end
-  --if GlobalActivatedCardID then print("GlobalCardID: "..GlobalActivatedCardID) end
   if ID == 65192027 then -- DAD
     return DADTarget(cards)
   end
@@ -797,10 +793,8 @@ function ChainGorz()
 end
 function ChainTrag()
   local c=Duel.GetAttacker()
-  print(c.GetCode)
   c=OppMon()
   if #c>0 then c=c[1] end
-  print(c.GetCode)
   return true
 end
 function ChaosDragonOnSelectChain(cards,only_chains_by_player)

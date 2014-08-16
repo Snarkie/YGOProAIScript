@@ -49,7 +49,6 @@ function BujinGetPriority(id,loc)
   elseif loc == LOCATION_REMOVED then
     index = 7
   else
-    --print("unknown location requested")
   end
   if checklist and HasID(checklist,id,true) then index=index+1 end
   checklist = BujinPrio[id]
