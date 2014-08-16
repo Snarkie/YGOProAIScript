@@ -13,7 +13,6 @@ function OnSelectNumber(choices)
   -- cards as possible with Card Trooper.
   -------------------------------------------
   if GlobalActivatedCardID == 85087012 -- Card Trooper
-  or GlobalActivatedCardID == 13700002 -- Dante Proxy
   or GlobalActivatedCardID == 83531441 -- Dante
   then
     GlobalActivatedCardID = nil

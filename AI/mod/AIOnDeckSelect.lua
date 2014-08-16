@@ -65,13 +65,11 @@ AddPriority({
 [33420078] = {2,1,6,2,6,0,0,0,3,1,PSZCond},           -- Plaguespreader Zombie
 [10802915] = {5,2,3,2,2,1,0,0,8,3,TourGuideCond},     -- Tour Guide of the Underworld
 [84764038] = {4,2,8,3,8,2,0,0,5,2,ScarmCond},         -- Scarm, Malebranche of the Burning Abyss
-[13700001] = {4,2,8,3,8,2,0,0,5,2,ScarmCond},         -- Scarm Proxy
 [00691925] = {8,3,0,0,3,0,0,0,0,0,nil},               -- Solar Recharge
 [94886282] = {7,2,0,0,1,0,0,0,0,0,nil},               -- Charge of the Light Brigade
 [01475311] = {5,3,0,0,4,0,0,0,0,0,nil},               -- Allure of Darkness
 [81439173] = {4,2,0,0,2,0,0,0,0,0,nil},               -- Foolish Burial
 
-[13700002] = {0,0,0,0,5,2,0,0,8,0,DanteCond},         -- Dante, Traveler of the Burning Abyss
 [83531441] = {0,0,0,0,5,2,0,0,8,0,DanteCond},         -- Dante Proxy
 [15914410] = {0,0,0,0,5,2,0,0,8,0,AngineerCond},      -- Mechquipped Angineer
 [95992081] = {0,0,0,0,5,2,0,0,8,0,LeviairCond},       -- Leviair the Sea Dragon

@@ -458,15 +458,8 @@ function ChaosDragonOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasIDNotNegated(Activatable,09596126) and UseChaosSorc() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(SpSummonable,13700002) and SummonDante() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
-  end
   if HasID(SpSummonable,83531441) and SummonDante() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
-  end
-  if HasIDNotNegated(Activatable,13700002) and UseDante() then
-    GlobalActivatedCardID = 13700002
-    return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Activatable,83531441) and UseDante() then
     GlobalActivatedCardID = 83531441
@@ -562,9 +555,6 @@ function ChaosDragonOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_SUMMON,CurrentIndex}
   end
 
-  --if HasID(Activatable,13700001) and UseScarm() then
-  --  return {COMMAND_ACTIVATE,CurrentIndex}
-  --end
   if HasID(Summonable,16404809) and SummonKuribandit() then
     return {COMMAND_SUMMON,CurrentIndex}
   end
@@ -573,9 +563,6 @@ function ChaosDragonOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   end
   if HasID(Summonable,22624373) and OverExtendCheck() then
     return {COMMAND_SUMMON,CurrentIndex}
-  end
-  if HasID(SetableMon,13700001) and SetScarm() then
-    return {COMMAND_SET_MONSTER,CurrentIndex}
   end
   if HasID(SetableMon,84764038) and SetScarm() then
     return {COMMAND_SET_MONSTER,CurrentIndex}
@@ -766,8 +753,8 @@ function ChaosDragonOnSelectCard(cards, minTargets, maxTargets,triggeringID,trig
   if ID == 33420078 then -- PSZ
     return Add(cards,PRIO_DISCARD)
   end
-  if ID == 51858306 or ID == 13700001 or ID == 94886282 -- Eclipse Wyvern, Scarm, Charge of the Light Brigade
-  or id == 84764038
+  if ID == 51858306 or ID == 94886282 -- Eclipse Wyvern, Scarm, Charge of the Light Brigade
+  or ID == 84764038
   then 
     return Add(cards)
   end
@@ -782,9 +769,6 @@ function ChaosDragonOnSelectCard(cards, minTargets, maxTargets,triggeringID,trig
   end
   if ID == 81439173 then -- Foolish
     return Add(cards,PRIO_TOGRAVE)
-  end
-  if ID == 13700002 then 
-    return DanteTarget(cards,triggeringCard)
   end
   if ID == 83531441 then 
     return DanteTarget(cards,triggeringCard)
@@ -837,9 +821,6 @@ function ChaosDragonOnSelectChain(cards,only_chains_by_player)
   if HasIDNotNegated(cards,84764038) then -- Scarm
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,13700001) then -- Scarm Proxy
-    return {1,CurrentIndex}
-  end
   if HasIDNotNegated(cards,51858306) then -- Eclipse Wyvern
     return {1,CurrentIndex}
   end
@@ -865,8 +846,8 @@ function ChaosDragonOnSelectEffectYesNo(id,card)
   local field = bit32.band(card.location,LOCATION_ONFIELD)>0
   local grave = bit32.band(card.location,LOCATION_GRAVE)>0
   if id==34408491 or id==61901281 or id==99234526 or id==99365553 -- Beelze, Collapserpent, Wyverbuster, Lightpulsar
-  or id==72989439 or id==16404809 or id==10802915 or id==13700001 -- BLS, Kuribandit, Tour Guide, Scarm Proxy
-  or id==51858306 or id==07391448 or id==13700002 or id==83531441 -- Eclipse Wyvern, Goyo Guardian, Dante Proxy
+  or id==72989439 or id==16404809 or id==10802915 -- BLS, Kuribandit, Tour Guide,
+  or id==51858306 or id==07391448 or id==83531441 -- Eclipse Wyvern, Goyo Guardian
   or id==84764038 -- Scarm
   and NotNegated(card) 
   then
@@ -884,7 +865,7 @@ ChaosDragonAtt={
   44330098,09596126,22624373,95992081
 }
 ChaosDragonDef={
-  98777036,13700001,16404809,33420078,
+  98777036,16404809,33420078,
   10802915,84764038
 }
 function ChaosDragonOnSelectPosition(id, available)
@@ -895,7 +876,7 @@ function ChaosDragonOnSelectPosition(id, available)
   for i=1,#ChaosDragonDef do
     if ChaosDragonDef[i]==id then result=POS_FACEUP_DEFENCE end
   end
-  if id == 13700002 or id == 83531441 then -- Dante
+  if id == 83531441 then -- Dante
     if GlobalBPAllowed and Duel.GetCurrentPhase()==PHASE_MAIN1 and OppGetWeakestAttDef()<2500 then
       result=POS_FACEUP_ATTACK
     else

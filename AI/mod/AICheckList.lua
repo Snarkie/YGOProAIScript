@@ -292,7 +292,7 @@ NSBL={
 75878039,02273734,38667773,63274863,  -- Satellarknights Deneb,Altair,Vega,Sirius
 38331564,91110378,69293721,99365553,  -- Star Seraphs Scepter,Sovereign,Mermail Abyssgunde, Lightpulsar
 77558536,22624373,95503687,16404809,  -- LS Raiden, Lyla, Lumina, Kuribandit
-33420078,51858306,10802915,13700001,  -- Plaguespreader, Eclipse Wyvern, Tour Guide, Scarm Proxy
+33420078,51858306,10802915,  -- Plaguespreader, Eclipse Wyvern, Tour Guide,
 04904812,68505803,91812341,45803070,  -- Genex Undine, Genex Controller, Traptrix Myrmeleo, Dioena
 68535320,95929069,84764038 -- Fire Hand, Ice Hand, Burning Abyss Scarm
 }
@@ -371,9 +371,9 @@ SSBL={
 93568288,56638325,42589641, -- Number 80,Delteros, Triveil
 17412721,38273745,21501505, -- Noden, ouroboros, Cairngorgon
 34408491,15561463,07391448, -- Beelze, Gauntlet Launcher, Goyo Guardian
-61901281,99234526,13700001, -- Collapserpent, Wyverbuster, Scarm Proxy
+61901281,99234526, -- Collapserpent, Wyverbuster,
 25460258,65192027,91499077, -- Darkflare Dragon, Dark Armed Dragon, Gagaga Samurai
-63746411,83531441,13700002, -- Giant Hand, Dante, Dante Proxy
+63746411,83531441, -- Giant Hand, Dante,
 84764038 -- Scarm
 }
 
@@ -700,8 +700,8 @@ ScriptedCards ={
 56638325,42589641,38273745,21501505,  -- Stellarknights Delteros, Triveil,Evilswarm Ouroboros,Cairngorgon
 88264978,98777036,44330098,99365553,  -- REDMD, Tragoedia, Gorz, Lightpulsar
 61901281,99234526,77558536,16404809,  -- Wyverbuster, Collapserpent, LS Raiden, Kuribandit
-51858306,10802915,13700001,00691925,  -- Eclipse Wyvern, Tour Guide, Scarm Proxy, Solar Recharge
-94886282,13700002,95992081,07391448,  -- Charge of the Light Brigade, Dante Proxy,Leviair, Goyo Guardian
+51858306,10802915,00691925,  -- Eclipse Wyvern, Tour Guide, Solar Recharge
+94886282,95992081,07391448,  -- Charge of the Light Brigade,Leviair, Goyo Guardian
 25460258,04904812,91812341,45803070,  -- Darkflare Dragon, Genex Undine, Traptrix Myrmeleo,Dioena
 68535320,95929069,29616929,91499077,  -- Fire Hand, Ice Hand, Traptrix Trap Hole Nightmare, Gagaga Samurai
 63746411,83531441,84764038  -- Giant Hand, Dante, Scarm
