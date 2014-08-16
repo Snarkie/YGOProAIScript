@@ -1712,14 +1712,14 @@ function ApplyATKBoosts(Cards)
   -- Hands
   for i=1,#Cards do
     if Cards[i].id == 68535320 and Cards[i].owner == 1 and FireHandCheck()  then
-      if bit32.band(Cards[i].position,POS_FACEUP_ATTACK) then
+      --if bit32.band(Cards[i].position,POS_FACEUP_ATTACK) then
         Cards[i].attack=HandAtt(OppMon(),1600)
-      end
+      --end
     end
     if Cards[i].id == 95929069 and Cards[i].owner == 1 and IceHandCheck() then
-      if bit32.band(Cards[i].position,POS_FACEUP_ATTACK) then
+      --if bit32.band(Cards[i].position,POS_FACEUP_ATTACK) then
         Cards[i].attack=HandAtt(OppMon(),1400)
-      end
+      --end
     end
   end
   
