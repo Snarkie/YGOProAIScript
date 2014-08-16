@@ -567,9 +567,7 @@ function SphereTarget(cards)
   end
   if GlobalSphere == 3 then
     GlobalSphere = nil
-    local atk=GlobalATK
-    GlobalATK = nil
-    return MermailAdd(cards,PRIO_TOGRAVE,1,FilterAttack,atk)
+    return MermailAdd(cards,PRIO_TOGRAVE,1,FilterAttack,AI.GetPlayerLP(2))
   end
   if GlobalSphere and GlobalSphere > 3 then
     local level = GlobalSphere
@@ -722,7 +720,14 @@ end
 function SphereFilter(c,dmg)
   return IsSetCode(c.setcode,0x74) and (dmg == nil or c.attack>=dmg) -- and c.attack>=dmg
 end
-
+function UseSphereBP()
+  if Duel.GetTurnPlayer() == player_ai and #OppMon()==0 
+  and CardsMatchingFilter(AIDeck(),SphereFilter,AI.GetPlayerLP(2))>0 and AI.GetPlayerLP(2)>ExpectedDamage(2)
+  then
+    GlobalSphere = 3
+    return true
+  end
+end
 function ChainSphere()
   if RemovalCheck(60202749) then
     return true
@@ -743,14 +748,6 @@ function ChainSphere()
   --and HasID(AIDeck(),23899727,true) and LindeCond(PRIO_TOFIELD) 
   then
     return Duel.GetAttacker() and #AIMon()==0
-  end
-  local dmg = AI.GetPlayerLP(2)-ExpectedDamage(2)
-  if Duel.GetCurrentPhase() == PHASE_BATTLE and Duel.GetTurnPlayer() == player_ai and #OppMon()==0 
-  and CardsMatchingFilter(AIDeck(),SphereFilter,dmg)>0 and dmg>0
-  then
-    GlobalSphere = 3
-    GlobalATK = dmg
-    return true
   end
   return false
 end

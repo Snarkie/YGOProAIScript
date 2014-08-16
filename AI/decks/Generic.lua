@@ -260,7 +260,7 @@ end
 function SummonBelzebuth()
   local AICards=UseLists({AIHand(),AIField()})
   local OppCards=UseLists({OppHand(),OppField()})
-  return #AICards<#OppCards and UseFieldNuke(0)
+  return #AICards<#OppCards and UseFieldNuke(1)
 end
 function SummonCowboyDef()
   return AI.GetPlayerLP(2)<=800 
@@ -318,7 +318,7 @@ function SummonRagnaZero()
   return false
 end
 function SummonImpKing()
-  return MP2Check() and CardsMatchingFilter(AIDeck(),RaceFilter,RACE_REPTILE)>0
+  return MP2Check() and CardsMatchingFilter(AIDeck(),FilterRace,RACE_REPTILE)>0
 end
 function SummonDracossack()
   return MP2Check() and Duel.GetLocationCount(player_ai,LOCATION_MZONE)>0
@@ -421,14 +421,12 @@ function SharkKnightFilter(c)
   and c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0 
 end
 function SummonSharkKnight(cards)
-  print("Shark")
-  print("targets: "..CardsMatchingFilter(OppMon(),SharkKnightFilter))
   return CardsMatchingFilter(OppMon(),SharkKnightFilter)>0 and OppHasStrongestMonster()
   and HasID(AIExtra(),48739166,true) and MP2Check()
 end
 function CowboyFilter(c)
   return ((c.attack<3000 and bit32.band(c.position,POS_ATTACK)>0
-  or c.defense<2500 and bit32.band(c.position,POS_DEFENSE)>0
+  or c.defense<2500 and bit32.band(c.position,POS_DEFENCE)>0
   and (bit32.band(c.position,POS_FACEUP)>0 or bit32.band(c.status,STATUS_IS_PUBLIC)>0))
   and c:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE)==0 
   and c:is_affected_by(EFFECT_CANNOT_BE_BATTLE_TARGET)==0)

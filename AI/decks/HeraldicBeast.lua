@@ -50,7 +50,7 @@ function SummonGenomHeritage()
   return UseGenomHeritage()
 end
 function SummonChainHeraldic()
-  return DeckCheck(DECK_HERALDIC) and not(HasAccess(84220251))
+  return DeckCheck(DECK_HERALDIC) and not(HasAccess(82293134)) and MP2Check()
 end
 function SummonLeo()
   return FieldCheck(4)==1 or FieldCheck(4)==0 and HasID(AIHand(),94656263)
@@ -58,7 +58,7 @@ function SummonLeo()
   or HeraldicCount(AIHand())>2 and HasID(AIHand(),87255382)
 end
 function SummonAmphisbaena()
-  return FieldCheck(4)==1 or FieldCheck(4)==0 and HasID(AIHand(),94656263)
+  return FieldCheck(4)==1 or FieldCheck(4)==0 and HasID(AIHand(),82293134)
   or HeraldicCount(AIGrave())>0 and HasID(AIHand(),84220251)
 end
 function UseAmphisbaena(card)
@@ -117,12 +117,12 @@ function UseTwinEagle()
   return false
 end
 function GenomHeritageFilter(c)
-	return bit.band(c:GetType(),TYPE_XYZ)>0 and c:IsCanBeEffectTarget() 
-  and c:IsControler(1-player_ai) and (c:GetOriginalCode()~=47387961 or c:GetAttack()>0)
-  and c:IsPosition(POS_FACEUP_ATTACK)
+  return bit32.band(c.type,TYPE_XYZ)>0 and c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
+  and (c.original_id~=47387961 or c.attack>0)
+  and bit32.band(c.position,POS_FACEUP_ATTACK)>0
 end
 function UseGenomHeritage() 
-  return Duel.IsExistingMatchingCard(GenomHeritageFilter,1-player_ai,LOCATION_MZONE,0,1,nil)
+  return CardsMatchingFilter(OppMon(),GenomHeritageFilter)>0
 end
 function HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local Activatable = cards.activatable_cards

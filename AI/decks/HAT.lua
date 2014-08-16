@@ -247,24 +247,19 @@ function DionaeaTarget(cards)
   end
 end
 function CotHTarget(cards)
-  print("CotH target")
   if GlobalCardMode and GlobalCardMode>2 then
     local level = GlobalCardMode
-    print("by level: "..level)
     GlobalCardMode = nil
     return Add(cards,PRIO_TOFIELD,1,FilterLevel,level)
   elseif GlobalCardMode == 2 then
     GlobalCardMode = nil
-    print("by attack: "..AI.GetPlayerLP(2))
     return Add(cards,PRIO_TOFIELD,1,FilterAttack,AI.GetPlayerLP(2)-ExpectedDamage(2))
   elseif GlobalCardMode == 1 then
     local id = GlobalTargetID
     GlobalCardMode = nil
     GlobalTargetID = nil
-    print("by id: "..id) 
     return {IndexByID(cards,id)}
   else
-    print("by priority") 
     return Add(cards,PRIO_TOFIELD)
   end
 end
@@ -293,7 +288,7 @@ function CotHFilter(c)
   return bit32.band(c.type,TYPE_MONSTER)>0 and c:is_affected_by(EFFECT_SPSUMMON_CONDITION)==0 
 end
 function FinishFilter(c)
-  return CotHFilter(c) and ExpectedDamage(2)+c.attack>=AI.GetPlayerLP(2) --and c.attack>=AI.GetPlayerLP(2)
+  return CotHFilter(c) and c.attack>=AI.GetPlayerLP(2)
 end
 function ArtifactCheckGrave(sanctum)
   local MoralltachCheck = HasID(AIGrave(),85103922,true) and Duel.GetTurnPlayer()==1-player_ai
@@ -312,6 +307,15 @@ function ArtifactCheckGrave(sanctum)
     return true
   end
   return false
+end
+function UseCotHBP()
+  if Duel.GetTurnPlayer() == player_ai and #OppMon()==0 
+  and CardsMatchingFilter(AIGrave(),FinishFilter)>0 
+  and ExpectedDamage(2)<AI.GetPlayerLP(2)
+  then
+    GlobalCardMode = 2
+    return true
+  end
 end
 function ChainCotH()
   local targets=CardsMatchingFilter(OppST(),DestroyFilter)
@@ -353,13 +357,6 @@ function ChainCotH()
       if targets2 > 0 and ArtifactCheckGrave() then
         return true
       end
-    end
-    if Duel.GetTurnPlayer() == player_ai and #OppMon()==0 
-    and CardsMatchingFilter(AIGrave(),FinishFilter)>0 
-    and ExpectedDamage(2)<AI.GetPlayerLP(2)
-    then
-      GlobalCardMode = 2
-      return true
     end
   end
   if Duel.GetCurrentPhase()==PHASE_END and Duel.CheckTiming(TIMING_END_PHASE) and Duel.GetTurnPlayer() == 1-player_ai then

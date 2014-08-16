@@ -13,7 +13,6 @@
 -- result = table containing target indices
 function OnSelectCard(cards, minTargets, maxTargets, triggeringID,triggeringCard)
   local result = {}
-  
 -------------------------------------------------
 -- **********************************************
 -- General purpose functions, for selecting 

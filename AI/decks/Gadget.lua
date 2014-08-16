@@ -270,7 +270,7 @@ function SummonGearGigant()
   return OppGetStrongestAttDef()<2300 and MP2Check()
 end
 function SummonChainGadget()
-  return DeckCheck(DECK_GADGET) and not HasAccess(90411554)
+  return DeckCheck(DECK_GADGET) and not HasAccess(90411554) and MP2Check()
 end
 function GadgetOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local Activatable = cards.activatable_cards
@@ -673,7 +673,6 @@ function GadgetOnSelectChain(cards,only_chains_by_player)
     return {1,IndexByID(cards,19665973)}
   end
   if HasID(cards,97077563) and ChainCotHGadget() then
-    print("ChainCotHGadget")
     return {1,IndexByID(cards,97077563)}
   end
   if HasID(cards,50078509) and ChainFiendish() then

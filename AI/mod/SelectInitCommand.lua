@@ -81,6 +81,7 @@ COMMAND_TO_END_PHASE   = 7
 
 GlobalBPAllowed = nil
 function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
+  print("select init")
   ------------------------------------------
   -- The first time around, it sets the AI's
   -- turn (only if the AI is playing first).

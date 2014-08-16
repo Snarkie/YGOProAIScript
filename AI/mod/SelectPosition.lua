@@ -89,41 +89,35 @@ function OnSelectPosition(id, available)
 	result = POS_FACEUP_ATTACK
   end
 
- local Position = FireFistOnSelectPosition(id,available)
- if Position then result=Position end
- Position = HeraldicOnSelectPosition(id,available)
- if Position then result=Position end
- Position = GadgetOnSelectPosition(id,available)
- if Position then result=Position end
- Position = BujinOnSelectPosition(id,available)
- if Position then result=Position end
- Position = MermailOnSelectPosition(id,available)
- if Position then result=Position end
- Position = ShadollOnSelectPosition(id,available)
- if Position then result=Position end
- Position = SatellarknightOnSelectPosition(id,available)
- if Position then result=Position end
- Position = ChaosDragonOnSelectPosition(id,available)
- if Position then result=Position end
+  local Position = FireFistOnSelectPosition(id,available)
+  if Position then result=Position end
+  Position = HeraldicOnSelectPosition(id,available)
+  if Position then result=Position end
+  Position = GadgetOnSelectPosition(id,available)
+  if Position then result=Position end
+  Position = BujinOnSelectPosition(id,available)
+  if Position then result=Position end
+  Position = MermailOnSelectPosition(id,available)
+  if Position then result=Position end
+  Position = ShadollOnSelectPosition(id,available)
+  if Position then result=Position end
+  Position = SatellarknightOnSelectPosition(id,available)
+  if Position then result=Position end
+  Position = ChaosDragonOnSelectPosition(id,available)
+  if Position then result=Position end
   Position = HATPosition(id,available)
- if Position then result=Position end
-    
-  -- check if the selected position is valid
-  ----print("is the position valid?", band(result,available))
+  if Position then result=Position end
+  
   if band(result,available) == 0 then
-          --invalid position! find a valid value
-          ----print("invalid position! find a valid value")
-          if band(POS_FACEUP_ATTACK,available) > 0 then
-                  result = POS_FACEUP_ATTACK
-          elseif band(POS_FACEUP_DEFENCE,available) > 0 then
-                  result = POS_FACEUP_DEFENCE
-          elseif band(POS_FACEDOWN_DEFENCE,available) > 0 then
-                  result = POS_FACEDOWN_DEFENCE
-          else
-                  result = POS_FACEDOWN_ATTACK
-          end
+    if band(POS_FACEUP_ATTACK,available) > 0 then
+      result = POS_FACEUP_ATTACK
+    elseif band(POS_FACEUP_DEFENCE,available) > 0 then
+      result = POS_FACEUP_DEFENCE
+    elseif band(POS_FACEDOWN_DEFENCE,available) > 0 then
+      result = POS_FACEDOWN_DEFENCE
+    else
+      result = POS_FACEDOWN_ATTACK
+    end
   end
-	
   return result
-
 end

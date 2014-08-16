@@ -8,7 +8,7 @@
 --
 -- Return: index of the selected choice
 function OnSelectNumber(choices)
-
+  print("select number")
   -------------------------------------------
   -- The AI should always try to mill as many
   -- cards as possible with Card Trooper.

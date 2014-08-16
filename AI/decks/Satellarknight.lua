@@ -522,7 +522,6 @@ function SatellarknightOnSelectChain(cards,only_chains_by_player)
     return {1,CurrentIndex}
   end
   if HasID(cards,97077563) and ChainCotH2() then
-    print("ChainCotHNutella")
     return {1,CurrentIndex}
   end
   if HasID(cards,25789292) and ChainChalice() then
