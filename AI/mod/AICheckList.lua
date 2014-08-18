@@ -526,18 +526,18 @@ Unchainable={
 10759529,25642998,29590905,43250041, -- Kid Guard,Poseidon wave,Super junior confrontation,Draining shiled
 43452193,57115864,60080151,62279055, -- Mirrot Gate, Lumenize, Memory of an adversary, Magic Cylinder
 75987257,23171610,37390589,01005587, -- Butterflyoke, Limiter Removal, Kunai with Chain, Void Trap Hole
-04206964,28654932,29401950,94192409, -- Trap hole, Deep dark trap hole, Compulsory Evacuation Device, Bottomless trap hole
+04206964,28654932,94192409,29401950, -- Trap hole, Deep dark trap hole, Compulsory Evacuation Device, Bottomless trap hole
 62325062,80723580,99590524,11593137, -- Adhesion, Giant, Treacherous, Chaos trap hole
 19230407,33846209,04178474,15083728, -- Offerings to the doomed, Gemini spark, Raigeki-breaker, House of adhesive tape
 30127518,39765115,42578427,46656406, -- Dark trap hole, Splash capture, Eatgaboon, Mirror of oaths
 58990631,72287557,86871614,84749824, -- Automatic laser, Chthonian Polymer, Cloning, Solem warning
 37412656,19665973,18964575,29223325, -- Hero blast, Battle Fader, Swift Scarecrow, Artifact Ignition
 12444060,85103922,12697630,77505534, -- Artifact Sanctum, Moralltach, Beagalltach, Facing the Shadows
-05318639,53582587,97077563,14087893, -- Mystical Space Typhoon, Torrential tribute, Call of the Haunted, Book of Moon
+05318639,53582587,97077563,14087893 -- Mystical Space Typhoon, Torrential tribute, Call of the Haunted, Book of Moon
 }
 function isUnchainableTogether(CardId)
   for i=1,#Unchainable do
-    if Unchainable[i] == CardID then
+    if Unchainable[i] == CardId then
       return 1
     end
   end

@@ -437,7 +437,11 @@ function ChainBoM()
   local targets1 = CardsMatchingFilter(OppMon(),MoonOppFilter)
   local targets2 = CardsMatchingFilter(OppMon(),MoonPriorityFilter)
   local e=Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
-  if RemovalCheck(14087893) and targets1>0 then
+  local c = nil
+  if e then
+    c = e:GetHandler()
+  end
+  if RemovalCheck(14087893) and not c:IsCode(12697630) and targets1>0 then
     return true
   end
   if not UnchainableCheck(14087893) then
@@ -458,7 +462,7 @@ function ChainBoM()
   cg = RemovalCheck()
   if cg then
     if cg:IsExists(function(c) return c:IsControler(player_ai) end, 1, nil) then
-      local g=cg:Filter(MoonFilter2,player_ai):GetMaxGroup(Card.GetAttack)
+      local g=cg:Filter(MoonFilter2,nil,player_ai):GetMaxGroup(Card.GetAttack)
       if g and e and MoonWhitelist2(e:GetHandler():GetCode()) then
         GlobalCardMode = 1
         GlobalTargetID = g:GetFirst():GetOriginalCode()
