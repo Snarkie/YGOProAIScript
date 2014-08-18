@@ -270,7 +270,8 @@ function SummonGearGigant()
   return OppGetStrongestAttDef()<2300 and MP2Check()
 end
 function SummonChainGadget()
-  return DeckCheck(DECK_GADGET) and not HasAccess(90411554) and MP2Check()
+  return DeckCheck(DECK_GADGET) and not HasAccess(90411554) 
+  and MP2Check() and OppGetStrongestAttDef()<=1800
 end
 function GadgetOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local Activatable = cards.activatable_cards

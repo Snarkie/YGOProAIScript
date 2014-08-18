@@ -519,63 +519,27 @@ end
 -----------------------------------------------------
 -- List of cards that shouldn't be activated in a same chain
 -----------------------------------------------------
+Unchainable={ 
+44095762,70342110,56120475,73964868, -- Mirror force, DPrison, Sakuretsu, Pleiades
+55713623,08698851,21481146,62271284, -- Shrink, D-Counter, Radiant mirror force,Justi-breal
+77754944,79178930,89041555,73178098, -- Widespread RuinKarakuri klock, Blast held by a tribut, Ego boost
+10759529,25642998,29590905,43250041, -- Kid Guard,Poseidon wave,Super junior confrontation,Draining shiled
+43452193,57115864,60080151,62279055, -- Mirrot Gate, Lumenize, Memory of an adversary, Magic Cylinder
+75987257,23171610,37390589,01005587, -- Butterflyoke, Limiter Removal, Kunai with Chain, Void Trap Hole
+04206964,28654932,29401950,94192409, -- Trap hole, Deep dark trap hole, Compulsory Evacuation Device, Bottomless trap hole
+62325062,80723580,99590524,11593137, -- Adhesion, Giant, Treacherous, Chaos trap hole
+19230407,33846209,04178474,15083728, -- Offerings to the doomed, Gemini spark, Raigeki-breaker, House of adhesive tape
+30127518,39765115,42578427,46656406, -- Dark trap hole, Splash capture, Eatgaboon, Mirror of oaths
+58990631,72287557,86871614,84749824, -- Automatic laser, Chthonian Polymer, Cloning, Solem warning
+37412656,19665973,18964575,29223325, -- Hero blast, Battle Fader, Swift Scarecrow, Artifact Ignition
+12444060,85103922,12697630,77505534, -- Artifact Sanctum, Moralltach, Beagalltach, Facing the Shadows
+05318639,53582587,97077563,14087893, -- Mystical Space Typhoon, Torrential tribute, Call of the Haunted, Book of Moon
+}
 function isUnchainableTogether(CardId)
-  if CardId == 44095762 or -- Mirror force
-     CardId == 70342110 or -- Dimensional prison
-     CardId == 56120475 or -- Sakuretsu armor
-     CardId == 73964868 or -- Constellar Pleiades
-	   CardId == 55713623 or -- Shrink
-     CardId == 08698851 or -- D-Counter
-     CardId == 21481146 or -- Radiant mirror force
-     CardId == 62271284 or -- Justi-break
-     CardId == 77754944 or -- Widespread Ruin
-     CardId == 79178930 or -- Karakuri klock
-     CardId == 89041555 or -- Blast held by a tribut
-     CardId == 73178098 or -- Ego boost
-     CardId == 10759529 or -- Kid guard
-     CardId == 25642998 or -- Poseidon wave
-     CardId == 29590905 or -- Super junior confrontation
-     CardId == 43250041 or -- Draining shiled
-     CardId == 43452193 or -- Mirror gate
-     CardId == 57115864 or -- Lumenize 
-     CardId == 60080151 or -- Memory of an Adversary
-     CardId == 62279055 or -- Magic cylinder
-     CardId == 75987257 or -- Butterflyoke
-     CardId == 23171610 or -- Limiter removal
-     CardId == 37390589 or -- Kunai with chain
-     CardId == 01005587 or -- Void trap hole
-     CardId == 04206964 or -- Trap hole
-     CardId == 28654932 or -- Deep dark trap hole
-     CardId == 94192409 or -- Compulsory Evacuation Device
-	   CardId == 29401950 or -- Bottomless trap hole
-     CardId == 62325062 or -- Adhesion trap hole
-     CardId == 80723580 or -- Giant trap hole
-     CardId == 99590524 or -- Treacherous trap hole
-     CardId == 11593137 or -- Chaos trap hole
-     CardId == 19230407 or -- Offerings to the doomed
-     CardId == 33846209 or -- Gemini spark
-     CardId == 04178474 or -- Raigeki-breaker
-     CardId == 15083728 or -- House of adhesive tape
-     CardId == 30127518 or -- Dark trap hole
-     CardId == 39765115 or -- Splash capture
-     CardId == 42578427 or -- Eatgaboon
-     CardId == 46656406 or -- Mirror of oaths
-     CardId == 58990631 or -- Automatic laser
-     CardId == 72287557 or -- Chthonian Polymer
-     CardId == 86871614 or -- Cloning
-     CardId == 84749824 or -- Solem warning
-     CardId == 37412656 or -- Hero blast
-     CardId == 19665973 or -- Battle Fader
-     CardId == 18964575 or -- Swift Scarecrow
-     CardId == 29223325 or -- Artifact Ignition
-     CardId == 12444060 or -- Artifact Sanctum
-     CardId == 85103922 or -- Artifact Moralltach  - to prevent multiple ignitions
-     CardId == 12697630 or -- Artifact Beagalltach - chained in a row for no reason
-     CardId == 77505534 or -- Facing the Shadows
-     CardId == 05318639 or -- Mystical Space Typhoon
-     CardId == 53582587 or -- Torrential tribute   
-     CardId == 97077563 then -- Call of the Haunted
-	return 1
+  for i=1,#Unchainable do
+    if Unchainable[i] == CardID then
+      return 1
+    end
   end
   return 0
 end

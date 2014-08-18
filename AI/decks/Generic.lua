@@ -13,7 +13,6 @@ function SummonExtraDeck(cards,prio)
 -- use certain effects before doing anything else
 ---- 
  if prio then 
-  
   if HasID(Activatable,12014404,false,nil,nil,POS_DEFENCE) and UseCowboyDef() then 
     return {COMMAND_ACTIVATE,CurrentIndex}                                -- Gagaga Cowboy finish
   end
@@ -32,11 +31,10 @@ function SummonExtraDeck(cards,prio)
   if HasID(ActivatableCards,53129443) and UseDarkHole() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-    
+  
 ---- 
 -- summon certain monsters before anything else
 ----   
- 
   if HasID(SpSummonable,12014404) and SummonCowboyDef() then          
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
@@ -100,7 +98,6 @@ function SummonExtraDeck(cards,prio)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   return nil
-  
  end
   
 ---- 
@@ -108,7 +105,6 @@ function SummonExtraDeck(cards,prio)
 ---- 
 
 -- Synchro
-
   if HasID(SpSummonable,08561192) and SummonLeoh() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
@@ -134,11 +130,9 @@ function SummonExtraDeck(cards,prio)
   end
 
 
-
 -- XYZ
 
 -- Rank 7
-
   if HasID(SpSummonable,80117527) and SummonBigEye() then
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,80117527)}
   end
@@ -148,7 +142,6 @@ function SummonExtraDeck(cards,prio)
   end
   
 -- Rank 6
-
   if HasID(SpSummonable,38495396) and SummonPtolemy() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
@@ -156,7 +149,6 @@ function SummonExtraDeck(cards,prio)
   if HasID(SpSummonable,15561463) and SummonGauntletLauncher() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-
 
 -- Rank 5
   if HasID(SpSummonable,73964868) and SummonPleiades() then
@@ -167,21 +159,20 @@ function SummonExtraDeck(cards,prio)
   end
 
 -- Rank 4
-
   if HasID(SpSummonable,94380860) and SummonRagnaZero() then            -- Ragna Zero
-    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,94380860)}
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end  
   if HasID(SpSummonable,22653490) and SummonChidori() then              -- Chidori
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSummonable,48739166) and SummonSharkKnight() then          -- SHArk Knight
-    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,48739166)}
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSummonable,82633039) and SummonSkyblaster() then           -- Skyblaster
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSummonable,61344030) and SummonPaladynamo() then
-    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,61344030)}
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSummonable,63746411) and SummonGiantHand() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
@@ -231,7 +222,6 @@ function SummonExtraDeck(cards,prio)
   end
   
 -- Rank 3
-
   if HasID(SpSummonable,15914410) and SummonMechquipped() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
@@ -245,11 +235,9 @@ function SummonExtraDeck(cards,prio)
   
   
 -- use Soul Charge when other plays have been exhausted
-  
   if HasID(Activatable,54447022) and UseSoulCharge() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  
   return nil
 end
 
@@ -273,7 +261,7 @@ function SummonPaladynamo()
     if c.attack>=2000 and bit32.band(c.position,POS_FACEUP_ATTACK)>0
     and c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
     then
-      return true
+      return MP2Check()
     end 
   end
   return false
@@ -301,7 +289,7 @@ function SummonChidori()
     end
   end
   return result[1]+result[2]>=2 
-  or OppGetStrongestAttDef() >= 2300
+  or OppGetStrongestAttDef() >= 2300 and MP2Check()
 end
 function SummonRagnaZero()
   local cards = OppMon()
@@ -330,7 +318,7 @@ function SummonBigEye()
   return CardsMatchingFilter(OppMon(),BigEyeFilter)>0 and MP2Check()
 end
 function SummonNaturiaBeast()
-  return OppGetStrongestAttDef()<2200
+  return OppGetStrongestAttDef()<2200 and MP2Check()
 end
 function SummonArmades()
   return Duel.GetCurrentPhase() == PHASE_MAIN1 and OppGetStrongestAttDef()<2300 
@@ -436,7 +424,7 @@ function UseCowboyAtt()
   and Duel.GetCurrentPhase()==PHASE_MAIN1 and GlobalBPAllowed
 end
 function SummonCowboyAtt()
-  return OppHasStrongestMonster() and UseCowboyAtt()
+  return OppHasStrongestMonster() and UseCowboyAtt() and MP2Check()
 end
 function SkyblasterFilter(c)
   return bit32.band(c.position,POS_FACEUP)>0 and c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0

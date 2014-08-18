@@ -157,7 +157,7 @@ AddPriority({
 
 [32807846] = {9,3,1,1,1,1,1,1,1,1,nil},               -- RotA
 [01845204] = {4,1,1,1,1,1,1,1,1,1,nil},               -- Instant Fusion
-[54447022] = {5,1,1,1,1,1,1,1,1,1,nil},               -- Soul Charge
+[54447022] = {5,1,1,1,1,1,1,1,1,1,SoulChargeCond},    -- Soul Charge
 [25789292] = {3,1,1,1,1,1,1,1,1,1,nil},               -- Forbidden Chalice
 
 [41510920] = {6,2,1,1,1,1,1,1,1,1,nil},               -- Celestial Factor

@@ -620,14 +620,7 @@ function SharkKnightTarget(cards,targets)
   end
   return result
 end
-function GlobalTarget(cards,player)
-  for i=1,#cards do
-    if cards[i].id==GlobalTargetID and (player==nil or cards[i].owner==player) then
-      return {i}
-    end
-  end
-  return {math.random(#cards)}
-end
+
 function BoarTarget(cards)
   local result = nil
   if cards[1].setcode==0x7c then --Fire Formations

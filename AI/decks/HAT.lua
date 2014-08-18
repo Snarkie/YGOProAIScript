@@ -94,6 +94,12 @@ function IgnitionCond(loc,c)
   end
   return true
 end
+function SoulChargeCond()
+  if loc == LOCATION_TOHAND then
+    return CardsMatchingFilter(AIGrave(),CotHFilter)>2 and AI.GetPlayerLP(1)>2000
+  end
+  return true
+end
 function CanUseHand()
   return ((HasID(AIMon(),68535320,true) or HasID(AIHand(),68535320,true) 
   and not Duel.CheckNormalSummonActivity(player_ai)) and FireHandCheck() 
@@ -113,10 +119,10 @@ end
 function SummonDionaea()
   return DualityCheck() and OverExtendCheck() 
   and (CardsMatchingFilter(AIGrave(),TraptrixFilter)>0
-  or FieldCheck(4)==1)
+  or FieldCheck(4)==1 and not HasID(AIHand(),91812341,true))
 end
 function SummonMyrmeleo()
-  return OverExtendCheck and (MyrmeleoCond(PRIO_TOHAND) or DualityCheck() and FieldCheck(4)==1)
+  return OverExtendCheck() and (MyrmeleoCond(PRIO_TOHAND) or DualityCheck() and FieldCheck(4)==1)
 end
 function HandFilter(c,atk)
   return bit32.band(c.position,POS_FACEUP_ATTACK)>0 
@@ -150,10 +156,10 @@ function SummonIceHand()
   and (IceHandCheck() or FieldCheck(4)==1)
 end
 function SetFireHand()
-  return OverExtendCheck()
+  return OverExtendCheck() and #OppMon()>0 and (Duel.GetCurrentPhase()==PHASE_MAIN2 or not GlobalBPAllowed)
 end
 function SetIceHand()
-  return OverExtendCheck()
+  return OverExtendCheck() and #OppMon()>0 and (Duel.GetCurrentPhase()==PHASE_MAIN2 or not GlobalBPAllowed)
 end
 function UseCotH()
   if Duel.GetTurnPlayer()==player_ai then
@@ -181,6 +187,12 @@ function UseCotH()
       return true
     end
   end
+end
+function SummonMonster(atk)
+  return OppGetStrongestAttDef()<=atk and #AIMon()==0 and Duel.GetTurnCount()>1
+end
+function SetMonster()
+  return #AIMon()==0 and (Duel.GetCurrentPhase()==PHASE_MAIN2 or not GlobalBPAllowed)
 end
 function HATInit(cards)
   local Activatable = cards.activatable_cards
@@ -214,6 +226,18 @@ function HATInit(cards)
     return {COMMAND_SET_MONSTER,CurrentIndex}
   end
   if HasID(SetableMon,95929069) and SetIceHand() then
+    return {COMMAND_SET_MONSTER,CurrentIndex}
+  end
+  if HasID(Summonable,45803070) and SummonMonster(Summonable[CurrentIndex].attack) then
+    return {COMMAND_SUMMON,CurrentIndex}
+  end
+  if HasID(Summonable,91812341) and SummonMonster(Summonable[CurrentIndex].attack) then
+    return {COMMAND_SUMMON,CurrentIndex}
+  end
+  if HasID(SetableMon,45803070) and SetMonster() then
+    return {COMMAND_SET_MONSTER,CurrentIndex}
+  end
+  if HasID(SetableMon,91812341) and SetMonster() then
     return {COMMAND_SET_MONSTER,CurrentIndex}
   end
   if HasID(SetableST,85103922) and SetArtifacts() then
@@ -263,6 +287,15 @@ function CotHTarget(cards)
     return Add(cards,PRIO_TOFIELD)
   end
 end
+function BoMTarget(cards)
+  if GlobalCardMode == 1 then
+    local p = GlobalPlayer
+    GlobalCardMode = nil
+    GlobalPlayer = nil
+    return GlobalTarget(cards,p,true)
+  end
+  return BestTargets(cards,1,TARGET_FACEDOWN)
+end
 function HATCard(cards,min,max,id,c)
   if c then
     id = c.id
@@ -279,8 +312,11 @@ function HATCard(cards,min,max,id,c)
   if id == 97077563 then
     return CotHTarget(cards)
   end
-  if ID == 98645731 then -- Duality
+  if id == 98645731 then -- Duality
     return Add(cards)
+  end
+  if id == 14087893 then -- Book of Moon
+    return BoMTarget(cards)
   end
   return nil
 end
@@ -371,6 +407,103 @@ function ChainCotH()
   end
   return false
 end
+
+function MoonWhitelist(c) -- cards to use Book of Moon on as soon as they hit the field, to prevent them from activating their effects
+  return c.id == 48739166 and c.xyz_material_count>=2 --SHArk
+  or c.id == 92633039 and c.xyz_material_count>=2 --Castel
+  or c.id == 57774843 or c.id == 72989439 or c.id == 65192027 --JD,BLS,DAD
+end
+function MoonWhitelist2(id) -- cards to chain Book of Moon to to save your monsters
+  return id == 29401950 or id == 44095762 -- Bottomless, Mirrorforce
+end
+function MoonFilter(c)
+  return bit32.band(c.type,TYPE_MONSTER)>0 and bit32.band(c.position,POS_FACEUP)>0 
+  and c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0 and c:is_affected_by(EFFECT_IMMUNE)==0
+end
+function MoonFilter2(c,p)
+  return c:IsType(TYPE_MONSTER) and c:IsPosition(POS_FACEUP) and c:IsControler(p)
+  and not c:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET) and not c:IsHasEffect(EFFECT_IMMUNE)
+end
+function MoonFilter3(c)
+  return MoonFilter(c) and ShadollFusionFilter(c)
+end
+function MoonOppFilter(c)
+  return MoonFilter(c) and bit32.band(c.type,TYPE_FLIP)==0
+end
+function MoonPriorityFilter(c)
+  return MoonFilter(c) and MoonWhitelist(c)
+end
+function ChainBoM()
+  local targets1 = CardsMatchingFilter(OppMon(),MoonOppFilter)
+  local targets2 = CardsMatchingFilter(OppMon(),MoonPriorityFilter)
+  local e=Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
+  if RemovalCheck(14087893) and targets1>0 then
+    return true
+  end
+  if not UnchainableCheck(14087893) then
+    return false
+  end
+  cg = NegateCheck()
+  if cg and Duel.GetCurrentChain()>1 then
+		if cg:IsExists(function(c) return c:IsControler(player_ai) end, 1, nil) then
+      local g=cg:Filter(MoonFilter2,player_ai):GetMaxGroup(Card.GetAttack)
+      if g then
+        GlobalCardMode = 1
+        GlobalTargetID = g:GetFirst():GetOriginalCode()
+        GlobalPlayer = 1
+        return true
+      end
+    end	
+  end
+  cg = RemovalCheck()
+  if cg then
+    if cg:IsExists(function(c) return c:IsControler(player_ai) end, 1, nil) then
+      local g=cg:Filter(MoonFilter2,player_ai):GetMaxGroup(Card.GetAttack)
+      if g and e and MoonWhitelist2(e:GetHandler():GetCode()) then
+        GlobalCardMode = 1
+        GlobalTargetID = g:GetFirst():GetOriginalCode()
+        GlobalPlayer = 1
+        return true
+      end
+    end
+  end
+  if targets2>0 then
+    for i=1,#OppMon() do
+      if MoonPriorityFilter(OppMon()[i]) then
+        GlobalCardMode = 1
+        GlobalTargetID = OppMon()[i].original_id
+        GlobalPlayer = 2
+        return true
+      end
+    end
+  end
+  if Duel.GetCurrentPhase() == PHASE_BATTLE and Duel.GetTurnPlayer()==1-player_ai then
+    local source = Duel.GetAttacker()
+		local target = Duel.GetAttackTarget()
+    if WinsBattle(source,target) and MoonFilter2(source,1-player_ai) 
+    and not (target:GetCode()==68535320 and CardsMatchingFilter(OppMon(),DestroyFilter)>0)
+    and not (target:GetCode()==95929069 and CardsMatchingFilter(OppST(),DestroyFilter)>0)
+    then
+      GlobalCardMode = 1
+      GlobalTargetID = source:GetOriginalCode()
+      GlobalPlayer = 2
+      return true
+    end
+  end
+  if e and e:GetHandler():GetCode() == 44394295 
+  and e:GetHandler():IsControler(1-player_ai)
+  and CardsMatchingFilter(AIMon(),MoonFilter3)==1
+  then
+    for i=1,#AIMon() do
+      if MoonFilter3(AIMon()[i]) then
+        GlobalCardMode = 1
+        GlobalTargetID = AIMon()[i].original_id
+        GlobalPlayer = 1
+        return true
+      end
+    end
+  end
+end
 function HATChain(cards)
   if HasID(cards,91812341) then -- Traptrix Myrmeleo
     return {1,CurrentIndex}
@@ -391,6 +524,9 @@ function HATChain(cards)
     return {1,CurrentIndex}
   end
   if HasID(cards,97077563) and ChainCotH() then
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,14087893) and ChainBoM() then
     return {1,CurrentIndex}
   end
 end

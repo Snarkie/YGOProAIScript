@@ -183,7 +183,7 @@ function OppGetWeakestAttDef()
 end
 function OppHasStrongestMonster(skipbonus)
   return #OppMon()>0 and ((AIGetStrongestAttack(skipbonus) <= OppGetStrongestAttDef()) 
-  or HasID(AIMon(),68535320) and FireHandCheck() or HasID(AIMon(),95929069) and IceHandCheck())
+  or HasID(AIMon(),68535320,true) and FireHandCheck() or HasID(AIMon(),95929069,true) and IceHandCheck())
 end
 function OppHasFacedownMonster()
   local cards=OppMon()
@@ -220,12 +220,8 @@ function RandomIndexFilter(cards,filter,opt)
 end
 -- check, if the AI can wait for an XYZ/Synchro summon until Main Phase 2
 function MP2Check()
-  result = false
-  if AI.GetCurrentPhase() == PHASE_MAIN2 or Duel.GetTurnCount() == 1 
-  or OppHasStrongestMonster() or not(GlobalBPAllowed) then
-    result = true
-  end
-  return result
+  return AI.GetCurrentPhase() == PHASE_MAIN2 or not(GlobalBPAllowed)
+  or OppHasStrongestMonster() and not(CanUseHand())
 end
 -- check how many monsters of a specific level are on the field. optional filter
 function FieldCheck(level,filter,opt)
@@ -406,24 +402,37 @@ function BestTargets(cards,count,target,filter,immuneCheck)
         end
       end
     end
+    if (bit32.band(cards[i].position, POS_FACEUP)>0 or bit32.band(cards[i].status,STATUS_IS_PUBLIC)>0)
+    and (target == TARGET_TOHAND and ToHandBlacklist(cards[i].id)   
+    or target == TARGET_DESTROY and DestroyBlacklist(cards[i])
+    or target==TARGET_FACEDOWN and bit32.band(cards[i].type,TYPE_FLIP)>0)
+    then
+      cards[i].prio = -1
+    end
     if filter and not filter(cards[i]) then
       cards[i].prio = 0
     end
     if cards[i].owner == 1 then 
       cards[i].prio = -1 * cards[i].prio
     end
-    if (bit32.band(cards[i].position, POS_FACEUP)>0 or bit32.band(cards[i].status,STATUS_IS_PUBLIC)>0)
-    and (target == TARGET_TOHAND and ToHandBlacklist(cards[i].id)   
-    or target == TARGET_DESTROY and DestroyBlacklist(cards[i]))
-    then
-      cards[i].prio = 0
-    end
+
   end
   table.sort(cards,function(a,b) return a.prio > b.prio end)
   for i=1,count do
     result[i]=cards[i].index
   end
   return result
+end
+function GlobalTarget(cards,player,original)
+  for i=1,#cards do
+    if (not original and cards[i].id==GlobalTargetID
+    or original and cards[i].original_id==GlobalTargetID)
+    and (player==nil or cards[i].owner==player) then
+      GlobalTargetID = nil
+      return {i}
+    end
+  end
+  return {math.random(#cards)}
 end
 function IsMonster(card)
   return bit32.band(card.type,TYPE_MONSTER)>0
@@ -486,8 +495,9 @@ end
 -- returns true, if the source is expected to win a battle against the target
 function WinsBattle(source,target)
   return source and target 
-  and (target:IsPosition(POS_ATTACK) and source:GetAttack()>=target.GetAttack()
-  or target:IsPosition(POS_DEFENCE) and source:GetAttack()>target.GetDefence())
+  and (target:IsPosition(POS_ATTACK) and source:GetAttack()>=target:GetAttack()
+  or target:IsPosition(POS_DEFENCE) and source:GetAttack()>target:GetDefence())
+  and not target:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE)
 end
 function NotNegated(card)
   return card:is_affected_by(EFFECT_DISABLE)==0 and card:is_affected_by(EFFECT_DISABLE_EFFECT)==0
@@ -519,4 +529,7 @@ function FilterType(c,type)
 end
 function FilterAttack(c,attack)
   return bit32.band(c.type,TYPE_MONSTER)>0 and c.attack>=attack
+end
+function FilterID(c,id)
+  return c.id==id
 end

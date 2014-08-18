@@ -161,7 +161,8 @@ function UseBeast()
   return OPTCheck(03717252) --and ShadollPriorityCheck(AIHand(),PRIO_TOGRAVE)>3
 end
 function ShadollFusionFilter(c)
-  return bit.band(c:GetSummonType(),SUMMON_TYPE_SPECIAL)==SUMMON_TYPE_SPECIAL and c:IsPreviousLocation(LOCATION_EXTRA)
+  return bit32.band(c.summon_type,SUMMON_TYPE_SPECIAL)==SUMMON_TYPE_SPECIAL
+  and bit32.band(c.previous_location,LOCATION_EXTRA)==LOCATION_EXTRA
 end
 function ArtifactFilter(c)
   return bit32.band(c.attribute,ATTRIBUTE_LIGHT)>0 and bit32.band(c.type,TYPE_MONSTER)>0
@@ -174,7 +175,7 @@ function UseShadollFusion()
   or ShadollPriorityCheck(UseLists({AIHand(),AIMon()}),PRIO_TOGRAVE,1,ShadollFilter)>2
   and ShadollPriorityCheck(UseLists({AIHand(),AIMon()}),PRIO_TOGRAVE,1,ArtifactFilter)>2
   and not HasID(AIMon(),20366274,true)
-  or Duel.IsExistingMatchingCard(ShadollFusionFilter,1-player_ai,LOCATION_MZONE,0,1,nil))
+  or CardsMatchingFilter(OppMon(),ShadollFusionFilter)>0)
 end
 function UseRoots()
   return HasID(AIHand(),44394295,true) and MidrashCheck()

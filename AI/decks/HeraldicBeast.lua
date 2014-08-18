@@ -50,7 +50,8 @@ function SummonGenomHeritage()
   return UseGenomHeritage()
 end
 function SummonChainHeraldic()
-  return DeckCheck(DECK_HERALDIC) and not(HasAccess(82293134)) and MP2Check()
+  return DeckCheck(DECK_HERALDIC) and not(HasAccess(82293134)) 
+  and MP2Check() and OppGetStrongestAttDef()<=1800
 end
 function SummonLeo()
   return FieldCheck(4)==1 or FieldCheck(4)==0 and HasID(AIHand(),94656263)

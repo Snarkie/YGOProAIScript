@@ -294,11 +294,11 @@ function UseDewloren()
 end
 function UseSphere()
   if HasID(AIMon(),70583986,true) then
-    GlobalSummonToHand = true
+    GlobalSphere = 5
     return true
   end
   if HasID(AIMon(),78868119,true) then
-    GlobalSphere = 1
+    GlobalSphere = 4
     return true
   end
   if HasID(AIMon(),68505803,true) then
@@ -445,19 +445,19 @@ function MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Summonable,78868119) and SummonDiva1() then
-    return {COMMAND_SUMMON,Summonable[CurrentIndex].index}
+    return {COMMAND_SUMMON,CurrentIndex}
   end
   if HasID(Summonable,04904812) and SummonUndine() then
-    return {COMMAND_SUMMON,Summonable[CurrentIndex].index}
+    return {COMMAND_SUMMON,CurrentIndex}
   end
   if HasID(Summonable,68505803) and SummonController() then
-    return {COMMAND_SUMMON,Summonable[CurrentIndex].index}
+    return {COMMAND_SUMMON,CurrentIndex}
   end
   if HasID(Summonable,58471134) and (UsePike() or FieldCheck(4)==1) then
-    return {COMMAND_SUMMON,Summonable[CurrentIndex].index}
+    return {COMMAND_SUMMON,CurrentIndex}
   end
   if HasID(Summonable,22076135) and (UseTurge() or FieldCheck(4)==1) then
-    return {COMMAND_SUMMON,Summonable[CurrentIndex].index}
+    return {COMMAND_SUMMON,CurrentIndex}
   end
   if HasID(SpSummonable,70583986) and SummonDewloren() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
@@ -478,16 +478,16 @@ function MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(Summonable,00706925) and SummonMarksman() then
-    return {COMMAND_SUMMON,Summonable[CurrentIndex].index}
+    return {COMMAND_SUMMON,CurrentIndex}
   end
   if HasID(Summonable,74298287) and SummonDine() then
-    return {COMMAND_SUMMON,Summonable[CurrentIndex].index}
+    return {COMMAND_SUMMON,CurrentIndex}
   end
   if HasID(SetableMon,23899727) and SetLinde() then
     return {COMMAND_SET_MONSTER,CurrentIndex}
   end
   if HasID(Summonable,78868119) and SummonDiva2() then
-    return {COMMAND_SUMMON,Summonable[CurrentIndex].index}
+    return {COMMAND_SUMMON,CurrentIndex}
   end
   if HasID(Activatable,26400609,false,422409746) and UseTidal() then
     GlobalCardMode = 2
@@ -505,10 +505,10 @@ function MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Summonable,58471134) and MermailOpenFieldCheck() then
-    return {COMMAND_SUMMON,Summonable[CurrentIndex].index}
+    return {COMMAND_SUMMON,CurrentIndex}
   end
   if HasID(Summonable,22076135) and MermailOpenFieldCheck() then
-    return {COMMAND_SUMMON,Summonable[CurrentIndex].index}
+    return {COMMAND_SUMMON,CurrentIndex}
   end
   if HasID(Activatable,26400609,false,422409744) and SummonTidal() then
     return {COMMAND_ACTIVATE,CurrentIndex}
@@ -544,12 +544,10 @@ function BestTargetsMermail(cards,count)
 end
 function SphereTarget(cards)
   if GlobalSphere == 1 then
-    GlobalSphere=nil
-    for i=1,#cards do
-      if cards[i].level == 4 then
-        return {i}
-      end
-    end
+    local id = GlobalSphereID
+    GlobalSphere = nil
+    GlobalSphereID = nil
+    return MermailAdd(cards,PRIO_TOFIELD,1,FilterID,id)
   end
   if GlobalSphere == 2 then
     GlobalSphere = nil
@@ -569,16 +567,16 @@ function SphereTarget(cards)
     GlobalSphere = nil
     return MermailAdd(cards,PRIO_TOGRAVE,1,FilterAttack,AI.GetPlayerLP(2))
   end
-  if GlobalSphere and GlobalSphere > 3 then
+  if GlobalSphere == 4 or GlobalSphere == 7 then
     local level = GlobalSphere
     GlobalSphere = nil
     return MermailAdd(cards,PRIO_TOGRAVE,1,FilterLevel,level)
   end
-  if GlobalSummonToHand then
+  if GlobalSphere == 5 then
+    GlobalSphere = nil
     return MermailAdd(cards,PRIO_TOHAND)
-  else
-    return MermailAdd(cards,PRIO_TOFIELD)
   end
+  return MermailAdd(cards,PRIO_TOFIELD)
 end
 function DewlorenTarget(cards,Min,Max)
   MermailAssignPriority(cards,PRIO_TOHAND)
@@ -742,12 +740,17 @@ function ChainSphere()
   if Duel.GetCurrentPhase()==PHASE_MAIN2 and Duel.CheckTiming(TIMING_MAIN_END) and Duel.GetTurnPlayer() == 1-player_ai 
   and HasID(AIDeck(),23899727,true) and LindeCond(PRIO_TOFIELD) 
   then
-    return false
+    GlobalSphere = 1
+    GlobalSphereID = 23899727
+    return true
   end
   if Duel.GetCurrentPhase() == PHASE_BATTLE and Duel.GetTurnPlayer() == 1-player_ai
   --and HasID(AIDeck(),23899727,true) and LindeCond(PRIO_TOFIELD) 
   then
-    return Duel.GetAttacker() and #AIMon()==0
+    if Duel.GetAttacker() and #AIMon()==0 then
+      GlobalSphere = 1
+      GlobalSphereID = 23899727
+    end
   end
   return false
 end

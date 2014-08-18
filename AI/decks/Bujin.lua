@@ -303,6 +303,7 @@ function BujinOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   --
+if DeckCheck(DECK_BUJIN) then
   BujinAssignPriority(Summonable,LOCATION_FIELD)
   table.sort(Summonable,function(a,b) return a.prio>b.prio end)
   if Summonable and Summonable[1] and (Summonable[1].prio>0 
@@ -358,6 +359,7 @@ function BujinOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(SpSummonable,12014404) and BujinXYZCheck() and SummonCowboyAtt() then
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,12014404)}
   end
+end
   GlobalBujinSS=nil
   return nil
 end
