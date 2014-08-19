@@ -592,6 +592,25 @@ function AllCardsArchetype(Cards,SetCode)
   return 1
 end
 
+---
+-- List of mandatory effects the AI might skip otherwise
+---
+Mandatory={
+53804307,26400609,89399912,90411554, -- Blaster, Tidal, Tempest, Redox
+78156759 -- Zenmaines
+}
+function MandatoryCheck(c)
+  if Duel.GetCurrentPhase()==PHASE_END and IsSetCode(c.setcode,0x38) then --Lightsworn monsters
+    return true
+  end
+  for i=1,#Mandatory do
+    if c and Mandatory[i]==c.id then
+      return true
+    end
+  end
+  return false
+end
+
 ----------------------------------------------------
 -- Checks if the selected card is already scripted 
 -- in "OnSelectInitCommand", "SelectChain" functions.

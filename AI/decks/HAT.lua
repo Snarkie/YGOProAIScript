@@ -296,6 +296,14 @@ function BoMTarget(cards)
   end
   return BestTargets(cards,1,TARGET_FACEDOWN)
 end
+function GiantHandTarget(cards)
+  if GlobalCardMode==1 then
+    GlobalCardMode = nil
+    return {1,2}
+  else
+    return GlobalTarget(cards,2,true)
+  end
+end
 function HATCard(cards,min,max,id,c)
   if c then
     id = c.id
@@ -317,6 +325,9 @@ function HATCard(cards,min,max,id,c)
   end
   if id == 14087893 then -- Book of Moon
     return BoMTarget(cards)
+  end
+  if id == 63746411 then -- Giant Hand
+    return GiantHandTarget(cards)
   end
   return nil
 end
@@ -508,6 +519,21 @@ function ChainBoM()
     end
   end
 end
+function ChainGiantHand()
+  local e=Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
+  local c=nil
+  if e then
+    c=e:GetHandler()
+  end
+  if c:IsLocation(LOCATION_MZONE) and not c:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET)
+  and NegateBlacklist(c:GetCode())==0
+  then
+    GlobalCardMode = 1
+    GlobalTargetID = c:GetOriginalCode()
+    return true
+  end
+  return false
+end
 function HATChain(cards)
   if HasID(cards,91812341) then -- Traptrix Myrmeleo
     return {1,CurrentIndex}
@@ -524,7 +550,7 @@ function HATChain(cards)
   if HasID(cards,29616929) then -- Traptrix Trap Hole Nightmare
     return {1,CurrentIndex}
   end
-  if HasID(cards,63746411) then -- Giant Hand
+  if HasID(cards,63746411) and ChainGiantHand() then -- Giant Hand
     return {1,CurrentIndex}
   end
   if HasID(cards,97077563) and ChainCotH() then
@@ -538,8 +564,11 @@ function HATEffectYesNo(id,card)
   local result = nil
   if id == 68535320 or id == 95929069 -- Fire Hand, Ice Hand
   or id == 91812341 or id == 45803070 -- Traptrix Myrmeleo, Dionaea
-  or id == 29616929 or id == 63746411 -- Traptrix Trap Hole Nightmare, Giant Hand
+  or id == 29616929 -- Traptrix Trap Hole Nightmare
   then
+    result = 1
+  end
+  if id == 63746411 and ChainGiantHand() then
     result = 1
   end
   return result

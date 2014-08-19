@@ -493,7 +493,7 @@ end
   -- if the enemy has a stronger monster
   ------------------------------------------
   for i=1,#cards do
-    if cards[i].id == 73964868 then  
+    if cards[i].id == 73964868 and UnchainableCheck(73964868) then  
 	  if Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") >= Get_Card_Att_Def(AIMon(),"defense",">",POS_FACEUP,"defense") then
          GlobalActivatedCardID = cards[i].id
          GlobalCardMode = 1
@@ -546,26 +546,11 @@ end
   -- Mandatory effects the AI could potentially 
   -- skip, if not handled here
   ---------------------------------------------
-  if HasID(cards,53804307) then -- Blaster
-    return 1,CurrentIndex
-  end
-  if HasID(cards,26400609) then -- Tidal
-    return 1,CurrentIndex
-  end
-  if HasID(cards,89399912) then -- Tempest
-    return 1,CurrentIndex
-  end
-  if HasID(cards,90411554) then -- Redox
-    return 1,CurrentIndex
-  end
-  
-  if Duel.GetCurrentPhase()==PHASE_END then
-    for i=1,#cards do -- Lightsworn monsters
-      if IsSetCode(cards[i].setcode,0x38) then
-        return 1,i
-      end
-    end  
-  end
+  for i=1,#cards do 
+    if MandatoryCheck(c) then
+      return 1,i
+    end
+  end  
   
   ----------------------------------------------------------
   -- For now, chain anything else (not already listed above)

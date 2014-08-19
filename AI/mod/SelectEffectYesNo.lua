@@ -36,12 +36,15 @@ function OnSelectEffectYesNo(id,triggeringCard)
     result = HATEffectYesNo(id,triggeringCard)
   end
   if result then return result end
-  
   if CardIsScripted(id)>0 then
     result = 0
+  else
+    result = 1
   end
   
-  if id == 92661479 or id == 94283662-- Bounzer, Trance Archfiend
+  if id == 92661479 or id == 94283662 -- Bounzer, Trance Archfiend
+  or id == 52624755 or id == 50091196 -- Peten, Formula
+  or id == 80344569 or id == 78156759 -- Grand Mole, Zenmaines
   then 
     result = 1
   end
@@ -79,7 +82,6 @@ function OnSelectEffectYesNo(id,triggeringCard)
     end
     return 0
   end
-
   if result==1 then
     GlobalActivatedEffectID = id
   end

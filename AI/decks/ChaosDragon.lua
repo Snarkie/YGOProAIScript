@@ -113,6 +113,9 @@ function KuribanditCond(loc,c)
   return true
 end
 function WyvernCond(loc,c)
+  if loc == PRIO_TOHAND then
+    return bit32.band(c.location,LOCATION_GRAVE)==0
+  end
   if loc == PRIO_TOFIELD then
     return bit32.band(c.location,LOCATION_GRAVE)==0
   end

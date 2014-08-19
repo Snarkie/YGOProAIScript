@@ -1,5 +1,6 @@
 -- Functions to check which deck the AI is playing
 
+DECK_SOMETHING    = 0
 DECK_CHAOSDRAGON  = 1
 DECK_FIREFIST     = 2
 DECK_HERALDIC     = 3
@@ -31,6 +32,9 @@ function DeckCheck(opt)
       end
     end
   end
+  if Deck == nil then
+    Deck = DECK_SOMETHING
+  end
   if opt then
     return Deck==opt
   else
@@ -61,7 +65,7 @@ AddPriority({
 [22624373] = {3,2,4,2,6,3,0,0,8,0,LylaCond},          -- Lightsworn Lyla
 [95503687] = {4,3,8,3,4,3,0,0,7,0,LuminaCond},        -- Lightsworn Lumina
 [16404809] = {3,2,4,2,6,3,0,0,8,0,KuribanditCond},    -- Kuribandit
-[51858306] = {5,3,3,2,9,0,0,0,9,9,WyvernCond},        -- Eclipse Wyvern
+[51858306] = {5,0,3,0,9,0,0,0,9,9,WyvernCond},        -- Eclipse Wyvern
 [33420078] = {2,1,6,2,6,0,0,0,3,1,PSZCond},           -- Plaguespreader Zombie
 [10802915] = {5,2,3,2,2,1,0,0,8,3,TourGuideCond},     -- Tour Guide of the Underworld
 [84764038] = {4,2,8,3,8,2,0,0,5,2,ScarmCond},         -- Scarm, Malebranche of the Burning Abyss
