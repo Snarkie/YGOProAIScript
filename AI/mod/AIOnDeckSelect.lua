@@ -279,5 +279,10 @@ function Add(cards,loc,count,filter,opt)
   for i=1,count do
     result[i]=cards[i].index
   end
+  if #result<count then 
+    for i=#result+1,count do
+      result[i]=i
+    end
+  end
   return result
 end

@@ -225,7 +225,6 @@ if not ExtraCheck then
     return DeckCommand[1],DeckCommand[2]
   end
 end
-
 -------------------------------------------------
 -- **********************************************
 --   Activate these cards before anything else :O
@@ -2044,7 +2043,6 @@ end
      end
    end
  end
-	
   -------------------------------------------------------
   -- *****************************************************
   --        General tribute summoning logic
@@ -2350,7 +2348,6 @@ end
       end
     end
   end
-
 
   ----print("DECISION: go to next phase")
   ------------------------------------------------------------

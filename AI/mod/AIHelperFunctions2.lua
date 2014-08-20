@@ -50,7 +50,7 @@ end
 -- returns true, if it finds the passed id in a list of cards + optional parameters)
 function HasID(cards,id,skipglobal,desc,loc,pos,filter,opt)
   local result = false;
-  if cards ~= nil then 
+  if cards then 
     for i=1,#cards do
       if cards[i].id == id 
       and (desc == nil or cards[i].description == desc) 
@@ -146,14 +146,17 @@ function OppGetStrongestAttack()
   end
   return result
 end
-function OppGetStrongestAttDef(filter)
+function OppGetStrongestAttDef(filter,loop)
   local cards=OppMon()
   local result=0
-  ApplyATKBoosts(cards)
+  if not loop then ApplyATKBoosts(cards) end
   for i=1,#cards do
     if cards[i] and (filter==nil or filter(cards[i])) then
       if bit32.band(cards[i].position,POS_ATTACK)>0 and cards[i].attack>result then
-        result=cards[i].attack-cards[i].bonus
+        result=cards[i].attack
+        if cards[i].bonus then 
+          result=result-cards[i].bonus
+        end   
       elseif bit32.band(cards[i].position,POS_DEFENCE)>0 and cards[i].defense>result 
       and (bit32.band(cards[i].position,POS_FACEUP)>0 or bit32.band(cards[i].status,STATUS_IS_PUBLIC)>0)
       then
@@ -444,7 +447,7 @@ function IsSetCode(card_set_code, set_code)
     local settype = band(set_code,0xfff);
     local setsubtype = band(set_code,0xf000);
     local setcode = card_set_code
-    while setcode > 0 do
+    while setcode and setcode > 0 do
         if (band(setcode,0xfff) == settype and band(band(setcode,0xf000),setsubtype) == setsubtype) then
             return true
         end

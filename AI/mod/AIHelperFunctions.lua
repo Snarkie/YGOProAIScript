@@ -1696,7 +1696,7 @@ function ApplyATKBoosts(Cards)
   -- Nephilim
   for i=1,#Cards do
     if Cards[i].id == 20366274 and NotNegated(Cards[i]) then
-      local OppAtt=OppGetStrongestAttDef(NephilimFilter)
+      local OppAtt=OppGetStrongestAttDef(NephilimFilter,true)
       Cards[i].attack = OppAtt+1
     end
   end
@@ -1704,7 +1704,7 @@ function ApplyATKBoosts(Cards)
   -- Catastor
   for i=1,#Cards do
     if Cards[i].id == 26593852 and NotNegated(Cards[i]) then
-      local OppAtt=OppGetStrongestAttDef(CatastorFilter)
+      local OppAtt=OppGetStrongestAttDef(CatastorFilter,true)
       Cards[i].attack = OppAtt+1
     end
   end

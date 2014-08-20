@@ -600,7 +600,8 @@ Mandatory={
 78156759 -- Zenmaines
 }
 function MandatoryCheck(c)
-  if Duel.GetCurrentPhase()==PHASE_END and IsSetCode(c.setcode,0x38) then --Lightsworn monsters
+  if Duel.GetCurrentPhase()==PHASE_END and c 
+  and IsSetCode(c.setcode,0x38) then --Lightsworn monsters
     return true
   end
   for i=1,#Mandatory do

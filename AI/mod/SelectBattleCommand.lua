@@ -97,7 +97,7 @@ function OnSelectBattleCommand(cards,activatable)
 
   ---------------------------------------------------------------
   -- Always attack with "El-Shaddoll Nephilim" if
-  -- opponent controls any non dark type monster.
+  -- opponent controls any special summoned monster.
   ---------------------------------------------------------------
   for i=1,#cards do
     if cards[i].id == 20366274 and NotNegated(cards[i]) and CardsMatchingFilter(targets,NephilimFilter)>0 then 

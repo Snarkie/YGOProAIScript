@@ -243,12 +243,12 @@ end
 
 
 function UseFieldNuke(exclude)
-  return DestroyCheck(OppField())-DestroyCheck(AIField())-exclude>0  
+  return (DestroyCheck(OppField())+exclude)-DestroyCheck(AIField())>0 
 end
 function SummonBelzebuth()
   local AICards=UseLists({AIHand(),AIField()})
   local OppCards=UseLists({OppHand(),OppField()})
-  return #AICards<#OppCards and UseFieldNuke(1)
+  return #AICards<=#OppCards and UseFieldNuke(-1)
 end
 function SummonCowboyDef()
   return AI.GetPlayerLP(2)<=800 
@@ -389,7 +389,7 @@ function UseVolcasaurus()
   return DestroyCheck(OppMon())>0
 end
 function SummonJD()
-  return UseFieldNuke(0) and not HasID(AIMon(),57774843,true) 
+  return UseFieldNuke(-1) and not HasID(AIMon(),57774843,true) 
   or #OppField()==0 and Duel.GetCurrentPhase()==PHASE_MAIN1 and GlobalBPAllowed
 end
 function LeviairFilter(c)
