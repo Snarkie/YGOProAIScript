@@ -161,7 +161,8 @@ function UseBeast()
   return OPTCheck(03717252) --and ShadollPriorityCheck(AIHand(),PRIO_TOGRAVE)>3
 end
 function ShadollFusionFilter(c)
-  return bit32.band(c.summon_type,SUMMON_TYPE_SPECIAL)==SUMMON_TYPE_SPECIAL
+  return c and c.summon_type and c.previous_location
+  and bit32.band(c.summon_type,SUMMON_TYPE_SPECIAL)==SUMMON_TYPE_SPECIAL
   and bit32.band(c.previous_location,LOCATION_EXTRA)==LOCATION_EXTRA
 end
 function ArtifactFilter(c)
@@ -537,6 +538,7 @@ function IgnitionTarget(cards)
   end 
   GlobalCardMode = nil
   if #result == 0 then result = {math.random(#cards)} end
+  if cards[1].prio then TargetSet(cards[1]) else TargetSet(cards[result[1]]) end
   return result
 end
 function MSTTarget(cards)
@@ -551,7 +553,8 @@ function MSTTarget(cards)
   GlobalCardMode=nil
   GlobalTargetID=nil
   GlobalPlayer=nil
-  if result==nil then result=BestTargets(cards,1,TARGET_DESTROY) end
+  if result==nil then result=BestTargets(cards,1,TARGET_DESTROY,TargetCheck) end
+  if cards[1].prio then TargetSet(cards[1]) else TargetSet(cards[result[1]]) end
   return result
 end
 function SoulChargeTarget(cards,min,max)
@@ -781,6 +784,9 @@ function ChainCompulse()
   if RemovalCheck(94192409) and targets>0 then
     return true
   end
+  if not UnchainableCheck(94192409) then
+    return false
+  end
   if targets2 > 0 then
     return true
   end
@@ -887,12 +893,16 @@ function ChainMST()
   end
   if e then
     local c = e:GetHandler()
-    if c:IsType(TYPE_CONTINUOUS+TYPE_EQUIP+TYPE_FIELD)
+    if (c:IsType(TYPE_CONTINUOUS+TYPE_EQUIP+TYPE_FIELD) or
+    c:IsType(TYPE_PENDULUM) and ScaleCheck(2)>1 or c:GetCode()==65518099)
     and c:IsControler(1-player_ai)
+    and targets>0
+    and c:IsLocation(LOCATION_ONFIELD)
     and not c:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET)
     and not c:IsHasEffect(EFFECT_INDESTRUCTABLE_EFFECT)
     and not c:IsHasEffect(EFFECT_IMMUNE_EFFECT)
     and (not DestroyBlacklist(c) or c:GetCode()==19337371)
+    and not(c:GetCode()==65518099 and not(Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_TOHAND)))
     then
       GlobalTargetID=c:GetCode()
       GlobalPlayer=2
@@ -903,7 +913,7 @@ function ChainMST()
   return false
 end
 function ChainIgnition()
-local targets=CardsMatchingFilter(OppST(),MSTFilter)
+  local targets=CardsMatchingFilter(OppST(),MSTFilter)
   local targets2=CardsMatchingFilter(UseLists({OppMon(),OppST()}),MoralltachFilter)
   local targets3=CardsMatchingFilter(UseLists({OppMon(),OppST()}),SanctumFilter)
   local targets4=CardsMatchingFilter(OppST(),MSTEndPhaseFilter)
@@ -949,12 +959,16 @@ local targets=CardsMatchingFilter(OppST(),MSTFilter)
   end
   if e then
     local c = e:GetHandler()
-    if c:IsType(TYPE_CONTINUOUS+TYPE_EQUIP+TYPE_FIELD)
+    if (c:IsType(TYPE_CONTINUOUS+TYPE_EQUIP+TYPE_FIELD) or
+    c:IsType(TYPE_PENDULUM) and ScaleCheck(2)>1 or c:GetCode()==65518099)
     and c:IsControler(1-player_ai)
+    and targets>0
+    and c:IsLocation(LOCATION_ONFIELD)
     and not c:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET)
     and not c:IsHasEffect(EFFECT_INDESTRUCTABLE_EFFECT)
     and not c:IsHasEffect(EFFECT_IMMUNE_EFFECT)
     and (not DestroyBlacklist(c) or c:GetCode()==19337371)
+    and not(c:GetCode()==65518099 and not(Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_TOHAND)))
     then
       GlobalTargetID=c:GetCode()
       GlobalPlayer=2

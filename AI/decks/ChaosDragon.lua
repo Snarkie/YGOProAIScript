@@ -788,6 +788,9 @@ function ChaosDragonOnSelectCard(cards, minTargets, maxTargets,triggeringID,trig
   if ID == 76774528 then 
     return ScrapDragonTarget(cards)
   end
+  if ID == 16404809 then -- Kuribandit
+    return Add(cards)
+  end
   return nil
 end
 function ChainGorz()

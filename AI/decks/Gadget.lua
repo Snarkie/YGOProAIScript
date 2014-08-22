@@ -469,13 +469,14 @@ function CotHTargetGadget(cards)
     else
       cards[i].prio=0
     end
-    if bit32.band(cards[i].type,TYPE_XYZ)>0 then
+    if bit32.band(cards[i].type,TYPE_XYZ)>0 or not TargetCheck(cards[i]) then
       cards[i].prio=-1
     end
   end
   table.sort(cards,compare)
   result=cards[1].index
   if result == nil then result = math.random(#cards) end
+  if cards[1].prio then TargetSet(cards[1]) else TargetSet(cards[result]) end
   return {result}
 end
 function GearframeTarget(cards)

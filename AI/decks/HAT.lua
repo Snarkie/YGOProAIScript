@@ -271,21 +271,24 @@ function DionaeaTarget(cards)
   end
 end
 function CotHTarget(cards)
+  local result = nil
   if GlobalCardMode and GlobalCardMode>2 then
     local level = GlobalCardMode
     GlobalCardMode = nil
-    return Add(cards,PRIO_TOFIELD,1,FilterLevel,level)
+    result = Add(cards,PRIO_TOFIELD,1,FilterLevel,level)
   elseif GlobalCardMode == 2 then
     GlobalCardMode = nil
-    return Add(cards,PRIO_TOFIELD,1,FilterAttack,AI.GetPlayerLP(2)-ExpectedDamage(2))
+    result = Add(cards,PRIO_TOFIELD,1,FilterAttack,AI.GetPlayerLP(2)-ExpectedDamage(2))
   elseif GlobalCardMode == 1 then
     local id = GlobalTargetID
     GlobalCardMode = nil
     GlobalTargetID = nil
-    return {IndexByID(cards,id)}
+    result = {IndexByID(cards,id)}
   else
-    return Add(cards,PRIO_TOFIELD)
+    result = Add(cards,PRIO_TOFIELD,1,TargetCheck)
   end
+  if cards[1].prio then TargetSet(cards[1]) else TargetSet(cards[result[1]]) end
+  return result
 end
 function BoMTarget(cards)
   if GlobalCardMode == 1 then
@@ -296,6 +299,19 @@ function BoMTarget(cards)
   end
   return BestTargets(cards,1,TARGET_FACEDOWN)
 end
+function PleiadesTarget(cards)
+  if GlobalCardMode == 2 then
+    GlobalCardMode = 1
+    return BestTargets(cards,1,TARGET_TOGRAVE)
+  elseif GlobalCardMode == 1 then
+    local p = GlobalPlayer
+    GlobalCardMode = nil
+    GlobalPlayer = nil
+    return GlobalTarget(cards,p,true)
+  else
+  return BestTargets(cards,1,TARGET_TOHAND)
+  end
+end
 function GiantHandTarget(cards)
   if GlobalCardMode==1 then
     GlobalCardMode = nil
@@ -304,6 +320,7 @@ function GiantHandTarget(cards)
     return GlobalTarget(cards,2,true)
   end
 end
+
 function HATCard(cards,min,max,id,c)
   if c then
     id = c.id
@@ -326,8 +343,11 @@ function HATCard(cards,min,max,id,c)
   if id == 14087893 then -- Book of Moon
     return BoMTarget(cards)
   end
-  if id == 63746411 then -- Giant Hand
+  if id == 63746411 then 
     return GiantHandTarget(cards)
+  end
+  if id == 73964868 then 
+    return PleiadesTarget(cards)
   end
   return nil
 end
@@ -426,6 +446,7 @@ function MoonWhitelist(c) -- cards to use Book of Moon on as soon as they hit th
 end
 function MoonWhitelist2(id) -- cards to chain Book of Moon to to save your monsters
   return id == 29401950 or id == 44095762 -- Bottomless, Mirrorforce
+  or id == 70342110 -- DPrison
 end
 function MoonFilter(c)
   return bit32.band(c.type,TYPE_MONSTER)>0 and bit32.band(c.position,POS_FACEUP)>0 
@@ -461,7 +482,7 @@ function ChainBoM()
   cg = NegateCheck()
   if cg and Duel.GetCurrentChain()>1 then
 		if cg:IsExists(function(c) return c:IsControler(player_ai) end, 1, nil) then
-      local g=cg:Filter(MoonFilter2,player_ai):GetMaxGroup(Card.GetAttack)
+      local g=cg:Filter(MoonFilter2,nil,player_ai):GetMaxGroup(Card.GetAttack)
       if g then
         GlobalCardMode = 1
         GlobalTargetID = g:GetFirst():GetOriginalCode()
@@ -519,6 +540,54 @@ function ChainBoM()
     end
   end
 end
+function MirrorForceFilter(c)
+  return bit32.band(c.position,POS_FACEUP_ATTACK)>0 and DestroyFilter(c)
+end
+function ChainMirrorForce()
+  if not UnchainableCheck(44095762) then
+    return false
+  end
+  local source = Duel.GetAttacker()
+  if source and (CardsMatchingFilter(OppMon(),MirrorForceFilter)>1
+  or not source:IsHasEffect(EFFECT_INDESTRUCTABLE_EFFECT) and (WinsBattle(source,target)
+  or source:IsType(TYPE_XYZ+TYPE_FUSION+TYPE_RITUAL+TYPE_SYNCHRO) or source:GetLevel()>4
+  or source:GetAttack()>2000 or source:GetAttack()>=AI.GetPlayerLP(1)))
+  then
+    return true
+  end
+end
+function ChainDPrison()
+  if not UnchainableCheck(70342110) then
+    return false
+  end
+  local source = Duel.GetAttacker()
+  local target = Duel.GetAttackTarget()
+  if WinsBattle(source,target) or source:GetCode()==68535320 or source:GetCode()==95929069 
+  or source:IsType(TYPE_XYZ+TYPE_FUSION+TYPE_RITUAL+TYPE_SYNCHRO) or source:GetLevel()>4
+  or source:GetAttack()>2000 or source:GetAttack()>=AI.GetPlayerLP(1)
+  then
+    return true
+  end
+  return false
+end
+function ChainBottomless()
+  if not UnchainableCheck(29401950) then
+    return false
+  end
+  return true
+end
+function ChainTTHN()
+  if not UnchainableCheck(29616929) then
+    return false
+  end
+  return true
+end
+function ChainTrapHole()
+  if not UnchainableCheck(04206964) then
+    return false
+  end
+  return true
+end
 function ChainGiantHand()
   local e=Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
   local c=nil
@@ -534,7 +603,82 @@ function ChainGiantHand()
   end
   return false
 end
+function PleiadesFilter(c)
+  return c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
+end
+function PleiadesFilter2(c)
+  return PleiadesFilter(c) and not ToHandBlacklist(c.id) 
+  and (c.level>4 or bit32.band(c.type,TYPE_FUSION+TYPE_SYNCHRO+TYPE_RITUAL+TYPE_XYZ)>0)
+end
+function PleiadesRemovalFilter(c)
+  return not ((c:IsType(TYPE_FUSION+TYPE_SYNCHRO+TYPE_RITUAL+TYPE_XYZ) 
+  or c:IsHasEffect(EFFECT_SPSUMMON_CONDITION))
+  or ToHandBlacklist(c:GetCode()))
+  and not c:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET)
+end
+function ChainPleiades()
+  local targets = CardsMatchingFilter(OppMon(),PleiadesFilter)
+  local targets2 = CardsMatchingFilter(OppMon(),PleiadesFilter2)
+  if RemovalCheck(73964868) then
+    if Duel.GetOperationInfo(Duel.GetCurrentChain(),CATEGORY_TOHAND) and targets>0 
+    or targets2>0
+    then
+      return true
+    else
+      GlobalCardMode = 2
+      GlobalTargetID = 73964868
+      GlobalPlayer = 1
+      return true
+    end
+  end
+  if not UnchainableCheck(73964868) then
+    return false
+  end
+  if targets2 > 0 then
+    return true
+  end
+  cg = RemovalCheck()
+  if cg and not Duel.GetOperationInfo(Duel.GetCurrentChain(),CATEGORY_TOHAND) then
+		if cg:IsExists(function(c) return c:IsControler(player_ai) end, 1, nil) then
+      local g=cg:Filter(MoonFilter2,nil,player_ai):GetMaxGroup(Card.GetAttack)
+      if g then
+        GlobalCardMode = 2
+        GlobalTargetID = g:GetFirst():GetOriginalCode()
+        GlobalPlayer = 1
+        return true
+      end
+    end	
+  end
+  cg = NegateCheck()
+  if cg and Duel.GetCurrentChain()>1 then
+		if cg:IsExists(function(c) return c:IsControler(player_ai) end, 1, nil) then
+      local g=cg:Filter(MoonFilter2,nil,player_ai):GetMaxGroup(Card.GetAttack)
+      if g then
+        GlobalCardMode = 2
+        GlobalTargetID = g:GetFirst():GetOriginalCode()
+        GlobalPlayer = 1
+        return true
+      end
+    end	
+  end
+  if Duel.GetCurrentPhase()==PHASE_BATTLE and targets>0 then
+    local source=Duel.GetAttacker()
+    local target=Duel.GetAttackTarget()
+    if source and target and (WinsBattle(source,target) or source:GetCode()==68535320 or source:GetCode()==95929069)
+    and target:IsControler(player_ai)
+    then
+      GlobalCardMode = 2
+      GlobalTargetID = source:GetOriginalCode()
+      GlobalPlayer = 2
+      return true
+    end
+  end
+  return false
+end
 function HATChain(cards)
+  if HasIDNotNegated(cards,73964868) and ChainPleiades() then
+    return {1,CurrentIndex}
+  end
   if HasID(cards,91812341) then -- Traptrix Myrmeleo
     return {1,CurrentIndex}
   end
@@ -550,6 +694,21 @@ function HATChain(cards)
   if HasID(cards,29616929) then -- Traptrix Trap Hole Nightmare
     return {1,CurrentIndex}
   end
+  if HasID(cards,44095762) and ChainMirrorForce() then
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,70342110) and ChainDPrison() then
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,29401950) and ChainBottomless() then
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,29616929) and ChainTTHN() then
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,04206964) and ChainTrapHole() then
+    return {1,CurrentIndex}
+  end
   if HasID(cards,63746411) and ChainGiantHand() then -- Giant Hand
     return {1,CurrentIndex}
   end
@@ -559,6 +718,7 @@ function HATChain(cards)
   if HasID(cards,14087893) and ChainBoM() then
     return {1,CurrentIndex}
   end
+  return nil
 end
 function HATEffectYesNo(id,card)
   local result = nil

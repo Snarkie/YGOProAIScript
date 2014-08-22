@@ -292,9 +292,11 @@ NSBL={
 75878039,02273734,38667773,63274863,  -- Satellarknights Deneb,Altair,Vega,Sirius
 38331564,91110378,69293721,99365553,  -- Star Seraphs Scepter,Sovereign,Mermail Abyssgunde, Lightpulsar
 77558536,22624373,95503687,16404809,  -- LS Raiden, Lyla, Lumina, Kuribandit
-33420078,51858306,10802915,  -- Plaguespreader, Eclipse Wyvern, Tour Guide,
+33420078,51858306,10802915,16178681,  -- Plaguespreader, Eclipse Wyvern, Tour Guide,Odd-Eyes Pendulum Dragon
 04904812,68505803,91812341,45803070,  -- Genex Undine, Genex Controller, Traptrix Myrmeleo, Dioena
-68535320,95929069,84764038 -- Fire Hand, Ice Hand, Burning Abyss Scarm
+68535320,95929069,84764038,43241495, -- Fire Hand, Ice Hand, Burning Abyss Scarm, Performapal Trampolynx
+65518099,90885155,66496451,  -- Qliphort Tool, Shell, Disk
+91907707,27279764,37991342,  -- Qliphort Archive, Killer, Genome
 }
 function NormalSummonBlacklist(CardId) 
   for i=1,#NSBL do
@@ -353,6 +355,7 @@ SSBL={
 98012938,58504745,96381979, -- Vulcan, Cardinal, Tiger King
 74168099,37057743,88264978, -- Horse Prince, Lion Emperor, REDMD 
 47387961,23649496,02407234, -- Number 8, Number 18, Number 69
+47387961,23649496,02407234, -- Number 8, Number 18, Number 69
 11398059,22653490,34086406, -- King of the Feral Imps, Chidori, Lavalval Chain
 12014404,46772449,48739166, -- Gagaga Cowboy, Evilswarm Exciton Knight, SHArk Knight
 89856523,38495396,94380860, -- Kirin, Constellar Ptolemy M7, Ragna Zero
@@ -371,10 +374,12 @@ SSBL={
 93568288,56638325,42589641, -- Number 80,Delteros, Triveil
 17412721,38273745,21501505, -- Noden, ouroboros, Cairngorgon
 34408491,15561463,07391448, -- Beelze, Gauntlet Launcher, Goyo Guardian
-61901281,99234526, -- Collapserpent, Wyverbuster,
+61901281,99234526,84764038, -- Collapserpent, Wyverbuster, Scarm
 25460258,65192027,91499077, -- Darkflare Dragon, Dark Armed Dragon, Gagaga Samurai
-63746411,83531441, -- Giant Hand, Dante,
-84764038 -- Scarm
+63746411,83531441,16178681, -- Giant Hand, Dante,Odd-Eyes Pendulum Dragon
+65518099,90885155,66496451, -- Qliphort Tool, Shell, Disk
+91907707,27279764,37991342, -- Qliphort Archive, Killer, Genome
+43241495, -- Performapal Trampolynx
 }
 
 
@@ -477,7 +482,7 @@ end
 
 DestroyBL={
   07452945,14745409,23562407,83438826, --  Noble Arms of Destiny, Gallatin, Caliburn, Arfeudutyr
-  19337371,29223325,12444060 -- Hysteric Sign, Artifact Ignition, Sanctum
+  19337371,29223325,12444060,17639150, -- Hysteric Sign, Artifact Ignition, Sanctum, Qliphort Sacrifice
 }
 
 -----------------------------------------------------
@@ -533,7 +538,7 @@ Unchainable={
 58990631,72287557,86871614,84749824, -- Automatic laser, Chthonian Polymer, Cloning, Solem warning
 37412656,19665973,18964575,29223325, -- Hero blast, Battle Fader, Swift Scarecrow, Artifact Ignition
 12444060,85103922,12697630,77505534, -- Artifact Sanctum, Moralltach, Beagalltach, Facing the Shadows
-05318639,53582587,97077563,14087893 -- Mystical Space Typhoon, Torrential tribute, Call of the Haunted, Book of Moon
+05318639,53582587,97077563,14087893, -- Mystical Space Typhoon, Torrential tribute, Call of the Haunted, Book of Moon
 }
 function isUnchainableTogether(CardId)
   for i=1,#Unchainable do
@@ -642,7 +647,7 @@ ScriptedCards ={
 53129443,07165085,05318639,19613556,  -- Dark Hole, Bait Doll, Mystical Space Typhoon, Heavy Storm           
 31036355,93816465,09596126,01475311,  -- Swap, Zero Gardna,Chaos Sorcerer, Allure of darkness        
 53567095,74848038,04178474,16255442,  -- Icarus, Monster Reincarnation,Raigeki Break, Beckoning                  
-47387961,82732705,95503687,22624373,  -- #8 Genome, Sin Truth,Lumina, Lyla         
+47387961,82732705,95503687,22624373,  -- #8 Genome,Skill Drain,Lumina, Lyla         
 51452091,10026986,37742478,94283662,  -- Royal Decree, Worm King,Honest, Trance         
 57774843,53582587,55794644,500000090, -- Judgment Dragon, Torrential Tribute,Hyperion, Toon Kingdom 
 41420027,84749824,84013237,96216229,  -- Solemn Judgment, Solemn WarningNumber 39: Utopia, Gladiator Beast War Chariotthen
@@ -684,11 +689,13 @@ ScriptedCards ={
 56638325,42589641,38273745,21501505,  -- Stellarknights Delteros, Triveil,Evilswarm Ouroboros,Cairngorgon
 88264978,98777036,44330098,99365553,  -- REDMD, Tragoedia, Gorz, Lightpulsar
 61901281,99234526,77558536,16404809,  -- Wyverbuster, Collapserpent, LS Raiden, Kuribandit
-51858306,10802915,00691925,  -- Eclipse Wyvern, Tour Guide, Solar Recharge
-94886282,95992081,07391448,  -- Charge of the Light Brigade,Leviair, Goyo Guardian
+51858306,10802915,00691925,16178681,  -- Eclipse Wyvern, Tour Guide, Solar Recharge,Odd-Eyes Pendulum Dragon
+94886282,95992081,07391448,43241495,  -- Charge of the Light Brigade,Leviair, Goyo Guardian,Performapal Trampolynx
 25460258,04904812,91812341,45803070,  -- Darkflare Dragon, Genex Undine, Traptrix Myrmeleo,Dioena
 68535320,95929069,29616929,91499077,  -- Fire Hand, Ice Hand, Traptrix Trap Hole Nightmare, Gagaga Samurai
-63746411,83531441,84764038  -- Giant Hand, Dante, Scarm
+63746411,83531441,84764038,05851097,  -- Giant Hand, Dante, Scarm, Vanitys Emptiness
+65518099,90885155,66496451,37991342,  -- Qliphort Tool, Shell, Disk, Genome
+91907707,27279764,17639150,04450854,  -- Qliphort Archive, Killer, Sacrifice, Apoqliphort
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do

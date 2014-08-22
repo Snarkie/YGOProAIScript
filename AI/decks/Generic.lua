@@ -28,7 +28,7 @@ function SummonExtraDeck(cards,prio)
   if HasIDNotNegated(Activatable,39765958) and UseJeweledRDA(Activatable[CurrentIndex],0) then 
     return {COMMAND_ACTIVATE,CurrentIndex}                                -- Hot Red Dragon Archfiend
   end
-  if HasID(ActivatableCards,53129443) and UseDarkHole() then
+  if HasID(Activatable,53129443) and UseDarkHole() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   
@@ -267,7 +267,7 @@ function SummonPaladynamo()
   return false
 end
 function SummonLavalvalChain()
-  if DeckCheck(DECK_HAT) then
+  if DeckCheck(DECK_HAT) or DeckCheck(DECK_HERALDIC) then
     return false
   else
     return MP2Check() and OppGetStrongestAttDef()<1800 and #AIGrave()<10
@@ -352,25 +352,20 @@ end
 function UseBigEye()
   return true
 end
-function DarkHoleFilter(card)
-  return card:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0 and card:is_affected_by(EFFECT_IMMUNE)==0
-end
-function UseDarkHole(card)
+function UseDarkHole()
   local aimon=AIMon()
-  local AITargets=SubGroup(aimon,DarkHoleFilter)
-  local OppTargets=SubGroup(OppMon(),DarkHoleFilter)
-  local diff=#OppTargets-#AITargets
+  local AITargets=DestroyCheck(AIMon(),true)
+  local OppTargets=DestroyCheck(OppMon(),true)
+  local diff=OppTargets-AITargets
   if HasIDNotNegated(aimon,83994433,true) and GlobalStardustSparkActivation[aimon[CurrentIndex].cardid]~=Duel.GetTurnCount() then
     diff = diff+1
   end
   if HasIDNotNegated(AIST(),27243130,true) or HasID(AIHand(),27243130,true) then
     diff = diff+1
   end
-  ApplyATKBoosts(AITargets)
-  ApplyATKBoosts(OppTargets)
-  local AIAtt=Get_Card_Att_Def(AITargets,"attack",">",nil,"attack")
-  local OppAtt=Get_Card_Att_Def(OppTargets,"attack",">",nil,"attack")
-  return (#AITargets==0 and OppAtt >= 2000) or diff>1 or (OppAtt >= 2000 and diff<=1 and AIAtt-OppAtt < diff*500)
+  local AIAtt=AIGetStrongestAttack()
+  local OppAtt=OppGetStrongestAttDef()
+  return (AITargets==0 and OppAtt >= 2000) or diff>1 or (OppAtt >= 2000 and diff<=1 and AIAtt-OppAtt < diff*500)
 end
 function UseEmeral()
   return true

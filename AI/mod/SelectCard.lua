@@ -56,6 +56,10 @@ result = HATCard(cards, minTargets, maxTargets, triggeringID, triggeringCard)
 if result ~= nil then
   return result
 end
+result = QliphortCard(cards, minTargets, maxTargets, triggeringID, triggeringCard)
+if result ~= nil then
+  return result
+end
 result = {}
 
   --------------------------------------------
@@ -616,29 +620,6 @@ end
         end
      end
   
-  --------------------------------------------     
-  -- Select any material to detach.
-  --------------------------------------------   
-  if GlobalActivatedCardID == 73964868 then -- Constellar Pleiades
-    if GlobalCardMode == 1 then
-	GlobalCardMode = nil
-	for i=1,#cards do
-      if cards[i] ~= false then 
-         result[1] = i
-		  return result
-         end
-       end
-     end	
-   end	
-  --------------------------------------------     
-  -- Select Players strongest monster by attack points on the field.
-  --------------------------------------------   
-  if GlobalActivatedCardID == 73964868 then -- Constellar Pleiades
-    if GlobalCardMode == nil then 
-       GlobalActivatedCardID = nil
-       return Get_Card_Index(cards, 2, "Highest", TYPE_MONSTER, POS_FACEUP)
-      end
-   end
 
   --------------------------------------------     
   -- Select Players strongest monster by attack points on the field.

@@ -220,6 +220,12 @@ if not ExtraCheck then
   end
 end
 if not ExtraCheck then 
+  DeckCommand = QliphortInit(cards)
+  if DeckCommand ~= nil then
+    return DeckCommand[1],DeckCommand[2]
+  end
+end
+if not ExtraCheck then 
   DeckCommand = SummonExtraDeck(cards)
   if DeckCommand ~= nil then
     return DeckCommand[1],DeckCommand[2]
@@ -1323,21 +1329,6 @@ end
        end
      end
    end
-   
-  
-  ------------------------------------------
-  -- Activate "Constellar Pleiades"
-  -- if the enemy has a stronger monster
-  ------------------------------------------
-  for i=1,#ActivatableCards do
-    if ActivatableCards[i].id == 73964868 then  
-	  if Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") >= Get_Card_Att_Def(AIMon(),"defense",">",POS_FACEUP,"defense") then
-         GlobalActivatedCardID = ActivatableCards[i].id
-         GlobalCardMode = 1
-        return COMMAND_ACTIVATE,i
-      end
-    end
-  end
   
   
    -----------------------------------------------------
@@ -2319,7 +2310,7 @@ end
       end
     end
     for i=1,#setCards do
-      if (setThisTurn < 2 or DeckCheck(DECK_HAT)) and #AIST()<4
+      if (setThisTurn < 3 or DeckCheck(DECK_HAT)) and #AIST()<4
       and SetBlacklist(setCards[i].id)==0 
       and (bit32.band(setCards[i].type,TYPE_TRAP) > 0 
       or bit32.band(setCards[i].type,TYPE_QUICKPLAY) > 0 )then

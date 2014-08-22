@@ -10,17 +10,19 @@ DECK_MERMAIL      = 6
 DECK_SHADOLL      = 7
 DECK_TELLARKNIGHT = 8
 DECK_HAT          = 9
+DECK_QLIPHORT     = 10
 
 DeckIdent={ --card that identifies the deck
-[1]=99365553, -- Lightpulsar Dragon
-[2]=01662004, -- Firefist Spirit
-[3]=82293134, -- Heraldic Beast Leo
-[4]=05556499, -- Machina Fortress
-[5]=32339440, -- Bujin Yamato
-[6]=21954587, -- Mermail Abyssmegalo
-[7]=44394295, -- Shaddoll Fusion
-[8]=75878039, -- Satellarknight Deneb
-[9]=45803070  -- Traptrix Dionaea
+[1]   = 99365553, -- Lightpulsar Dragon
+[2]   = 01662004, -- Firefist Spirit
+[3]   = 82293134, -- Heraldic Beast Leo
+[4]   = 05556499, -- Machina Fortress
+[5]   = 32339440, -- Bujin Yamato
+[6]   = 21954587, -- Mermail Abyssmegalo
+[7]   = 44394295, -- Shaddoll Fusion
+[8]   = 75878039, -- Satellarknight Deneb
+[9]   = 45803070, -- Traptrix Dionaea
+[10]  = 65518099, -- Qliphort Tool
 }
 Deck = nil
 function DeckCheck(opt)
@@ -49,6 +51,24 @@ PRIO_DISCARD,PRIO_TODECK,PRIO_EXTRA = 7,7,7
 PRIO_BANISH = 9
 -- priority lists for decks:
 function PrioritySetup()
+AddPriority({
+--Qliphort:
+[65518099] = {9,4,1,1,1,1,5,3,1,1,ToolCond},          -- Qliphort Tool
+[27279764] = {5,2,4,1,1,1,1,1,1,1,KillerCond},        -- Apoqliphort Killer
+[90885155] = {6,2,4,2,1,1,2,1,1,1,ShellCond},         -- Qliphort Shell
+[66496451] = {7,2,4,2,1,1,3,1,1,1,DiskCond},          -- Qliphort Disk
+[37991342] = {6,3,3,1,1,1,1,1,1,1,GenomeCond},        -- Qliphort Genome
+[91907707] = {7,3,3,1,1,1,3,1,1,1,ArchiveCond},       -- Qliphort Archive
+[16178681] = {7,2,1,1,1,1,1,1,1,1,OddEyesCond},       -- Odd-Eyes Pendulum Dragon
+[43241495] = {5,1,1,1,1,1,1,1,1,1,LynxCond},          -- Performapal Trampolynx
+
+[79816536] = {9,4,1,1,1,1,1,1,1,1,nil},               -- Summoners Art
+[17639150] = {8,3,1,1,1,1,1,1,1,1,SacrificeCond},     -- Qliphort Sacrifice
+[04450854] = {5,2,1,1,1,1,1,1,1,1,ApoCond},           -- Apoqliphort
+[05851097] = {2,1,1,1,1,1,1,1,1,1,nil},               -- Vanitys Emptiness
+[82732705] = {2,1,1,1,1,1,1,1,1,1,nil},               -- Skill Drain
+})
+
 AddPriority({
 --Chaos Dragons
 [65192027] = {8,5,8,2,1,0,0,0,2,0,DADCond},           -- Dark Armed Dragon 
@@ -200,6 +220,11 @@ AddPriority({
 [91949988] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Gaia Dragon, the Thunder Charger
 [91499077] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Gagaga Samurai
 [63746411] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Giant Hand
+})
+AddPriority({
+--for backwards compatibility
+[05361647] = {1,1,1,1,9,1,1,1,1,1,nil},               -- Battlin' Boxer Glassjaw
+[68144350] = {1,1,1,1,5,1,1,1,1,1,nil},               -- Battlin' Boxer Switchhitter
 })
 end
 

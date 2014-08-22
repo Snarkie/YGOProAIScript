@@ -405,6 +405,15 @@ function BestTargets(cards,count,target,filter,immuneCheck)
         end
       end
     end
+    if bit32.band(cards[i].type,TYPE_FUSION+TYPE_RITUAL+TYPE_XYZ+TYPE_SYNCHRO)>0 then
+      cards[i].prio = cards[i].prio+2
+    end
+    if cards[i].level>4 then
+      cards[i].prio = cards[i].prio+1
+    end
+    if bit32.band(cards[i].position, POS_FACEUP_ATTACK)>0 then
+      cards[i].prio = cards[i].prio+1
+    end
     if (bit32.band(cards[i].position, POS_FACEUP)>0 or bit32.band(cards[i].status,STATUS_IS_PUBLIC)>0)
     and (target == TARGET_TOHAND and ToHandBlacklist(cards[i].id)   
     or target == TARGET_DESTROY and DestroyBlacklist(cards[i])
@@ -413,7 +422,7 @@ function BestTargets(cards,count,target,filter,immuneCheck)
       cards[i].prio = -1
     end
     if filter and not filter(cards[i]) then
-      cards[i].prio = 0
+      cards[i].prio = -1
     end
     if cards[i].owner == 1 then 
       cards[i].prio = -1 * cards[i].prio
@@ -464,6 +473,11 @@ function OPTCheck(id)
 end
 function OPTSet(id)
   OPT[id]=Duel.GetTurnCount()
+end
+-- used to keep track, if the OPT was reset willingly
+-- for example if the card was bounced back to the hand
+function OPTReset(id)
+  OPT[id]=0
 end
 -- used to keep track of how many cards with the same id got a priority request
 -- so the AI does not discard multiple Marksmen to kill one card, for example
@@ -535,4 +549,35 @@ function FilterAttack(c,attack)
 end
 function FilterID(c,id)
   return c.id==id
+end
+
+function ScaleCheck(p)
+  local cards=AIST()
+  local result = 0
+  local scale = {}
+  if p==2 then
+    cards=OppST()
+  end
+  for i=1,#cards do
+    if bit32.band(cards[i].type,TYPE_PENDULUM)>0 then
+      result = result + 1
+      --scale[result]= --missing function?
+    end
+  end
+  return result
+end
+
+
+GlobalTarget = {}
+-- function to prevent multiple cards to target the same card in the same chain
+function TargetCheck(card)
+  for i=1,#GlobalTarget do
+    if card and GlobalTarget[i]==card.cardid then
+      return false
+    end
+  end
+  return true
+end
+function TargetSet(card)
+  GlobalTarget[#GlobalTarget+1]=card.cardid
 end

@@ -113,6 +113,7 @@ require("ai.decks.Shadoll")
 require("ai.decks.Satellarknight")
 require("ai.decks.ChaosDragon")
 require("ai.decks.HAT")
+require("ai.decks.Qliphort")
 
 math.randomseed( require("os").time() )
 

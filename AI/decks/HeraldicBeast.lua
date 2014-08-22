@@ -1,7 +1,9 @@
 function HeraldicCount(cards)
   local result = 0
-  for i=1,#cards do
-    if cards[i].setcode==0x76 then result = result + 1 end
+  if cards then
+    for i=1,#cards do
+      if IsSetCode(cards[i].setcode,0x76) then result = result + 1 end
+    end
   end
   return result
 end
@@ -44,14 +46,15 @@ function UsePlainCoat()
   return result
 end
 function SummonPlainCoat()
-  return UsePlainCoat() or not(HasAccess(23649496)) and (HasID(AIHand(),92365601,true) or OppGetStrongestAttDef()<=2200)
+  return UsePlainCoat() or not(HasAccess(23649496)) and (HasID(AIHand(),92365601,true) 
+  or OppGetStrongestAttDef()<=2200) or not(HasAccess(23649496)) and Duel.GetCurrentPhase() == PHASE_MAIN2
 end
 function SummonGenomHeritage()
   return UseGenomHeritage()
 end
 function SummonChainHeraldic()
   return DeckCheck(DECK_HERALDIC) and not(HasAccess(82293134)) 
-  and MP2Check() and OppGetStrongestAttDef()<=1800
+  and MP2Check() and OppGetStrongestAttDef()<=1800 and not HasID(AIHand(),92365601,true)
 end
 function SummonLeo()
   return FieldCheck(4)==1 or FieldCheck(4)==0 and HasID(AIHand(),94656263)
@@ -65,53 +68,66 @@ end
 function UseAmphisbaena(card)
   if bit32.band(card.location,LOCATION_HAND)>0 then
     return Duel.CheckNormalSummonActivity(player_ai) and FieldCheck(4)==1 
-    or HeraldicCanXYZ() and HasID(AIHand(),82293134) and HeraldicCount(AIHand())==2 and FieldCheck(4)==0
+    and (not HasID(AIHand(),82293134) or OPTCheck(82293134))
+    or HeraldicCanXYZ() and FieldCheck(4)==0 
+    and (HasID(AIHand(),82293134) and OPTCheck(82293134) 
+    or HeraldicCount(AIHand())>0)
+    and not HasID(AIHand(),94656263,true)
+    and not(HeraldicCount(AIGrave())>0 and HasID(AIHand(),84220251))
   else
     return false
   end
 end
 function UseAberconway()
-  local hand = AIHand()
-  return #hand <= 4 or HeraldicCount(hand)<=2
+  return #AIHand() <= 4 or HeraldicCount(AIHand())<=2
 end
 function UseHeraldryReborn()
-  return Duel.CheckNormalSummonActivity(player_ai) and FieldCheck(4)==1
+  return FieldCheck(4)==1 and (HeraldicCount(AIHand())==0 
+  or Duel.CheckNormalSummonActivity(player_ai))
 end
 function C101Filter(c)
-	return bit.band(c:GetSummonType(),SUMMON_TYPE_SPECIAL)>0 and not c:IsType(TYPE_TOKEN) 
+	return bit32.band(c.summon_type,SUMMON_TYPE_SPECIAL)>0 
+  and bit32.band(c.type,TYPE_TOKEN)==0
+  and c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
 end
 function UseC101()
-  return Duel.IsExistingMatchingCard(C101Filter,1-player_ai,LOCATION_MZONE,0,1,nil)
+  return CardsMatchingFilter(OppMon(),C101Filter)>0
+end
+function SummonC101()
+  return HasID(AIExtra(),12744567,true) and UseC101() 
+  and (HasID(AIGrave(),48739166) or CardsMatchingFilter(AIMon(),UsedSHarkFilter)>0)
 end
 function UsedSHarkFilter(c)
   return c.id == 48739166 and c.xyz_material_count < 2
 end
 function UseRUM()
-  return HasID(AIMon(),23649496) or (HasID(AIGrave(),48739166) or CardsMatchingFilter(AIMon(),UsedSHarkFilter)>0) and UseC101()
+  return HasID(AIMon(),23649496,true) 
+  or HasID(AIMon(),48739166,true) and SummonC101()
 end
 function UseTwinEagle()
   local cards=AIMon()
   for i=1,#cards do
     if cards[i].id==48739166 and cards[i].xyz_material_count==0 
-    and SummonSharkKnight() then
+    and SummonSharkKnight() and NotNegated(cards[i]) then
       return true
     end
     if cards[i].id==23649496 and cards[i].xyz_material_count==0 
-    and (UsePlainCoat() and cards[i]:is_affected_by(EFFECT_DISABLE_EFFECT)==0 
-    and cards[i]:is_affected_by(EFFECT_DISABLE)==0 
+    and (UsePlainCoat() and NotNegated(cards[i])
     or HasID(AIHand(),92365601) and HasID(AIGrave(),82293134)) then
       return true
     end
-    if cards[i].id==34086406 and cards[i].xyz_material_count==0
+    if cards[i].id==34086406 and cards[i].xyz_material_count==0 and NotNegated(cards[i])
     and OPTCheck(82293134) then
       return true
     end
-    if cards[i].id==94380860 and SummonRagnaZero() 
+    if cards[i].id==94380860 and SummonRagnaZero() and NotNegated(cards[i])
     and cards[i].xyz_material_count==0 then
-      return IndexByID(cards,94380860)
+      return true
     end
-    if cards[i].id==55888045 or cards[i].id==12744567
-    and cards[i].xyz_material_count==0 then
+    if (cards[i].id==55888045 or cards[i].id==12744567 
+    or cards[i].original_id==47387961) and NotNegated(cards[i])
+    and cards[i].xyz_material_count==0 
+    then
       return true
     end
   end
@@ -124,6 +140,9 @@ function GenomHeritageFilter(c)
 end
 function UseGenomHeritage() 
   return CardsMatchingFilter(OppMon(),GenomHeritageFilter)>0
+end
+function UseAHA()
+  return OverExtendCheck() and FieldCheck(4)<2
 end
 function HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local Activatable = cards.activatable_cards
@@ -148,7 +167,7 @@ function HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Activatable,23649496) and UsePlainCoat() then
-    GlobalCardMode = 2
+    GlobalPlainCoat = 2
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(SpSummonable,65367484) then -- Photon Thrasher
@@ -168,6 +187,7 @@ function HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_ACTIVATE,IndexByID(Activatable,19310321)}
   end
   if HasID(Activatable,92365601) and UseRUM() then   -- Rank-Up Magic - Limited Barian's Force
+    GlobalCardMode = 1
     return {COMMAND_ACTIVATE,IndexByID(Activatable,92365601)}
   end
   if HasID(Activatable,84220251) and UseHeraldryReborn() then 
@@ -224,8 +244,8 @@ function HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(Summonable,60316373) then   -- Aberconway
     return {COMMAND_SUMMON,IndexByID(Summonable,60316373)}
   end
-  if HasID(Activatable,61314842) and OverExtendCheck() then 
-  -- AHA, activate after most summons are done for the overextension check
+  if HasID(Activatable,61314842) and UseAHA() then 
+    GlobalCardMode = 2
     return {COMMAND_ACTIVATE,IndexByID(Activatable,61314842)}
   end
   if HasID(SetableMon,82293134) then   -- Leo
@@ -240,6 +260,7 @@ function HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   return nil
 end
 GlobalLeoCheck = 0
+GlobalUnicornCheck = 0
 function HeraldicToGravePriority(card)
   local id=card.id
   if id==90411554 then
@@ -259,9 +280,10 @@ function HeraldicToGravePriority(card)
     end
   end
   if id==45705025 then
-    if HasID(AIGrave(),id) then
+    if HasID(AIGrave(),id) or Duel.GetTurnCount()==GlobalUnicornCheck then
       return 4
     else
+      GlobalUnicornCheck=Duel.GetTurnCount()
       return 7
     end
   end
@@ -276,7 +298,7 @@ function HeraldicToGravePriority(card)
   if card.attribute==ATTRIBUTE_EARTH then 
     return 2 
   end
-  return 1
+  return GetPriority(card,PRIO_TOGRAVE)
 end
 function HeraldicAssignPriority(cards,toLocation)
   local func = nil
@@ -408,13 +430,15 @@ function ImpKingTarget(cards)
     if result then return result end
     return {math.random(#cards)}
 end
-function PlainCoatTarget(cards)
+function PlainCoatTarget(cards,min)
     local result = nil
-    local e=Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
-    local c=Duel.GetFirstTarget()
-    if e and e:GetActivateLocation()==LOCATION_GRAVE then 
+    if GlobalPlainCoat == 2 then 
+      GlobalPlainCoat = nil
       result = HeraldicToGrave(cards,2)
-    elseif c then
+    elseif GlobalPlainCoat == 1 then
+      GlobalPlainCoat = nil
+      result = HeraldicToGrave(cards,1)
+    else
       for i=1,#cards do
         if cards[i].owner == 1 and HasID(OppMon(),cards[i].id)
         or cards[i].owner == 2 and not HasID(AIMon(),cards[i].id)
@@ -422,11 +446,9 @@ function PlainCoatTarget(cards)
           result = {i}
         end
       end
-    else
-      result = HeraldicToGrave(cards,1)
     end
     if result then return result end
-    return {math.random(#cards)}
+    return HeraldicToGrave(cards,min)
 end
 function AberconwayTarget(cards)
   local result=nil
@@ -460,33 +482,34 @@ function LanceTarget(cards)
     local filter = function(c) return c.id==GlobalTargetID and c.owner==GlobalPlayer end
     result=RandomIndexFilter(cards,filter)
     GlobalTargetID=nil
-    GlobalPlayer=nil
+    GlobalPlayer=nily
   end  
   if result == nil then result={math.random(#cards)} end
   return result
 end
 function RUMTarget(cards)
-  local c=Duel.GetFirstTarget()
-  local cg=Duel.GetMatchingGroup(nil,1-player_ai,LOCATION_MZONE,0,nil)
-  local g = cg:GetMaxGroup(Card.GetAttack)
   local result = nil
-  if c then
-    if c:IsCode(48739166) then
+  if GlobalCardMode == 1 then
+    GlobalCardMode = nil
+    if HasID(cards,48739166) and UseC101() then
+      GlobalRUMTarget = 48739166
+      result = CurrentIndex
+    end
+    if HasID(cards,23649496) then
+      GlobalRUMTarget = 23649496
+      result = CurrentIndex
+    end
+  else
+    if SummonC101() then
       result = IndexByID(cards,12744567)
     else
-      if Chance(50) or g and g:GetFirst():GetAttack()>2600 then
+      if OppGetStrongestAttDef()>2600 or #OppMon()==0 and Duel.GetTurnCount()>1 then
         result = IndexByID(cards,11522979)
       else
         result = IndexByID(cards,55888045)
       end
     end
-  else
-    if HasID(cards,48739166) and UseC101() then
-      result = IndexByID(cards,48739166)
-    end
-    if HasID(cards,23649496) then
-      result = CurrentIndex
-    end
+    GlobalRUMTarget = nil
   end
   if result == nil then result = math.random(#cards) end
   return {result}
@@ -501,58 +524,54 @@ function ChidoriCheck(cards)
   return result>=2
 end
 function AHATarget(cards)
- local c=Duel.GetFirstTarget()
- local result=nil
- if c then
-  if HasID(cards,23649496) and not HasID(AIMon(),23649496) then
-    result=IndexByID(cards,23649496)
-  end
-  if HasID(cards,12014404) and SummonCowboyAtt() then
-    result=IndexByID(cards,12014404)
-  end
-  if HasID(cards,34086406) and SummonChainHeraldic() then
-    result=IndexByID(cards,34086406)
-  end
-  if HasID(cards,11398059) and SummonImpKing() then
-    result=IndexByID(cards,11398059)
-  end
-  if HasID(cards,23649496) and SummonPlainCoat() then
-    result=IndexByID(cards,23649496)
-  end
-  if HasID(cards,48739166) and SummonSharkKnight() then 
-    result=IndexByID(cards,48739166)
-  end
-  if HasID(cards,22653490) and SummonChidori() then
-    result=IndexByID(cards,22653490)
-  end
-  if HasID(cards,94380860) and SummonRagnaZero() then
-    result=IndexByID(cards,94380860)
-  end
-  if HasID(cards,61344030) and SummonPaladynamo() then
-    result=IndexByID(cards,61344030)
-  end 
-  if HasID(cards,47387961) and SummonGenomHeritage() then
-    result=IndexByID(cards,47387961)
-  end
-  if HasID(cards,46772449) and SummonBelzebuth() then
-    result=IndexByID(cards,46772449)
-  end  
-  if HasID(cards,12014404) and SummonCowboyDef() then
-    result=IndexByID(cards,12014404)
-  end
-  if result == nil then result=math.random(#cards) end
-  return {result}
- else
-  --[[if SummonChidori() then 
-    for i=1,#cards do
-      if bit32.band(cards[i].attribute,ATTRIBUTE_WIND)>0 then
-        result = {i}
-      end
+  local result = nil
+  if GlobalCardMode == 2 then
+    GlobalCardMode = 1
+    result = HeraldicToField(cards,1)
+  elseif GlobalCardMode == 1 then
+    GlobalCardMode = nil
+    result = HeraldicToField(cards,1)
+  else
+    if HasID(cards,23649496) and not HasID(AIMon(),23649496) then
+      result=IndexByID(cards,23649496)
+    end
+    if HasID(cards,12014404) and SummonCowboyAtt() then
+      result=IndexByID(cards,12014404)
+    end
+    if HasID(cards,34086406) and SummonChainHeraldic() then
+      result=IndexByID(cards,34086406)
+    end
+    if HasID(cards,11398059) and SummonImpKing() then
+      result=IndexByID(cards,11398059)
+    end
+    if HasID(cards,23649496) and SummonPlainCoat() then
+      result=IndexByID(cards,23649496)
+    end
+    if HasID(cards,48739166) and SummonSharkKnight() then 
+      result=IndexByID(cards,48739166)
+    end
+    if HasID(cards,22653490) and SummonChidori() then
+      result=IndexByID(cards,22653490)
+    end
+    if HasID(cards,94380860) and SummonRagnaZero() then
+      result=IndexByID(cards,94380860)
+    end
+    if HasID(cards,61344030) and SummonPaladynamo() then
+      result=IndexByID(cards,61344030)
     end 
-  end]]
-  if result == nil then result = HeraldicToField(cards,1) end
+    if HasID(cards,47387961) and SummonGenomHeritage() then
+      result=IndexByID(cards,47387961)
+    end
+    if HasID(cards,46772449) and SummonBelzebuth() then
+      result=IndexByID(cards,46772449)
+    end  
+    if HasID(cards,12014404) and SummonCowboyDef() then
+      result=IndexByID(cards,12014404)
+    end
+    result = {result}
+  end
+  if result == nil or #result==0 then result={math.random(#cards)} end
   return result
- end
 end
 function TwinEagleTarget(cards,minTargets)
  local result=nil
@@ -697,12 +716,13 @@ function HeraldicOnSelectCard(cards, minTargets, maxTargets, triggeringID, trigg
     return PaladynamoTarget(cards,minTargets)
   end
   if triggeringID == 23649496 then -- Plain Coat
-    return PlainCoatTarget(cards)
+    return PlainCoatTarget(cards,minTargets)
   end
   if triggeringID == 81439173 then -- Foolish Burial 
     return FoolishTarget(cards)
   end
   if triggeringID == 82293134 then -- Leo
+    OPTSet(82293134)
     return {HeraldicToHand(cards)}
   end
   if triggeringID == 45705025 then -- Unicorn
@@ -739,20 +759,34 @@ function HeraldicOnSelectCard(cards, minTargets, maxTargets, triggeringID, trigg
   return nil
 end
 GlobalC106=0
-function ChainPlainCoat()
-  result = true
-  local effect
-  for i=1,Duel.GetCurrentChain() do
-    effect = Duel.GetChainInfo(i, CHAININFO_TRIGGERING_EFFECT)
-    if effect and effect:GetHandler():GetCode()==23649496 then
-      result=false
+function ChainPlainCoat(c)
+  if bit32.band(c.location,LOCATION_GRAVE)>0 then
+    for i=1,Duel.GetCurrentChain() do
+      effect = Duel.GetChainInfo(i, CHAININFO_TRIGGERING_EFFECT)
+      if effect and effect:GetHandler():GetCode()==82293134 then
+        OPTSet(82293134)
+      end
+    end
+    GlobalPlainCoat = 2
+    return true
+  else
+    local result = true
+    local effect
+    for i=1,Duel.GetCurrentChain() do
+      effect = Duel.GetChainInfo(i, CHAININFO_TRIGGERING_EFFECT)
+      if effect and effect:GetHandler():GetCode()==23649496 then
+        result=false
+      end
+    end
+    effect = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
+    if effect and effect:IsHasCategory(CATEGORY_DISABLE+CATEGORY_NEGATE) then 
+      result = true 
+    end
+    if result and UsePlainCoat() then
+      GlobalPlainCoat = 1
+      return true
     end
   end
-  effect = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
-  if effect and effect:IsHasCategory(CATEGORY_DISABLE+CATEGORY_NEGATE) then 
-    result = true 
-  end
-  return result and UsePlainCoat() 
 end
 function SafeZoneFilter(card)
   return card:IsControler(player_ai) and card:IsType(TYPE_MONSTER) 
@@ -883,7 +917,7 @@ end
 
 
 function HeraldicOnSelectChain(cards,only_chains_by_player)
-  if HasIDNotNegated(cards,23649496) and ChainPlainCoat() then
+  if HasIDNotNegated(cards,23649496) and ChainPlainCoat(cards[CurrentIndex]) then
     return {1,CurrentIndex}
   end
   if HasID(cards,38296564) and ChainSafeZone() then
@@ -911,7 +945,10 @@ function HeraldicOnSelectOption(options)
 end
 function HeraldicOnSelectEffectYesNo(id,triggeringCard)
   local result = nil
-  if id == 23649496 or id == 11522979 or id == 12744567 then
+  if id == 23649496 and ChainPlainCoat(triggeringCard) then
+    result = 1
+  end
+  if id == 11522979 or id == 12744567 then
     result = 1
   end
   if id == 82293134 then

@@ -11,8 +11,13 @@
 --		1 = yes, chain a card
 --		0 = no, don't chain
 -- index = index of the chain
-
+GlobalChain = 0
 function OnSelectChain(cards,only_chains_by_player,forced)
+  if Duel.GetCurrentChain()<=GlobalChain then
+    GlobalTarget = {} -- reset for new chain
+  else
+    GlobalChain=Duel.GetCurrentChain()
+  end
   local result = 0
   local index = 1
   local ChainAllowed = 0
@@ -50,6 +55,10 @@ if result ~= nil then
   return result[1],result[2]
 end
 result=HATChain(cards)
+if result ~= nil then
+  return result[1],result[2]
+end
+result=QliphortChain(cards)
 if result ~= nil then
   return result[1],result[2]
 end
@@ -487,20 +496,6 @@ end
      end
    end
  end
-  
-  ------------------------------------------
-  -- Activate "Constellar Pleiades"
-  -- if the enemy has a stronger monster
-  ------------------------------------------
-  for i=1,#cards do
-    if cards[i].id == 73964868 and UnchainableCheck(73964868) then  
-	  if Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") >= Get_Card_Att_Def(AIMon(),"defense",">",POS_FACEUP,"defense") then
-         GlobalActivatedCardID = cards[i].id
-         GlobalCardMode = 1
-        return 1,i
-      end
-    end
-  end
 	          
   ---------------------------------------------
   -- AI should activate: Amazoness Archers, 
