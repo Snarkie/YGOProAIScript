@@ -14,7 +14,7 @@
 GlobalChain = 0
 function OnSelectChain(cards,only_chains_by_player,forced)
   if Duel.GetCurrentChain()<=GlobalChain then
-    GlobalTarget = {} -- reset for new chain
+    GlobalTargetList = {} -- reset for new chain
   else
     GlobalChain=Duel.GetCurrentChain()
   end

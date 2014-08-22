@@ -568,16 +568,16 @@ function ScaleCheck(p)
 end
 
 
-GlobalTarget = {}
+GlobalTargetList = {}
 -- function to prevent multiple cards to target the same card in the same chain
 function TargetCheck(card)
-  for i=1,#GlobalTarget do
-    if card and GlobalTarget[i]==card.cardid then
+  for i=1,#GlobalTargetList do
+    if card and GlobalTargetList[i]==card.cardid then
       return false
     end
   end
   return true
 end
 function TargetSet(card)
-  GlobalTarget[#GlobalTarget+1]=card.cardid
+  GlobalTargetList[#GlobalTargetList+1]=card.cardid
 end
