@@ -542,7 +542,7 @@ end
   -- skip, if not handled here
   ---------------------------------------------
   for i=1,#cards do 
-    if MandatoryCheck(c) then
+    if MandatoryCheck(cards[i]) then
       return 1,i
     end
   end  

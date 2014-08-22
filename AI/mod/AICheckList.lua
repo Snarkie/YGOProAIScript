@@ -444,7 +444,8 @@ function ToHandBlacklist(id) -- cards to not return to your opponent's hand
 end
 
 ToHandBL={
-  70095154,57774843,92841002 -- Cyber Dragon, JD, Mythic Water Dragon
+  70095154,57774843,92841002, -- Cyber Dragon, JD, Mythic Water Dragon
+  77901552  -- Tefnuit
 }
 
 function DestroyBlacklist(c) -- cards to not destroy in your opponent's possession
@@ -539,6 +540,7 @@ Unchainable={
 37412656,19665973,18964575,29223325, -- Hero blast, Battle Fader, Swift Scarecrow, Artifact Ignition
 12444060,85103922,12697630,77505534, -- Artifact Sanctum, Moralltach, Beagalltach, Facing the Shadows
 05318639,53582587,97077563,14087893, -- Mystical Space Typhoon, Torrential tribute, Call of the Haunted, Book of Moon
+78474168,50078509 -- Breakthrough Skill, Fiendish Chain
 }
 function isUnchainableTogether(CardId)
   for i=1,#Unchainable do
