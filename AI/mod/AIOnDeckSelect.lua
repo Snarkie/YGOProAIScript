@@ -53,17 +53,17 @@ PRIO_BANISH = 9
 function PrioritySetup()
 AddPriority({
 --Qliphort:
-[65518099] = {9,4,1,1,1,1,5,3,1,1,ToolCond},          -- Qliphort Tool
-[27279764] = {5,2,4,1,1,1,1,1,1,1,KillerCond},        -- Apoqliphort Killer
-[90885155] = {6,2,4,2,1,1,2,1,1,1,ShellCond},         -- Qliphort Shell
-[66496451] = {7,2,4,2,1,1,3,1,1,1,DiskCond},          -- Qliphort Disk
-[37991342] = {6,3,3,1,1,1,1,1,1,1,GenomeCond},        -- Qliphort Genome
-[91907707] = {7,3,3,1,1,1,3,1,1,1,ArchiveCond},       -- Qliphort Archive
+[65518099] = {9,4,1,1,5,1,7,5,1,1,ToolCond},          -- Qliphort Tool
+[27279764] = {5,2,1,1,1,1,1,1,1,1,KillerCond},        -- Apoqliphort Killer
+[90885155] = {6,2,4,2,2,1,3,1,1,1,ShellCond},         -- Qliphort Shell
+[64496451] = {7,2,4,2,2,1,4,1,1,1,DiskCond},          -- Qliphort Disk
+[37991342] = {5,3,7,3,8,4,1,1,1,1,GenomeCond},        -- Qliphort Genome
+[91907707] = {5,3,6,3,9,4,2,1,1,1,ArchiveCond},       -- Qliphort Archive
 [16178681] = {7,2,1,1,1,1,1,1,1,1,OddEyesCond},       -- Odd-Eyes Pendulum Dragon
 [43241495] = {5,1,1,1,1,1,1,1,1,1,LynxCond},          -- Performapal Trampolynx
 
-[79816536] = {9,4,1,1,1,1,1,1,1,1,nil},               -- Summoners Art
-[17639150] = {8,3,1,1,1,1,1,1,1,1,SacrificeCond},     -- Qliphort Sacrifice
+[79816536] = {9,4,1,1,1,1,1,1,1,1,SummonersCond},     -- Summoners Art
+[17639150] = {8,2,1,1,1,1,1,1,1,1,SacrificeCond},     -- Qliphort Sacrifice
 [04450854] = {5,2,1,1,1,1,1,1,1,1,ApoCond},           -- Apoqliphort
 [05851097] = {2,1,1,1,1,1,1,1,1,1,nil},               -- Vanitys Emptiness
 [82732705] = {2,1,1,1,1,1,1,1,1,1,nil},               -- Skill Drain
@@ -270,6 +270,9 @@ function AssignPriority(cards,loc,filter,opt)
     end
     if loc==PRIO_TOFIELD and cards[i].location==LOCATION_DECK then
       cards[i].prio=cards[i].prio+2
+    end
+    if loc==PRIO_TOFIELD and cards[i].location==LOCATION_EXTRA then
+      cards[i].prio=cards[i].prio+5
     end
     --if loc==PRIO_GRAVE and cards[i].location==LOCATION_ONFIELD then
       --cards[i].prio=cards[i].prio-1

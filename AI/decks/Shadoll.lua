@@ -717,7 +717,7 @@ end
 function ChainFacingTheShadows()
   local result = false
   local e = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
-  if RemovalCheck(77505534)  then 
+  if RemovalCheck(77505534) then 
     result = true
   end
   if RemovalCheck(37445295) and UseFalcon() then
@@ -759,6 +759,7 @@ function ChainFacingTheShadows()
     end
   end
   if result and e then
+    c = e:GetHandler()
     result = (c and c:GetCode()~=12697630)
   end
   return result
@@ -894,7 +895,7 @@ function ChainMST()
   if e then
     local c = e:GetHandler()
     if (c:IsType(TYPE_CONTINUOUS+TYPE_EQUIP+TYPE_FIELD) or
-    c:IsType(TYPE_PENDULUM) and ScaleCheck(2)>1 or c:GetCode()==65518099)
+    c:IsType(TYPE_PENDULUM) and ScaleCheck(2)==true or c:GetCode()==65518099)
     and c:IsControler(1-player_ai)
     and targets>0
     and c:IsLocation(LOCATION_ONFIELD)
@@ -960,7 +961,7 @@ function ChainIgnition()
   if e then
     local c = e:GetHandler()
     if (c:IsType(TYPE_CONTINUOUS+TYPE_EQUIP+TYPE_FIELD) or
-    c:IsType(TYPE_PENDULUM) and ScaleCheck(2)>1 or c:GetCode()==65518099)
+    c:IsType(TYPE_PENDULUM) and ScaleCheck(2)==true or c:GetCode()==65518099)
     and c:IsControler(1-player_ai)
     and targets>0
     and c:IsLocation(LOCATION_ONFIELD)

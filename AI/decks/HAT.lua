@@ -108,8 +108,11 @@ function CanUseHand()
   and Duel.GetCurrentPhase()==PHASE_MAIN1 and GlobalBPAllowed
 end
 GlobalDuality = 0
+function VanityFilter(c)
+  return c.id == 05851097 and bit32.band(c.position,POS_FACEUP)>0
+end
 function DualityCheck()
-  return Duel.GetTurnCount()~=GlobalDuality
+  return Duel.GetTurnCount()~=GlobalDuality and CardsMatchingFilter(UseLists({AIST(),OppST()}),VanityFilter)==0
 end
 function UseDuality()
   return not (CanUseHand() or FieldCheck(4)>1 or FieldCheck(5)>1
@@ -541,7 +544,7 @@ function ChainBoM()
   end
 end
 function MirrorForceFilter(c)
-  return bit32.band(c.position,POS_FACEUP_ATTACK)>0 and DestroyFilter(c)
+  return bit32.band(c.position,POS_FACEUP_ATTACK)>0 and DestroyFilter(c,true)
 end
 function ChainMirrorForce()
   if not UnchainableCheck(44095762) then

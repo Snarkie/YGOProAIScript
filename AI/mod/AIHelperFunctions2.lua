@@ -550,8 +550,13 @@ end
 function FilterID(c,id)
   return c.id==id
 end
-
-function ScaleCheck(p)
+function FilterPosition(c,pos)
+  return bit32.band(c.position,pos)>0
+end
+function FilterLocation(c,loc)
+  return bit32.band(c.location,loc)>0
+end
+--[[function ScaleCheck(p)
   local cards=AIST()
   local result = 0
   local scale = {}
@@ -565,7 +570,7 @@ function ScaleCheck(p)
     end
   end
   return result
-end
+end]]
 
 
 GlobalTargetList = {}
@@ -580,4 +585,8 @@ function TargetCheck(card)
 end
 function TargetSet(card)
   GlobalTargetList[#GlobalTargetList+1]=card.cardid
+end
+
+function PendulumCheck(c)
+  return bit32.band(c.type,TYPE_PENDULUM)>0 and bit32.band(c.location,LOCATION_SZONE)>0
 end

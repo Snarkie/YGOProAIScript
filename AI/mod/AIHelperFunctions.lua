@@ -1648,11 +1648,38 @@ function ApplyATKBoosts(Cards)
     if check then
       for i=1,#Cards do
         if Cards[i].owner==1 
-        and Cards[i]:is_affected_by(EFFECT_IMMUNE_EFFECT)==0
+        and (Cards[i]:is_affected_by(EFFECT_IMMUNE_EFFECT)==0
+        or QliphortFilter(Cards[i],27279764))
         and Cards[i]:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
         then
-          Cards[i].attack = Cards[i].attack+400
-          Cards[i].bonus = 400
+          Cards[i].attack = Cards[i].attack+400+QliphortAttackBonus(Cards[i].id,Cards[i].level)
+          Cards[i].bonus = 400+QliphortAttackBonus(Cards[i].id,Cards[i].level)
+        end
+      end
+    end
+  end 
+  
+  ------------------------------------------
+  -- Apply attack bonuses monster get for Skill Drain
+  ------------------------------------------
+  if #Cards > 0 then
+    local ST = AIST()
+    local check = false
+    for i=1,#ST do
+      if ST[i].id == 82732705 and bit32.band(ST[i].status,STATUS_SET_TURN)==0 
+      and AI.GetPlayerLP(1)>1000 and not SkillDrainCheck
+      then
+        check = true
+      end
+    end
+    if check then
+      for i=1,#Cards do
+        if Cards[i].owner==1 
+        and (Cards[i]:is_affected_by(EFFECT_IMMUNE_EFFECT)==0
+        or QliphortFilter(Cards[i],27279764))
+        and NotNegated(Cards[i])
+        then
+          Cards[i].attack = Cards[i].attack+QliphortAttackBonus(Cards[i].id,Cards[i].level)
         end
       end
     end

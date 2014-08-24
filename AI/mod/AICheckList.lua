@@ -295,7 +295,7 @@ NSBL={
 33420078,51858306,10802915,16178681,  -- Plaguespreader, Eclipse Wyvern, Tour Guide,Odd-Eyes Pendulum Dragon
 04904812,68505803,91812341,45803070,  -- Genex Undine, Genex Controller, Traptrix Myrmeleo, Dioena
 68535320,95929069,84764038,43241495, -- Fire Hand, Ice Hand, Burning Abyss Scarm, Performapal Trampolynx
-65518099,90885155,66496451,  -- Qliphort Tool, Shell, Disk
+65518099,90885155,64496451,  -- Qliphort Tool, Shell, Disk
 91907707,27279764,37991342,  -- Qliphort Archive, Killer, Genome
 }
 function NormalSummonBlacklist(CardId) 
@@ -377,7 +377,7 @@ SSBL={
 61901281,99234526,84764038, -- Collapserpent, Wyverbuster, Scarm
 25460258,65192027,91499077, -- Darkflare Dragon, Dark Armed Dragon, Gagaga Samurai
 63746411,83531441,16178681, -- Giant Hand, Dante,Odd-Eyes Pendulum Dragon
-65518099,90885155,66496451, -- Qliphort Tool, Shell, Disk
+65518099,90885155,64496451, -- Qliphort Tool, Shell, Disk
 91907707,27279764,37991342, -- Qliphort Archive, Killer, Genome
 43241495, -- Performapal Trampolynx
 }
@@ -696,7 +696,7 @@ ScriptedCards ={
 25460258,04904812,91812341,45803070,  -- Darkflare Dragon, Genex Undine, Traptrix Myrmeleo,Dioena
 68535320,95929069,29616929,91499077,  -- Fire Hand, Ice Hand, Traptrix Trap Hole Nightmare, Gagaga Samurai
 63746411,83531441,84764038,05851097,  -- Giant Hand, Dante, Scarm, Vanitys Emptiness
-65518099,90885155,66496451,37991342,  -- Qliphort Tool, Shell, Disk, Genome
+65518099,90885155,64496451,37991342,  -- Qliphort Tool, Shell, Disk, Genome
 91907707,27279764,17639150,04450854,  -- Qliphort Archive, Killer, Sacrifice, Apoqliphort
 }
 function CardIsScripted(CardId)

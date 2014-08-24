@@ -526,11 +526,11 @@ end
   -- only if AI's monsters are weaker than players.
   ---------------------------------------------
   for i=1,#cards do   
-   if cards[i].id == 18807108 or cards[i].id == 44095762 or -- Spellbinding Circle, Mirror Force
-      cards[i].id == 70342110 then                          -- Dimensional Prison
+   if cards[i].id == 18807108 then-- Spellbinding Circle
     if Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") > Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") 
-   and Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") > Get_Card_Att_Def(OppMon(),"attack", ">", POS_FACEUP_ATTACK,"defense")
-   and Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") >= 1600 or AI.GetPlayerLP(1) <= 2000 then
+    and Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") > Get_Card_Att_Def(OppMon(),"attack", ">", POS_FACEUP_ATTACK,"defense")
+    and Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") >= 1600 or AI.GetPlayerLP(1) <= 2000 
+    then
 	   GlobalActivatedCardID = cards[i].id
 	    return 1,i
        end

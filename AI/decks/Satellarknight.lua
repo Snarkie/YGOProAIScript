@@ -470,6 +470,8 @@ function ChainChalice()
     if c and c:IsControler(1-player) and c:IsLocation(LOCATION_MZONE) 
     and NegateBlacklist(c:GetCode())==0 and c:IsCanBeEffectTarget()
     and not c:IsHasEffect(EFFECT_IMMUNE_EFFECT)
+    and not c:IsHasEffect(EFFECT_DISABLE)
+    and not c:IsHasEffect(EFFECT_DISABLE_EFFECT)
     then
       GlobalTargetID=c:GetCode()
       GlobalPlayer=2
@@ -488,9 +490,10 @@ function ChainChalice()
     end
   end
   if Duel.GetCurrentPhase() == PHASE_DAMAGE and source and target then
-    if source:GetAttack() >= target:GetAttack() and source:GetAttack() <= target:GetAttack()+400 
+    if source:GetAttack() >= target:GetAttack() 
+    and source:GetAttack() <= target:GetAttack()+QliphortAttackBonus(target:GetCode(),target:GetLevel())+400 
     and source:IsPosition(POS_FACEUP_ATTACK) and target:IsPosition(POS_FACEUP_ATTACK) and target:IsControler(player_ai)
-    and not target:IsHasEffect(EFFECT_IMMUNE_EFFECT) 
+    and (not target:IsHasEffect(EFFECT_IMMUNE_EFFECT) or target:IsSetCard(0xaa) and target:GetCode()~=27279764)
     then
       GlobalTargetID=target:GetCode()
       GlobalPlayer=1

@@ -779,7 +779,14 @@ function ChainTenken()
   end
 end
 function ChainMaxxC()
-  return Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_SPECIAL_SUMMON) and  Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_PLAYER)~=player_ai  
+  for i=1,Duel.GetCurrentChain() do
+    if Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_SPECIAL_SUMMON) 
+    and  Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_PLAYER)~=player_ai 
+    then
+      return true
+    end
+  end
+  return false
 end
 function NegateBPCheck(card)
   if card:is_affected_by(EFFECT_DISABLE)>0 or card:is_affected_by(EFFECT_DISABLE_EFFECT)>0 then
@@ -807,7 +814,8 @@ function VeilerTarget(card)
     value=card.defense
   end
   if value and att>value and NegateBPCheck(card) 
-  and card:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0 then
+  and card:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
+  then
     return true
   end
   return false
@@ -823,6 +831,8 @@ function ChainVeiler()
     end
     if card and card:IsControler(1-player) and card:IsLocation(LOCATION_MZONE) 
     and NegateBlacklist(card:GetCode())==0 and card:IsCanBeEffectTarget()
+    and not card:IsHasEffect(EFFECT_DISABLE)
+    and not card:IsHasEffect(EFFECT_DISABLE_EFFECT)
     then
       GlobalTargetID=card:GetCode()
       return true

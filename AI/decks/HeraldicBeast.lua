@@ -310,7 +310,7 @@ function HeraldicAssignPriority(cards,toLocation)
   end
 end
 function HeraldicToGrave(cards,amount)
-  result = {}
+  local result = {}
   for i=1,#cards do
     cards[i].index=i
   end

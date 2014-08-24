@@ -9,8 +9,11 @@
 -- Return: index of the selected option
 function OnSelectOption(options)
 local result = 0
-
   result = HeraldicOnSelectOption(options)
+  if result ~= nil then
+    return result
+  end
+  result = QliphortOption(options)
   if result ~= nil then
     return result
   end

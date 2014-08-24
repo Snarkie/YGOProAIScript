@@ -18,13 +18,15 @@
 -- token monsters, otherwise check for rank, 
 -- attack and tribute exceptions.
 ---------------------------------------------------
-function OnSelectTribute(cards,minTributes, maxTributes)
-  local result = {}
+function OnSelectTribute(cards,minTributes, maxTributes) 
   local preferred = {}
   local valid = {}
+  local result = QliphortTribute(cards,minTributes, maxTributes)
+  if result ~= nil then return result end
   if DeckCheck(DECK_CHAOSDRAGON) then
     return Add(cards,PRIO_TOGRAVE,minTributes)
   end
+  result = {}
   for i=1,#cards do
 	if cards[i].owner == 2 or TributeWhitelist(cards[i].id) > 0 or 
 	   bit32.band(cards[i].type,TYPE_TOKEN) > 0  then      

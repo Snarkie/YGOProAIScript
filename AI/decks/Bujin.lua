@@ -6,12 +6,12 @@ BujinPrio[32339440] = {9,2,9,5,1,1,2} -- Yamato
 BujinPrio[53678698] = {5,1,5,4,2,1,2} -- Mikazuchi
 BujinPrio[23979249] = {3,1,3,3,2,1,2} -- Arasuda
 BujinPrio[09418365] = {4,1,4,3,2,1,2} -- Hirume
-BujinPrio[68601507] = {7,2,0,0,0,0,2} -- Crane
+BujinPrio[68601507] = {7,3,0,0,0,0,2} -- Crane
 BujinPrio[59251766] = {3,1,2,2,9,5,0} -- Hare
 BujinPrio[05818294] = {3,1,2,2,8,4,0} -- Turtle
 BujinPrio[69723159] = {2,1,1,1,7,3,0} -- Quilin
 BujinPrio[88940154] = {2,1,1,1,6,3,0} -- Centipede
-BujinPrio[50474354] = {3,1,0,0,2,2,5} -- Peacock
+BujinPrio[50474354] = {2,1,0,0,2,2,5} -- Peacock
 BujinPrio[37742478] = {8,2,0,0,0,0,0} -- Honest
 
 BujinPrio[73906480] = {4,2,0,0,0,0,0} -- Bujincarnation
