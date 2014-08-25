@@ -137,6 +137,7 @@ function SacrificeCond(loc,c)
   if loc == PRIO_TOHAND then
     return not HasID(UseLists({AIHand(),AIST()}),17639150,true) 
     and (PriorityCheck(AIHand(),PRIO_TOFIELD)>2 or CardsMatchingFilter(AIMon(),QliphortFilter)>0)
+    and not PendulumSummon(2) and not (#AIMon()>1)
   end
   return true
 end
@@ -152,6 +153,7 @@ function UseTool(c)
     return ScaleCheck() == false or ScaleCheck() < 8
   elseif bit32.band(c.location,LOCATION_SZONE)>0 then
     return AI.GetPlayerLP(1)>4000 or ScaleCheck() ~= true
+    or OppHasStrongestMonster()
   end
 end
 function UseSacrifice()
@@ -162,7 +164,8 @@ function PendulumSummon(count)
   return CardsMatchingFilter(AIExtra(),QliphortFilter)>=count
 end
 function TributeSummonShell()
-  if TributeCheck(2) and (not SkillDrainCheck() or TributeCheck(2)>5)
+  if TributeCheck(2) and (not SkillDrainCheck() 
+  or TributeCheck(2)>5 and OppHasStrongestMonster())
   and not Duel.CheckNormalSummonActivity(player_ai) 
   then
     return true
@@ -170,7 +173,8 @@ function TributeSummonShell()
   return false
 end
 function TributeSummonDisk()
-  if TributeCheck(2) and (not SkillDrainCheck() and DualityCheck() or TributeCheck(2)>5)
+  if TributeCheck(2) and (not SkillDrainCheck() and DualityCheck() 
+  or TributeCheck(2)>5 and OppHasStrongestMonster())
   and not Duel.CheckNormalSummonActivity(player_ai)
   then
     return true
@@ -178,21 +182,22 @@ function TributeSummonDisk()
   return false
 end
 function TributeSummonKiller()
-  if TributeCheck(3) and (not SkillDrainCheck() or TributeCheck(3)>5)
-  and not Duel.CheckNormalSummonActivity(player_ai)
+  if TributeCheck(3) and (not SkillDrainCheck() or TributeCheck(3)>5 and OppHasStrongestMonster())
+  and not Duel.CheckNormalSummonActivity(player_ai) and (ExpectedDamage(2)<AI.GetPlayerLP(2)
+  or OppHasStrongestMonster())
   then
     return true
   end
   return false
 end
 function TributeSummonArchive()
-  if TributeCheck(1) and TributeCheck(1)>5 then
+  if TributeCheck(1) and TributeCheck(1)>5 and OppHasStrongestMonster() then
     return true
   end
   return false
 end
 function TributeSummonGenome()
-  if TributeCheck(1) and TributeCheck(1)>5 then
+  if TributeCheck(1) and TributeCheck(1)>5 and OppHasStrongestMonster() then
     return true
   end
   return false
@@ -242,6 +247,9 @@ function UseOddEyes()
   or not HasID(UseLists({AIMon(),AIST()},43241495,true)))
   and not HasID(AIST(),16178681,true)
 end
+function UseDualityQliphort()
+  return ScaleCheck()==false or not PendulumSummon()
+end
 function QliphortInit(cards)
   local Act = cards.activatable_cards
   local Sum = cards.summonable_cards
@@ -266,7 +274,10 @@ function QliphortInit(cards)
     GlobalCardMode = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
+  if HasID(Act,65518099,false,nil,nil,nil,FilterLocation,LOCATION_HAND) 
+  and UseTool(Act[CurrentIndex]) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   if HasID(Act,43241495) and UseTrampolynx() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -274,10 +285,6 @@ function QliphortInit(cards)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Act,91907707) and UseArchive() then
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
-  if HasID(Act,65518099,false,nil,nil,nil,FilterLocation,LOCATION_HAND) 
-  and UseTool(Act[CurrentIndex]) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Act,65518099,false,nil,nil,nil,FilterLocation,LOCATION_SZONE) 
@@ -303,6 +310,9 @@ function QliphortInit(cards)
   if HasID(Sum,90885155) and TributeSummonShell() then
     GlobalQliphortNormalSummon = 1
     return {COMMAND_SUMMON,CurrentIndex}
+  end
+  if HasID(Act,98645731) and UseDualityQliphort() then
+    return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Sum,37991342) and TributeSummonGenome() then
     GlobalQliphortNormalSummon = 1
@@ -340,7 +350,7 @@ end
 function QliphortTribute(cards,min,max)
   if DeckCheck(AI_QLIPHORT) then
     if HasID(AIST(),17639150,false,nil,nil,nil,FilterPosition,POS_FACEUP) then
-      min = math.min(min-1,1)
+      min = math.max(min-1,1)
     end
     return Add(cards,PRIO_TOGRAVE,min)
   end
@@ -370,10 +380,11 @@ function QliphortCard(cards,min,max,id,c)
   if GlobalPendulumSummoning then
     GlobalPendulumSummoning = nil
     local x = CardsMatchingFilter(AIExtra(),QliphortFilter)
-    if x<2 and CardsMatchingFilter(cards,QliphortFilter,65518099)>x then x = x+1 end
+    if x<2 and CardsMatchingFilter(AIHand(),QliphortFilter,65518099)>0 then x = x+1 end
     if CardsMatchingFilter(OppST(),FilterPosition,POS_FACEDOWN)>0 then
       x = math.min(x,2)
     end
+    x = math.min(x,max)
     return Add(cards,PRIO_TOFIELD,x)
   end
   if id == 65518099 then -- Tool
@@ -443,8 +454,13 @@ function ChainSkillDrain()
         target = Duel.GetAttacker()
         source = Duel.GetAttackTarget()
       end
-      if source:GetAttack() >= target:GetAttack() and target:IsControler(player_ai) 
+      if target:IsControler(player_ai)
+      and (source:IsPosition(POS_FACEUP_ATTACK) 
+      and source:GetAttack() >= target:GetAttack() 
       and source:GetAttack() <= target:GetAttack()+QliphortAttackBonus(target:GetCode(),target:GetLevel())
+      or source:IsPosition(POS_FACEUP_DEFENCE)
+      and source:GetDefense() >= target:GetAttack() 
+      and source:GetDefense() <= target:GetAttack()+QliphortAttackBonus(target:GetCode(),target:GetLevel()))
       and target:IsPosition(POS_FACEUP_ATTACK) 
       then
         return true
@@ -473,13 +489,10 @@ function QliphortChain(cards)
   if HasID(cards,04450854) and ChainApoqliphort() then
     return {1,CurrentIndex}
   end
-  if HasID(cards,82732705) and ChainSkillDrain() then
-    return {1,CurrentIndex}
-  end
   if HasID(cards,05851097) and ChainVanity() then
     return {1,CurrentIndex}
   end
-  if HasID(cards,64496451) then -- Disk
+  if HasIDNotNegated(cards,64496451) then -- Disk
     return {1,CurrentIndex}
   end
   if HasID(cards,16178681) then -- Odd-Eyes
@@ -503,6 +516,7 @@ function QliphortEffectYesNo(id,card)
   end
   if id==64496451 or id==16178681 --or id==43241495  -- Disk, Odd-Eyes,Trampolynx
   or id==17639150 -- Sacrifice
+  and NotNegated(card)
   then
     result = 1
   end

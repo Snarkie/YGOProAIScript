@@ -54,7 +54,7 @@ function PrioritySetup()
 AddPriority({
 --Qliphort:
 [65518099] = {9,4,1,1,5,1,7,5,1,1,ToolCond},          -- Qliphort Tool
-[27279764] = {5,2,1,1,1,1,1,1,1,1,KillerCond},        -- Apoqliphort Killer
+[27279764] = {7,2,1,1,1,1,1,1,1,1,KillerCond},        -- Apoqliphort Killer
 [90885155] = {6,2,4,2,2,1,3,1,1,1,ShellCond},         -- Qliphort Shell
 [64496451] = {7,2,4,2,2,1,4,1,1,1,DiskCond},          -- Qliphort Disk
 [37991342] = {5,3,7,3,8,4,1,1,1,1,GenomeCond},        -- Qliphort Genome

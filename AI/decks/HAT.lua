@@ -115,9 +115,9 @@ function DualityCheck()
   return Duel.GetTurnCount()~=GlobalDuality and CardsMatchingFilter(UseLists({AIST(),OppST()}),VanityFilter)==0
 end
 function UseDuality()
-  return not (CanUseHand() or FieldCheck(4)>1 or FieldCheck(5)>1
+  return DeckCheck(DECK_HAT) and (not (CanUseHand() or FieldCheck(4)>1 or FieldCheck(5)>1
   or HandCheck(4)>0 and FieldCheck(4)>0 and not Duel.CheckNormalSummonActivity(player_ai) 
-  or HasID(AIHand(),45803070,true) and SummonDionaea() and not Duel.CheckNormalSummonActivity(player_ai)) 
+  or HasID(AIHand(),45803070,true) and SummonDionaea() and not Duel.CheckNormalSummonActivity(player_ai))) 
 end
 function SummonDionaea()
   return DualityCheck() and OverExtendCheck() 
