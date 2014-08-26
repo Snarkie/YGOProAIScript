@@ -66,7 +66,7 @@ function HasID(cards,id,skipglobal,desc,loc,pos,filter,opt)
   return result
 end
 -- same, but only returns true, if the card is not negated
-function HasIDNotNegated(cards,id,skipglobal,desc,loc,pos)
+function HasIDNotNegated(cards,id,skipglobal,desc,loc,pos,filter,opt)
   local result = false
   if cards ~= nil then 
     for i=1,#cards do
@@ -74,6 +74,7 @@ function HasIDNotNegated(cards,id,skipglobal,desc,loc,pos)
       and (desc == nil or cards[i].description == desc) 
       and (loc == nil or bit32.band(cards[i].location,loc)>0)
       and (pos == nil or bit32.band(cards[i].position,pos)>0)
+      and (filter == nil or (opt==nil and filter(cards[i]) or filter(cards[i],opt)))
       then
         if bit32.band(cards[i].type,TYPE_MONSTER)>0 
         and cards[i]:is_affected_by(EFFECT_DISABLE_EFFECT)==0 
@@ -85,6 +86,7 @@ function HasIDNotNegated(cards,id,skipglobal,desc,loc,pos)
         if bit32.band(cards[i].type,TYPE_SPELL+TYPE_TRAP)>0
         and bit32.band(cards[i].status,STATUS_SET_TURN)==0        
         and cards[i]:is_affected_by(EFFECT_CANNOT_TRIGGER)==0
+        and cards[i]:is_affected_by(EFFECT_DISABLE)==0
         then
           if not skipglobal then CurrentIndex = i end
           result = true 

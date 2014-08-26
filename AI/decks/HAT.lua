@@ -108,13 +108,11 @@ function CanUseHand()
   and Duel.GetCurrentPhase()==PHASE_MAIN1 and GlobalBPAllowed
 end
 GlobalDuality = 0
-function VanityFilter(c)
-  return c.id == 05851097 and bit32.band(c.position,POS_FACEUP)>0
-end
 function DualityCheck()
-  return Duel.GetTurnCount()~=GlobalDuality and CardsMatchingFilter(UseLists({AIST(),OppST()}),VanityFilter)==0
+  return Duel.GetTurnCount()~=GlobalDuality 
+  and not HasIDNotNegated(UseLists({AIST(),OppST()}),05851097,true,nil,nil,nil,FilterPosition,POS_FACEUP)
 end
-function UseDuality()
+function UseDualityHAT()
   return DeckCheck(DECK_HAT) and (not (CanUseHand() or FieldCheck(4)>1 or FieldCheck(5)>1
   or HandCheck(4)>0 and FieldCheck(4)>0 and not Duel.CheckNormalSummonActivity(player_ai) 
   or HasID(AIHand(),45803070,true) and SummonDionaea() and not Duel.CheckNormalSummonActivity(player_ai))) 
@@ -207,7 +205,7 @@ function HATInit(cards)
   if HasID(Activatable,97077563) and UseCotH() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Activatable,98645731) and UseDuality() then
+  if HasID(Activatable,98645731) and UseDualityHAT() then
     GlobalDuality = Duel.GetTurnCount()
     return {COMMAND_ACTIVATE,CurrentIndex}
   end

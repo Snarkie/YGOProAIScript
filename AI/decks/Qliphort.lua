@@ -54,7 +54,7 @@ function TributeCheck(amount)
   return result
 end
 function SkillDrainCheck()
-  return HasID(UseLists({AIST(),OppST()}),82732705,true,nil,nil,nil,FilterPosition,POS_FACEUP)
+  return HasIDNotNegated(UseLists({AIST(),OppST()}),82732705,true,nil,nil,nil,FilterPosition,POS_FACEUP)
 end
 
 function ToolCond(loc,c)
@@ -287,7 +287,7 @@ function QliphortInit(cards)
   if HasID(Act,91907707) and UseArchive() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Act,65518099,false,nil,nil,nil,FilterLocation,LOCATION_SZONE) 
+  if HasIDNotNegated(Act,65518099,false,nil,nil,nil,FilterLocation,LOCATION_SZONE) 
   and UseTool(Act[CurrentIndex]) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -364,12 +364,12 @@ function SacrificeTarget(cards)
   return Add(cards)
 end
 function ArchiveTarget(cards)
-  local result = BestTargets(cards,1,TARGET_DESTROY,TargetCheck) 
+  local result = BestTargets(cards,1,TARGET_TOHAND,TargetCheck) 
   TargetSet(cards[1])
   return result
 end
 function GenomeTarget(cards)
-  local result = BestTargets(cards,1,TARGET_TOHAND,TargetCheck) 
+  local result = BestTargets(cards,1,TARGET_DESTROY,TargetCheck) 
   TargetSet(cards[1])
   return result
 end
@@ -408,8 +408,8 @@ function QliphortCard(cards,min,max,id,c)
   if id == 16178681 then -- Odd-Eyes
     return Add(cards)
   end
-  if id == 04450854 then
-    return Add(cards,PRIO_EXTRA,math.min(min,3))
+  if id == 04450854 then -- Apoqliphort
+    return Add(cards,PRIO_EXTRA,max)
   end
   return nil
 end
