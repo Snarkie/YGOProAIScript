@@ -679,13 +679,11 @@ end
 -- by checking it's position on side of the field.
 ---------------------------------------
 function CurrentMonOwner(CardId)
-  local AIMon = AI.GetAIMonsterZones()
+  local cards = AIMon()
   local Result = 2 -- by default it's controlled by Player
-  for i=1,#AIMon do
-    if AIMon[i] ~= false then  
-	 if AIMon[i].cardid == CardId then
-	   Result = 1 -- if monster exists on AI's side of the field it is owned by AI (well duh)
-      end
+  for i=1,#cards do
+    if cards[i] and cards[i].cardid == CardId then
+      Result = 1 -- if monster exists on AI's side of the field it is owned by AI (well duh)
     end
   end
   return Result
@@ -1724,7 +1722,7 @@ function ApplyATKBoosts(Cards)
   for i=1,#Cards do
     if Cards[i].id == 20366274 and NotNegated(Cards[i]) then
       local OppAtt=OppGetStrongestAttDef(NephilimFilter,true)
-      Cards[i].attack = OppAtt+1
+      Cards[i].attack = math.max(Cards[i].attack,OppAtt+1)
     end
   end
   
@@ -1732,7 +1730,16 @@ function ApplyATKBoosts(Cards)
   for i=1,#Cards do
     if Cards[i].id == 26593852 and NotNegated(Cards[i]) then
       local OppAtt=OppGetStrongestAttDef(CatastorFilter,true)
-      Cards[i].attack = OppAtt+1
+      Cards[i].attack = math.max(Cards[i].attack,OppAtt+1)
+    end
+  end
+  
+  -- Gwen
+  for i=1,#Cards do
+    if HasID(Cards[i]:get_equipped_cards(),19748583,true) 
+    and FilterAttribute(Cards[i],ATTRIBUTE_DARK)
+    then
+      Cards[i].attack = math.max(Cards[i].attack,OppGetStrongestAttDef(GwenFilter,true)+2)
     end
   end
   
@@ -1754,7 +1761,7 @@ function ApplyATKBoosts(Cards)
   local cards=AIMon()
   local StardustSparkCheck=false
   for i=1,#cards do
-    if cards[i].id == 83994433
+    if cards[i].id == 83994433 and NotNegated(cards[i]) and bit32.band(cards[i].position,POS_FACEUP)>0
     and GlobalStardustSparkActivation[cards[i].cardid]~=Duel.GetTurnCount()
     then
       StardustSparkCheck = true
@@ -1762,6 +1769,7 @@ function ApplyATKBoosts(Cards)
   end
   for i=1,#Cards do
     if Cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE)>0
+    or Cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_COUNT)>0
     or Cards[i].owner==1 and (StardustSparkCheck 
     or Cards[i].id==23649496)
     then

@@ -60,6 +60,10 @@ result = QliphortCard(cards, minTargets, maxTargets, triggeringID, triggeringCar
 if result ~= nil then
   return result
 end
+result = NobleCard(cards, minTargets, maxTargets, triggeringID, triggeringCard)
+if result ~= nil then
+  return result
+end
 result = {}
 
   --------------------------------------------

@@ -110,7 +110,7 @@ function HasAccess(id)
       end
     end
   end
-  return HasID(UseLists({AIHand(),AIMon(),AIGrave()}),id,true) 
+  return HasID(UseLists({AIHand(),AIField(),AIGrave()}),id,true) 
 end
 -- gets index of a card id in a card list
 function IndexByID(cards,id)
@@ -234,7 +234,7 @@ function FieldCheck(level,filter,opt)
   local cards=AIMon()
   for i=1,#cards do
     if cards[i].level==level and bit32.band(cards[i].position,POS_FACEUP)>0 
-    and (filter == nil or filter and opt == nil or filter(opt))
+    and (filter == nil or filter(cards[i]) and opt == nil or filter(cards[i],opt))
     then
       result = result + 1
     end
@@ -532,7 +532,11 @@ function DestroyFilter(c,nontarget)
 end
 -- returns the amount of cards that can be safely destroyed in a list of cards
 function DestroyCheck(cards,nontarget,filter,opt)
-  return CardsMatchingFilter(cards,DestroyFilter,nontarget,filter,opt)
+  return CardsMatchingFilter(cards,
+  function(c) 
+    return DestroyFilter(c,nontarget) and filter == nil 
+    or filter and (opt == nil and filter(c) or opt and filter(c,opt))
+  end)
 end
 function FilterAttribute(c,att)
   return bit32.band(c.type,TYPE_MONSTER)>0 and bit32.band(c.attribute,att)>0

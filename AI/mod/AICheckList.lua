@@ -265,38 +265,41 @@ end
 ---------------------------------------------------------
 NSBL={
    -- 
-19665973,98777036,50933533,18964575,   -- Battle Fader, Trag,AGG Dragon, Scarecrow
-53804307,89399912,44330098,26400609,   -- Blaster, Tempest,Gorz, Tidal
-53797637,89185742,90411554,27415516,   -- Burner, Lightning,Redox, Stream
-07902349,70903634,91020571,33396948,   -- Left Arm, Right Arm,Reactan, Exodia
-70095154,88264978,44519536,08124921,   -- CyDra, REDMD,Left Leg, Right Leg
-74530899,37742478,83039729,63176202,   -- Metaion, Honest,Grandmaster, Shogun                   
-40240595,40640057,75498415,51945556,   -- Cocoon of Evolution, Kuriboh,Sirocco, Zaborg the Thunder Monarch 
-74131780,91949988,57116033,00423585,   -- Exiled Force, Gaia Dragon, Winged Kuriboh, Summoner Monk 
-45812361,37742478,09748752,78364470,   -- Cardcar D, Honest, Caius the Shadow Monarch, Constellar Pollux
-66762372,92572371,23434538,03534077,   -- Boar, Buffalo, Maxx "C", Wolfbark
-01662004,06353603,43748308,39699564,   -- Spirit, Bear, Dragon, Leopard
-44860890,93294869,70355994,17475251,   -- Raven, Wolf, Gorilla, Hawk
-80344569,30929786,97268402,41269771,   -- Neo-Spacian Grand Mole, FF Chicken, Effect Veiler, Constellar Algiedi
-87255382,19310321,82293134,60316373,   -- Amphisbaena, Twin Eagle, Heraldic Beasts: Leo, Aberconway
-56921677,86445415,45705025,82315772,   -- Basilisk, Red Gadget, Unicorn, Eale
-42940404,05556499,41172955,13839120,   -- Machina Gearframe, Machina Fortress, Green Gadget, Yellow Gadget
-53573406,32339440,39284521,18063928,   -- Masked Chameleon, Bujin Yamato, Machina Cannon, Tin Goldfish
-68601507,59251766,53678698,23979249,  -- Bujin Crane, Hare, Bujin Mikazuchi, Arasuda
-88940154,50474354,05818294,69723159,  -- Centipede, Peacock, Turtle, Quilin
-21954587,22446869,37104630,00706925,  -- Mermail AbyssMegalo, Mermail Abyssteus, Atlantean Heavy Infantry, Atlantean Marksman
-58471134,22076135,37781520,74311226,  -- Mermail Apysspike, Mermail Abyssturge, Mermail Abyssleed, Atlantean Dragoons
-78868119,26400609,23899727,74298287,  -- Deep Sea Diva, Tidal, Dragon Ruler of Waterfalls Mermail Abysslinde, Mermail Abyssdine
-30328508,77723643,37445295,04939890,  -- Shadoll Lizard, Shadoll Dragon, Shadoll Falcon, Shadoll Hedgehog
-85103922,12697630,03717252,24062258,  -- Artifact Moralltach, Artifact Beagalltach, Shadoll Beast, Secret Sect Druid Dru
-75878039,02273734,38667773,63274863,  -- Satellarknights Deneb,Altair,Vega,Sirius
-38331564,91110378,69293721,99365553,  -- Star Seraphs Scepter,Sovereign,Mermail Abyssgunde, Lightpulsar
-77558536,22624373,95503687,16404809,  -- LS Raiden, Lyla, Lumina, Kuribandit
-33420078,51858306,10802915,16178681,  -- Plaguespreader, Eclipse Wyvern, Tour Guide,Odd-Eyes Pendulum Dragon
-04904812,68505803,91812341,45803070,  -- Genex Undine, Genex Controller, Traptrix Myrmeleo, Dioena
+19665973,98777036,50933533,18964575, -- Battle Fader, Trag,AGG Dragon, Scarecrow
+53804307,89399912,44330098,26400609, -- Blaster, Tempest,Gorz, Tidal
+53797637,89185742,90411554,27415516, -- Burner, Lightning,Redox, Stream
+07902349,70903634,91020571,33396948, -- Left Arm, Right Arm,Reactan, Exodia
+70095154,88264978,44519536,08124921, -- CyDra, REDMD,Left Leg, Right Leg
+74530899,37742478,83039729,63176202, -- Metaion, Honest,Grandmaster, Shogun                   
+40240595,40640057,75498415,51945556, -- Cocoon of Evolution, Kuriboh,Sirocco, Zaborg the Thunder Monarch 
+74131780,91949988,57116033,00423585, -- Exiled Force, Gaia Dragon, Winged Kuriboh, Summoner Monk 
+45812361,37742478,09748752,78364470, -- Cardcar D, Honest, Caius the Shadow Monarch, Constellar Pollux
+66762372,92572371,23434538,03534077, -- Boar, Buffalo, Maxx "C", Wolfbark
+01662004,06353603,43748308,39699564, -- Spirit, Bear, Dragon, Leopard
+44860890,93294869,70355994,17475251, -- Raven, Wolf, Gorilla, Hawk
+80344569,30929786,97268402,41269771, -- Neo-Spacian Grand Mole, FF Chicken, Effect Veiler, Constellar Algiedi
+87255382,19310321,82293134,60316373, -- Amphisbaena, Twin Eagle, Heraldic Beasts: Leo, Aberconway
+56921677,86445415,45705025,82315772, -- Basilisk, Red Gadget, Unicorn, Eale
+42940404,05556499,41172955,13839120, -- Machina Gearframe, Machina Fortress, Green Gadget, Yellow Gadget
+53573406,32339440,39284521,18063928, -- Masked Chameleon, Bujin Yamato, Machina Cannon, Tin Goldfish
+68601507,59251766,53678698,23979249, -- Bujin Crane, Hare, Bujin Mikazuchi, Arasuda
+88940154,50474354,05818294,69723159, -- Centipede, Peacock, Turtle, Quilin
+21954587,22446869,37104630,00706925, -- Mermail AbyssMegalo, Mermail Abyssteus, Atlantean Heavy Infantry, Atlantean Marksman
+58471134,22076135,37781520,74311226, -- Mermail Apysspike, Mermail Abyssturge, Mermail Abyssleed, Atlantean Dragoons
+78868119,26400609,23899727,74298287, -- Deep Sea Diva, Tidal, Dragon Ruler of Waterfalls Mermail Abysslinde, Mermail Abyssdine
+30328508,77723643,37445295,04939890, -- Shadoll Lizard, Shadoll Dragon, Shadoll Falcon, Shadoll Hedgehog
+85103922,12697630,03717252,24062258, -- Artifact Moralltach, Artifact Beagalltach, Shadoll Beast, Secret Sect Druid Dru
+75878039,02273734,38667773,63274863, -- Satellarknights Deneb,Altair,Vega,Sirius
+38331564,91110378,69293721,99365553, -- Star Seraphs Scepter,Sovereign,Mermail Abyssgunde, Lightpulsar
+77558536,22624373,95503687,16404809, -- LS Raiden, Lyla, Lumina, Kuribandit
+33420078,51858306,10802915,16178681, -- Plaguespreader, Eclipse Wyvern, Tour Guide,Odd-Eyes Pendulum Dragon
+04904812,68505803,91812341,45803070, -- Genex Undine, Genex Controller, Traptrix Myrmeleo, Dioena
 68535320,95929069,84764038,43241495, -- Fire Hand, Ice Hand, Burning Abyss Scarm, Performapal Trampolynx
-65518099,90885155,64496451,  -- Qliphort Tool, Shell, Disk
-91907707,27279764,37991342,  -- Qliphort Archive, Killer, Genome
+65518099,90885155,64496451,91907707, -- Qliphort Tool, Shell, Disk, Archive
+27279764,37991342,00000997,00000999, -- Qliphort Killer, Genome, Noble Knight Merlin, Bewdyr
+95772051,93085839,19680539,53550467, -- Black Sally, Eachtar, Gawayn, Drystan
+59057152,47120245,13391185,57690191, -- Medraut, Borz, Chad, Brothers
+19748583,10736540,92125819,73359475, -- Gwen, Lady, Artorigus, Peredur
 }
 function NormalSummonBlacklist(CardId) 
   for i=1,#NSBL do
@@ -379,7 +382,9 @@ SSBL={
 63746411,83531441,16178681, -- Giant Hand, Dante,Odd-Eyes Pendulum Dragon
 65518099,90885155,64496451, -- Qliphort Tool, Shell, Disk
 91907707,27279764,37991342, -- Qliphort Archive, Killer, Genome
-43241495, -- Performapal Trampolynx
+43241495,19680539, -- Performapal Trampolynx, Noble Knight Gawayn
+48009503,60645181,82944432,  -- HC - Gandiva, Excalibur, Blade Armor Ninja
+21223277,10613952,83519853,  -- R4torigus, R5torigus, High Sally 
 }
 
 
@@ -399,7 +404,9 @@ end
 SetBL={
   61314842,92365601,84220251, -- Advanced Heraldry Art, Rank-Up Magic - Limited Barian's Force, Heraldry Reborn
   73906480,96947648,74845897, -- Bujincarnation, Salvage, Rekindling
-  54447022,44394295 -- Soul Charge, Shadoll Fusion
+  54447022,44394295,55742055, -- Soul Charge, Shadoll Fusion, Table
+  07452945,14745409,23562407, -- Noble Arms Destiny, Gallatin, Caliburn
+  46008667,83438826,00000998, -- Excaliburn, Arfeudutyr, Chapter
 }
 
 
@@ -540,7 +547,8 @@ Unchainable={
 37412656,19665973,18964575,29223325, -- Hero blast, Battle Fader, Swift Scarecrow, Artifact Ignition
 12444060,85103922,12697630,77505534, -- Artifact Sanctum, Moralltach, Beagalltach, Facing the Shadows
 05318639,53582587,97077563,14087893, -- Mystical Space Typhoon, Torrential tribute, Call of the Haunted, Book of Moon
-78474168,50078509 -- Breakthrough Skill, Fiendish Chain
+78474168,50078509,29616929,19748583, -- Breakthrough Skill, Fiendish Chain, TTHN, Gwen
+25789292 -- Forbidden Chalice
 }
 function isUnchainableTogether(CardId)
   for i=1,#Unchainable do
@@ -698,6 +706,13 @@ ScriptedCards ={
 63746411,83531441,84764038,05851097,  -- Giant Hand, Dante, Scarm, Vanitys Emptiness
 65518099,90885155,64496451,37991342,  -- Qliphort Tool, Shell, Disk, Genome
 91907707,27279764,17639150,04450854,  -- Qliphort Archive, Killer, Sacrifice, Apoqliphort
+95772051,93085839,59057152,47120245,  -- Noble Knights Black Sally, Eachtar, Medraut, Borz
+13391185,57690191,19748583,10736540,  -- Chad, Brothers, Gwen, Lady of the Lake
+73359475,55742055,92512625,  -- Peredur, Table, Solemn Advice
+07452945,14745409,23562407,46008667,  -- Noble Arms Destiny, Gallatin, Caliburn, Excaliburn
+83438826,48009503,60645181,82944432,  -- Arfeudutyr, HC - Gandiva, Excalibur, Blade Armor Ninja
+21223277,10613952,83519853,00000997,  -- R4torigus, R5torigus, High Sally, Merlin
+00000998,00000999,  -- Chapter, Bedwyr
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do

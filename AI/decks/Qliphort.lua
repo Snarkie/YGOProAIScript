@@ -1,17 +1,8 @@
 function QliphortFilter(c,exclude)
   return IsSetCode(c.setcode,0xaa) and (exclude == nil or c.id~=exclude)
 end
-ScaleList={
-[65518099] = 9,  -- Tool
-[90885155] = 9,  -- Shell
-[64496451] = 1,  -- Disk
-[37991342] = 9,  -- Genome
-[91907707] = 1,  -- Archive
-[16178681] = 4,  -- Odd-Eyes
-[43241495] = 4,  -- Trampolynx
-}
-function Scale(c)
-  return ScaleList[c.id]
+function Scale(c) -- backwards compatibility
+  return c.lscale
 end
 function ScaleCheck(p)
   local cards=AIST()
@@ -153,7 +144,7 @@ function UseTool(c)
     return ScaleCheck() == false or ScaleCheck() < 8
   elseif bit32.band(c.location,LOCATION_SZONE)>0 then
     return AI.GetPlayerLP(1)>4000 or ScaleCheck() ~= true
-    or OppHasStrongestMonster()
+    and PendulumSummon(2) or OppHasStrongestMonster()
   end
 end
 function UseSacrifice()
@@ -248,7 +239,7 @@ function UseOddEyes()
   and not HasID(AIST(),16178681,true)
 end
 function UseDualityQliphort()
-  return ScaleCheck()==false or not PendulumSummon()
+  return DeckCheck(DECK_QLIPHORT) and (ScaleCheck()==false or not PendulumSummon())
 end
 function QliphortInit(cards)
   local Act = cards.activatable_cards
@@ -258,6 +249,10 @@ function QliphortInit(cards)
   local SetMon = cards.monster_setable_cards
   local SetST = cards.st_setable_cards
   GlobalQliphortNormalSummon = nil
+  if HasIDNotNegated(Act,65518099,false,nil,nil,nil,FilterLocation,LOCATION_SZONE) 
+  and UseTool(Act[CurrentIndex]) and HasID(AIST(),43241495,true) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   for i=1,#SpSum do
     if PendulumCheck(SpSum[i]) and PendulumSummon() then
       GlobalPendulumSummoning = true
@@ -373,6 +368,14 @@ function GenomeTarget(cards)
   TargetSet(cards[1])
   return result
 end
+function TrampolynxTarget(cards)
+  for i=1,#cards do
+    if cards[i].id == 65518099 then
+      return {i}
+    end
+  end
+  return {math.random(#cards)}
+end
 function QliphortCard(cards,min,max,id,c)
   if c then
     id = c.id
@@ -410,6 +413,9 @@ function QliphortCard(cards,min,max,id,c)
   end
   if id == 04450854 then -- Apoqliphort
     return Add(cards,PRIO_EXTRA,max)
+  end
+  if id == 43241495 then
+    return TrampolynxTarget(cards)
   end
   return nil
 end
@@ -514,7 +520,7 @@ function QliphortEffectYesNo(id,card)
   if id==37991342 and ChainGenome() then
     result = 1
   end
-  if id==64496451 or id==16178681 --or id==43241495  -- Disk, Odd-Eyes,Trampolynx
+  if id==64496451 or id==16178681 or id==43241495  -- Disk, Odd-Eyes,Trampolynx
   or id==17639150 -- Sacrifice
   and NotNegated(card)
   then

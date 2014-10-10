@@ -109,6 +109,8 @@ function OnSelectPosition(id, available)
   if Position then result=Position end
   Position = QliphortPosition(id,available)
   if Position then result=Position end
+  Position = NoblePosition(id,available)
+  if Position then result=Position end
   
   if band(result,available) == 0 then
     if band(POS_FACEUP_ATTACK,available) > 0 then

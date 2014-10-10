@@ -621,8 +621,9 @@ function ChainPleiades()
   local targets = CardsMatchingFilter(OppMon(),PleiadesFilter)
   local targets2 = CardsMatchingFilter(OppMon(),PleiadesFilter2)
   if RemovalCheck(73964868) then
-    if Duel.GetOperationInfo(Duel.GetCurrentChain(),CATEGORY_TOHAND) and targets>0 
-    or targets2>0
+    if (Duel.GetOperationInfo(Duel.GetCurrentChain(),CATEGORY_TOHAND) 
+    or Duel.GetOperationInfo(Duel.GetCurrentChain(),CATEGORY_TODECK))
+    and targets>0 or targets2>0
     then
       return true
     else

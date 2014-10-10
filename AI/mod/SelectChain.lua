@@ -62,6 +62,10 @@ result=QliphortChain(cards)
 if result ~= nil then
   return result[1],result[2]
 end
+result=NobleChain(cards)
+if result ~= nil then
+  return result[1],result[2]
+end
 result = 0
  
   ------------------------------------------

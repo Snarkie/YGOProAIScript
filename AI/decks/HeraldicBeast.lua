@@ -401,12 +401,12 @@ function LavalvalChainTarget(cards)
     if DeckCheck(DECK_TELLARKNIGHT) then
       if GlobalCardMode == 2 then
         GlobalCardMode = 1
-        result = SatellarknightAdd(cards,PRIO_TOGRAVE)
+        result = Add(cards,PRIO_TOGRAVE)
       elseif GlobalCardMode == 1 then
         GlobalCardMode = nil
-        result = SatellarknightAdd(cards,PRIO_TOHAND)
+        result = Add(cards,PRIO_TOHAND)
       else
-        result = SatellarknightAdd(cards,PRIO_TOGRAVE)
+        result = Add(cards,PRIO_TOGRAVE)
       end
     else
       result = HeraldicToGrave(cards,1)
@@ -806,7 +806,6 @@ function ChainSafeZone()
       return true
     end
   end	
-  local cardtype = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_EXTTYPE)
   local ex,cg = Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_DESTROY)
   local tg = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TARGET_CARDS)
   local e = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
@@ -883,7 +882,7 @@ function ChainLance()
   elseif tg then
     g = tg:Filter(LanceFilter, nil):GetMaxGroup(Card.GetAttack)
   end
-  if g and bit32.band(cardtype, TYPE_SPELL+TYPE_TRAP)>0 then
+  if g and bit32.band(cardtype, TYPE_SPELL+TYPE_TRAP)>0 and p ~= player_ai then
     if source and target and target:IsCode(g:GetFirst():GetCode())
     and source:IsPosition(POS_FACEUP_ATTACK) and target:IsPosition(POS_FACEUP_ATTACK)
     and source:GetAttack()>target:GetAttack()-800

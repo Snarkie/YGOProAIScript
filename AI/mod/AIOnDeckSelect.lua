@@ -11,6 +11,7 @@ DECK_SHADOLL      = 7
 DECK_TELLARKNIGHT = 8
 DECK_HAT          = 9
 DECK_QLIPHORT     = 10
+DECK_NOBLEKNIGHT  = 11
 
 DeckIdent={ --card that identifies the deck
 [1]   = 99365553, -- Lightpulsar Dragon
@@ -23,14 +24,30 @@ DeckIdent={ --card that identifies the deck
 [8]   = 75878039, -- Satellarknight Deneb
 [9]   = 45803070, -- Traptrix Dionaea
 [10]  = 65518099, -- Qliphort Tool
+[11]  = 59057152, -- Noble Knight Medraut
 }
 Deck = nil
+DeckName={
+[0]   = "Not Supported",
+[1]   = "Chaos Dragon",
+[2]   = "Fire Fist",
+[3]   = "Heraldic Beast", 
+[4]   = "Gadget",
+[5]   = "Bujin",
+[6]   = "Mermail",
+[7]   = "Shaddoll",
+[8]   = "Satellarknight",
+[9]   = "HAT",
+[10]  = "Qliphort",
+[11]  = "Noble Knight",
+}
 function DeckCheck(opt)
   if Deck == nil then
     PrioritySetup()
     for i=1,#DeckIdent do
       if HasID(UseLists({AIDeck(),AIHand()}),DeckIdent[i],true) then
         Deck = i
+        print("AI deck is "..DeckName[i])
       end
     end
   end
@@ -51,6 +68,42 @@ PRIO_DISCARD,PRIO_TODECK,PRIO_EXTRA = 7,7,7
 PRIO_BANISH = 9
 -- priority lists for decks:
 function PrioritySetup()
+
+AddPriority({
+-- Noble Knight:
+[95772051] = {1,1,9,2,9,2,1,1,1,1,BlackSallyCond},    -- Black Sally
+[93085839] = {1,1,8,2,10,2,1,1,1,1,EachtarCond},      -- Eachtar
+[19680539] = {4,2,2,1,4,2,3,2,3,2,GawaynCond},        -- Gawayn
+[53550467] = {3,2,3,2,6,3,3,2,3,2,DrystanCond},       -- Drystan
+[59057152] = {7,3,7,2,4,2,5,3,2,2,MedrautCond},       -- Medraut
+[47120245] = {6,2,6,2,4,3,3,2,3,2,BorzCond},          -- Borz
+[13391185] = {5,2,4,2,3,2,3,2,2,2,ChadCond},          -- Chad
+[57690191] = {4,2,5,2,5,3,3,2,2,2,BrothersCond},      -- Brothers
+[19748583] = {8,2,1,1,11,3,1,1,1,1,GwenCond},         -- Gwen
+[10736540] = {6,1,1,1,12,3,1,1,1,1,LadyCond},         -- Lady
+
+[92125819] = {1,1,2,1,8,1,3,2,3,1,ArtorigusCond},     -- Artorigus
+[73359475] = {3,2,2,1,7,3,3,2,3,2,PeredurCond},       -- Peredur
+[00000997] = {9,2,4,2,3,2,1,1,1,1,nil},               -- Merlin
+[00000999] = {5,2,4,2,4,3,3,2,1,1,BedwyrCond},        -- Bedwyr
+
+[00000998] = {8,5,1,1,1,1,9,1,1,1,nil},               -- Chapter
+[07452945] = {7,1,7,1,4,1,2,1,1,1,RequipArmsCond},    -- Destiny
+[14745409] = {4,1,4,1,5,1,2,1,1,1,RequipArmsCond},    -- Gallatin
+[23562407] = {6,1,6,1,7,1,2,1,1,1,RequipArmsCond},    -- Caliburn
+[46008667] = {5,2,5,1,5,1,1,1,1,1,ExcaliburnCond},    -- Excaliburn
+[83438826] = {3,1,3,1,6,2,3,1,1,1,ArfCond},           -- Arfeudutyr
+[55742055] = {9,2,1,1,1,1,7,1,1,1,TableCond},         -- Table
+[92512625] = {4,1,1,1,1,1,1,1,1,1,nil},               -- Advice
+
+[48009503] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Gandiva
+[82944432] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Blade Armor Ninja
+[60645181] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Excalibur
+[21223277] = {1,1,1,1,1,1,5,1,3,1,nil},               -- R4torigus
+[10613952] = {1,1,1,1,3,1,6,1,3,1,R5torigusCond},     -- R5torigus
+[83519853] = {1,1,8,1,1,1,1,1,1,1,nil},               -- High Sally
+})
+
 AddPriority({
 --Qliphort:
 [65518099] = {9,4,1,1,5,1,7,5,1,1,ToolCond},          -- Qliphort Tool
@@ -274,9 +327,11 @@ function AssignPriority(cards,loc,filter,opt)
     if loc==PRIO_TOFIELD and cards[i].location==LOCATION_EXTRA then
       cards[i].prio=cards[i].prio+5
     end
-    --if loc==PRIO_GRAVE and cards[i].location==LOCATION_ONFIELD then
-      --cards[i].prio=cards[i].prio-1
-    --end
+    if loc==PRIO_TOGRAVE and bit32.band(cards[i].location,LOCATION_ONFIELD)>0
+    and cards[i].equip_count and cards[i].equip_count>0 and HasID(cards[i]:get_equipped_cards(),17639150,true) 
+    then
+      cards[i].prio=10
+    end
     if loc==PRIO_TOHAND and bit32.band(cards[i].location,LOCATION_ONFIELD)>0 then
       cards[i].prio=-1
     end

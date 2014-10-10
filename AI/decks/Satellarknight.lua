@@ -404,7 +404,7 @@ function SatellarknightOnSelectCard(cards, minTargets, maxTargets,triggeringID,t
     return SatellarknightAdd(cards)
   end
   if ID == 32807846 then
-    return SatellarknightAdd(cards)
+    return Add(cards)
   end
   if ID == 01845204 then
     return SatellarknightAdd(cards,PRIO_TOFIELD)

@@ -159,7 +159,9 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
 -- **********************************************
 -------------------------------------------------
 DeckCheck()
-ExtraCheck=(DeckCheck(DECK_BUJIN) or DeckCheck(DECK_TELLARKNIGHT))
+ExtraCheck=(DeckCheck(DECK_BUJIN) 
+or DeckCheck(DECK_TELLARKNIGHT) 
+or DeckCheck(DECK_NOBLEKNIGHT))
 local DeckCommand = nil
 DeckCommand = SummonExtraDeck(cards,true)
 if DeckCommand ~= nil then
@@ -221,6 +223,12 @@ if not ExtraCheck then
 end
 if not ExtraCheck then 
   DeckCommand = QliphortInit(cards)
+  if DeckCommand ~= nil then
+    return DeckCommand[1],DeckCommand[2]
+  end
+end
+if not (DeckCheck(DECK_BUJIN) or DeckCheck(DECK_TELLARKNIGHT)) then 
+  DeckCommand = NobleInit(cards)
   if DeckCommand ~= nil then
     return DeckCommand[1],DeckCommand[2]
   end
@@ -334,7 +342,7 @@ end
 	if ActivatableCards[i].type == TYPE_SPELL + TYPE_FIELD and
        ActivatableCards[i].position == POS_FACEDOWN then
        GlobalActivatedCardID = ActivatableCards[i].id
-	  return COMMAND_ACTIVATE,i
+	  --return COMMAND_ACTIVATE,i
      end
    end
  end
@@ -401,7 +409,7 @@ end
     end
     for i=1,#cards.st_setable_cards do
       if cards.st_setable_cards[i].type == TYPE_FIELD + TYPE_SPELL and 
-	    AIFieldExists == 0 then
+	    AIFieldExists == 0 and CardIsScripted(cards.st_setable_cards[i].id)==0 then
         return COMMAND_SET_ST,i
       end
     end
