@@ -71,21 +71,21 @@ function PrioritySetup()
 
 AddPriority({
 -- Noble Knight:
-[95772051] = {1,1,9,2,9,2,1,1,1,1,BlackSallyCond},    -- Black Sally
-[93085839] = {1,1,8,2,10,2,1,1,1,1,EachtarCond},      -- Eachtar
-[19680539] = {4,2,2,1,4,2,3,2,3,2,GawaynCond},        -- Gawayn
-[53550467] = {3,2,3,2,6,3,3,2,3,2,DrystanCond},       -- Drystan
-[59057152] = {7,3,7,2,4,2,5,3,2,2,MedrautCond},       -- Medraut
+[95772051] = {4,1,9,2,9,2,1,1,1,1,BlackSallyCond},    -- Black Sally
+[93085839] = {4,1,8,2,10,2,1,1,1,1,EachtarCond},      -- Eachtar
+[19680539] = {4,2,2,1,4,2,3,2,4,2,GawaynCond},        -- Gawayn
+[53550467] = {3,2,3,3,6,3,3,2,3,2,DrystanCond},       -- Drystan
+[59057152] = {7,3,7,2,4,2,5,3,3,2,MedrautCond},       -- Medraut
 [47120245] = {6,2,6,2,4,3,3,2,3,2,BorzCond},          -- Borz
-[13391185] = {5,2,4,2,3,2,3,2,2,2,ChadCond},          -- Chad
+[13391185] = {5,2,4,2,5,2,3,2,4,2,ChadCond},          -- Chad
 [57690191] = {4,2,5,2,5,3,3,2,2,2,BrothersCond},      -- Brothers
 [19748583] = {8,2,1,1,11,3,1,1,1,1,GwenCond},         -- Gwen
 [10736540] = {6,1,1,1,12,3,1,1,1,1,LadyCond},         -- Lady
 
 [92125819] = {1,1,2,1,8,1,3,2,3,1,ArtorigusCond},     -- Artorigus
-[73359475] = {3,2,2,1,7,3,3,2,3,2,PeredurCond},       -- Peredur
+[73359475] = {3,2,4,3,7,3,3,2,3,2,PeredurCond},       -- Peredur
 [00000997] = {9,2,4,2,3,2,1,1,1,1,nil},               -- Merlin
-[00000999] = {5,2,4,2,4,3,3,2,1,1,BedwyrCond},        -- Bedwyr
+[00000999] = {5,2,4,2,3,2,3,2,3,1,BedwyrCond},        -- Bedwyr
 
 [00000998] = {8,5,1,1,1,1,9,1,1,1,nil},               -- Chapter
 [07452945] = {7,1,7,1,4,1,2,1,1,1,RequipArmsCond},    -- Destiny

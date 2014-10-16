@@ -2318,10 +2318,11 @@ end
       end
     end
     for i=1,#setCards do
-      if (setThisTurn < 3 or DeckCheck(DECK_HAT)) and #AIST()<4
+      if (setThisTurn < 3 or DeckCheck(DECK_HAT)) --and #AIST()<4
       and SetBlacklist(setCards[i].id)==0 
       and (bit32.band(setCards[i].type,TYPE_TRAP) > 0 
-      or bit32.band(setCards[i].type,TYPE_QUICKPLAY) > 0 )then
+      or bit32.band(setCards[i].type,TYPE_QUICKPLAY) > 0 )
+      and not HasID(AIST(),92512625,true) then
         return COMMAND_SET_ST,i
       end
     end
@@ -2340,7 +2341,7 @@ end
       local setCards = cards.st_setable_cards
       for i=1,#setCards do
         if bit32.band(setCards[i].type,TYPE_SPELL) > 0 and SetBlacklist(setCards[i].id)==0 then
-          if Get_Card_Count(AIST()) < 2 then
+          if Get_Card_Count(AIST()) < 2 and not HasID(AIST(),92512625,true) then
             return COMMAND_SET_ST,i
           end
         end

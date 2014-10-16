@@ -110,8 +110,9 @@ end
 function AmaterasuFilter(card)
   return card and card.level==4 and bit32.band(card.setcode,0x88)>0
 end
-function SummonAmaterasu()
+function SummonAmaterasuBujin()
   return CardsMatchingFilter(AIBanish(),AmaterasuFilter)>2 and BujinPriorityCheck(AIBanish(),LOCATION_GRAVE,2)>4
+  and DeckCheck(DECK_BUJIN)
 end
 function SummonHirume()
   return OverExtendCheck() and BujinPriorityCheck(AIGrave(),LOCATION_REMOVED)>0
@@ -288,7 +289,7 @@ function BujinOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     GlobalCardMode = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasIDNotNegated(Activatable,68618157) then -- Amaterasu
+  if HasIDNotNegated(Activatable,68618157) and DeckCheck(DECK_BUJIN) then -- Amaterasu
     GlobalCardMode = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -338,7 +339,7 @@ if DeckCheck(DECK_BUJIN) then
   if HasID(SpSummonable,73289035) and SummonTsukuyomi() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasID(SpSummonable,68618157) and SummonAmaterasu() then
+  if HasID(SpSummonable,68618157) and SummonAmaterasuBujin() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSummonable,96381979) and SummonTigerKingBujin() then
@@ -395,7 +396,7 @@ function SusanowoTarget(cards)
     return result
   end
 end
-function AmaterasuTarget(cards)
+function AmaterasuTargetBujin(cards)
   if GlobalCardMode == 1 then
     GlobalCardMode = nil
     return BujinAdd(cards,LOCATION_GRAVE)
@@ -498,8 +499,8 @@ function BujinOnSelectCard(cards, minTargets, maxTargets,ID,triggeringCard)
   if ID == 75840616 then
     return SusanowoTarget(cards)
   end
-  if ID == 68618157 then
-    return AmaterasuTarget(cards)
+  if ID == 68618157 and DeckCheck(DECK_BUJIN) then
+    return AmaterasuTargetBujin(cards)
   end
   if ID == 59251766 then
     return HareTarget(cards)
@@ -711,7 +712,7 @@ function BujinOnSelectChain(cards,only_chains_by_player)
     GlobalCardMode = 1
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,68618157) then -- Amaterasu
+  if HasIDNotNegated(cards,68618157) and DeckCheck(DECK_BUJIN) then -- Amaterasu
     GlobalCardMode = 1
     return {1,CurrentIndex}
   end

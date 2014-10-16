@@ -407,6 +407,7 @@ SetBL={
   54447022,44394295,55742055, -- Soul Charge, Shadoll Fusion, Table
   07452945,14745409,23562407, -- Noble Arms Destiny, Gallatin, Caliburn
   46008667,83438826,00000998, -- Excaliburn, Arfeudutyr, Chapter
+  92512625, -- Advice
 }
 
 
@@ -428,17 +429,26 @@ RepoBL={
 -- of cards to never negate on the field via cards like
 -- Effect Veiler or Breakthrough Skill
 ---------------------------------------------------------
-function NegateBlacklist(CardId)
+NegBL={
+  53804307,26400609,89399912,90411554 -- the 4 Dragon Rulers
+}
+function NegateBlacklist(id)
   for i=1,#NegBL do
-    if NegBL[i]==CardId then
+    if NegBL[i]==id then
       return 1
     end
+  end
+  if id == 00423585 -- negate Summoner Monk only, when he tries to special summon something
+  and not Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_SPECIAL_SUMMON) then
+    return 1
   end
   return 0
 end
 
-NegBL={
-  53804307,26400609,89399912,90411554 -- the 4 Dragon Rulers
+-- for cards like Solemn Warning
+EffNegBL={
+  70368879,32807846,12538374,  -- Upstart Goblin, RotA, Treeborn Frog
+  19748583,98645731 -- Gwen, Duality
 }
 
 function ToHandBlacklist(id) -- cards to not return to your opponent's hand 

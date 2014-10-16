@@ -562,6 +562,12 @@ end
 function FilterLocation(c,loc)
   return bit32.band(c.location,loc)>0
 end
+function FilterStatus(c,status)
+  return bit32.band(c.status,status)>0
+end
+function HasMaterials(c)
+  return c.xyz_material_count>0
+end
 --[[function ScaleCheck(p)
   local cards=AIST()
   local result = 0
@@ -596,3 +602,19 @@ end
 function PendulumCheck(c)
   return bit32.band(c.type,TYPE_PENDULUM)>0 and bit32.band(c.location,LOCATION_SZONE)>0
 end
+
+function EffectCheck(player)
+  -- function to check, if an effect is used in the current chain
+  local p = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_PLAYER)
+  local e = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
+  local c = nil
+  local id = nil
+  if e and p and (p == player or player == nil) then
+    c = e:GetHandler()
+    if c then
+      id = c:GetCode()
+      return e,c,id
+    end
+  end
+  return nil
+end 

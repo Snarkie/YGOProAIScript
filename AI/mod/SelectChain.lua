@@ -22,6 +22,10 @@ function OnSelectChain(cards,only_chains_by_player,forced)
   local index = 1
   local ChainAllowed = 0
   
+local result=PriorityChain(cards,only_chains_by_player)
+if result ~= nil then
+  return result[1],result[2]
+end
 local result=FireFistOnChain(cards,only_chains_by_player)
 if result ~= nil then
   return result[1],result[2]
@@ -449,9 +453,10 @@ end
   -- Use these cards only on opponents cards.
   -- TODO: Expand card list
   ---------------------------------------------------
-  for i=1,#cards do
+  --[[for i=1,#cards do
 	  if cards[i].id == 41420027 or cards[i].id == 84749824 
     or cards[i].id == 03819470 or cards[i].id == 77538567 
+    or cards[i].id == 92512625
     then     
       local p = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_PLAYER)
       if p and p ~= player_ai then
@@ -481,7 +486,7 @@ end
         return 1,i
        end
     end
-  end
+  end]]
   
   ---------------------------------------------
   -- AI should activate: Shrink, 

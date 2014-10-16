@@ -989,9 +989,9 @@ function ShadollOnSelectChain(cards,only_chains_by_player)
   if HasID(cards,77505534) and ChainFacingTheShadows() then
     return {1,CurrentIndex}
   end
-  if HasID(cards,34507039) and ChainWireTap() then
-    return {1,CurrentIndex}
-  end
+  --if HasID(cards,34507039) and ChainWireTap() then
+    --return {1,CurrentIndex}
+  --end
   if HasID(cards,14087893) and ChainBookOfMoon() then
     return {1,CurrentIndex}
   end

@@ -14,14 +14,17 @@ end
 function NobleOrArmsFilter(c,exclude)
   return NobleFilter(c,exclude) or ArmsFilter(c,exclude)
 end
+function RequipCheck(id)
+  return id == 07452945 and OPTCheck(07452945)
+      or id == 14745409 and OPTCheck(14745409)
+      or id == 23562407 and OPTCheck(23562407)
+      or id == 83438826 and OPTCheck(83438826)
+end
 function ArmsCount(cards,requip,skipgwen,raw)
   local result = 0
   if requip then
     for i=1,#cards do
-      if (cards[i].id == 07452945 and OPTCheck(07452945)
-      or cards[i].id == 14745409 and OPTCheck(14745409)
-      or cards[i].id == 23562407 and OPTCheck(23562407)
-      or cards[i].id == 83438826 and OPTCheck(83438826))
+      if RequipCheck(cards[i].id)
       and (bit32.band(cards[i].location,LOCATION_SZONE)==0 
       or bit32.band(cards[i].position,POS_FACEDOWN)>0 or raw)
       then
@@ -198,19 +201,23 @@ GlobalNobleSS = 0
 function MedrautCond(loc,c)
   if loc == PRIO_TOHAND then
     return SummonMedraut() and not HasID(AIHand(),59057152,true) 
-    and ArmsAvailable(true)>0 or ArmsAvailable()>1
+    and (ArmsAvailable(true)>0 or ArmsAvailable()>1 or CardsMatchingFilter(AIDeck(),ArmsFilter)<2)
   end
   if loc == PRIO_TOFIELD then
-    return SummonMedraut(true) and Duel.GetCurrentPhase()~=PHASE_END
+    return bit32.band(c.location,LOCATION_REMOVED)==0 and (SummonMedraut(true) 
+    or CardsMatchingFilter(AIDeck(),ArmsFilter)<2) and Duel.GetCurrentPhase()~=PHASE_END
   end
   if loc == PRIO_TOGRAVE and bit32.band(c.location,LOCATION_DECK)>0 then
     return not HasID(AIGrave(),59057152,true) 
+  end
+  if loc == PRIO_BANISH then
+    return HasID(AIMon(),00000999,true) or HasID(AIMon(),68618157,true)
   end
   return true
 end
 function BorzCond(loc,c)
   if loc == PRIO_TOHAND then
-    return SummonBorz() and not HasID(AIHand(),47120245,true)
+    return SummonBorz() and not HasID(AIHand(),47120245,true) and Duel.GetCurrentPhase()~=PHASE_END
   end
   if loc == PRIO_TOFIELD then
     return SummonBorz(true) and Duel.GetCurrentPhase()~=PHASE_END
@@ -222,13 +229,18 @@ function BorzCond(loc,c)
 end
 function ChadCond(loc,c)
   if loc == PRIO_TOHAND then
-    return SummonChad() and not HasID(AIHand(),13391185,true) or bit32.band(c.location,LOCATION_REMOVED)>0
+    return SummonChad() and not HasID(AIHand(),13391185,true) or bit32.band(c.location,LOCATION_REMOVED)>0 
+    and not AmaterasuCheck()
   end
   if loc == PRIO_TOFIELD then
-    return SummonChad(true) and Duel.GetCurrentPhase()~=PHASE_END
+    return bit32.band(c.location,LOCATION_REMOVED)>0 or SummonChad(true)
+    and Duel.GetCurrentPhase()~=PHASE_END
   end
   if loc == PRIO_TOGRAVE and bit32.band(c.location,LOCATION_DECK)>0 then
     return not HasID(AIGrave(),13391185,true) 
+  end
+  if loc == PRIO_BANISH then
+    return HasID(AIMon(),00000999,true) or HasID(AIMon(),68618157,true)
   end
   return true
 end
@@ -237,10 +249,14 @@ function BedwyrCond(loc,c)
     return SummonBedwyr() and not HasID(AIHand(),00000999,true) or bit32.band(c.location,LOCATION_REMOVED)>0
   end
   if loc == PRIO_TOFIELD then
-    return SummonBedwyr(true) and Duel.GetCurrentPhase()~=PHASE_END
+    return (bit32.band(c.location,LOCATION_REMOVED)>0 or SummonBedwyr(true) or HasID(AIGrave(),93085839,true))
+    and Duel.GetCurrentPhase()~=PHASE_END
   end
   if loc == PRIO_TOGRAVE and bit32.band(c.location,LOCATION_DECK)>0 then
     return not HasID(AIGrave(),00000999,true) 
+  end
+  if loc == PRIO_BANISH then
+    return HasID(AIMon(),00000999,true) or HasID(AIMon(),68618157,true)
   end
   return true
 end
@@ -281,8 +297,14 @@ function GawaynCond(loc,c)
   if loc == PRIO_TOGRAVE and bit32.band(c.location,LOCATION_DECK)>0 then
     return not HasID(AIGrave(),19680539,true) 
   end
+  if loc == PRIO_BANISH then
+    return HasID(AIMon(),00000999,true) or HasID(AIMon(),68618157,true)
+  end
 end
 function BlackSallyCond(loc,c)
+  if loc == PRIO_TOHAND then
+    return bit32.band(c.location,LOCATION_REMOVED)>0
+  end
   if loc == PRIO_TOFIELD then
     return bit32.band(c.location,LOCATION_HAND+LOCATION_REMOVED)>0 or (ArmsAvailable(false,false,false,true)==0 and not ArmsRequip())
     or Duel.GetCurrentPhase()==PHASE_END
@@ -293,6 +315,9 @@ function BlackSallyCond(loc,c)
   return true
 end
 function EachtarCond(loc,c)
+  if loc == PRIO_TOHAND then
+    return bit32.band(c.location,LOCATION_REMOVED)>0
+  end
   if loc == PRIO_TOFIELD then
     return bit32.band(c.location,LOCATION_HAND+LOCATION_REMOVED)>0 or Duel.GetCurrentPhase()==PHASE_END
   end
@@ -330,6 +355,7 @@ end
 function ExcaliburnCond(loc,c)
   if loc == PRIO_TOHAND then
     return not HasAccess(c.id) and GetMultiple(c.id)==0
+    and (bit32.band(c.location,LOCATION_REMOVED)==0 or ArmsAvailable()==0)
   end
   return true
 end
@@ -340,6 +366,7 @@ function GwenCond(loc,c)
     and not ((HasID(cards,59057152,true) or HasID(AIHand(),00000997,true)) 
     and not HasID(AIMon(),47120245,true))
     and not FilterLocation(c,LOCATION_GRAVE)
+    and (bit32.band(c.location,LOCATION_REMOVED)==0 or ArmsAvailable()==0)
   end
   if loc == PRIO_TOGRAVE then
     if bit32.band(c.location,LOCATION_SZONE)==0 then 
@@ -361,6 +388,7 @@ function RequipArmsCond(loc,c)
   end
   if loc == PRIO_TOHAND then
     return not HasAccess(c.id) and GetMultiple(c.id)==0
+    and (bit32.band(c.location,LOCATION_REMOVED)==0 or ArmsAvailable()==0)
   end
   return true
 end
@@ -383,7 +411,9 @@ function ArfCond(loc,c)
 end
 function LadyCond(loc,c)
   if loc == PRIO_TOGRAVE then
-    return (FieldCheck(5,NobleFilter)>0 or Lvl5Check()) and SummonHighSally() and NobleSSCheck()
+    return (FieldCheck(5,NobleFilter)>0 or Lvl5Check()
+    or HasID(AIGrave(),93085839,true) and PriorityCheck(AIGrave(),PRIO_BANISH,2,NobleMonsterFilter)>1) 
+    and SummonHighSally() and NobleSSCheck()
   end
   if loc == PRIO_TOHAND then
     return HasID(AIGrave(),92125819,true)
@@ -408,7 +438,8 @@ function SummonBorz(ss)
   return (((ArmsAvailable()>0 or ArmsRequip()) and OPTCheck(47120245) 
   and ArmsCount(AIDeck(),false,false,true)>3
   and (ss or not Duel.CheckNormalSummonActivity(player_ai))) or GawaynCheck() and not ss
-  or ArmsAvailable()>0 and FieldCheck(5,NobleMonsterFilter,9577205)==1 and SummonR5torigus())
+  or ArmsAvailable()>0 and FieldCheck(5,NobleMonsterFilter,9577205)==1 and SummonR5torigus()
+  or HasID(UseLists({AIHand(),AIGrave()}),95772051,true))
   and not UseMedraut()
 end
 function SummonMedraut(ss)
@@ -425,14 +456,14 @@ function SummonChad(ss)
 end
 function SummonBedwyr(ss)
   return (((OPTCheck(00000999) and (ss or not Duel.CheckNormalSummonActivity(player_ai)))
-  and (ArmsAvailable()>0 and PriorityCheck(AIBanish(),PRIO_TOHAND,1,NobleOrArmsFilter)>0
-  or ArmsAvailable()>0 and HasID(AIBanish(),19680539,true))) or GawaynCheck())
-  and not UseMedraut()
+  and ArmsAvailable()>0 and (PriorityCheck(AIBanish(),PRIO_TOHAND,1,NobleOrArmsFilter)>0
+  or HasID(AIGrave(),93085839,true) and PriorityCheck(AIGrave(),PRIO_BANISH,2,NobleMonsterFilter)>1)) 
+  or GawaynCheck()) and not UseMedraut()
 end
 function SummonPeredur(ss)
   return (ArmsAvailable()>0 and (ss or not Duel.CheckNormalSummonActivity(player_ai))
-  or FieldCheck(5,NobleMonsterFilter,9577205)==1 and SummonR5torigus())
-  and not UseMedraut()
+  or FieldCheck(5,NobleMonsterFilter,83519853)==1 and SummonR5torigus())
+  and not UseMedraut() and not UseChad() and not UseBedwyr()
 end
 function BlackSallyFilter(c)
   return NobleMonsterFilter(c) and bit32.band(c.type,TYPE_NORMAL)>0
@@ -447,7 +478,9 @@ function SummonBlackSally()
   or FieldCheck(5,NobleMonsterFilter,83519853)==1 and SummonR5torigus()
   or ArmsAvailable()==0 and not ArmsRequip() and not OPTCheck(19748583)
   and not (FieldCheck(4,NobleMonsterFilter)==2 and SummonR4torigus()))
-  and not UseMedraut()
+  and not UseMedraut() and not AmaterasuCheck()
+  and not UseChad() and not UseBedwyr()
+  and not HighSallyCheck(4) 
 end
 function UseBrothers()
   return PriorityCheck(AIGrave(),PRIO_TODECK,3,NobleFilter)>1 and OPTCheck(57690191)
@@ -463,40 +496,45 @@ function SummonBrothers()
   and not UseMedraut()
 end
 function SetBrothers()
-  return (Duel.GetTurnCount()==1 or Duel.GetCurrentPhase()==PHASE_MAIN2)
+  return ((Duel.GetCurrentPhase()==PHASE_MAIN2 or not GlobalBPAllowed))
   and (not HasID(AIST(),55742055,true) or TableCount()<6)
 end
 function UseArfDestroy()
   return CardsMatchingFilter(OppField(),ArfFilter)>0
 end
 function SummonEachtar()
-  return (HasID(AIMon(),00000999,true) or PriorityCheck(AIGrave(),PRIO_BANISH,2,NobleMonsterFilter)>2)
+  return (HasID(AIMon(),00000999,true) or HasID(AIMon(),68618157,true) or (PriorityCheck(AIGrave(),PRIO_BANISH,2,NobleMonsterFilter)>1
   and (FieldCheck(5)==1 and SummonR5torigus() or HasID(AIGrave(),10736540,true) and SummonHighSally() 
-  or #AIMon()==0 ) and not UseMedraut()
+  or #AIMon()==0))) and not UseMedraut() and Duel.GetLocationCount(player_ai,LOCATION_MZONE)>0
 end
 
-function UseCaliburn()
-  return EquipTargetCheck(AIMon()) or ArmsCount(AIHand(),false,true)>1
-  or OppHasStrongestMonster()
+function UseCaliburn(facedown)
+  return EquipTargetCheck(AIMon(),true) or ArmsCount(AIHand(),false,true)>1
+  or OppHasStrongestMonster() or facedown and not AmaterasuCheck()
 end
-function UseArf()
-  return UseArfDestroy() or (EquipTargetCheck(AIMon()) and ArmsCount(AIHand(),true,true)==1)
+function UseArf(facedown)
+  return UseArfDestroy() or (EquipTargetCheck(AIMon(),true) and ArmsCount(AIHand(),true,true)==1)
+  or facedown and not AmaterasuCheck()
 end
-function UseDestiny()
-  return (ArmsCount(AIHand(),false,true)>1 or EquipTargetCheck(AIMon()))
+function UseDestiny(facedown)
+  return (ArmsCount(AIHand(),false,true)>1 or EquipTargetCheck(AIMon(),true)
+  or #AIMon()==1)
   and CardsMatchingFilter(AIMon(),FilterRace,RACE_WARRIOR)>0
+  or facedown and not AmaterasuCheck()
 end
-function UseGallatin()
-  return (ArmsCount(AIHand(),false,true)>1 or EquipTargetCheck(AIMon())
+function UseGallatin(facedown)
+  return (ArmsCount(AIHand(),false,true)>1 or EquipTargetCheck(AIMon(),true)
   or OppHasStrongestMonster())
   and CardsMatchingFilter(AIMon(),FilterRace,RACE_WARRIOR)>0
+  or facedown and not AmaterasuCheck()
 end
 function UseGwen()
-  return true
+  return not AmaterasuCheck()
 end
-function UseExcaliburn()
-  return (ArmsCount(AIHand(),false,true)>1 or EquipTargetCheck(AIMon()))
-  and CardsMatchingFilter(AIMon(),FilterRace,RACE_WARRIOR)>0
+function UseExcaliburn(facedown)
+  return (ArmsCount(AIHand(),false,true)>1 or EquipTargetCheck(AIMon(),true))
+  and CardsMatchingFilter(AIMon(),NobleMonsterFilter)>0
+  or facedown and not AmaterasuCheck()
 end
 
 function BorzFilter(c)
@@ -504,12 +542,18 @@ function BorzFilter(c)
   and CardsMatchingFilter(c:get_equipped_cards(),ArmsFilter)>0
 end
 function UseBorz()
-  return OPTCheck(47120245) and (HasID(AIMon(),47120245,true,nil,nil,nil,BedwyrFilter) 
+  return OPTCheck(47120245) and (HasID(AIMon(),47120245,true,nil,nil,nil,BorzFilter) 
   or ArmsAvailable()>0 or skiparms) and CardsMatchingFilter(AIDeck(),ArmsFilter)>2
+end
+function ChadFilter(c)
+  return NobleMonsterFilter(c) 
+  and c.id~=95772051 and c.id~=93085839
+  and c.id~=83519853 and c.id~=21223277
+  and c.id~=10613952
 end
 function UseChad(skiparms)
   return OPTCheck(13391185) 
-  and PriorityCheck(AIGrave(),PRIO_TOHAND,1,NobleMonsterFilter)>1
+  and CardsMatchingFilter(AIGrave(),ChadFilter)>0
 end
 function BedwyrFilter(c)
   return c.id == 00000999 and c.equip_count>0 
@@ -517,7 +561,8 @@ function BedwyrFilter(c)
 end
 function UseBedwyr(skiparms)
   return OPTCheck(00000999) and (HasID(AIMon(),00000999,true,nil,nil,nil,BedwyrFilter)
-  or ArmsAvailable()>0 or skiparms) and CardsMatchingFilter(AIBanish(),NobleOrArmsFilter)>0
+  or ArmsAvailable()>0 or skiparms) and (CardsMatchingFilter(AIBanish(),NobleOrArmsFilter)>0
+  or HasID(AIGrave(),93085839,true))
 end
 function SummonMerlin()
   return DualityCheck() and OPTCheck(00000997) and not UseMedraut()
@@ -534,6 +579,8 @@ function HighSallyFilter(c)
   and c:is_affected_by(EFFECT_CANNOT_BE_BATTLE_TARGET)==0
   and c:is_affected_by(EFFECT_INDESTRUCTABLE_COUNT)==0
   and bit32.band(c.type,TYPE_PENDULUM)==0
+  and not ((c.id == 48739166 or c.id == 78156759
+  or c.id == 10002346) and c.xyz_material_count>0)
 end
 function HighSallySummonFilter(c)
   return HighSallyFilter(c) and c.attack<2100+NobleATKBoost(1)
@@ -559,11 +606,10 @@ function UseMedraut(skiparms,skipmon)
 end
 function SummonGawayn()
   return ((SummonR4torigus() or SummonChainNoble()) and FieldCheck(4,NobleFilter)==1 
-  or SummonHighSally() and HasID(AIDeck(),10736540,true) and HasID(AIExtra(),34086406,true) 
-  and (FieldCheck(5,NobleFilter)>0 and FieldCheck(4,NobleFilter)==1
-  or ((HasID(AIMon(),47120245,true) or HasID(AIMon(),59057152,true) 
+  or SummonAmaterasu() and FieldCheck(4,NobleFilter)==2
+  or HighSallyCheck(4) or ((HasID(AIMon(),47120245,true) or HasID(AIMon(),59057152,true) 
   and (FieldCheck(4,NobleFilter)==2 or FieldCheck(4,NobleFilter)==1 and CardsMatchingFilter(AIHand(),FilterID,19680539)>1))
-  and (HasID(UseLists({AIHand(),AIGrave()}),95772051,true) or ArmsAvailable()>0))))
+  and (HasID(UseLists({AIHand(),AIGrave()}),95772051,true) or ArmsAvailable()>0)))
   and not UseMedraut()
 end
 function SummonR4torigus()
@@ -579,28 +625,87 @@ function UseR4torigus()
   and not (HasID(AIMon(),00000999,true) and UseBedwyr() and ArmsAvailable()>0)
 end
 function SummonR5torigus()
-  return HasID(AIExtra(),10613952,true) and ArmsCount(AIGrave(),false,true)>1
-  and OppHasStrongestMonster() and DestroyCheck(OppMon())
+  return HasID(AIExtra(),10613952,true) and ArmsCount(UseLists({AIST(),AIGrave()}),false,true,true)>1
+  and (OppHasStrongestMonster() or Duel.GetCurrentPhase()==PHASE_MAIN2) and DestroyCheck(OppMon())>0
 end
 function UseR5torigus()
   return DestroyCheck(OppMon())>0
 end
 function UseTable()
   return not HasID(AIST(),55742055,true) and CardsMatchingFilter(UseLists({AIField(),AIGrave()}),NobleFilter)>1
+  and (Duel.GetCurrentPhase()==PHASE_MAIN2 or not GlobalBPAllowed)
 end
-
 function SummonChainNoble()
-  return HasID(AIExtra(),34086406,true) and NobleSSCheck() 
+  return (HasID(AIExtra(),34086406,true) and NobleSSCheck() 
   and (SummonHighSally() and HasID(AIDeck(),10736540,true) and (FieldCheck(5,NobleFilter)>0 
   or (FieldCheck(4,NobleFilter)>2 and Lvl5Check()))
-  or HasID(AIDeck(),19748583,true) and OPTCheck(19748583) and ArmsAvailable(false,false,false,true)==0)
+  or HasID(AIDeck(),19748583,true) and OPTCheck(19748583) and ArmsAvailable(false,false,false,true)==0))
+  and not UseBedwyr() and not UseChad() and not UseBorz() and not SummonAmaterasu()
 end
 function UseChapter()
   return HasID(AIGrave(),83519853,true)
   or HasID(AIGrave(),59057152,true) and UseMedraut(true,true)
   or HasID(AIGrave(),13391185,true) and UseChad(true)
   or HasID(AIGrave(),00000999,true) and UseBedwyr(true)
-  or HasID(AIGrave(),00000999,true) and ArmsCount(AIDeck(),false,false,true)>3
+  or HasID(AIGrave(),47120245,true) and ArmsCount(AIDeck(),false,false,true)>3
+end
+function SetAdvice()
+  return CardsMatchingFilter(AIST(),FilterPosition,POS_FACEDOWN)==0
+  and (Duel.GetCurrentPhase()==PHASE_MAIN2 or not GlobalBPAllowed)
+  and AI.GetPlayerLP(1)>3000
+end
+function HighSallyCheck(level)
+  return SummonHighSally() and (HasID(AIDeck(),10736540,true) and HasID(AIExtra(),34086406,true)
+  or HasID(AIHand(),10736540,true) and HasID(AIExtra(),73289035,true))
+  and (level == 4 and FieldCheck(4,NobleFilter) == 1 and FieldCheck(5,NobleFilter) == 1
+  or level == 5 and FieldCheck(4,NobleFilter)>1)
+end
+function AmaterasuCheck()
+  return SummonAmaterasu() and HasID(UseLists({AIGrave(),AIBanish()}),19680539,true) 
+  and FieldCheck(4,NobleMonsterFilter)>=2
+end
+function SummonAmaterasu()
+  return HasID(AIExtra(),68618157,true) and (CardsMatchingFilter(AIBanish(),NobleMonsterFilter)>1
+  or HasID(AIGrave(),93085839,true) and PriorityCheck(AIGrave(),PRIO_BANISH,2,NobleMonsterFilter)>2
+  or HasID(AIMon(),93085839,true) and CardsMatchingFilter(AIBanish(),NobleMonsterFilter)>0)
+  and DualityCheck() and NobleSSCheck()
+end
+function TsukuyomiHandCheck()
+  local AdviceCheck=false
+  local result = 0
+  local setable = 0
+  for i=1,#AIHand() do
+    local c = AIHand()[i]
+    if c.id == 92512625 then
+      if not AdviceCheck and not HasID(AIST(),92512625,true) then
+        AdviceCheck = true
+      else
+        return false
+      end
+    end
+    if FilterType(c,TYPE_SPELL+TYPE_TRAP) then
+      setable = setable + 1
+    else
+      result = result + 1
+    end
+  end
+  return setable <= Duel.GetLocationCount(player_ai,LOCATION_SZONE) 
+  and result < 3 and PriorityCheck(AIHand(),PRIO_TOGRAVE,math.max(1,result-1),FilterType,TYPE_MONSTER)>4
+end
+function SummonTsukuyomiNK()
+  return DeckCheck(DECK_NOBLEKNIGHT) and HasID(AIExtra(),73289035,true) 
+  and HasID(AIHand(),10736540,true) and SummonHighSally()
+  and TsukuyomiHandCheck() and (FieldCheck(5,NobleMonsterFilter)>0 or HasID(AIGrave(),93085839,true)
+  and PriorityCheck(UseLists({AIHand(),AIGrave()}),PRIO_BANISH,2,NobleMonsterFilter)>1)
+  and not UseChad() and not UseBedwyr() and not AmaterasuCheck() 
+  and DualityCheck() and NobleSSCheck()
+end
+function UseTsukuyomiNK()
+  return DeckCheck(DECK_NOBLEKNIGHT) and (#AIHand()<4 and PriorityCheck(AIHand(),PRIO_TOGRAVE,math.max(#AIHand()-1,1),FilterType,TYPE_MONSTER)>4
+  or #AIHand()==1)
+end
+function TsukuyomiFilter(c)
+  return HasMaterials(c) and NotNegated(c) and OPTCheck(c.cardid)
 end
 function NobleInit(cards)
   local Act = cards.activatable_cards
@@ -609,13 +714,24 @@ function NobleInit(cards)
   local Rep = cards.repositionable_cards
   local SetMon = cards.monster_setable_cards
   local SetST = cards.st_setable_cards
+  if HasID(AIMon(),73289035,true,nil,nil,nil,TsukuyomiFilter) 
+  and #SetST>0 and #AIHand()>1 and TsukuyomiHandCheck() then
+    return {COMMAND_SET_ST,1}
+  end
+  if HasID(Act,73289035) and UseTsukuyomiNK() then
+    OPTSet(Act[CurrentIndex].cardid)
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   if HasID(Act,00691925) then -- test
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Act,23562407,false,nil,LOCATION_ONFIELD) then -- Caliburn LP Recovery
+  if HasID(Act,68618157) then -- Amaterasu
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Act,83438826,false,nil,LOCATION_ONFIELD) and UseArfDestroy() then
+  if HasID(Act,23562407,false,nil,LOCATION_SZONE,POS_FACEUP) then -- Caliburn LP Recovery
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasID(Act,83438826,false,nil,LOCATION_SZONE,POS_FACEUP) and UseArfDestroy() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Act,00000998) and UseChapter() then
@@ -636,7 +752,7 @@ function NobleInit(cards)
   if HasID(Act,10613952) and UseR5torigus() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Act,00000997) then -- Merlin
+  if HasID(Act,00000997,false,nil,LOCATION_MZONE) then -- Merlin
     OPTSet(00000997)
     GlobalNobleSS = Duel.GetTurnCount()
     return {COMMAND_ACTIVATE,CurrentIndex}
@@ -653,12 +769,14 @@ function NobleInit(cards)
   if HasID(SpSum,34086406) and SummonChainNoble() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
+  if HasID(SpSum,73289035) and SummonTsukuyomiNK() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
   if HasID(SpSum,83519853) and SummonHighSally() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(Act,13391185) and UseChad() then
     OPTSet(13391185)
-    GlobalCardMode = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Act,00000999) and UseBedwyr() then
@@ -668,10 +786,6 @@ function NobleInit(cards)
   end
   if HasID(Act,57690191) and UseBrothers() then
     OPTSet(57690191)
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
-  if HasID(Act,95772051,false,nil,LOCATION_HAND+LOCATION_GRAVE) and SummonBlackSally() then
-    GlobalCardMode = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Sum,00000997) and SummonMerlin() then
@@ -695,6 +809,16 @@ function NobleInit(cards)
   if HasID(SpSum,19680539) and SummonGawayn() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
+  if HasID(Act,93085839) and SummonEachtar() then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasID(SpSum,68618157) and SummonAmaterasu() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(Act,95772051,false,nil,LOCATION_HAND+LOCATION_GRAVE) and SummonBlackSally() then
+    GlobalCardMode = 1
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   if HasID(SpSum,21223277) and SummonR4torigus() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
@@ -704,11 +828,14 @@ function NobleInit(cards)
   if HasID(Sum,57690191) and SummonBrothers() then
     return {COMMAND_SUMMON,CurrentIndex}
   end
-  if HasID(Act,95772051,false,nil,LOCATION_MZONE) and UseBlackSally() then
+  if HasID(Sum,73359475) and SummonPeredur() then
+    return {COMMAND_SUMMON,CurrentIndex}
+  end
+    if HasID(Act,95772051,false,nil,LOCATION_MZONE) and UseBlackSally() then
     GlobalCardMode = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Act,83438826,false,nil,nil,POS_FACEDOWN) and UseArf() then
+  if HasID(Act,83438826,false,nil,LOCATION_SZONE,POS_FACEDOWN) and UseArf(true) then
     GlobalCardMode = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -716,23 +843,30 @@ function NobleInit(cards)
     GlobalCardMode = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Act,23562407,false,nil,nil,POS_FACEDOWN) and UseCaliburn() then
+  if HasID(Act,23562407,false,nil,LOCATION_SZONE,POS_FACEDOWN) and UseCaliburn(true) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Act,23562407,false,nil,LOCATION_HAND) and UseCaliburn() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Act,07452945) and UseDestiny() then
+  if HasID(Act,07452945,false,nil,LOCATION_SZONE,POS_FACEDOWN) and UseDestiny(true) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Act,14745409) and UseGallatin() then
+  if HasID(Act,07452945,false,nil,LOCATION_HAND) and UseDestiny() then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasID(Act,14745409,false,nil,LOCATION_SZONE,POS_FACEDOWN) and UseGallatin(true) then
     GlobalGallatinTurn[Act[CurrentIndex].cardid]=Duel.GetTurnCount()
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Act,46008667,false,nil,LOCATION_HAND) and UseExcaliburn() then
+  if HasID(Act,14745409,false,nil,LOCATION_HAND) and UseGallatin() then
+    GlobalGallatinTurn[Act[CurrentIndex].cardid]=Duel.GetTurnCount()
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Act,46008667,false,nil,nil,POS_FACEDOWN) and UseExcaliburn() then
+  if HasID(Act,46008667,false,nil,LOCATION_SZONE,POS_FACEDOWN) and UseExcaliburn(true) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasID(Act,46008667,false,nil,LOCATION_HAND) and UseExcaliburn() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Act,19748583,false,nil,LOCATION_GRAVE) and UseGwen() then
@@ -743,23 +877,47 @@ function NobleInit(cards)
     OPTSet(19748583)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Sum,73359475) and #AIMon() < 2 then -- Peredur
+  if HasID(Sum,73359475) and OverExtendCheck() then -- Peredur
     return {COMMAND_SUMMON,CurrentIndex}
   end
-  if HasID(Sum,92125819) and #AIMon() < 2 then -- Artorigus
+  if HasID(Sum,92125819) and OverExtendCheck() then -- Artorigus
     return {COMMAND_SUMMON,CurrentIndex}
+  end
+  if HasID(Sum,53550467) and OverExtendCheck() then -- Drystan
+    return {COMMAND_SUMMON,CurrentIndex}
+  end
+  if HasID(Sum,47120245) and OverExtendCheck() then -- Borz
+    return {COMMAND_SUMMON,CurrentIndex}
+  end
+  if HasID(Sum,59057152) and OverExtendCheck() then -- Medraut
+    return {COMMAND_SUMMON,CurrentIndex}
+  end
+  if HasID(Sum,13391185) and OverExtendCheck() then -- Chad
+    return {COMMAND_SUMMON,CurrentIndex}
+  end
+  if HasID(Sum,00000999) and OverExtendCheck() then -- Bedwyr
+    return {COMMAND_SUMMON,CurrentIndex}
+  end
+  if HasID(Act,00000998) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Sum,19680539) and #AIMon() == 0 then -- Gawayn
     return {COMMAND_SUMMON,CurrentIndex}
-  end
-  if HasID(Act,93085839) and SummonEachtar() then
-    return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Act,55742055) and UseTable() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(SetMon,57690191) and SetBrothers() then
     return {COMMAND_SET_MONSTER,CurrentIndex}
+  end
+  if HasID(SetMon,10736540) and SetMonster() then
+    return {COMMAND_SET_MONSTER,CurrentIndex}
+  end
+  if HasID(SetMon,19748583) and SetMonster() then
+    return {COMMAND_SET_MONSTER,CurrentIndex}
+  end
+  if HasID(SetST,92512625) and SetAdvice() then
+    return {COMMAND_SET_ST,CurrentIndex}
   end
   return nil
 end
@@ -771,31 +929,31 @@ function MedrautTarget(cards)
     return Add(cards,PRIO_TOGRAVE)
   end
 end
-function EquipTargetCheckFunc(cards,id,func,opt,skipeqcheck)
+function EquipTargetCheckFunc(cards,id,func,opt,skipeqcheck,skipmultiple)
   for i=1,#cards do
     if (((id== nil or cards[i].id == id and (opt==nil and func() or opt and func(opt))) and GetMultiple(cards[i].cardid)==0) 
     and (skipeqcheck or not EquipCheck(cards[i])))
     and CurrentMonOwner(cards[i].cardid) == 1
     then
-      SetMultiple(cards[i].cardid)
+      if skipmultiple~=true then SetMultiple(cards[i].cardid) end
       return {i}
     end
   end
   return nil
 end
-function EquipTargetCheck(cards)
+function EquipTargetCheck(cards,skipmultiple)
   local result = nil
-  result = EquipTargetCheckFunc(cards,59057152,UseMedraut,true)
+  result = EquipTargetCheckFunc(cards,59057152,UseMedraut,true,false,skipmultiple)
   if result then return result end
-  result = EquipTargetCheckFunc(cards,47120245,function() return ArmsCount(AIDeck())>3 end,true) 
+  result = EquipTargetCheckFunc(cards,47120245,function() return ArmsCount(AIDeck())>3 end,true,false,skipmultiple) 
   if result then return result end
-  result = EquipTargetCheckFunc(cards,13391185,UseChad,true) 
+  result = EquipTargetCheckFunc(cards,13391185,UseChad,true,false,skipmultiple) 
   if result then return result end
-  result = EquipTargetCheckFunc(cards,00000999,UseBedwyr,true) 
+  result = EquipTargetCheckFunc(cards,00000999,UseBedwyr,true,false,skipmultiple) 
   if result then return result end
-  result = EquipTargetCheckFunc(cards,47120245,function() return DestroyCheck(OppField(),false,FilterPosition,POS_FACEUP)>0 and OPTCheck(53550467) end,nil,true) 
+  result = EquipTargetCheckFunc(cards,47120245,function() return DestroyCheck(OppField(),false,FilterPosition,POS_FACEUP)>0 and OPTCheck(53550467) end,nil,true,skipmultiple) 
   if result then return result end
-  result = EquipTargetCheckFunc(cards,73359475,function() return true end) 
+  result = EquipTargetCheckFunc(cards,73359475,function() return true end,nil,false,skipmultiple) 
   if result then return result end
   if OppHasStrongestMonster() then
     
@@ -872,7 +1030,7 @@ function ArmsTargets(cards,max)
     if cards[i].owner == 1 and cards[i]:get_equip_target()
     and (cards[i].id == 23562407 and OPTCheck(23562407) 
     or cards[i].id == 14745409 and OPTCheck(14745409) 
-    and GlobalGallatinTurn[cards[i].cardid]<Duel.GetTurnCount()
+    and GlobalGallatinTurn[cards[i].cardid] and GlobalGallatinTurn[cards[i].cardid]<Duel.GetTurnCount()
     or cards[i]:get_equip_target() and CurrentMonOwner(cards[i]:get_equip_target().cardid)==2)
     then
       result[#result+1]=i
@@ -931,8 +1089,7 @@ function TableTarget(cards)
   return result
 end
 function ChadTarget(cards)
-  if GlobalCardMode == 1 then
-    GlobalCardMode = nil
+  if FilterLocation(cards[1],LOCATION_GRAVE) then
     return Add(cards,PRIO_TOHAND)
   end
   return Add(cards,PRIO_TOGRAVE)
@@ -978,6 +1135,16 @@ function EachtarTarget(cards)
 end
 function PeredurTarget(cards)
   Add(cards,PRIO_TOHAND)
+end
+function AmaterasuTarget(cards)
+  if FilterLocation(cards[1],LOCATION_OVERLAY) then
+    return Add(cards,PRIO_TOGRAVE)
+  end
+  if Duel.GetTurnPlayer()==player_ai then
+    return Add(cards,PRIO_TOFIELD)
+  else
+    return Add(cards,PRIO_TOHAND)
+  end
 end
 function NobleCard(cards,min,max,id,c)
   if c then
@@ -1042,6 +1209,9 @@ function NobleCard(cards,min,max,id,c)
   if id == 73359475 then
     return PeredurTarget(cards)
   end
+  if id == 68618157 then
+    return AmaterasuTarget(cards)
+  end
   return nil
 end
 function ChainCaliburn()
@@ -1069,7 +1239,21 @@ function TableSummon()
   return OverExtendCheck() or HasID(AIHand(),95772051,true) or HasID(AIHand(),93085839,true)
   or HasID(AIHand(),57690191,true) or HasID(AIHand(),92125819,true)
 end
+function ChainAmaterasu()
+  if RemovalCheck(68618157) then
+    return true
+  end
+  if NegateCheck(68618157) then
+    return true
+  end
+  if Duel.GetTurnPlayer()==1-player_ai then
+    return Duel.GetCurrentPhase()==PHASE_END
+  end
+end
 function NobleChain(cards)
+  if HasID(cards,68618157) and ChainAmaterasu() then
+    return {1,CurrentIndex}
+  end
   if HasID(cards,23562407) and ChainCaliburn() then
     return {1,CurrentIndex}
   end
@@ -1102,20 +1286,20 @@ function NobleChain(cards)
     end
   end
   if HasID(cards,55742055,false,891872883) then -- Table draw
-    print("OnSelectChain: Table draw, Description: "..cards[CurrentIndex].description)
+    print("Table draw")
     return {1,CurrentIndex}
   end
   if HasID(cards,55742055,false,891872880) then -- Table dump
-    print("OnSelectChain: Table dump, Description: "..cards[CurrentIndex].description)
+    print("Table dump")
     GlobalTableDump=Duel.GetTurnCount()
     return {1,CurrentIndex}
   end
   if HasID(cards,55742055,false,891872882) then -- Table recover
-    print("OnSelectChain: Table recover, Description: "..cards[CurrentIndex].description)
+    print("Table recover")
     return {1,CurrentIndex}
   end
   if HasID(cards,55742055,false,891872881) and TableSummon() then -- Table summon
-    print("OnSelectChain: Table summon, Description: "..cards[CurrentIndex].description)
+    print("Table summon")
     return {1,CurrentIndex}
   end
   if HasID(cards,57690191) and ChainBrothers() then
@@ -1141,10 +1325,11 @@ function ChainGwen()
       source = Duel.GetAttackTarget()
     else
     end
-    if (target:IsPosition(POS_ATTACK) and source:IsPosition(POS_ATTACK) and source:GetAttack() >= target:GetAttack()
+    if (target:IsPosition(POS_ATTACK) and source:IsPosition(POS_ATTACK) and (source:GetAttack() > target:GetAttack()
+    or source:GetAttack() == target:GetAttack() and not target:IsHasEffect(EFFECT_INDESTRUCTIBLE_COUNT))
     or target:IsPosition(POS_ATTACK) and source:IsPosition(POS_DEFENCE) and source:GetDefence() >= target:GetAttack()
     or target:IsPosition(POS_DEFENCE) and source:IsPosition(POS_ATTACK) and source:GetAttack() >= target:GetDefence()
-    or source:IsPosition(POS_FACEDOWN)
+    or source:IsPosition(POS_FACEDOWN) and not target:IsCode(83519853)
     or source:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE)
     or source:IsHasEffect(EFFECT_INDESTRUCTABLE_COUNT))
     and not source:IsHasEffect(EFFECT_IMMUNE_EFFECT) 
@@ -1176,10 +1361,7 @@ function NobleEffectYesNo(id,card)
   if id == 21223277 or id == 10613952 then -- R4torigus, R5torigus
     result = 1
   end
-  if id == 55742055 then
-    print("OnSelectEffectYesNo: Table, Description: "..card.description)
-  end
-  --[[if id == 55742055 and card.description == 891872883 then -- Table Draw
+  if id == 55742055 and card.description == 891872883 then -- Table Draw
     print("Table draw")
     result = 1
   end
@@ -1196,12 +1378,6 @@ function NobleEffectYesNo(id,card)
   if id == 55742055 and card.description == 891872881 and TableSummon() then -- Table Summon
     print("Table summon")
     GlobalTable = 3
-    result = 1
-  end]]
-  if id == 55742055 and TableCount()>8 then
-    result = 1
-  end
-  if id == 55742055 and GlobalTableDump~=Duel.GetTurnCount() then -- Table
     result = 1
   end
   if id == 57690191 and ChainBrothers() then

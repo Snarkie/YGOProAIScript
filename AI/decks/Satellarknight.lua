@@ -518,9 +518,9 @@ function SatellarknightOnSelectChain(cards,only_chains_by_player)
   if HasIDNotNegated(cards,17412721) then   -- Elder God Noden
     return {1,CurrentIndex}
   end
-  if HasID(cards,41510920) and ChainFactor() then
-    return {1,CurrentIndex}
-  end
+  --if HasID(cards,41510920) and ChainFactor() then
+    --return {1,CurrentIndex}
+  --end
   if HasID(cards,21501505) and ChainCairngorgon() then
     return {1,CurrentIndex}
   end
