@@ -137,6 +137,23 @@ function OnSelectBattleCommand(cards,activatable)
      end
   end
   
+  -- Attack with monsters that can get search effects first
+  -- TODO: Expand on this
+  
+  if HasID(cards,83519853) then -- High Laundsallyn
+    local c = cards[CurrentIndex]
+    local sub = SubGroup(targets,HighSallyFilter)
+    for i=1,#sub do
+      if FilterPosition(sub[i],POS_ATTACK) and sub[i].attack<c.attack
+      or FilterPosition(sub[i],POS_DEFENCE) and (sub[i].attack<c.defense)
+      and (FilterPosition(sub[i],POS_FACEUP) or c:is_affected_by(EFFECT_PUBLIC)) 
+      then
+        GlobalCurrentATK = cards[i].attack
+        GlobalAIIsAttacking = 1
+        return 1,CurrentIndex
+      end
+    end
+  end
   -------------------------------------------------------
   -- If the opponent has a monster with more ATK than any
   -- of the AI's monsters, look for an opponent's monster
@@ -230,6 +247,9 @@ end
     return 2,CurrentIndex
   end
   if HasID(activatable,97077563) and UseCotHBP() then
+    return 2,CurrentIndex
+  end
+  if HasID(activatable,00000997) and UseMerlinBP() then
     return 2,CurrentIndex
   end
 

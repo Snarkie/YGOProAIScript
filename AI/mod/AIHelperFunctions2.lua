@@ -568,6 +568,10 @@ end
 function HasMaterials(c)
   return c.xyz_material_count>0
 end
+function HasEquips(c,opt)
+  return opt == nil and c.equip_count>0
+  or opt and c.equip_count==opt
+end
 --[[function ScaleCheck(p)
   local cards=AIST()
   local result = 0

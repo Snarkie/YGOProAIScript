@@ -155,7 +155,7 @@ function HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(Activatable,81439173) then   -- Foolish Burial
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Activatable,32807846) then   -- Reinforcement of the Army
+  if HasID(Activatable,32807846) and not DeckCheck(DECK_NOBLEKNIGHT) then   -- Reinforcement of the Army
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   

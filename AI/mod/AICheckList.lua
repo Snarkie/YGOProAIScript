@@ -447,8 +447,9 @@ end
 
 -- for cards like Solemn Warning
 EffNegBL={
-  70368879,32807846,12538374,  -- Upstart Goblin, RotA, Treeborn Frog
-  19748583,98645731 -- Gwen, Duality
+  70368879,32807846,12538374, -- Upstart, RotA, Treeborn
+  19748583,98645731,81439173, -- Gwen, Duality, Foolish
+  75500286, -- Gold Sarc
 }
 
 function ToHandBlacklist(id) -- cards to not return to your opponent's hand 
@@ -588,10 +589,10 @@ end
 ----------------------------------------------------
 function CardIsASearchCard(CardId)
   local Result = 0
-  if CardId == 73628505 or CardId == 32807846 or   -- Terraforming, ROTA
+  if CardId == 73628505 or --CardId == 32807846 or   -- Terraforming, ROTA
      CardId == 00213326 or CardId == 25377819 or   -- E-Call, Convocation
      CardId == 54031490 or CardId == 94886282 or   -- SSS, Charge
-     CardId == 96363153 or CardId == 57103969 or   -- Tuning, FF Tenki
+     CardId == 96363153 or --CardId == 57103969 or   -- Tuning, FF Tenki
      CardId == 74968065 or CardId == 12171659 or   -- Hecatrice, Zeradias
      CardId == 17393207 or CardId == 51435705 or   -- Commandant, Skull
      CardId == 75064463 or CardId == 48675364 or   -- Harpie Q, ArchF Gen
@@ -718,7 +719,7 @@ ScriptedCards ={
 91907707,27279764,17639150,04450854,  -- Qliphort Archive, Killer, Sacrifice, Apoqliphort
 95772051,93085839,59057152,47120245,  -- Noble Knights Black Sally, Eachtar, Medraut, Borz
 13391185,57690191,19748583,10736540,  -- Chad, Brothers, Gwen, Lady of the Lake
-73359475,55742055,92512625,  -- Peredur, Table, Solemn Advice
+73359475,55742055,92512625,32807846,  -- Peredur, Table, Solemn Advice, RotA
 07452945,14745409,23562407,46008667,  -- Noble Arms Destiny, Gallatin, Caliburn, Excaliburn
 83438826,48009503,60645181,82944432,  -- Arfeudutyr, HC - Gandiva, Excalibur, Blade Armor Ninja
 21223277,10613952,83519853,00000997,  -- R4torigus, R5torigus, High Sally, Merlin

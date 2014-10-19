@@ -1,3 +1,4 @@
+-- A cheating AI file, which draws additional cards and recovers LP each turn
 
 require("ai.mod.AICheckList")
 require("ai.mod.AIHelperFunctions")
@@ -35,7 +36,6 @@ math.randomseed( require("os").time() )
 function OnStartOfDuel()
   AI.Chat("You selected a cheating AI")
 	AI.Chat("The AI will recover 1000 LP and draw an additional card each turn")
-  --Debug.SetAIName("AI-Cheater")
   GlobalCheating = 1
   SaveState()
 end
