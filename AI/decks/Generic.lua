@@ -475,19 +475,14 @@ function SummonNegateFilter(c)
 end
 function EffectNegateFilter(c,card)
   local id = c:GetCode()
-  print("checking eff:")
   if RemovalCheck(card.id) then
-    print("removal")
     local cg = RemovalCheck()
     if cg:GetCount()>1 then
-      print("mass removal or nontargeting, negate")
       return true
     else
       if FilterType(card,TYPE_MONSTER) then
-        print("removal on monster, negate")
         return true
       else
-        print("S/T removal, not negate")
         return false
       end
     end
@@ -497,45 +492,37 @@ function EffectNegateFilter(c,card)
   end
   for i=1,#EffNegBL do
     if id == EffNegBL[i] then
-      print("in blacklist, never negate")
       return false
     end
   end
   if c:IsType(TYPE_EQUIP+TYPE_FIELD) then
-    print("field or equip spell, dont negate")
     return false
   end
   if (id == 53804307 or id == 26400609 -- Dragon Rulers
   or id == 89399912 or id == 90411554)
   and c:IsLocation(LOCATION_MZONE)
   then
-    print("ruler on field, dont negate")
     return false
   end
   if  id == 00423585 -- Summoner Monk
   and not Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_SPECIAL_SUMMON) 
   then
-    print("monk not summoning, dont negate")
     return false
   end
-  print("anything else, negate")
   return true
 end
 function ChainNegation(card)
   local e,c,id 
   if EffectCheck(1-player_ai)~=nil then
     e,c,id = EffectCheck()
-    print("card used: "..id)
     return EffectNegateFilter(c,card)
   else
     local cards = SubGroup(OppMon(),FilterStatus,STATUS_SUMMONING)
     if #cards > 1 then
-      print("inherent summon for multiple monsters")
       return true
     end
     if #cards == 1 then
       c=cards[1]
-      print("inherent summoning: "..c.id)
       return SummonNegateFilter(c)
     end
   end
@@ -547,13 +534,13 @@ function PriorityChain(cards) -- chain these before anything else
   if HasID(cards,58120309) and ChainNegation(cards[CurrentIndex]) then -- Starlight Road
     return {1,CurrentIndex}
   end
-  if HasID(cards,44508094) and ChainNegation(cards[CurrentIndex]) then -- Stardust
+  if HasID(cards,44508094,false,nil,LOCATION_MZONE) and ChainNegation(cards[CurrentIndex]) then -- Stardust
     return {1,CurrentIndex}
   end
-  if HasID(cards,61257789) and ChainNegation(cards[CurrentIndex]) then -- Stardust AM
+  if HasID(cards,61257789,false,nil,LOCATION_MZONE) and ChainNegation(cards[CurrentIndex]) then -- Stardust AM
     return {1,CurrentIndex}
   end
-  if HasID(cards,35952884) and ChainNegation(cards[CurrentIndex]) then -- Quasar
+  if HasID(cards,35952884,false,nil,LOCATION_MZONE) and ChainNegation(cards[CurrentIndex]) then -- Quasar
     return {1,CurrentIndex}
   end
   if HasID(cards,24696097) and ChainNegation(cards[CurrentIndex]) then -- Shooting Star
@@ -581,6 +568,9 @@ function PriorityChain(cards) -- chain these before anything else
     return {1,CurrentIndex}
   end
   if HasID(cards,77538567) and ChainNegation(cards[CurrentIndex]) then -- Dark Bribe
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,93016201) and ChainNegation(cards[CurrentIndex]) then -- Royal Oppression
     return {1,CurrentIndex}
   end
   if HasID(cards,50323155) and ChainNegation(cards[CurrentIndex]) then -- Black Horn of Heaven

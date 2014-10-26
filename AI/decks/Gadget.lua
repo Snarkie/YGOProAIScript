@@ -162,7 +162,7 @@ function UseCotHGadget(card)
   end
   return false
 end
-function OnSelectSum(cards, sum)
+function GadgetSum(cards, sum)
 	local result = {}
 	local num_levels = 0
   for i=1,#cards do

@@ -227,8 +227,14 @@ if not ExtraCheck then
     return DeckCommand[1],DeckCommand[2]
   end
 end
-if not (DeckCheck(DECK_BUJIN) or DeckCheck(DECK_TELLARKNIGHT)) then 
+if not (DeckCheck(DECK_BUJIN) or DeckCheck(DECK_TELLARKNIGHT) or DeckCheck(DECK_NECLOTH)) then 
   DeckCommand = NobleInit(cards)
+  if DeckCommand ~= nil then
+    return DeckCommand[1],DeckCommand[2]
+  end
+end
+if not (DeckCheck(DECK_BUJIN) or DeckCheck(DECK_TELLARKNIGHT) or DeckCheck(DECK_NOBLEKNIGHT)) then 
+  DeckCommand = NeclothInit(cards)
   if DeckCommand ~= nil then
     return DeckCommand[1],DeckCommand[2]
   end

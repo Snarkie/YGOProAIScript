@@ -41,6 +41,9 @@ function OnSelectEffectYesNo(id,triggeringCard)
   if result==nil then
     result = NobleEffectYesNo(id,triggeringCard)
   end
+  if result==nil then
+    result = NeclothEffectYesNo(id,triggeringCard)
+  end
   if result then return result end
   if CardIsScripted(id)>0 then
     result = 0

@@ -1,4 +1,4 @@
-Version = "0.24d"
+Version = "0.24e"
 Experimental = true
 
 --[[
@@ -7,6 +7,9 @@ Experimental = true
 
   script by Snarky
   original script by Percival18
+  
+  GitHub repository: 
+  https://github.com/Snarkie/YGOProAIScript/tree/master/AI
   
   Check here for updates: 
   http://www.ygopro.co/Forum/tabid/95/g/posts/t/7877/AI-Updates#post47538
@@ -32,6 +35,7 @@ require("ai.mod.SelectInitCommand")
 require("ai.mod.SelectNumber")
 require("ai.mod.SelectOption")
 require("ai.mod.SelectPosition")
+require("ai.mod.SelectSum")
 require("ai.mod.SelectTribute")
 require("ai.mod.SelectYesNo")
 require("ai.decks.Generic")
@@ -46,6 +50,7 @@ require("ai.decks.ChaosDragon")
 require("ai.decks.HAT")
 require("ai.decks.Qliphort")
 require("ai.decks.NobleKnight")
+require("ai.decks.Necloth")
 
 math.randomseed( require("os").time() )
 

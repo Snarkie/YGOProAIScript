@@ -203,7 +203,7 @@ function VolcasaurusFilter(c,lp)
   return c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
   and c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0
   and bit32.band(c.position,POS_FACEUP)>0
-  and (lp==nil or c.base_attack>=AI.GetPlayerLP(2))
+  and (lp==nil or c.text_attack and c.text_attack>=AI.GetPlayerLP(2))
 end
 function SummonVolcasaurus()
   return (MidrashCheck() or FieldCheck(5)>2) and HasID(AIExtra(),29669359,true)

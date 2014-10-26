@@ -300,6 +300,8 @@ NSBL={
 95772051,93085839,19680539,53550467, -- Black Sally, Eachtar, Gawayn, Drystan
 59057152,47120245,13391185,57690191, -- Medraut, Borz, Chad, Brothers
 19748583,10736540,92125819,73359475, -- Gwen, Lady, Artorigus, Peredur
+90307777,08903700,95492061,23401839, -- Shrit, Caster of Necloth, Djinn Releaser of Rituals, Manju, Senju 
+13974207 -- Denkou Sekka
 }
 function NormalSummonBlacklist(CardId) 
   for i=1,#NSBL do
@@ -382,9 +384,10 @@ SSBL={
 63746411,83531441,16178681, -- Giant Hand, Dante,Odd-Eyes Pendulum Dragon
 65518099,90885155,64496451, -- Qliphort Tool, Shell, Disk
 91907707,27279764,37991342, -- Qliphort Archive, Killer, Genome
-43241495,19680539, -- Performapal Trampolynx, Noble Knight Gawayn
+43241495,19680539,44505297, -- Performapal Trampolynx, Noble Knight Gawayn,Inzektor Exa-Beetle
 48009503,60645181,82944432,  -- HC - Gandiva, Excalibur, Blade Armor Ninja
 21223277,10613952,83519853,  -- R4torigus, R5torigus, High Sally 
+08809344,95113856, -- Outer God Nyarla, Phantom Fortress Enterblathnir 
 }
 
 
@@ -407,7 +410,8 @@ SetBL={
   54447022,44394295,55742055, -- Soul Charge, Shadoll Fusion, Table
   07452945,14745409,23562407, -- Noble Arms Destiny, Gallatin, Caliburn
   46008667,83438826,00000998, -- Excaliburn, Arfeudutyr, Chapter
-  92512625, -- Advice
+  92512625,51124303,14735698, -- Advice, Necloth Kaleidomirror, Exomirror
+  96729612, -- Preparation of Rites
 }
 
 
@@ -723,7 +727,11 @@ ScriptedCards ={
 07452945,14745409,23562407,46008667,  -- Noble Arms Destiny, Gallatin, Caliburn, Excaliburn
 83438826,48009503,60645181,82944432,  -- Arfeudutyr, HC - Gandiva, Excalibur, Blade Armor Ninja
 21223277,10613952,83519853,00000997,  -- R4torigus, R5torigus, High Sally, Merlin
-00000998,00000999,  -- Chapter, Bedwyr
+00000998,00000999,95113856,44505297, -- Chapter, Bedwyr, Phantom Fortress Enterblathnir, Inzektor Exa-Beetle
+90307777,99185129,89463537,26674724,  -- Necloth Shrit, Clausolas, Unicore, Brionac
+13700028,52068432,88240999,08903700,  -- Necloth Gungnir, Trishula, Decisive Armor, Djinn Releaser of Rituals
+95492061,23401839,13974207,08809344, -- Manju, Senju, Denkou Sekka, Outer God Nyarla
+93016201,51124303,14735698, -- Royal Oppression, Kaleidomirror, Exomirror
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do

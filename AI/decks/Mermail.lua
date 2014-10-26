@@ -224,7 +224,7 @@ function MermailAdd(cards,loc,count,filter,opt)
   return result
 end
 function UseMegalo(card)
-  return bit32.band(card.location,LOCATION_HAND)>0 and OverExtendCheck()
+  return OverExtendCheck()
   and MermailPriorityCheck(AIHand(),PRIO_DISCARD,2,FilterAttribute,ATTRIBUTE_WATER)>3
 end
 function MegaloFilter(c)
@@ -232,9 +232,8 @@ function MegaloFilter(c)
   and bit32.band(c.attribute,ATTRIBUTE_WATER)>0 and c.level<5
 end
 function UseMegaloField(card)
-  return bit32.band(card.location,LOCATION_ONFIELD)>0 
-  and CardsMatchingFilter(AIMon(),MegaloFilter)>0
-  and #OppMon()==0 and Duel.GetTurnCount()>1
+  return CardsMatchingFilter(AIMon(),MegaloFilter)>0
+  and #OppMon()==0 and GlobalBPAllowed
   and Duel.GetCurrentPhase() == PHASE_MAIN1
   and card.attack>=2000
   and card:is_affected_by(EFFECT_CANNOT_ATTACK)==0
@@ -406,11 +405,11 @@ function MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(Activatable,96947648) and UseSalvage() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Activatable,21954587) and UseMegalo(Activatable[CurrentIndex]) then
+  if HasID(Activatable,21954587,false,nil,LOCATION_HAND) and UseMegalo(Activatable[CurrentIndex]) then
     GlobalCardMode=1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasIDNotNegated(Activatable,21954587) and UseMegaloField(Activatable[CurrentIndex]) then
+  if HasIDNotNegated(Activatable,21954587,false,nil,LOCATION_MZONE) and UseMegaloField(Activatable[CurrentIndex]) then
     GlobalCardMode=2
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -498,7 +497,7 @@ function MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     GlobalCardMode=1
     return {COMMAND_ACTIVATE,IndexByID(Activatable,22446869)}
   end
-  if HasID(Activatable,21954587) and MermailPriorityCheck(AIHand(),PRIO_DISCARD)>5  
+  if HasID(Activatable,21954587,false,nil,LOCATION_HAND) and MermailPriorityCheck(AIHand(),PRIO_DISCARD)>5  
   and MermailPriorityCheck(AIHand(),PRIO_DISCARD,2)>1 and MermailOpenFieldCheck()
   then
     GlobalCardMode=1
@@ -661,14 +660,11 @@ function MermailOnSelectCard(cards, minTargets, maxTargets,triggeringID,triggeri
   or ID == 37781520 or ID == 22446869 or ID == 74311226
   then
     if GlobalCardMode==2 then
-      result=BestTargetsMermail(cards)
+      result=BestTargetsMermail(cards,minTargets)
     elseif GlobalCardMode==1 then
-      count=1
-      if ID == 21954587 then count = 2 end
-      if ID == 37781520 then count = 3 end
-      result=MermailAdd(cards,PRIO_DISCARD,count)
+      result=MermailAdd(cards,PRIO_DISCARD,minTargets)
     else
-      result=MermailAdd(cards,PRIO_TOHAND)
+      result=MermailAdd(cards,PRIO_TOHAND,minTargets)
     end
     GlobalCardMode=nil
     if result==nil then result = {math.random(#cards)} end

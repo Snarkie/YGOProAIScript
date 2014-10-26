@@ -307,8 +307,9 @@ function OverExtendCheck()
   return OppHasStrongestMonster() or #cards < 2 or #hand > 4 or AI.GetPlayerLP(2)<=800 and HasID(AIExtra(),12014404,true) -- Cowboy
 end
 -- checks, if a card the AI controls is about to be removed in the current chain
-function RemovalCheck(id)
+function RemovalCheck(id,category)
   local c={CATEGORY_DESTROY,CATEGORY_REMOVE,CATEGORY_TOGRAVE,CATEGORY_TOHAND,CATEGORY_TODECK}
+  if category then c={category} end
   for i=1,#c do
     for j=1,Duel.GetCurrentChain() do
       local ex,cg = Duel.GetOperationInfo(j,c[i])
@@ -514,8 +515,11 @@ end
 -- returns true, if the source is expected to win a battle against the target
 function WinsBattle(source,target)
   return source and target 
-  and (target:IsPosition(POS_ATTACK) and source:GetAttack()>=target:GetAttack()
-  or target:IsPosition(POS_DEFENCE) and source:GetAttack()>target:GetDefence())
+  and (target:IsPosition(POS_FACEUP_ATTACK) 
+  and source:GetAttack() >= target:GetAttack()
+  or target:IsPosition(POS_FACEUP_DEFENCE)
+  and source:GetAttack() >= target:GetDefence()) 
+  and source:IsPosition(POS_FACEUP_ATTACK)
   and not target:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE)
 end
 function NotNegated(card)
@@ -622,3 +626,68 @@ function EffectCheck(player)
   end
   return nil
 end 
+
+function FindCard(cardid,cards)
+  if cards == nil then cards = UseLists({AIAll(),OppAll()}) end
+  for i=1,#cards do
+    if cards[i].cardid==cardid then
+      return cards[i]
+    end
+  end
+  return nil
+end
+
+function CurrentOwner(c)
+  local cards = AIField()
+  local result = 2
+  for i=1,#cards do
+    if cards[i].cardid == c.cardid then
+      result = 1
+    end
+  end
+  return Result
+end
+
+function AttackBoostCheck(bonus,player)
+  local source = Duel.GetAttacker()
+  local target = Duel.GetAttackTarget()
+  if player == nil then player = player_ai end
+  if source and target 
+  and source:IsLocation(LOCATION_MZONE) 
+  and target:IsLocation(LOCATION_MZONE) 
+  then
+    if source:IsControler(player) then
+      target = Duel.GetAttacker()
+      source = Duel.GetAttackTarget()
+    end
+    if target:IsPosition(POS_FACEUP_ATTACK) 
+    and (source:IsPosition(POS_FACEUP_ATTACK) 
+    and source:GetAttack() >= target:GetAttack() 
+    and source:GetAttack() <= target:GetAttack()+bonus
+    or source:IsPosition(POS_FACEUP_DEFENCE) 
+    and source:GetDefence() >= target:GetAttack() 
+    and source:GetDefence() <= target:GetAttack()+bonus)
+    and not source:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE)
+    then
+      return true
+    end
+  end
+  return false
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

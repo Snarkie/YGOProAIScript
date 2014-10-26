@@ -169,17 +169,31 @@ local OppExtra = AI.GetOppExtraDeck()
    end
   return list
 end
-function UseLists(lists)
-local cards
-local Result={}
-if lists then
-  for i=1,#lists do
-    cards = lists[i]
-    if cards then
-      for j=1,#cards do
-        Result[#Result+1]=cards[j]
-	    end
-	  end
+function UseLists(lists,opt,opt2)
+  local cards
+  local Result={}
+  if lists then
+    if opt then
+      for i=1,#lists do
+        Result[#Result+1]=lists[i]
+      end
+      for i=1,#opt do
+        Result[#Result+1]=opt[i]
+      end
+      if opt2 then
+        for i=1,#opt2 do
+          Result[#Result+1]=opt2[i]
+        end
+      end
+    else
+      for i=1,#lists do
+        cards = lists[i]
+        if cards then
+          for j=1,#cards do
+            Result[#Result+1]=cards[j]
+          end
+        end
+      end
     end
   end
   return Result
@@ -190,8 +204,12 @@ end
 function OppField() 
   return UseLists({OppMon(),OppST()})
 end
-
-
+function AIAll() 
+  return UseLists({AIHand(),AIField(),AIGrave(),AIDeck(),AIBanish(),AIExtra()})
+end
+function OppAll() 
+  return UseLists({OppHand(),OppField(),OppGrave(),OppDeck(),OppBanish(),OppExtra()})
+end
 -------------------------------------------------
 -- **********************************************
 -- Functions related to monster count returning, 
@@ -1912,3 +1930,5 @@ end
 function CardsEqual(Card1, Card2)
   return Card1 and Card2 and Card1.cardid==Card2.cardid
 end
+
+

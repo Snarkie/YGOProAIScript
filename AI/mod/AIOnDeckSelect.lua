@@ -12,6 +12,7 @@ DECK_TELLARKNIGHT = 8
 DECK_HAT          = 9
 DECK_QLIPHORT     = 10
 DECK_NOBLEKNIGHT  = 11
+DECK_NECLOTH      = 12
 
 DeckIdent={ --card that identifies the deck
 [1]   = 99365553, -- Lightpulsar Dragon
@@ -25,6 +26,7 @@ DeckIdent={ --card that identifies the deck
 [9]   = 45803070, -- Traptrix Dionaea
 [10]  = 65518099, -- Qliphort Tool
 [11]  = 59057152, -- Noble Knight Medraut
+[12]  = 14735698, -- Necloth Exomirror
 }
 Deck = nil
 DeckName={
@@ -40,6 +42,7 @@ DeckName={
 [9]   = "HAT",
 [10]  = "Qliphort",
 [11]  = "Noble Knight",
+[12]  = "Necloth",
 }
 function DeckCheck(opt)
   if Deck == nil then
@@ -70,19 +73,47 @@ PRIO_BANISH = 9
 function PrioritySetup()
 
 AddPriority({
+-- Necloth: 
+
+[90307777] = {6,3,1,1,1,1,1,1,1,1,ShritCond},         -- Shrit, Caster of Necloth
+[99185129] = {12,2,3,1,1,1,1,1,1,1,ClausCond},         -- The Necloth of Clausolas
+[89463537] = {7,1,7,1,1,1,1,1,1,1,UniCond},           -- The Necloth of Unicore
+[26674724] = {9,3,4,1,1,1,1,1,1,1,BrioCond},          -- The Necloth of Brionac
+[13700028] = {4,2,3,1,1,1,1,1,1,1,GungCond},          -- The Necloth of Gungnir
+[52068432] = {7,2,6,1,1,1,1,1,1,1,TrishCond},         -- The Necloth of Trishula
+[88240999] = {6,2,5,1,1,1,1,1,1,1,ArmorCond},         -- The Necloth of Decisive Armor
+[08903700] = {3,1,1,1,9,1,1,1,1,1,nil},               -- Djinn Releaser of Rituals
+[95492061] = {4,1,1,1,1,1,1,1,1,1,nil},               -- Manju of the Ten Thousand Hands
+[23401839] = {5,1,1,1,1,1,1,1,1,1,nil},               -- Senju of the Thousand Hands
+[13974207] = {3,1,1,1,1,1,1,1,1,1,nil},               -- Denkou Sekka
+
+[96729612] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Preparation of Rites
+[14735698] = {10,3,1,1,3,1,1,1,1,1,ExoCond},           -- Necloth Exomirror
+[51124303] = {11,2,1,1,3,1,1,1,1,1,KaleidoCond},       -- Necloth Kaleidomirror
+
+[35952884] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Shooting Quasar Dragon
+[24696097] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Shooting Star Dragon
+[79606837] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Herald of Rainbow Light
+[15240268] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Mist Bird Clausolas
+[95113856] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Phantom Fortress Enterblathnir
+[44505297] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Inzektor Exa-Beetle
+[08809344] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Outer God Nyarla
+})
+
+AddPriority({
 -- Noble Knight:
-[95772051] = {4,1,9,2,9,2,1,1,1,1,BlackSallyCond},    -- Black Sally
-[93085839] = {4,1,8,2,10,2,1,1,1,1,EachtarCond},      -- Eachtar
+[95772051] = {4,0,9,2,9,2,1,1,1,1,BlackSallyCond},    -- Black Sally
+[93085839] = {4,0,8,2,10,2,1,1,1,1,EachtarCond},      -- Eachtar
 [19680539] = {4,2,2,1,4,2,3,2,4,2,GawaynCond},        -- Gawayn
 [53550467] = {3,3,3,3,6,3,3,2,3,2,DrystanCond},       -- Drystan
 [59057152] = {7,2,7,2,4,2,5,3,3,2,MedrautCond},       -- Medraut
 [47120245] = {6,1,6,3,4,3,3,2,3,2,BorzCond},          -- Borz
 [13391185] = {5,2,5,2,5,2,3,2,5,2,ChadCond},          -- Chad
 [57690191] = {4,3,4,2,5,3,3,2,2,2,BrothersCond},      -- Brothers
-[19748583] = {8,2,1,1,11,3,1,1,1,1,GwenCond},         -- Gwen
-[10736540] = {6,1,1,1,12,3,1,1,1,1,LadyCond},         -- Lady
+[19748583] = {8,1,1,1,11,3,1,1,1,1,GwenCond},         -- Gwen
+[10736540] = {6,0,1,1,12,3,1,1,1,1,LadyCond},         -- Lady
 
-[92125819] = {1,1,2,1,8,1,3,2,3,1,ArtorigusCond},     -- Artorigus
+[92125819] = {1,0,2,1,8,1,3,2,3,1,ArtorigusCond},     -- Artorigus
 [73359475] = {3,3,4,3,7,3,3,2,3,2,PeredurCond},       -- Peredur
 [00000997] = {9,2,4,2,3,2,1,1,1,1,nil},               -- Merlin
 [00000999] = {5,2,5,2,3,2,3,2,3,1,BedwyrCond},        -- Bedwyr
