@@ -161,7 +161,8 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
 DeckCheck()
 ExtraCheck=(DeckCheck(DECK_BUJIN) 
 or DeckCheck(DECK_TELLARKNIGHT) 
-or DeckCheck(DECK_NOBLEKNIGHT))
+or DeckCheck(DECK_NOBLEKNIGHT)
+or DeckCheck(DECK_NECLOTH))
 local DeckCommand = nil
 DeckCommand = SummonExtraDeck(cards,true)
 if DeckCommand ~= nil then
@@ -1607,9 +1608,11 @@ end
   -------------------------------------------------------
   for i=1,#SpSummonableCards do   
     if SpSummonableCards[i].id == 91949988 then -- Gaia Dragon, the Thunder Charger
-      if AIXyzMonsterMatCount(5,0) > 0 or AIXyzMonsterMatCount(6,0) > 0 then
-         GlobalActivatedCardID = id
-		return COMMAND_SPECIAL_SUMMON,i
+      if AIXyzMonsterMatCount(5,0) > 0 or AIXyzMonsterMatCount(6,0) > 0 
+      or HasID(AIMon(),44505297,true,nil,nil,nil,HasEquips,0)
+      then
+        GlobalActivatedCardID = id
+        return COMMAND_SPECIAL_SUMMON,i
       end
     end
   end

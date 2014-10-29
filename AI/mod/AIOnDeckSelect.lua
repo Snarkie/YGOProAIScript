@@ -76,12 +76,12 @@ AddPriority({
 -- Necloth: 
 
 [90307777] = {6,3,1,1,1,1,1,1,1,1,ShritCond},         -- Shrit, Caster of Necloth
-[99185129] = {12,2,3,1,1,1,1,1,1,1,ClausCond},         -- The Necloth of Clausolas
-[89463537] = {7,1,7,1,1,1,1,1,1,1,UniCond},           -- The Necloth of Unicore
-[26674724] = {9,3,4,1,1,1,1,1,1,1,BrioCond},          -- The Necloth of Brionac
-[13700028] = {4,2,3,1,1,1,1,1,1,1,GungCond},          -- The Necloth of Gungnir
-[52068432] = {7,2,6,1,1,1,1,1,1,1,TrishCond},         -- The Necloth of Trishula
-[88240999] = {6,2,5,1,1,1,1,1,1,1,ArmorCond},         -- The Necloth of Decisive Armor
+[99185129] = {12,2,3,1,1,1,1,1,2,1,ClausCond},         -- The Necloth of Clausolas
+[89463537] = {8,1,7,1,1,1,1,1,6,1,UniCond},           -- The Necloth of Unicore
+[26674724] = {9,3,4,1,1,1,1,1,3,1,BrioCond},          -- The Necloth of Brionac
+[13700028] = {4,2,3,1,1,1,1,1,7,1,GungCond},          -- The Necloth of Gungnir
+[52068432] = {7,2,6,1,1,1,1,1,5,1,TrishCond},         -- The Necloth of Trishula
+[88240999] = {6,2,5,1,1,1,1,1,4,1,ArmorCond},         -- The Necloth of Decisive Armor
 [08903700] = {3,1,1,1,9,1,1,1,1,1,nil},               -- Djinn Releaser of Rituals
 [95492061] = {4,1,1,1,1,1,1,1,1,1,nil},               -- Manju of the Ten Thousand Hands
 [23401839] = {5,1,1,1,1,1,1,1,1,1,nil},               -- Senju of the Thousand Hands

@@ -79,7 +79,7 @@ end
 function MegaloCond(loc)
   if loc == PRIO_TOHAND then
     return MermailPriorityCheck(AIHand(),PRIO_DISCARD,2)>3 
-    and not HasID(UseLists({AIHand(),AIMon()},21954587,true))
+    and not HasID(UseLists(AIHand(),AIMon()),21954587,true)
   end
   if loc == PRIO_DISCARD then
     return false-- CardsMatchingFilter(AIHand(),function(c) return c.id==21954587 end)>1
@@ -136,7 +136,7 @@ function SquallFilter(c)
 end
 function SquallCond(loc)
   if loc == PRIO_TOHAND then
-    return CardsMatchingFilter(AIGrave(),SquallFilter)>3 or HasID(UseLists({AIHand(),AIST()},60202749,true))
+    return CardsMatchingFilter(AIGrave(),SquallFilter)>3 or HasID(UseLists(AIHand(),AIST()),60202749,true)
   end
   return true
 end
@@ -746,6 +746,7 @@ function ChainSphere()
     if Duel.GetAttacker() and #AIMon()==0 then
       GlobalSphere = 1
       GlobalSphereID = 23899727
+      return true
     end
   end
   return false

@@ -1722,6 +1722,7 @@ function ApplyATKBoosts(Cards)
     end
   end
   
+
   
   ------------------------------------------
   -- Apply Honest's Attack Bonus
@@ -1772,6 +1773,26 @@ function ApplyATKBoosts(Cards)
       --if bit32.band(Cards[i].position,POS_FACEUP_ATTACK) then
         Cards[i].attack=HandAtt(OppMon(),1400)
       --end
+    end
+  end
+  
+  -- Necloth Decisive Armor
+  for i=1,#Cards do
+    if HasID(AIHand(),88240999,true) and NeclothMonsterFilter(Cards[i])
+    and Cards[i].owner==1 and not FilterAffected(Cards[i],EFFECT_CANNOT_BE_EFFECT_TARGET)
+    then
+      Cards[i].bonus = Cards[i].bonus + 1000
+      Cards[i].attack = Cards[i].attack + 1000
+    end
+  end
+  
+  -- Necloth Gungnir
+  for i=1,#Cards do
+    if HasID(AIHand(),13700028,true) and NeclothMonsterFilter(Cards[i])
+    and Cards[i].owner==1 and not FilterAffected(Cards[i],EFFECT_CANNOT_BE_EFFECT_TARGET)
+    then
+      Cards[i].bonus = Cards[i].bonus + 1000
+      Cards[i].attack = Cards[i].attack + 1000
     end
   end
   

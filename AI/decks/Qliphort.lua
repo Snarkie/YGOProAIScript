@@ -234,8 +234,8 @@ function UseTrampolynx()
 end
 function UseOddEyes()
   return (ScaleCheck()==9 and PendulumSummon() 
-  or not HasID(UseLists({AIMon(),AIST()},65518099,true))
-  or not HasID(UseLists({AIMon(),AIST()},43241495,true)))
+  or not HasID(UseLists(AIMon(),AIST()),65518099,true)
+  or not HasID(UseLists(AIMon(),AIST()),43241495,true))
   and not HasID(AIST(),16178681,true)
 end
 function UseDualityQliphort()
@@ -465,8 +465,8 @@ function ChainSkillDrain()
       and source:GetAttack() >= target:GetAttack() 
       and source:GetAttack() <= target:GetAttack()+QliphortAttackBonus(target:GetCode(),target:GetLevel())
       or source:IsPosition(POS_FACEUP_DEFENCE)
-      and source:GetDefense() >= target:GetAttack() 
-      and source:GetDefense() <= target:GetAttack()+QliphortAttackBonus(target:GetCode(),target:GetLevel()))
+      and source:GetDefence() >= target:GetAttack() 
+      and source:GetDefence() <= target:GetAttack()+QliphortAttackBonus(target:GetCode(),target:GetLevel()))
       and target:IsPosition(POS_FACEUP_ATTACK) 
       then
         return true

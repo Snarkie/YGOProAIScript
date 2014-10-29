@@ -569,6 +569,12 @@ end
 function FilterStatus(c,status)
   return bit32.band(c.status,status)>0
 end
+function FilterSummon(c,type)
+  return bit32.band(c.summon_type,type)>0
+end
+function FilterAffected(c,effect)
+  return c:is_affected_by(effect)>0
+end
 function HasMaterials(c)
   return c.xyz_material_count>0
 end
@@ -648,7 +654,7 @@ function CurrentOwner(c)
   return Result
 end
 
-function AttackBoostCheck(bonus,player)
+function AttackBoostCheck(bonus,player,filter,cond)
   local source = Duel.GetAttacker()
   local target = Duel.GetAttackTarget()
   if player == nil then player = player_ai end
@@ -668,6 +674,7 @@ function AttackBoostCheck(bonus,player)
     and source:GetDefence() >= target:GetAttack() 
     and source:GetDefence() <= target:GetAttack()+bonus)
     and not source:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE)
+    and (opt == nil and filter(target) or opt and filter(target,opt))
     then
       return true
     end
