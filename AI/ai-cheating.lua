@@ -2,8 +2,8 @@
 
 
 -- Configure these to your liking
-EXTRA_DRAW = 3
-LP_RECOVER = 2000
+EXTRA_DRAW = 1
+LP_RECOVER = 1000
 
 
 require("ai.ai")
