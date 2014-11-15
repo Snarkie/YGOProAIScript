@@ -1,5 +1,5 @@
-Version = "0.24f"
-Experimental = true
+Version = "0.25"
+Experimental = false
 
 --[[
   AI Script for YGOPro Percy:
@@ -9,10 +9,10 @@ Experimental = true
   original script by Percival18
   
   GitHub repository: 
-  https://github.com/Snarkie/YGOProAIScript/tree/master/AI
+  https://github.com/Snarkie/YGOProAIScript/
   
   Check here for updates: 
-  http://www.ygopro.co/Forum/tabid/95/g/posts/t/7877/AI-Updates#post47538
+  http://www.ygopro.co/Forum/tabid/95/g/posts/t/7877/AI-Updates
   
   Contributors: ytterbite, Sebrian, Skaviory, francot514
   

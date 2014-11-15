@@ -17,23 +17,15 @@ function EnableCheats()
   e1:SetType(EFFECT_TYPE_CONTINUOUS+EFFECT_TYPE_FIELD)
   e1:SetCode(EVENT_PHASE+PHASE_DRAW)
   e1:SetCountLimit(1)
+  e1:SetCondition(function(e,tp,eg,ep,ev,re,r,rp)
+    return Duel.GetTurnPlayer()==player_ai
+  end)
   e1:SetOperation(function(e,tp,eg,ep,ev,re,r,rp) 
-    if Duel.GetTurnPlayer()==player_ai then 
-      --AI.Chat("Oh yeah, cheating feels good.")
-      Duel.Draw(player_ai,1,REASON_RULE) 
-    end 
+    --AI.Chat("Oh yeah, cheating feels good.")
+    Duel.Draw(player_ai,EXTRA_DRAW,REASON_RULE) 
+    Duel.Recover(player_ai,LP_RECOVER,REASON_RULE) 
   end)
-  Duel.RegisterEffect(e1,0)
-  local e2=Effect.GlobalEffect()
-  e2:SetType(EFFECT_TYPE_CONTINUOUS+EFFECT_TYPE_FIELD)
-  e2:SetCode(EVENT_PHASE+PHASE_DRAW)
-  e2:SetCountLimit(1)
-  e2:SetOperation(function(e,tp,eg,ep,ev,re,r,rp) 
-    if Duel.GetTurnPlayer()==player_ai then 
-      Duel.Recover(player_ai,1000,REASON_RULE) 
-    end 
-  end)
-  Duel.RegisterEffect(e2,0)
+  Duel.RegisterEffect(e1,player_ai)
 end
 -- get the AI script owner from card script controler
 function get_owner_by_controler(controler)
@@ -682,7 +674,18 @@ function AttackBoostCheck(bonus,player,filter,cond)
   return false
 end
 
-
+function LocCheck(cards,loc,all) -- checks the location of cards
+  if not all then                -- for target functions etc
+    return FilterLocation(cards[1],loc)
+  end
+  local result = #cards
+  for i=1,#cards do
+    if FilterLocation(cards[i],loc) then
+      result = result-1
+    end
+  end
+  return result == 0
+end
 
 
 

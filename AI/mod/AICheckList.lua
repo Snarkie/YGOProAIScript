@@ -385,9 +385,9 @@ SSBL={
 65518099,90885155,64496451, -- Qliphort Tool, Shell, Disk
 91907707,27279764,37991342, -- Qliphort Archive, Killer, Genome
 43241495,19680539,44505297, -- Performapal Trampolynx, Noble Knight Gawayn,Inzektor Exa-Beetle
-48009503,60645181,82944432,  -- HC - Gandiva, Excalibur, Blade Armor Ninja
-21223277,10613952,83519853,  -- R4torigus, R5torigus, High Sally 
-08809344,95113856, -- Outer God Nyarla, Phantom Fortress Enterblathnir 
+48009503,60645181,82944432, -- HC - Gandiva, Excalibur, Blade Armor Ninja
+21223277,10613952,83519853, -- R4torigus, R5torigus, High Sally 
+08809344,95113856,31563350, -- Outer God Nyarla, Phantom Fortress Enterblathnir, Zubaba General
 }
 
 
@@ -727,11 +727,11 @@ ScriptedCards ={
 07452945,14745409,23562407,46008667,  -- Noble Arms Destiny, Gallatin, Caliburn, Excaliburn
 83438826,48009503,60645181,82944432,  -- Arfeudutyr, HC - Gandiva, Excalibur, Blade Armor Ninja
 21223277,10613952,83519853,00000997,  -- R4torigus, R5torigus, High Sally, Merlin
-00000998,00000999,95113856,44505297, -- Chapter, Bedwyr, Phantom Fortress Enterblathnir, Inzektor Exa-Beetle
+00000998,00000999,95113856,44505297,  -- Chapter, Bedwyr, Phantom Fortress Enterblathnir, Inzektor Exa-Beetle
 90307777,99185129,89463537,26674724,  -- Necloth Shrit, Clausolas, Unicore, Brionac
 13700028,52068432,88240999,08903700,  -- Necloth Gungnir, Trishula, Decisive Armor, Djinn Releaser of Rituals
-95492061,23401839,13974207,08809344, -- Manju, Senju, Denkou Sekka, Outer God Nyarla
-93016201,51124303,14735698, -- Royal Oppression, Kaleidomirror, Exomirror
+95492061,23401839,13974207,08809344,  -- Manju, Senju, Denkou Sekka, Outer God Nyarla
+93016201,51124303,14735698,31563350,  -- Royal Oppression, Kaleidomirror, Exomirror, Zubaba General
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do

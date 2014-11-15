@@ -1,5 +1,12 @@
 -- A cheating AI file, which draws additional cards and recovers LP each turn
 
+
+-- Configure these to your liking
+EXTRA_DRAW = 3
+LP_RECOVER = 2000
+
+
+require("ai.ai")
 require("ai.mod.AICheckList")
 require("ai.mod.AIHelperFunctions")
 require("ai.mod.AIHelperFunctions2")
@@ -36,8 +43,9 @@ require("ai.decks.Necloth")
 math.randomseed( require("os").time() )
 
 function OnStartOfDuel()
+  AI.Chat("AI script version "..Version)
   AI.Chat("You selected a cheating AI")
-	AI.Chat("The AI will recover 1000 LP and draw an additional card each turn")
+	AI.Chat("The AI will recover "..LP_RECOVER.." LP and draw "..EXTRA_DRAW.." additional cards each turn")
   GlobalCheating = 1
   SaveState()
 end

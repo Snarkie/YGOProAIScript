@@ -63,6 +63,15 @@ function RitualSpellCheck(cards)
   if cards == nil then cards = UseLists(AIHand(),AIST()) end
   return HasID(cards,14735698,true) or HasID(cards,51124303,true)
 end
+function NeclothOTKCheck()
+  local cards=UseLists({AIMon(),AIExtra()})
+  return Duel.GetCurrentPhase()==PHASE_MAIN1 and GlobalBPAllowed
+  and DualityCheck() and NobleSSCheck() and AI.GetPlayerLP(2)<=8000 and AI.GetPlayerLP(2)>4000
+  and #OppField()==0 and HasID(cards,31563350,true) and HasID(UseLists(AIHand(),AIST()),52068432,true)
+  and HasID(AIHand(),88240999,true) and HasID(AIHand(),14735698,true) 
+  and OPTCheck(14735698) and (RitualTributeCheck(10,2,true) 
+  or HasID(AIGrave(),26674724,true) and HasID(AIMon(),89463537,true))
+end
 function ShritCond(loc,c)
   if loc == PRIO_TOHAND then
     return not HasID(AIHand(),52068432,true)
@@ -163,7 +172,7 @@ function UseArmor()
   return CardsMatchingFilter(OppField(),ArmorFilter)>0
 end
 function SummonArmor(mirror)
-  return DualityCheck() and RitualTributeCheck(12,mirror,true)
+  return DualityCheck() and RitualTributeCheck(10,mirror,true)
 end
 function UseClaus()
   return (NeedsCard(51124303,AIDeck(),AIHand(),true) and OPTCheck(51124303)
@@ -200,7 +209,7 @@ function RitualSummonCheck(mirror)
   end
   if HasID(AIHand(),88240999,true)
   and SummonArmor(mirror)
-  and UseArmor()
+  and (UseArmor() or NeclothOTKCheck())
   then
     result = true
   end
@@ -228,12 +237,15 @@ function SummonNyarla()
   --or CardsMatchingFilter(AIGrave(),FilterID,79606837)>0)
 end
 function SummonChainNecloth()
-  return DualityCheck() and MP2Check()
+  return DualityCheck() --and MP2Check()
   and HasID(AIExtra(),34086406,true)
   and HasID(AIDeck(),08903700,true)
   and CardsMatchingFilter(AIHand(),NeclothMonsterFilter,true)>0
   and RitualSpellCheck()
-  and (Chance(50) or not SummonNyarla())
+  and ((Chance(50) or not SummonNyarla()) and MP2Check()
+  or SummonTrishula(2) and UseTrishula()
+  and HasID(AIHand(),52068432,true) 
+  and HasID(AIHand(),14735698,true))
 end
 function SummonExaBeetle()
   return HasID(AIGrave(),35952884,true) and HasID(AIExtra(),44505297,true)
@@ -245,6 +257,24 @@ function ExaBeetleFilter(c)
 end
 function UseExaBeetle()
   return CardsMatchingFilter(OppField(),ExaBeetleFilter)>0
+end
+function SummonZubaba()
+  return NeclothOTKCheck()
+end
+function ZubabaFilter(c)
+  return FilterType(c,TYPE_MONSTER) and FilterRace(c,RACE_WARRIOR)
+  and c.attack>=1500
+end
+function UseZubaba()
+  return CardsMatchingFilter(AIHand(),ZubabaFilter)>0
+end
+function UseEnterblathnir(cards)
+  if cards == nil then cards = UseLists(OppHand(),OppField()) end
+  return #cards>0
+end
+function SummonEnterblathnir()
+  return DualityCheck() and HasID(AIExtra(),95113856,true)
+  and MP2Check() and #UseLists(OppHand(),OppMon())>0
 end
 function NeclothInit(cards)
   GlobalPreparation = nil
@@ -302,6 +332,12 @@ function NeclothInit(cards)
   if HasID(Sum,13974207) and SummonDenkou() then 
     return {COMMAND_SUMMON,CurrentIndex}
   end   
+  if HasID(SpSum,31563350) and SummonZubaba() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end  
+  if HasID(Act,31563350) and UseZubaba() then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   if HasID(SpSum,34086406) and SummonChainNecloth() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end    
@@ -310,7 +346,13 @@ function NeclothInit(cards)
   end  
   if HasID(SpSum,44505297) and SummonExaBeetle() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
-  end  
+  end 
+  if HasID(Act,95113856) and UseEnterblathnir() then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end   
+  if HasID(SpSum,95113856) and SummonEnterblathnir() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end 
   if HasID(Act,51124303,false,nil,LOCATION_HAND+LOCATION_SZONE) -- Kaleidomirror
   and (RitualSummonCheck(1) or QuasarComboCheck())
   then 
@@ -327,6 +369,20 @@ function NeclothInit(cards)
     return {COMMAND_SET_MONSTER,CurrentIndex}
   end
   return nil
+end
+
+function NeclothOption(options)
+  for i=1,#options do
+    if options[i] == 1521821697 then -- Enterblathnir control
+      return i
+    end
+    if options[i] == 1521821698 then -- Enterblathnir hand
+      return i
+    end
+    if options[i] == 1521821699 then -- Enterblathnir grave
+      return i
+    end
+  end
 end
 function QuasarComboCheck(skipmirror)
   return HasID(AIExtra(),35952884,true) and HasID(AIExtra(),24696097,true)
@@ -349,7 +405,6 @@ function KaleidoTarget(cards)
   if FilterLocation(cards[1],LOCATION_DECK) 
   and FilterType(cards[1],TYPE_SPELL) 
   then
-    print("ritual spell from grave")
     return ClausTarget(cards)
   end
   local c = FindCard(GlobalKaleidoTarget)
@@ -384,7 +439,6 @@ function ExoTarget(cards)
   if FilterLocation(cards[1],LOCATION_DECK) 
   and FilterType(cards[1],TYPE_SPELL) 
   then
-    print("ritual spell from grave")
     return ClausTarget(cards)
   end
   local result = Add(cards,PRIO_TOFIELD)
@@ -449,7 +503,6 @@ function ArmorTarget(cards)
   end
 end
 function ClausTarget(cards)
-  print("claus target")
   if FilterLocation(cards[1],LOCATION_DECK) then
     if NeedsCard(51124303,cards,AIHand()) 
     and (HasID(AIHand(),89463537,true)  
@@ -457,23 +510,18 @@ function ClausTarget(cards)
     and not HasID(AIGrave(),90307777,true))
     and OPTCheck(51124303) 
     then
-      print("can use Kaleido")
       return {CurrentIndex}
     end
     if NeedsCard(14735698,cards,AIHand()) and OPTCheck(14735698)  then
-      print("Exo")
       return {CurrentIndex}
     end
     if NeedsCard(51124303,cards,AIHand()) and OPTCheck(51124303) then
-      print("Kaleido")
       return {CurrentIndex}
     end
     if NeedsCard(14735698,cards,AIHand()) then
-      print("Exo leftover")
       return {CurrentIndex}
     end
     if NeedsCard(51124303,cards,AIHand()) then
-      print("Kaleido leftover")
       return {CurrentIndex}
     end
   else
@@ -495,6 +543,26 @@ function TrishTarget(cards)
     return {math.random(#cards)}
   end
   return BestTargets(cards,1,PRIO_BANISH)
+end
+function ZubabaTarget(cards)
+  if FilterLocation(cards[1],LOCATION_OVERLAY) then
+    if HasID(cards,89463537) then
+      return {CurrentIndex}
+    end
+    return Add(cards,PRIO_TOGRAVE)
+  end
+  if FilterLocation(cards[1],LOCATION_HAND) then
+    if HasID(cards,52068432) then
+      return {CurrentIndex}
+    end
+    return Add(cards,PRIO_TOFIELD)
+  end
+end
+function EnterblathnirTarget(cards)
+  if LocCheck(cards,LOCATION_HAND) then
+    return {math.random(#cards)}
+  end
+  return BestTargets(cards,1,TARGET_BANISH)
 end
 function NeclothCard(cards,min,max,id,c)
   if GlobalNeclothExtra and GlobalNeclothExtra>0 then
@@ -538,6 +606,9 @@ function NeclothCard(cards,min,max,id,c)
   if id == 52068432 then
     return TrishTarget(cards)
   end
+  if id == 31563350 then
+    return ZubabaTarget(cards)
+  end
   return nil
 end
 function KaleidoSum(cards,sum,card)
@@ -546,26 +617,21 @@ function ExoSum(cards,sum,card)
   local result = {}
   local lvl = sum
   if HasID(cards,08903700) then 
-    print("djinn")
     result[#result+1] = CurrentIndex
     lvl = lvl - cards[CurrentIndex].level
   end
   if HasID(cards,90307777,false,nil,LOCATION_GRAVE) and #result==0 then
-    print("shrit grave, no djinn")
     return {CurrentIndex}
   end
   if HasID(cards,90307777) and #result==0 then
-    print("shrit hand, no djinn")
     return {CurrentIndex}
   end
-  print("fill")
   for j=1,5 do
     for i=1,#cards do
       if cards[i].id ~= 90307777 and cards[i].id ~= 08903700 
       and lvl == cards[i].level
       then
         j=5
-        print("matching level")
         result[#result+1]= i
         return result
       end
@@ -574,13 +640,11 @@ function ExoSum(cards,sum,card)
       if cards[i].id ~= 90307777 and cards[i].id ~= 08903700 
       and lvl - cards[i].level > 2
       then
-        print("lower level, fill")
         lvl = lvl - cards[i].level
         result[#result+1]= i
       end
     end
   end
-  print("return")
   return result
 end
 function NeclothSum(cards,sum,card)

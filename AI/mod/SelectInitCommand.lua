@@ -161,8 +161,8 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
 DeckCheck()
 ExtraCheck=(DeckCheck(DECK_BUJIN) 
 or DeckCheck(DECK_TELLARKNIGHT) 
-or DeckCheck(DECK_NOBLEKNIGHT)
-or DeckCheck(DECK_NECLOTH))
+or DeckCheck(DECK_NOBLEKNIGHT))
+--or DeckCheck(DECK_NECLOTH))
 local DeckCommand = nil
 DeckCommand = SummonExtraDeck(cards,true)
 if DeckCommand ~= nil then

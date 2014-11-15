@@ -17,6 +17,10 @@ local result = 0
   if result ~= nil then
     return result
   end
+  result = NeclothOption(options)
+  if result ~= nil then
+    return result
+  end
 	result = 0
    ------------------------------------------------------    
    -- Return random result if it isn't specified below.
