@@ -296,7 +296,7 @@ NSBL={
 04904812,68505803,91812341,45803070, -- Genex Undine, Genex Controller, Traptrix Myrmeleo, Dioena
 68535320,95929069,84764038,43241495, -- Fire Hand, Ice Hand, Burning Abyss Scarm, Performapal Trampolynx
 65518099,90885155,64496451,91907707, -- Qliphort Tool, Shell, Disk, Archive
-27279764,37991342,00000997,00000999, -- Qliphort Killer, Genome, Noble Knight Merlin, Bewdyr
+27279764,37991342,03580032,30575681, -- Qliphort Killer, Genome, Noble Knight Merlin, Bewdyr
 95772051,93085839,19680539,53550467, -- Black Sally, Eachtar, Gawayn, Drystan
 59057152,47120245,13391185,57690191, -- Medraut, Borz, Chad, Brothers
 19748583,10736540,92125819,73359475, -- Gwen, Lady, Artorigus, Peredur
@@ -409,7 +409,7 @@ SetBL={
   73906480,96947648,74845897, -- Bujincarnation, Salvage, Rekindling
   54447022,44394295,55742055, -- Soul Charge, Shadoll Fusion, Table
   07452945,14745409,23562407, -- Noble Arms Destiny, Gallatin, Caliburn
-  46008667,83438826,00000998, -- Excaliburn, Arfeudutyr, Chapter
+  46008667,83438826,66970385, -- Excaliburn, Arfeudutyr, Chapter
   92512625,51124303,14735698, -- Advice, Necloth Kaleidomirror, Exomirror
   96729612, -- Preparation of Rites
 }
@@ -726,8 +726,8 @@ ScriptedCards ={
 73359475,55742055,92512625,32807846,  -- Peredur, Table, Solemn Advice, RotA
 07452945,14745409,23562407,46008667,  -- Noble Arms Destiny, Gallatin, Caliburn, Excaliburn
 83438826,48009503,60645181,82944432,  -- Arfeudutyr, HC - Gandiva, Excalibur, Blade Armor Ninja
-21223277,10613952,83519853,00000997,  -- R4torigus, R5torigus, High Sally, Merlin
-00000998,00000999,95113856,44505297,  -- Chapter, Bedwyr, Phantom Fortress Enterblathnir, Inzektor Exa-Beetle
+21223277,10613952,83519853,03580032,  -- R4torigus, R5torigus, High Sally, Merlin
+66970385,30575681,95113856,44505297,  -- Chapter, Bedwyr, Phantom Fortress Enterblathnir, Inzektor Exa-Beetle
 90307777,99185129,89463537,26674724,  -- Necloth Shrit, Clausolas, Unicore, Brionac
 13700028,52068432,88240999,08903700,  -- Necloth Gungnir, Trishula, Decisive Armor, Djinn Releaser of Rituals
 95492061,23401839,13974207,08809344,  -- Manju, Senju, Denkou Sekka, Outer God Nyarla

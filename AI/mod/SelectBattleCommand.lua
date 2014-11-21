@@ -249,7 +249,7 @@ end
   if HasID(activatable,97077563) and UseCotHBP() then
     return 2,CurrentIndex
   end
-  if HasID(activatable,00000997) and UseMerlinBP() then
+  if HasID(activatable,03580032) and UseMerlinBP() then
     return 2,CurrentIndex
   end
 

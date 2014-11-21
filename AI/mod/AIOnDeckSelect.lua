@@ -116,10 +116,10 @@ AddPriority({
 
 [92125819] = {1,0,2,1,8,1,3,2,3,1,ArtorigusCond},     -- Artorigus
 [73359475] = {3,3,3,3,7,3,3,2,3,2,PeredurCond},       -- Peredur
-[00000997] = {9,2,4,2,3,2,1,1,1,1,nil},               -- Merlin
-[00000999] = {5,2,6,2,3,2,3,2,3,1,BedwyrCond},        -- Bedwyr
+[03580032] = {9,2,4,2,3,2,1,1,1,1,nil},               -- Merlin
+[30575681] = {5,2,6,2,3,2,3,2,3,1,BedwyrCond},        -- Bedwyr
 
-[00000998] = {8,5,1,1,1,1,9,1,1,1,nil},               -- Chapter
+[66970385] = {8,5,1,1,1,1,9,1,1,1,nil},               -- Chapter
 [07452945] = {7,1,7,1,4,1,2,1,1,1,RequipArmsCond},    -- Destiny
 [14745409] = {4,1,4,1,5,1,2,1,1,1,RequipArmsCond},    -- Gallatin
 [23562407] = {6,1,6,1,7,1,2,1,1,1,RequipArmsCond},    -- Caliburn
