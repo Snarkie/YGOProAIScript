@@ -143,7 +143,7 @@ end
 function DivaCond(loc)
   if loc == PRIO_TOHAND then
     return HasID(UseLists({AIHand(),AIST()}),60202749,true) or FieldCheck(4)>1 
-    and Duel.GetTurnPlayer()==player_ai and not Duel.CheckNormalSummonActivity(player_ai)
+    and Duel.GetTurnPlayer()==player_ai and not NormalSummonCheck(player_ai)
   end
   return true
 end
@@ -336,7 +336,7 @@ function SummonArmadesMermail()
 end
 function MermailOpenFieldCheck()
   return (#AIMon()==0 and #OppMon()==0 and not HasID(UseLists({AIHand(),AIST()}),60202749,true) 
-  and (not HasID(AIHand(),23899727,true) or Duel.CheckNormalSummonActivity(player_ai)))
+  and (not HasID(AIHand(),23899727,true) or NormalSummonCheck(player_ai)))
   or #OppMon()>1
 end
 function UseTidal()

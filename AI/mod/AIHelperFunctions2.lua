@@ -688,8 +688,14 @@ function LocCheck(cards,loc,all) -- checks the location of cards
 end
 
 
-
-
+function NormalSummonCheck(player)
+  -- wrapper for changed card script function
+  if Duel.CheckNormalSummonActivity then
+    return Duel.CheckNormalSummonActivity(player)
+  else
+    return Duel.GetActivityCount(player,ACTIVITY_NORMALSUMMON)>0
+  end
+end
 
 
 

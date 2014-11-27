@@ -166,7 +166,7 @@ function UseRegaliaGrave()
   end	
   if Duel.GetTurnPlayer()==player_ai and BujinPriorityCheck(AIHand(),LOCATION_FIELD)<2 
   and BujinPriorityCheck(AIGrave(),LOCATION_FIELD)>4 and OverExtendCheck() 
-  and not Duel.CheckNormalSummonActivity(player_ai)
+  and not NormalSummonCheck(player_ai)
   then
     GlobalCardMode=2
     return true

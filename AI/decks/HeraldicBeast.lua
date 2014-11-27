@@ -14,7 +14,7 @@ function HeraldicCanXYZ()
   local gravecount=HeraldicCount(AIGrave())
   local fieldcount=HeraldicCount(AIMon)
   local result = false
-  if not Duel.CheckNormalSummonActivity(player_ai) then
+  if not NormalSummonCheck(player_ai) then
     if HasID(AIHand(),65367484) and handcount>0 and #AIMon==0 then --Thrasher
       result=true
     end
@@ -67,7 +67,7 @@ function SummonAmphisbaena()
 end
 function UseAmphisbaena(card)
   if bit32.band(card.location,LOCATION_HAND)>0 then
-    return Duel.CheckNormalSummonActivity(player_ai) and FieldCheck(4)==1 
+    return NormalSummonCheck(player_ai) and FieldCheck(4)==1 
     and (not HasID(AIHand(),82293134) or OPTCheck(82293134))
     or HeraldicCanXYZ() and FieldCheck(4)==0 
     and (HasID(AIHand(),82293134) and OPTCheck(82293134) 
@@ -83,7 +83,7 @@ function UseAberconway()
 end
 function UseHeraldryReborn()
   return FieldCheck(4)==1 and (HeraldicCount(AIHand())==0 
-  or Duel.CheckNormalSummonActivity(player_ai))
+  or NormalSummonCheck(player_ai))
 end
 function C101Filter(c)
 	return bit32.band(c.summon_type,SUMMON_TYPE_SPECIAL)>0 

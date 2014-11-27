@@ -3,7 +3,7 @@ function CanXYZ(rank)
   local cards=UseLists({AIHand(),AIST()})
   return CardsMatchingFilter(AIMon(),function(c,lvl)return c.level==lvl end,rank)>0
   or CardsMatchingFilter(AIHand(),function(c,lvl)return c.level==lvl end,rank)>=2 
-  and HasID(cards,10719350,true) and not Duel.CheckNormalSummonActivity(player_ai)
+  and HasID(cards,10719350,true) and not NormalSummonCheck(player_ai)
 end
 
 FF={}          
@@ -136,7 +136,7 @@ function SummonLeopard()
   if HasID(AIMon(),01662004,true) then
     result=result+1
   end
-  if HasID(AIHand(),01662004,true) and not Duel.CheckNormalSummonActivity(player_ai) and not SummonSpirit() then
+  if HasID(AIHand(),01662004,true) and not NormalSummonCheck(player_ai) and not SummonSpirit() then
     result=result+1
   end
   if HasID(AICards,57103969,true) and HasID(AIDeck(),01662004,true) then
@@ -180,7 +180,7 @@ function SummonCardinal()
 end
 function UseTensu()
   return CardsMatchingFilter(AIHand(),function(c) return c.race==RACE_BEASTWARRIOR end)>0
-  and Duel.CheckNormalSummonActivity(player_ai)
+  and NormalSummonCheck(player_ai)
   and CardsMatchingFilter(AIST(),function(c) return c.id==10719350 and bit32.band(c.position,POS_FACEUP)>0 end)==0
 end
 

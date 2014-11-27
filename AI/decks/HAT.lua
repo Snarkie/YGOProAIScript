@@ -102,9 +102,9 @@ function SoulChargeCond()
 end
 function CanUseHand()
   return ((HasID(AIMon(),68535320,true) or HasID(AIHand(),68535320,true) 
-  and not Duel.CheckNormalSummonActivity(player_ai)) and FireHandCheck() 
+  and not NormalSummonCheck(player_ai)) and FireHandCheck() 
   or (HasID(AIMon(),95929069,true) or HasID(AIHand(),95929069,true) 
-  and not Duel.CheckNormalSummonActivity(player_ai)) and IceHandCheck())
+  and not NormalSummonCheck(player_ai)) and IceHandCheck())
   and Duel.GetCurrentPhase()==PHASE_MAIN1 and GlobalBPAllowed
 end
 GlobalDuality = 0
@@ -114,8 +114,8 @@ function DualityCheck()
 end
 function UseDualityHAT()
   return DeckCheck(DECK_HAT) and (not (CanUseHand() or FieldCheck(4)>1 or FieldCheck(5)>1
-  or HandCheck(4)>0 and FieldCheck(4)>0 and not Duel.CheckNormalSummonActivity(player_ai) 
-  or HasID(AIHand(),45803070,true) and SummonDionaea() and not Duel.CheckNormalSummonActivity(player_ai))) 
+  or HandCheck(4)>0 and FieldCheck(4)>0 and not NormalSummonCheck(player_ai) 
+  or HasID(AIHand(),45803070,true) and SummonDionaea() and not NormalSummonCheck(player_ai))) 
 end
 function SummonDionaea()
   return DualityCheck() and OverExtendCheck() 

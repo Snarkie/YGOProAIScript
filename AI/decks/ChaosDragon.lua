@@ -351,7 +351,7 @@ function SummonMini()
   return HasID(AIMon(),77558536,true) and FieldCheck(4)==1 and ExtraDeckCheck(TYPE_SYNCHRO,8)>0 and #OppMon()>0 --and OppHasStrongestMonster()
   or OppHasStrongestMonster() and (FieldCheck(4)==1 or TragCheck(4)) and ExtraDeckCheck(TYPE_XYZ,4)>0
   or HasID(AIMon(),33420078,true) and OppHasStrongestMonster() and FieldCheck(4)==0 and ExtraDeckCheck(TYPE_SYNCHRO,6)>0
-  or HasID(AIHand(),99365553,true) and PriorityCheck(AIField(),PRIO_TOGRAVE)<4 and not Duel.CheckNormalSummonActivity(player_ai) and OverExtendCheck() and #OppMon()>0
+  or HasID(AIHand(),99365553,true) and PriorityCheck(AIField(),PRIO_TOGRAVE)<4 and not NormalSummonCheck(player_ai) and OverExtendCheck() and #OppMon()>0
   or HasID(AIHand(),88264978,true) and UseREDMD() and OverExtendCheck()
   or HasID(AIMon(),76774528,true) and DestroyCheck(OppField())>0 
 end
@@ -380,7 +380,7 @@ function UseLyla()
   return CardsMatchingFilter(OppST(),DestroyFilter)>0 
   and (Duel.GetCurrentPhase()==PHASE_MAIN2 or FieldCheck(4)>1 
   or HasID(AIMon(),33420078,true) or HasID(AIHand(),99365553,true) 
-  and not Duel.CheckNormalSummonActivity(player_ai))
+  and not NormalSummonCheck(player_ai))
 end
 function SummonRaiden()
   return OverExtendCheck()

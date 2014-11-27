@@ -157,7 +157,7 @@ end
 function TributeSummonShell()
   if TributeCheck(2) and (not SkillDrainCheck() 
   or TributeCheck(2)>5 and OppHasStrongestMonster())
-  and not Duel.CheckNormalSummonActivity(player_ai) 
+  and not NormalSummonCheck(player_ai) 
   then
     return true
   end
@@ -166,7 +166,7 @@ end
 function TributeSummonDisk()
   if TributeCheck(2) and (not SkillDrainCheck() and DualityCheck() 
   or TributeCheck(2)>5 and OppHasStrongestMonster())
-  and not Duel.CheckNormalSummonActivity(player_ai)
+  and not NormalSummonCheck(player_ai)
   then
     return true
   end
@@ -174,7 +174,7 @@ function TributeSummonDisk()
 end
 function TributeSummonKiller()
   if TributeCheck(3) and (not SkillDrainCheck() or TributeCheck(3)>5 and OppHasStrongestMonster())
-  and not Duel.CheckNormalSummonActivity(player_ai) and (ExpectedDamage(2)<AI.GetPlayerLP(2)
+  and not NormalSummonCheck(player_ai) and (ExpectedDamage(2)<AI.GetPlayerLP(2)
   or OppHasStrongestMonster())
   then
     return true

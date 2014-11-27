@@ -217,7 +217,7 @@ function PlayCheck()
   or HasID(AIHand(),03580032,true) --and (ArmsAvailable()>0
   or HasID(AIHand(),19680539,true) and CardsMatchingFilter(AIHand(),NormalCheck)>0 
   and ArmsAvailable(false,false,true)==0 and not HasID(AIHand(),47120245,true))
-  or Duel.CheckNormalSummonActivity(player_ai)
+  or NormalSummonCheck(player_ai)
 end
 GlobalGallatinTurn={}
 GlobalTableDump=0
@@ -354,7 +354,7 @@ function GawaynCond(loc,c)
     or (HasID(AIHand(),47120245,true) and ArmsAvailable()==0
     or HasID(AIHand(),59057152,true) and UseMedraut(true) 
     and ArmsAvailable()==1 and HasID(AIHand(),46008667,true))
-    and not (Duel.CheckNormalSummonActivity(player_ai) and UseBorz(true)))
+    and not (NormalSummonCheck(player_ai) and UseBorz(true)))
     and Duel.GetCurrentPhase()~=PHASE_END
   end
   if loc == PRIO_TOFIELD then
@@ -531,26 +531,26 @@ function SummonBorz(ss)
   and ArmsCount(AIDeck(),false,false,true)>3 or GawaynCheck() and not ss
   or ArmsAvailable()>0 and FieldCheck(5,NobleMonsterFilter,9577205)==1 and SummonR5torigus()
   or HasID(UseLists({AIHand(),AIGrave()}),95772051,true))
-  and (ss or not Duel.CheckNormalSummonActivity(player_ai))) and not UseMedraut()
+  and (ss or not NormalSummonCheck(player_ai))) and not UseMedraut()
 end
 function SummonMedraut(ss)
   return ((ArmsAvailable(true)>0 or ArmsAvailable()>1 or (ArmsAvailable()>0 and not ss 
   and not HasID(AIHand(),47120245,true) and not HasID(AIHand(),03580032,true)))
   and #AIMon()==0 and OPTCheck(59057152) and DualityCheck()
-  and (ss or not Duel.CheckNormalSummonActivity(player_ai))) or GawaynCheck() and not ss and not HasID(AIHand(),47120245,true)
+  and (ss or not NormalSummonCheck(player_ai))) or GawaynCheck() and not ss and not HasID(AIHand(),47120245,true)
   or ArmsAvailable()>0 and FieldCheck(5,NobleMonsterFilter,9577205)==1 and SummonR5torigus()
 end
 function SummonChad(ss)
-  return (((OPTCheck(13391185) and (ss or not Duel.CheckNormalSummonActivity(player_ai)))
+  return (((OPTCheck(13391185) and (ss or not NormalSummonCheck(player_ai)))
   and ArmsAvailable()>0 and PriorityCheck(AIGrave(),PRIO_TOHAND,1,NobleMonsterFilter)>2) 
   or GawaynCheck()) and not UseMedraut()
 end
 function SummonBedwyr(ss)
-  return (OPTCheck(30575681) and (ss or not Duel.CheckNormalSummonActivity(player_ai)))
+  return (OPTCheck(30575681) and (ss or not NormalSummonCheck(player_ai)))
   and ArmsAvailable()==0 and not UseMedraut()
 end
 function SummonPeredur(ss)
-  return (ArmsAvailable()>0 and (ss or not Duel.CheckNormalSummonActivity(player_ai))
+  return (ArmsAvailable()>0 and (ss or not NormalSummonCheck(player_ai))
   or FieldCheck(5,NobleMonsterFilter,83519853)==1 and SummonR5torigus())
   and not UseMedraut() and not UseChad()
 end
@@ -583,7 +583,7 @@ end
 function SummonBrothers()
   return OPTCheck(57690191) and (PriorityCheck(AIGrave(),PRIO_TODECK,6,NobleFilter)>1
   or PriorityCheck(AIGrave(),PRIO_TODECK,3,NobleFilter)>4 or ChainBrothers() and not ss)
-  and (ss or not Duel.CheckNormalSummonActivity(player_ai))
+  and (ss or not NormalSummonCheck(player_ai))
   and not UseMedraut()
 end
 function SetBrothers()
@@ -851,7 +851,7 @@ function UseRotA()
   or CardsMatchingFilter(cards,NormalCheck)>0 
   or ArmsAvailable()>0)
   or CardsMatchingFilter(AIHand(),NobleMonsterFilter)==0 
-  and not Duel.CheckNormalSummonActivity(player_ai)
+  and not NormalSummonCheck(player_ai)
   and not HasID(AIHand(),03580032,true)
 end
 function CastelNKFilter(c)

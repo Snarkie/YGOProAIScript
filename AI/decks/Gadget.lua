@@ -156,7 +156,7 @@ function UseCotHGadget(card)
     return true
   end
   if HandCheck(4)>0 and GraveCheck(4)>0 
-  and not Duel.CheckNormalSummonActivity(player_ai)
+  and not NormalSummonCheck(player_ai)
   then
     return true
   end
