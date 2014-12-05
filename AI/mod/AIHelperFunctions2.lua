@@ -697,7 +697,14 @@ function NormalSummonCheck(player)
   end
 end
 
-
+function SpecialSummonCheck(player)
+  -- wrapper for changed card script function
+  if Duel.CheckSpecialSummonActivity then
+    return Duel.CheckSpecialSummonActivity(player)
+  else
+    return Duel.GetActivityCount(player,ACTIVITY_SPSUMMON)>0
+  end
+end
 
 
 

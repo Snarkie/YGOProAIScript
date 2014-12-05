@@ -253,7 +253,7 @@ function SummonFalcon()
   return (SummonMichael() and CardsMatchingFilter(AIMon(),FalconFilter2)>0 
   or SummonArcanite() and CardsMatchingFilter(AIMon(),FalconFilter3)>0 
   or SummonArmades() and FieldCheck(3)>0)
-  and (MidrashCheck() or not Duel.CheckSpecialSummonActivity(player_ai))
+  and (MidrashCheck() or not SpecialSummonCheck(player_ai))
 end
 function SetFalcon()
   return (Duel.GetTurnCount()==1 or Duel.GetCurrentPhase()==PHASE_MAIN2) 

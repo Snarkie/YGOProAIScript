@@ -135,7 +135,7 @@ function SummonGearframe()
   return HasID(AIHand(),94656263,true) or FieldCheck(4)==1
 end
 function SummonMaskedChameleon()
-  return not(Get_Card_Count_Att_Def(AIGrave(),"==",nil,0,nil)>0 and not Duel.CheckSpecialSummonActivity(player_ai)) == (FieldCheck(4)==1)
+  return not(Get_Card_Count_Att_Def(AIGrave(),"==",nil,0,nil)>0 and not SpecialSummonCheck(player_ai)) == (FieldCheck(4)==1)
 end
 function SummonGadget()
   return HasID(AIHand(),94656263,true) or FieldCheck(4)==1 
