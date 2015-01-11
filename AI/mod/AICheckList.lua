@@ -301,7 +301,8 @@ NSBL={
 59057152,47120245,13391185,57690191, -- Medraut, Borz, Chad, Brothers
 19748583,10736540,92125819,73359475, -- Gwen, Lady, Artorigus, Peredur
 90307777,08903700,95492061,23401839, -- Shrit, Caster of Necloth, Djinn Releaser of Rituals, Manju, Senju 
-13974207 -- Denkou Sekka
+13974207,57143342,73213494,47728740, -- Denkou Sekka, BA Cir, Calcab, Alich
+20758643,00734714, -- BA Graff, Rubic
 }
 function NormalSummonBlacklist(CardId) 
   for i=1,#NSBL do
@@ -388,6 +389,10 @@ SSBL={
 48009503,60645181,82944432, -- HC - Gandiva, Excalibur, Blade Armor Ninja
 21223277,10613952,83519853, -- R4torigus, R5torigus, High Sally 
 08809344,95113856,31563350, -- Outer God Nyarla, Phantom Fortress Enterblathnir, Zubaba General
+00601193,72167543,81330115, -- BA Virgil, Downerd Magician, Acid Golem of Destruction
+31320433,47805931,75367227, -- Nightmare Shark, Giga-Brillant, Ghostrick Alucard
+68836428,52558805,78156759, -- Tri-Edge Levia, Temptempo the Percussion Djinn, Wind-Up Zenmaines
+16259549, -- Fortune Tune
 }
 
 
@@ -732,6 +737,11 @@ ScriptedCards ={
 13700028,52068432,88240999,08903700,  -- Necloth Gungnir, Trishula, Decisive Armor, Djinn Releaser of Rituals
 95492061,23401839,13974207,08809344,  -- Manju, Senju, Denkou Sekka, Outer God Nyarla
 93016201,51124303,14735698,31563350,  -- Royal Oppression, Kaleidomirror, Exomirror, Zubaba General
+57143342,73213494,47728740,20758643,  -- BA Cir, Calcab, Alich, Graff
+00734714,36006208,00601193,63356631,  -- BA Rubic, Fire Lake, Virgil, PWWB
+71587526,72167543,81330115,31320433,  -- Karma Cut, Downerd Magician, Acid Golem, Nightmare Shark
+47805931,75367227,68836428,52558805,  -- Giga-Brillant, Ghostrick Alucard, Tri-Edge Levia, Temptempo the Percussion Djinn
+16259549, -- Fortune Tune
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do

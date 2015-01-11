@@ -13,6 +13,7 @@ DECK_HAT          = 9
 DECK_QLIPHORT     = 10
 DECK_NOBLEKNIGHT  = 11
 DECK_NECLOTH      = 12
+DECK_BA           = 13
 
 DeckIdent={ --card that identifies the deck
 [1]   = 99365553, -- Lightpulsar Dragon
@@ -27,6 +28,7 @@ DeckIdent={ --card that identifies the deck
 [10]  = 65518099, -- Qliphort Tool
 [11]  = 59057152, -- Noble Knight Medraut
 [12]  = 14735698, -- Necloth Exomirror
+[13]  = 36006208, -- Fire Lake of the Burning Abyss
 }
 Deck = nil
 DeckName={
@@ -43,6 +45,7 @@ DeckName={
 [10]  = "Qliphort",
 [11]  = "Noble Knight",
 [12]  = "Necloth",
+[13]  = "Burning Abyss",
 }
 function DeckCheck(opt)
   if Deck == nil then
@@ -71,12 +74,38 @@ PRIO_DISCARD,PRIO_TODECK,PRIO_EXTRA = 7,7,7
 PRIO_BANISH = 9
 -- priority lists for decks:
 function PrioritySetup()
+AddPriority({
+-- Burning Abyss
 
+[57143342] = {1,1,1,1,1,1,1,1,1,1,CirCond},      -- BA Cir
+[73213494] = {1,1,1,1,1,1,1,1,1,1,CalcabCond},   -- BA Calcab
+[47728740] = {1,1,1,1,1,1,1,1,1,1,AlichCond},    -- BA Alich
+[20758643] = {1,1,1,1,1,1,1,1,1,1,GraffCond},    -- BA Graff
+[10802915] = {1,1,1,1,1,1,1,1,1,1,TourGuideCond},-- Tour Guide
+[84764038] = {1,1,1,1,1,1,1,1,1,1,ScarmCond},    -- BA Scarm
+[00734714] = {1,1,1,1,1,1,1,1,1,1,RubicCond},    -- BA Rubic
+
+[36006208] = {1,1,1,1,1,1,1,1,1,1,FireLakeCond}, -- BA Fire Lake
+[63356631] = {1,1,1,1,1,1,1,1,1,1,PWWBCond},     -- PWWB
+[71587526] = {1,1,1,1,1,1,1,1,1,1,KarmaCutCond}, -- Karma Cut
+
+[00601193] = {1,1,1,1,1,1,1,1,1,1,VirgilCond},   -- BA Virgil
+[72167543] = {1,1,1,1,1,1,1,1,1,1},              -- Downerd Magician
+[81330115] = {1,1,1,1,1,1,1,1,1,1},              -- Acid Golem of Destruction
+[31320433] = {1,1,1,1,1,1,1,1,1,1},              -- Nightmare Shark
+[47805931] = {1,1,1,1,1,1,1,1,1,1},              -- Giga-Brillant
+[75367227] = {1,1,1,1,1,1,1,1,1,1},              -- Ghostrick Alucard
+[68836428] = {1,1,1,1,1,1,1,1,1,1},              -- Tri-Edge Levia
+[52558805] = {1,1,1,1,1,1,1,1,1,1},              -- Temptempo the Percussion Djinn
+[78156759] = {1,1,1,1,1,1,1,1,1,1},              -- Wind-Up Zenmaines
+[83531441] = {1,1,1,1,1,1,1,1,1,1,DanteCond},    -- BA Dante
+[16259549] = {1,1,1,1,1,1,1,1,1,1},              -- Fortune Tune
+})
 AddPriority({
 -- Necloth: 
 
 [90307777] = {6,3,1,1,1,1,1,1,1,1,ShritCond},         -- Shrit, Caster of Necloth
-[99185129] = {12,2,3,1,1,1,1,1,2,1,ClausCond},         -- The Necloth of Clausolas
+[99185129] = {12,2,3,1,1,1,1,1,2,1,ClausCond},        -- The Necloth of Clausolas
 [89463537] = {8,1,7,1,1,1,1,1,6,1,UniCond},           -- The Necloth of Unicore
 [26674724] = {9,3,4,1,1,1,1,1,3,1,BrioCond},          -- The Necloth of Brionac
 [13700028] = {4,2,3,1,1,1,1,1,7,1,GungCond},          -- The Necloth of Gungnir
@@ -88,8 +117,8 @@ AddPriority({
 [13974207] = {3,1,1,1,1,1,1,1,1,1,nil},               -- Denkou Sekka
 
 [96729612] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Preparation of Rites
-[14735698] = {10,3,1,1,3,1,1,1,1,1,ExoCond},           -- Necloth Exomirror
-[51124303] = {11,2,1,1,3,1,1,1,1,1,KaleidoCond},       -- Necloth Kaleidomirror
+[14735698] = {10,3,1,1,3,1,1,1,1,1,ExoCond},          -- Necloth Exomirror
+[51124303] = {11,2,1,1,3,1,1,1,1,1,KaleidoCond},      -- Necloth Kaleidomirror
 
 [35952884] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Shooting Quasar Dragon
 [24696097] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Shooting Star Dragon
@@ -157,6 +186,7 @@ AddPriority({
 })
 
 AddPriority({
+
 --Chaos Dragons
 [65192027] = {8,5,8,2,1,0,0,0,2,0,DADCond},           -- Dark Armed Dragon 
 [72989439] = {9,5,6,3,1,0,0,0,2,0,BLSCond},           -- BLS Envoy
@@ -174,14 +204,14 @@ AddPriority({
 [16404809] = {3,2,4,2,6,3,0,0,8,0,KuribanditCond},    -- Kuribandit
 [51858306] = {5,0,3,0,9,0,0,0,9,9,WyvernCond},        -- Eclipse Wyvern
 [33420078] = {2,1,6,2,6,0,0,0,3,1,PSZCond},           -- Plaguespreader Zombie
-[10802915] = {5,2,3,2,2,1,0,0,8,3,TourGuideCond},     -- Tour Guide of the Underworld
-[84764038] = {4,2,8,3,8,2,0,0,5,2,ScarmCond},         -- Scarm, Malebranche of the Burning Abyss
+--[10802915] = {5,2,3,2,2,1,0,0,8,3,TourGuideCond},     -- Tour Guide of the Underworld
+--[84764038] = {4,2,8,3,8,2,0,0,5,2,ScarmCond},         -- Scarm, Malebranche of the Burning Abyss
 [00691925] = {8,3,0,0,3,0,0,0,0,0,nil},               -- Solar Recharge
 [94886282] = {7,2,0,0,1,0,0,0,0,0,nil},               -- Charge of the Light Brigade
 [01475311] = {5,3,0,0,4,0,0,0,0,0,nil},               -- Allure of Darkness
 [81439173] = {4,2,0,0,2,0,0,0,0,0,nil},               -- Foolish Burial
 
-[83531441] = {0,0,0,0,5,2,0,0,8,0,DanteCond},         -- Dante Proxy
+--[83531441] = {0,0,0,0,5,2,0,0,8,0,DanteCond},         -- BA Dante
 [15914410] = {0,0,0,0,5,2,0,0,8,0,AngineerCond},      -- Mechquipped Angineer
 [95992081] = {0,0,0,0,5,2,0,0,8,0,LeviairCond},       -- Leviair the Sea Dragon
 [34086406] = {0,0,0,0,5,2,0,0,8,0,ChainCond},         -- Lavalval Chain
@@ -197,7 +227,7 @@ AddPriority({
 AddPriority({
 -- Mermail
 [21954587] = {6,4,5,3,4,1,5,1,1,1,MegaloCond},        -- Mermail Abyssmegalo
-[22446869] = {7,3,4,2,2,1,1,1,1,1,TeusCond},           -- Mermail Abyssteus
+[22446869] = {7,3,4,2,2,1,1,1,1,1,TeusCond},          -- Mermail Abyssteus
 [37781520] = {7,1,6,4,5,1,4,1,1,1,LeedCond},          -- Mermail Abyssleed
 [58471134] = {4,2,8,2,2,1,1,1,1,1,PikeCond},          -- Mermail Abysspike
 [22076135] = {4,2,7,2,2,1,1,1,1,1,TurgeCond},         -- Mermail Abyssturge

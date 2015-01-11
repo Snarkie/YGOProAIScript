@@ -68,6 +68,10 @@ result = NeclothCard(cards, minTargets, maxTargets, triggeringID, triggeringCard
 if result ~= nil then
   return result
 end
+result = BACard(cards, minTargets, maxTargets, triggeringID, triggeringCard)
+if result ~= nil then
+  return result
+end
 result = {}
 
   --------------------------------------------

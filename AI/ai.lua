@@ -1,5 +1,5 @@
-Version = "0.25"
-Experimental = false
+Version = "0.25b"
+Experimental = true
 
 --[[
   AI Script for YGOPro Percy:
@@ -51,6 +51,7 @@ require("ai.decks.HAT")
 require("ai.decks.Qliphort")
 require("ai.decks.NobleKnight")
 require("ai.decks.Necloth")
+require("ai.decks.BurningAbyss")
 
 math.randomseed( require("os").time() )
 
