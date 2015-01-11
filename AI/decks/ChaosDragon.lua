@@ -476,7 +476,7 @@ function ChaosDragonOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(SpSummonable,34408491) and SummonBeelze() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasID(SpSummonable,07391448) and SummonGoyo() then
+  if HasID(SpSummonable,07391448) and SummonGoyoGuardian() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   --if HasIDNotNegated(Activatable,04779823) and UseMichael() then
