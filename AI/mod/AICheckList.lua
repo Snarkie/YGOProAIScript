@@ -302,7 +302,8 @@ NSBL={
 19748583,10736540,92125819,73359475, -- Gwen, Lady, Artorigus, Peredur
 90307777,08903700,95492061,23401839, -- Shrit, Caster of Necloth, Djinn Releaser of Rituals, Manju, Senju 
 13974207,57143342,73213494,47728740, -- Denkou Sekka, BA Cir, Calcab, Alich
-20758643,00734714, -- BA Graff, Rubic
+20758643,00734741,36551319,09342162, -- BA Graff, Rubic, Farfa, Cagna
+62957424, -- BA Libic
 }
 function NormalSummonBlacklist(CardId) 
   for i=1,#NSBL do
@@ -392,7 +393,7 @@ SSBL={
 00601193,72167543,81330115, -- BA Virgil, Downerd Magician, Acid Golem of Destruction
 31320433,47805931,75367227, -- Nightmare Shark, Giga-Brillant, Ghostrick Alucard
 68836428,52558805,78156759, -- Tri-Edge Levia, Temptempo the Percussion Djinn, Wind-Up Zenmaines
-16259549, -- Fortune Tune
+16259549,51617185, -- Fortune Tune, Machina Megaform
 }
 
 
@@ -478,9 +479,11 @@ ToHandBL={
 function DestroyBlacklist(c) -- cards to not destroy in your opponent's possession
   local AICard = true
   local id = nil
+  local faceup
   if c.GetCode then
     AICard = false
     id = c:GetCode()
+    faceup = c:IsPosition(POS_FACEUP)
     if c:IsSetCard(0x97) and c:GetOwner()==1-player_ai 
     and Duel.GetTurnPlayer()==player_ai and c:IsLocation(LOCATION_SZONE)
     then
@@ -488,6 +491,7 @@ function DestroyBlacklist(c) -- cards to not destroy in your opponent's possessi
     end
   else
     id = c.id
+    faceup = FilterPosition(c,POS_FACEUP)
     if IsSetCode(c.setcode,0x97) and c.owner==2 
     and Duel.GetTurnPlayer()==player_ai and bit32.band(c.location,LOCATION_SZONE)>0
     then
@@ -503,6 +507,9 @@ function DestroyBlacklist(c) -- cards to not destroy in your opponent's possessi
     return true
   end
   if id == 95929069 and #AIST()>0 then -- Ice Hand
+    return true
+  end
+  if id == 05851097 and #OppField()>1 and faceup then
     return true
   end
   return false
@@ -568,7 +575,7 @@ Unchainable={
 12444060,85103922,12697630,77505534, -- Artifact Sanctum, Moralltach, Beagalltach, Facing the Shadows
 05318639,53582587,97077563,14087893, -- Mystical Space Typhoon, Torrential tribute, Call of the Haunted, Book of Moon
 78474168,50078509,29616929,19748583, -- Breakthrough Skill, Fiendish Chain, TTHN, Gwen
-25789292 -- Forbidden Chalice
+25789292,36006208,71587526,63356631, -- Forbidden Chalice, Fire Lake, Karma Cut, PWWB
 }
 function isUnchainableTogether(CardId)
   for i=1,#Unchainable do
@@ -738,10 +745,11 @@ ScriptedCards ={
 95492061,23401839,13974207,08809344,  -- Manju, Senju, Denkou Sekka, Outer God Nyarla
 93016201,51124303,14735698,31563350,  -- Royal Oppression, Kaleidomirror, Exomirror, Zubaba General
 57143342,73213494,47728740,20758643,  -- BA Cir, Calcab, Alich, Graff
-00734714,36006208,00601193,63356631,  -- BA Rubic, Fire Lake, Virgil, PWWB
+00734741,36006208,00601193,63356631,  -- BA Rubic, Fire Lake, Virgil, PWWB
 71587526,72167543,81330115,31320433,  -- Karma Cut, Downerd Magician, Acid Golem, Nightmare Shark
 47805931,75367227,68836428,52558805,  -- Giga-Brillant, Ghostrick Alucard, Tri-Edge Levia, Temptempo the Percussion Djinn
-16259549, -- Fortune Tune
+16259549,51617185,36551319,09342162,  -- Fortune Tune, Machina Megaform, BA Farfa, Cagna
+62957424,00005497,62835876,73680966,  -- BA Libic, Malacoda, Good&Evil, The Beginning of the End
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do

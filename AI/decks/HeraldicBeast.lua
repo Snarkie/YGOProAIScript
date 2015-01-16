@@ -152,7 +152,7 @@ function HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local SetableMon = cards.monster_setable_cards
   local SetableST = cards.st_setable_cards
   local HasBackrow = HasBackrow(SetableST)
-  if HasID(Activatable,81439173) then   -- Foolish Burial
+  if HasID(Activatable,81439173) and not DeckCheck(DECK_BA) then   -- Foolish Burial
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Activatable,32807846) and not DeckCheck(DECK_NOBLEKNIGHT) then   -- Reinforcement of the Army
@@ -686,7 +686,7 @@ end
 function FoolishTarget(cards)
   if DeckCheck(DECK_BUJIN) then
     return BujinAdd(cards,LOCATION_GRAVE)
-  elseif DeckCheck(DECK_CHAOSDRAGON) then
+  elseif DeckCheck(DECK_CHAOSDRAGON) or DeckCheck(DECK_BA) then
     return Add(cards,PRIO_TOGRAVE)
   else
     return HeraldicToGrave(cards,1)

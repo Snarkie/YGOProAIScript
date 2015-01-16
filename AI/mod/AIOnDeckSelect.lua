@@ -76,20 +76,25 @@ PRIO_BANISH = 9
 function PrioritySetup()
 AddPriority({
 -- Burning Abyss
+[57143342] = {7,2,7,3,7,1,1,1,2,1,CirCond},      -- BA Cir
+[73213494] = {3,2,3,1,3,3,1,1,6,1,CalcabCond},   -- BA Calcab
+[47728740] = {2,2,3,1,3,3,1,1,6,1,AlichCond},    -- BA Alich
+[20758643] = {6,2,8,2,8,2,1,1,5,1,GraffCond},    -- BA Graff
+[10802915] = {8,2,3,2,2,1,1,1,8,3,TourGuideCond},-- Tour Guide
+[84764038] = {5,2,5,4,5,2,1,1,4,2,ScarmCond},    -- BA Scarm
+[00734741] = {4,2,3,1,3,3,1,1,6,1,RubicCond},    -- BA Rubic
+[36551319] = {4,2,4,1,4,3,1,1,6,1,FarfaCond},    -- BA Farfa
+[09342162] = {3,2,6,1,6,3,1,1,6,1,CagnaCond},    -- BA Cagna
+[62957424] = {3,2,3,1,3,3,1,1,6,1,LibicCond},    -- BA Libic
+[00005497] = {8,2,1,1,2,2,1,1,5,1,MalacodaCond}, -- BA Malacoda
 
-[57143342] = {1,1,1,1,1,1,1,1,1,1,CirCond},      -- BA Cir
-[73213494] = {1,1,1,1,1,1,1,1,1,1,CalcabCond},   -- BA Calcab
-[47728740] = {1,1,1,1,1,1,1,1,1,1,AlichCond},    -- BA Alich
-[20758643] = {1,1,1,1,1,1,1,1,1,1,GraffCond},    -- BA Graff
-[10802915] = {1,1,1,1,1,1,1,1,1,1,TourGuideCond},-- Tour Guide
-[84764038] = {1,1,1,1,1,1,1,1,1,1,ScarmCond},    -- BA Scarm
-[00734714] = {1,1,1,1,1,1,1,1,1,1,RubicCond},    -- BA Rubic
-
-[36006208] = {1,1,1,1,1,1,1,1,1,1,FireLakeCond}, -- BA Fire Lake
+[73680966] = {5,1,1,1,1,1,1,1,1,1,TBOTECond},    -- The Beginning of the End
+[62835876] = {9,1,1,1,5,1,1,1,1,1,GECond},       -- BA Good&Evil
+[36006208] = {8,2,1,1,4,1,1,1,1,1,FireLakeCond}, -- BA Fire Lake
 [63356631] = {1,1,1,1,1,1,1,1,1,1,PWWBCond},     -- PWWB
 [71587526] = {1,1,1,1,1,1,1,1,1,1,KarmaCutCond}, -- Karma Cut
 
-[00601193] = {1,1,1,1,1,1,1,1,1,1,VirgilCond},   -- BA Virgil
+[00601193] = {1,1,10,1,1,1,1,1,1,1,VirgilCond},   -- BA Virgil
 [72167543] = {1,1,1,1,1,1,1,1,1,1},              -- Downerd Magician
 [81330115] = {1,1,1,1,1,1,1,1,1,1},              -- Acid Golem of Destruction
 [31320433] = {1,1,1,1,1,1,1,1,1,1},              -- Nightmare Shark
@@ -98,7 +103,7 @@ AddPriority({
 [68836428] = {1,1,1,1,1,1,1,1,1,1},              -- Tri-Edge Levia
 [52558805] = {1,1,1,1,1,1,1,1,1,1},              -- Temptempo the Percussion Djinn
 [78156759] = {1,1,1,1,1,1,1,1,1,1},              -- Wind-Up Zenmaines
-[83531441] = {1,1,1,1,1,1,1,1,1,1,DanteCond},    -- BA Dante
+[83531441] = {1,1,9,1,5,2,1,1,5,1,DanteCond},    -- BA Dante
 [16259549] = {1,1,1,1,1,1,1,1,1,1},              -- Fortune Tune
 })
 AddPriority({
@@ -111,7 +116,7 @@ AddPriority({
 [13700028] = {4,2,3,1,1,1,1,1,7,1,GungCond},          -- The Necloth of Gungnir
 [52068432] = {7,2,6,1,1,1,1,1,5,1,TrishCond},         -- The Necloth of Trishula
 [88240999] = {6,2,5,1,1,1,1,1,4,1,ArmorCond},         -- The Necloth of Decisive Armor
-[08903700] = {3,1,1,1,9,1,1,1,1,1,nil},               -- Djinn Releaser of Rituals
+[08903700] = {3,1,1,1,4,2,1,1,1,1,ReleaserCond},      -- Djinn Releaser of Rituals
 [95492061] = {4,1,1,1,1,1,1,1,1,1,nil},               -- Manju of the Ten Thousand Hands
 [23401839] = {5,1,1,1,1,1,1,1,1,1,nil},               -- Senju of the Thousand Hands
 [13974207] = {3,1,1,1,1,1,1,1,1,1,nil},               -- Denkou Sekka
@@ -204,8 +209,6 @@ AddPriority({
 [16404809] = {3,2,4,2,6,3,0,0,8,0,KuribanditCond},    -- Kuribandit
 [51858306] = {5,0,3,0,9,0,0,0,9,9,WyvernCond},        -- Eclipse Wyvern
 [33420078] = {2,1,6,2,6,0,0,0,3,1,PSZCond},           -- Plaguespreader Zombie
---[10802915] = {5,2,3,2,2,1,0,0,8,3,TourGuideCond},     -- Tour Guide of the Underworld
---[84764038] = {4,2,8,3,8,2,0,0,5,2,ScarmCond},         -- Scarm, Malebranche of the Burning Abyss
 [00691925] = {8,3,0,0,3,0,0,0,0,0,nil},               -- Solar Recharge
 [94886282] = {7,2,0,0,1,0,0,0,0,0,nil},               -- Charge of the Light Brigade
 [01475311] = {5,3,0,0,4,0,0,0,0,0,nil},               -- Allure of Darkness
@@ -401,6 +404,9 @@ function AssignPriority(cards,loc,filter,opt)
     end
     if cards[i].owner==2 then
       cards[i].prio=-1*cards[i].prio
+    end
+    if not TargetCheck(cards[i]) then
+      cards[i].prio=-1
     end
     SetMultiple(cards[i].id)
   end

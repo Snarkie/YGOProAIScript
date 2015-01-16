@@ -30,7 +30,7 @@ function SetBanishPriority(cards)
         c.prio=-1
       end
     end
-    if c.id==05556499 then
+    if c.id==05556499 or c.id==51617185 then
       c.prio=-1
     end
     if c.id==18063928 or c.id==18964575
@@ -76,7 +76,7 @@ function SetDiscardPriority(cards)
     local c=cards[i]
     c.index=i
     c.prio=0
-    if c.id==39284521 or c.id==90411554 then
+    if c.id==39284521 or c.id==90411554 or c.id==51617185 then
       c.prio=-1
     end
     if c.id==05556499 then
@@ -120,7 +120,7 @@ end
 function SummonMachinaFortress(card)
   local result = false
   if card.location == LOCATION_GRAVE then
-    result = HasID(AIHand(),39284521,true) or GadgetCount(AIHand())>1
+    result = HasID(AIHand(),39284521,true) or HasID(AIHand(),51617185,true) or GadgetCount(AIHand())>1
   else
     result = HasID(AIHand(),18964575,true) or GadgetCount(AIHand())>1
     or Get_Card_Count_ID(AIHand(),05556499)>1
@@ -171,7 +171,7 @@ function GadgetSum(cards, sum)
     if cards[i].id == 05556499 then
       cards[i].prio = 10
     end
-    if cards[i].id == 39284521 then
+    if cards[i].id == 39284521 or cards[i].id == 51617185 then
       if HasID(cards,05556499,true) then
         cards[i].prio = 1
       else
@@ -273,6 +273,9 @@ function SummonChainGadget()
   return DeckCheck(DECK_GADGET) and not HasAccess(90411554) 
   and MP2Check() and OppGetStrongestAttDef()<=1800
 end
+function UseMegaform()
+  return true
+end
 function GadgetOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local Activatable = cards.activatable_cards
   local Summonable = cards.summonable_cards
@@ -294,6 +297,9 @@ function GadgetOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   end
   if HasID(Activatable,42940404) and UseGearframe(Activatable[CurrentIndex]) then
     return {COMMAND_ACTIVATE,IndexByID(Activatable,42940404)}
+  end
+  if HasID(Activatable,51617185) and UseMegaform() then
+    return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Summonable,18063928) and SummonTinGoldfish() and OverExtendCheck() then
     return {COMMAND_SUMMON,IndexByID(Summonable,18063928)}
@@ -487,6 +493,9 @@ function GearframeTarget(cards)
   if HasID(cards,39284521) and HasID(AIGrave(),05556499) then
     result = {IndexByID(cards,39284521)}
   end
+  if HasID(cards,51617185) and HasID(AIGrave(),05556499) then
+    result = {IndexByID(cards,51617185)}
+  end
   if result == nil then result = {math.random(#cards)} end
   return result
 end
@@ -665,6 +674,9 @@ function ChainStardustSpark()
   end
   return false
 end
+function ChainMegaform()
+  return true
+end
 GlobalStardustSparkActivation={}
 function GadgetOnSelectChain(cards,only_chains_by_player)
   if HasID(cards,18964575) and ChainSwiftScarecrow(18964575) then
@@ -686,6 +698,9 @@ function GadgetOnSelectChain(cards,only_chains_by_player)
     GlobalStardustSparkActivation[cards[CurrentIndex].cardid]=Duel.GetTurnCount()
     return {1,CurrentIndex}
   end
+  if HasID(cards,51617185) and ChainMegaform() then
+    return {1,CurrentIndex}
+  end
   return nil
 end
 function GadgetOnSelectEffectYesNo(id,triggeringCard)
@@ -693,6 +708,9 @@ function GadgetOnSelectEffectYesNo(id,triggeringCard)
   if id == 42940404 or IsGadget(id) or id == 18063928 
   or id == 53573406 
   then
+    result = 1
+  end
+  if id==51617185 and ChainMegaform() then
     result = 1
   end
   return result

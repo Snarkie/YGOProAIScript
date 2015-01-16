@@ -16,7 +16,11 @@ function OnSelectNumber(choices)
   or GlobalActivatedCardID == 83531441 -- Dante
   then
     GlobalActivatedCardID = nil
-    return #choices
+    if #AIDeck()>10 then
+      return #choices
+    else
+      return 1
+    end
   end
 
   -------------------------------------------

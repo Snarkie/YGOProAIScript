@@ -125,8 +125,13 @@ function PSZCond(loc,c)
   return true
 end
 function TourGuideCond(loc,c)
+  if loc == PRIO_TOHAND then
+    local cards = UseLists(AIHand(),AIST())
+    return not HasID(AIHand(),10802915,true) 
+    and not (HasID(cards,63356631,true) or HasID(cards,71587526 ,true))
+  end
   if loc == PRIO_BANISH then
-    return bit32.band(c.location,LOCATION_HAND)==0
+    return bit32.band(c.location,LOCATION_HAND)==0 or CardsMatchingFilter(AIHand(),FilterID,10802915)>1
   end
   return true
 end
@@ -210,11 +215,11 @@ function MergePriorities()
   end]]
 end
 
-function SSLightpulsar(c)
-  if bit32.band(c.location,LOCATION_HAND)>0 then
+function SSLightpulsar(c,loc)
+  if bit32.band(c.location,LOCATION_HAND)>0 and loc==LOCATION_HAND then
     GlobalCardMode=4
     return ChaosSummonCheck()>4 and OverExtendCheck() and #OppMon()>0  --and LightpulsarSummonCheck()>4
-  elseif bit32.band(c.location,LOCATION_GRAVE)>0 then
+  elseif bit32.band(c.location,LOCATION_GRAVE)>0 and loc==LOCATION_GRAVE then
     GlobalCardMode=2
     return (LightpulsarSummonCheck()>4 or (LightpulsarSummonCheck()>2 
     and #AIHand()>4) and OverExtendCheck() and #OppMon()>0)
@@ -232,7 +237,7 @@ function UseDAD()
   and PriorityCheck(AIGrave(),PRIO_BANISH,2,FilterAttribute,ATTRIBUTE_DARK)>4
 end
 function SummonDante()
-  return #AIDeck()>20
+  return #AIDeck()>20 and DeckCheck(DECK_CHAOSDRAGON)
 end
 function LeviairFilter(c)
   return bit32.band(c.type,TYPE_MONSTER)>0 and c.level<5 and c:is_affected_by(EFFECT_SPSUMMON_CONDITION)==0
@@ -362,7 +367,8 @@ function SummonWyverbuster()
   return PriorityCheck(AIGrave(),PRIO_BANISH,1,FilterAttribute,ATTRIBUTE_DARK)>4 and SummonMini()
 end
 function SetScarm()
-  return (Duel.GetTurnCount()==1 or Duel.GetCurrentPhase() == PHASE_MAIN2) and #AIMon()==0
+  return (Duel.GetTurnCount()==1 or Duel.GetCurrentPhase() == PHASE_MAIN2) 
+  and #AIMon()==0 and DeckCheck(DECK_CHAOSDRAGON)
 end
 function LuminaFilter(c)
   return bit32.band(c.type,TYPE_MONSTER) and c.level<5 and IsSetCode(c.setcode,0x38)
@@ -371,7 +377,7 @@ function SummonLumina()
   return CardsMatchingFilter(AIGrave(),LuminaFilter)>0 and OverExtendCheck()
 end
 function UseLumina()
-  return OverExtendCheck() and PriorityCheck(AIHand(),PRIO_TOGRAVE)>4
+  return OverExtendCheck() or PriorityCheck(AIHand(),PRIO_TOGRAVE)>3
 end
 function SummonLyla()
   return CardsMatchingFilter(OppST(),DestroyFilter)>0 and OverExtendCheck()
@@ -398,14 +404,9 @@ function UsePSZ()
   return SummonPSZ() and #AIHand()>4
 end
 function UseAllure()
-  return PriorityCheck(AIHand(),PRIO_BANISH)>4
+  return PriorityCheck(AIHand(),PRIO_BANISH,1,FilterAttribute,ATTRIBUTE_DARK)>4
 end
-function TourguideFilter(c)
-  return bit32.band(c.type,TYPE_MONSTER)>0 and bit32.band(c.race,RACE_FIEND)>0 and c.level==3
-end
-function SummonTourguide()
-  return CardsMatchingFilter(UseLists({AIDeck(),AIHand()}),TourguideFilter)>1 and OverExtendCheck()
-end
+
 function SummonGoyoGuardian()
   return Duel.GetCurrentPhase==PHASE_MAIN1 and OppGetStrongestAttDef()<2800
 end
@@ -413,7 +414,7 @@ function SummonKuribandit()
   return true
 end
 function UseDante()
-  return #AIDeck()>10
+  return true
 end
 function SummonBeelze()
   return true
@@ -496,7 +497,7 @@ function ChaosDragonOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   for i=1,#SpSummonable do
-    if SpSummonable[i].id == 99365553 and SSLightpulsar(SpSummonable[i]) then
+    if SpSummonable[i].id == 99365553 and SSLightpulsar(SpSummonable[i],LOCATION_HAND) then
       GlobalSSCardID = 99365553
       return {COMMAND_SPECIAL_SUMMON,i}
     end
@@ -539,7 +540,7 @@ function ChaosDragonOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
 
-  if HasID(Summonable,10802915) and SummonTourguide() then
+  if HasID(Summonable,10802915) and SummonTourguide() and DeckCheck(DECK_CHAOSDRAGON) then
     return {COMMAND_SUMMON,CurrentIndex}
   end
   if HasID(Summonable,95503687) and SummonLumina() then
@@ -565,6 +566,29 @@ function ChaosDragonOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_SUMMON,CurrentIndex}
   end
   if HasID(Summonable,22624373) and OverExtendCheck() then
+    return {COMMAND_SUMMON,CurrentIndex}
+  end
+  if HasID(SpSummonable,61901281) and OverExtendCheck()
+  and PriorityCheck(AIGrave(),PRIO_BANISH,1,FilterAttribute,ATTRIBUTE_LIGHT)>4
+  and GlobalBPAllowed and Duel.GetCurrentPhase()==PHASE_MAIN1
+  then
+    GlobalSSCardID = 61901281
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(SpSummonable,99234526) and OverExtendCheck() 
+  and PriorityCheck(AIGrave(),PRIO_BANISH,1,FilterAttribute,ATTRIBUTE_DARK)>4
+  and GlobalBPAllowed and Duel.GetCurrentPhase()==PHASE_MAIN1
+  then
+    GlobalSSCardID = 99234526
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  for i=1,#SpSummonable do
+    if SpSummonable[i].id == 99365553 and SSLightpulsar(SpSummonable[i],LOCATION_GRAVE) then
+      GlobalSSCardID = 99365553
+      return {COMMAND_SPECIAL_SUMMON,i}
+    end
+  end
+  if HasID(Summonable,10802915) and DeckCheck(DECK_CHAOSDRAGON) then
     return {COMMAND_SUMMON,CurrentIndex}
   end
   if HasID(SetableMon,84764038) and SetScarm() then
@@ -608,7 +632,9 @@ function LuminaTarget(cards)
 end
 function DanteTarget(cards,c)
   if bit32.band(c.location,LOCATION_GRAVE)>0 then
-    return Add(cards,PRIO_TOFIELD)
+    result = Add(cards,PRIO_TOHAND,1,TargetCheck)
+    TargetSet(cards[1])
+    return result
   else
     return Add(cards,PRIO_TOGRAVE)
   end
@@ -868,7 +894,7 @@ function ChaosDragonOnSelectEffectYesNo(id,card)
   return result
 end
 ChaosDragonAtt={
-  44330098,09596126,22624373,95992081
+  44330098,09596126,22624373,95992081,
 }
 ChaosDragonDef={
   98777036,16404809,33420078,
@@ -883,7 +909,17 @@ function ChaosDragonOnSelectPosition(id, available)
     if ChaosDragonDef[i]==id then result=POS_FACEUP_DEFENCE end
   end
   if id == 83531441 then -- Dante
-    if GlobalBPAllowed and Duel.GetCurrentPhase()==PHASE_MAIN1 and OppGetWeakestAttDef()<2500 then
+    if GlobalBPAllowed and Duel.GetCurrentPhase()==PHASE_MAIN1 
+    and OppGetWeakestAttDef()<2500 or CardsMatchingFilter(OppMon(),FilterPosition,POS_FACEDOWN)>0
+    then
+      result=POS_FACEUP_ATTACK
+    else
+      result=POS_FACEUP_DEFENCE
+    end
+  end
+  if id == 61901281 or id == 99234526 then
+    if GlobalBPAllowed and Duel.GetCurrentPhase()==PHASE_MAIN1 
+    then
       result=POS_FACEUP_ATTACK
     else
       result=POS_FACEUP_DEFENCE

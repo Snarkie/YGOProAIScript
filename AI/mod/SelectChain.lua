@@ -265,8 +265,7 @@ result = 0
   -- the opponent controls a card.
   ---------------------------------
     for i=1,#cards do
-      if cards[i].id == 04178474 or -- Raigeki B
-         cards[i].id == 63356631 then -- Phoenix Wing Wind Blast
+      if cards[i].id == 04178474 then -- Raigeki B
         if Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") < Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") or Get_Card_Count(OppST()) > 0 then
           GlobalActivatedCardID = cards[i].id
           GlobalCardMode = 1

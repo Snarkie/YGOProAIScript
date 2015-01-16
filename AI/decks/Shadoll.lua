@@ -526,7 +526,13 @@ end
 function IgnitionTarget(cards)
   local result = {}
   if GlobalCardMode == 2 then
-    result = {IndexByID(cards,GlobalTargetID)}
+    for i=1,#cards do
+      if cards[i].id==GlobalTargetID and cards[i].owner==GlobalPlayer 
+      and FilterPosition(cards[i],GlobalPosition)
+      then
+        result = {i}
+      end
+    end
   elseif GlobalCardMode == 1 then
     result = BestTargets(cards,1,true)
   else
@@ -536,7 +542,10 @@ function IgnitionTarget(cards)
       end
     end
   end 
-  GlobalCardMode = nil
+  GlobalCardMode=nil
+  GlobalTargetID=nil
+  GlobalPlayer=nil
+  GlobalPosition=nil
   if #result == 0 then result = {math.random(#cards)} end
   if cards[1].prio then TargetSet(cards[1]) else TargetSet(cards[result[1]]) end
   return result
@@ -545,7 +554,9 @@ function MSTTarget(cards)
   result = nil
   if GlobalCardMode == 1 then
     for i=1,#cards do
-      if cards[i].id==GlobalTargetID and cards[i].owner==GlobalPlayer then
+      if cards[i].id==GlobalTargetID and cards[i].owner==GlobalPlayer 
+      and FilterPosition(cards[i],GlobalPosition)
+      then
         result = {i}
       end
     end
@@ -553,6 +564,7 @@ function MSTTarget(cards)
   GlobalCardMode=nil
   GlobalTargetID=nil
   GlobalPlayer=nil
+  GlobalPosition=nil
   if result==nil then result=BestTargets(cards,1,TARGET_DESTROY,TargetCheck) end
   if cards[1].prio then TargetSet(cards[1]) else TargetSet(cards[result[1]]) end
   return result
@@ -889,6 +901,7 @@ function ChainMST()
       GlobalTargetID=cards[math.random(#cards)].id
       GlobalPlayer=2
       GlobalCardMode=1
+      GlobalPosition=POS_FACEDOWN
       return true
     end
   end
@@ -902,14 +915,18 @@ function ChainMST()
     and not c:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET)
     and not c:IsHasEffect(EFFECT_INDESTRUCTABLE_EFFECT)
     and not c:IsHasEffect(EFFECT_IMMUNE_EFFECT)
-    and (not DestroyBlacklist(c) or c:GetCode()==19337371)
+    and (not DestroyBlacklist(c) or c:GetCode()==19337371 or c:GetCode()==05851097)
     and not(c:GetCode()==65518099 and not(Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_TOHAND)))
     then
       GlobalTargetID=c:GetCode()
       GlobalPlayer=2
       GlobalCardMode=1
+      GlobalPosition=POS_FACEUP
       return true
     end
+  end
+  if HasPriorityTarget(OppST(),destroycheck) then
+    return true
   end
   return false
 end
@@ -928,7 +945,7 @@ function ChainIgnition()
       return true
     end
     if targets > 0 then
-      return true
+      return Duel.GetLocationCount(player_ai,LOCATION_SZONE)>0
     end
   end
   if not UnchainableCheck(12444060) then
@@ -955,7 +972,8 @@ function ChainIgnition()
       GlobalTargetID=cards[math.random(#cards)].id
       GlobalPlayer=2
       GlobalCardMode=2
-      return true
+      GlobalPosition=POS_FACEDOWN
+      return Duel.GetLocationCount(player_ai,LOCATION_SZONE)>0
     end
   end
   if e then
@@ -974,8 +992,12 @@ function ChainIgnition()
       GlobalTargetID=c:GetCode()
       GlobalPlayer=2
       GlobalCardMode=1
-      return true
+      GlobalPosition=POS_FACEUP
+      return Duel.GetLocationCount(player_ai,LOCATION_SZONE)>0
     end
+  end
+  if HasPriorityTarget(OppST(),destroycheck) then
+    return Duel.GetLocationCount(player_ai,LOCATION_SZONE)>0
   end
   return false
 end

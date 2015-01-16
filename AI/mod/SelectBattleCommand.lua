@@ -229,7 +229,7 @@ end
   
   --------------------------------------------------------
   -- If a monster is forced to attack for some reason, 
-  -- attack with the strongest monster fist to potentially
+  -- attack with the strongest monster first to potentially
   -- clear the way for weaker ones.
   --------------------------------------------------------
   if #cards>0 then

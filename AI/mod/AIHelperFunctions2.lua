@@ -293,10 +293,11 @@ function HasBackrow(Setable)
 end
 -- check, if the AI is already controlling the field, 
 -- so it doesn't overcommit as much
-function OverExtendCheck()
+function OverExtendCheck(limit)
+  if limit == nil then limit = 2 end
   local cards = AIMon()
   local hand = AIHand()
-  return OppHasStrongestMonster() or #cards < 2 or #hand > 4 or AI.GetPlayerLP(2)<=800 and HasID(AIExtra(),12014404,true) -- Cowboy
+  return OppHasStrongestMonster() or #cards < limit or #hand > 4 or AI.GetPlayerLP(2)<=800 and HasID(AIExtra(),12014404,true) -- Cowboy
 end
 -- checks, if a card the AI controls is about to be removed in the current chain
 function RemovalCheck(id,category)
@@ -400,7 +401,7 @@ function BestTargets(cards,count,target,filter,immuneCheck)
         end
       end
     end
-    if bit32.band(cards[i].type,TYPE_FUSION+TYPE_RITUAL+TYPE_XYZ+TYPE_SYNCHRO)>0 then
+    if PriorityTarget(cards[i]) then
       cards[i].prio = cards[i].prio+2
     end
     if cards[i].level>4 then
@@ -412,7 +413,7 @@ function BestTargets(cards,count,target,filter,immuneCheck)
     if (bit32.band(cards[i].position, POS_FACEUP)>0 or bit32.band(cards[i].status,STATUS_IS_PUBLIC)>0)
     and (target == TARGET_TOHAND and ToHandBlacklist(cards[i].id)   
     or target == TARGET_DESTROY and DestroyBlacklist(cards[i])
-    or target==TARGET_FACEDOWN and bit32.band(cards[i].type,TYPE_FLIP)>0)
+    or target == TARGET_FACEDOWN and bit32.band(cards[i].type,TYPE_FLIP)>0)
     then
       cards[i].prio = -1
     end
@@ -567,6 +568,12 @@ end
 function FilterAffected(c,effect)
   return c:is_affected_by(effect)>0
 end
+function FilterPublic(c)
+  return FilterStatus(c,STATUS_IS_PUBLIC) or FilterPosition(c,POS_FACEUP)
+end
+function FilterSet(c,code)
+  return IsSetCode(c.setcode,code)
+end
 function HasMaterials(c)
   return c.xyz_material_count>0
 end
@@ -595,14 +602,14 @@ GlobalTargetList = {}
 -- function to prevent multiple cards to target the same card in the same chain
 function TargetCheck(card)
   for i=1,#GlobalTargetList do
-    if card and GlobalTargetList[i]==card.cardid then
+    if card and GlobalTargetList[i].cardid==card.cardid then
       return false
     end
   end
   return true
 end
 function TargetSet(card)
-  GlobalTargetList[#GlobalTargetList+1]=card.cardid
+  GlobalTargetList[#GlobalTargetList+1]=card
 end
 
 function PendulumCheck(c)
@@ -643,7 +650,7 @@ function CurrentOwner(c)
       result = 1
     end
   end
-  return Result
+  return result
 end
 
 function AttackBoostCheck(bonus,player,filter,cond)
@@ -705,12 +712,77 @@ function SpecialSummonCheck(player)
     return Duel.GetActivityCount(player,ACTIVITY_SPSUMMON)>0
   end
 end
-
-
-
-
-
-
-
+function TargetProtection(id,type)
+  if id == 16037007 or id == 58058134 then
+    return true
+  end
+  return false
+end
+function Targetable(c,type)
+  local id
+  if c.GetCode then
+    id = c:GetCode()
+    return not c:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET) 
+    and not TargetProtection(id,type)
+  else
+    id = c.id
+    return c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
+    and not TargetProtection(id,type)
+  end
+end
+function AffectedProtection(id,type,level)
+  return false
+end
+function Affected(c,type,level)
+  local id
+  local immune = false
+  local atkdiff
+  if c.GetCode then
+    id = c:GetCode()
+    immune = c:IsHasEffect(EFFECT_IMMUNE) 
+    atkdiff = c:GetOriginalAttack() - c:GetAttack()
+  else
+    id = c.id
+    immune = c:is_affected_by(EFFECT_IMMUNE)>0
+    atkdiff = c.base_attack - c.attack
+  end
+  if immune and atkdiff == 800 
+  and bit32.band(type,TYPE_SPELL+TYPE_TRAP)==0
+  then
+    return true -- probably forbidden lance
+  end
+  return not immune
+end
+PriorityTargetList=
+{
+  82732705,30241314,81674782  -- Skill Drain, Macro Cosmos, Dimensional Fissure
+}
+function PriorityTarget(c,destroycheck,filter,opt) -- preferred target for removal
+  if bit32.band(c.type,TYPE_FUSION+TYPE_RITUAL+TYPE_XYZ+TYPE_SYNCHRO)>0 
+  or c.level>4 and c.attack>2000
+  then
+    return FilterPublic(c) and (filter == nil or (opt==nil and filter(c) or filter(c,opt)))
+  end
+  for i=1,#PriorityTargetList do
+    if PriorityTargetList[i]==c.id then
+      if not destroycheck or DestroyCheck(c) then
+        return FilterPublic(c) and (filter == nil or (opt==nil and filter(c) or filter(c,opt)))
+      end
+    end
+  end
+  return false
+end
+function HasPriorityTarget(cards,destroycheck,filter,opt)
+  if HasID(cards,05851097,true,nil,nil,nil,FilterPublic) then -- Vanity's Emptiness
+    return true
+  end
+  local count = 0
+  for i=1,#cards do
+    if PriorityTarget(cards[i],destroycheck,filter,opt) then
+      count = count +1
+    end
+  end
+  return count>0
+end
 
 

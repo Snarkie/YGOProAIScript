@@ -31,6 +31,9 @@ function SummonExtraDeck(cards,prio)
   if HasID(Activatable,53129443) and UseDarkHole() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+  if HasID(Activatable,89882100) then                                     -- Night Beam
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   
 ---- 
 -- summon certain monsters before anything else
@@ -267,7 +270,9 @@ function SummonPaladynamo()
   return false
 end
 function SummonLavalvalChain()
-  if DeckCheck(DECK_HAT) or DeckCheck(DECK_HERALDIC) then
+  if DeckCheck(DECK_HAT) or DeckCheck(DECK_HERALDIC) 
+  or DeckCheck(DECK_QLIPHORT)
+  then
     return false
   else
     return MP2Check() and OppGetStrongestAttDef()<1800 and #AIGrave()<10

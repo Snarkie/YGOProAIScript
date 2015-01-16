@@ -273,7 +273,7 @@ function BujinOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(Activatable,88940154) and UseCentipede() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Activatable,81439173) then -- Foolish Burial
+  if HasID(Activatable,81439173) and not DeckCheck(DECK_BA) then -- Foolish Burial
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Activatable,73289035) and UseTsukuyomi(AIHand()) then
