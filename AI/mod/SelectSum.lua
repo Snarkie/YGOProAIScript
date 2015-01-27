@@ -15,7 +15,7 @@ function OnSelectSum(cards, sum,triggeringCard)
   local result = nil
   if DeckCheck(DECK_GADGET) then result = GadgetSum(cards,sum,triggeringCard) end
   if result then return result end
-  if DeckCheck(DECK_NECLOTH) then result = NeclothSum(cards,sum,triggeringCard) end
+  if DeckCheck(DECK_NEKROZ) then result = NekrozSum(cards,sum,triggeringCard) end
   if result then return result end
   
   result = {}

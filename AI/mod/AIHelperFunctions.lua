@@ -1722,7 +1722,18 @@ function ApplyATKBoosts(Cards)
     end
   end
   
-
+  ------------------------------------------
+  -- Apply Bujingi Sinyou's Attack Bonus
+  ------------------------------------------
+  for i=1,#Cards do
+    if HasID(AIGrave(),56574543,true) and bit32.band(Cards[i].setcode,0x88)>0
+    and bit32.band(Cards[i].race,RACE_BEASTWARRIOR)>0 and Cards[i].owner==1 
+    then
+      local OppAtt = Get_Card_Att_Def(OppMon(),"attack",">",nil,"attack")
+      Cards[i].attack = Cards[i].attack + OppAtt
+      Cards[i].bonus = OppAtt
+    end
+  end
   
   ------------------------------------------
   -- Apply Honest's Attack Bonus
@@ -1776,9 +1787,9 @@ function ApplyATKBoosts(Cards)
     end
   end
   
-  -- Necloth Decisive Armor
+  -- Nekroz Decisive Armor
   for i=1,#Cards do
-    if HasID(AIHand(),88240999,true) and NeclothMonsterFilter(Cards[i])
+    if HasID(AIHand(),88240999,true) and NekrozMonsterFilter(Cards[i])
     and Cards[i].owner==1 and not FilterAffected(Cards[i],EFFECT_CANNOT_BE_EFFECT_TARGET)
     then
       Cards[i].bonus = Cards[i].bonus + 1000
@@ -1786,13 +1797,25 @@ function ApplyATKBoosts(Cards)
     end
   end
   
-  -- Necloth Gungnir
+  -- Nekroz Gungnir
   for i=1,#Cards do
-    if HasID(AIHand(),13700028,true) and NeclothMonsterFilter(Cards[i])
+    if HasID(AIHand(),74122412,true) and NekrozMonsterFilter(Cards[i])
     and Cards[i].owner==1 and not FilterAffected(Cards[i],EFFECT_CANNOT_BE_EFFECT_TARGET)
     then
-      Cards[i].bonus = Cards[i].bonus + 1000
-      Cards[i].attack = Cards[i].attack + 1000
+      Cards[i].bonus = Cards[i].bonus + 1
+      Cards[i].attack = Cards[i].attack + 1
+    end
+  end
+  
+  
+  -- Nekroz Clausolas
+  for i=1,#Cards do
+    if HasIDNotNegated(AIMon(),99185129,true) and OPTCheck(991851291) then
+      for i=1,#Cards do
+        if ClausFilter2(Cards[i]) then
+          Cards[i].attack = 0
+        end
+      end
     end
   end
   

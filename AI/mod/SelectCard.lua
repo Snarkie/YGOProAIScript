@@ -64,7 +64,7 @@ result = NobleCard(cards, minTargets, maxTargets, triggeringID, triggeringCard)
 if result ~= nil then
   return result
 end
-result = NeclothCard(cards, minTargets, maxTargets, triggeringID, triggeringCard)
+result = NekrozCard(cards, minTargets, maxTargets, triggeringID, triggeringCard)
 if result ~= nil then
   return result
 end

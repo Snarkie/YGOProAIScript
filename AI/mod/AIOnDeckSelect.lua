@@ -12,7 +12,7 @@ DECK_TELLARKNIGHT = 8
 DECK_HAT          = 9
 DECK_QLIPHORT     = 10
 DECK_NOBLEKNIGHT  = 11
-DECK_NECLOTH      = 12
+DECK_NEKROZ      = 12
 DECK_BA           = 13
 
 DeckIdent={ --card that identifies the deck
@@ -27,7 +27,7 @@ DeckIdent={ --card that identifies the deck
 [9]   = 45803070, -- Traptrix Dionaea
 [10]  = 65518099, -- Qliphort Tool
 [11]  = 59057152, -- Noble Knight Medraut
-[12]  = 14735698, -- Necloth Exomirror
+[12]  = 14735698, -- Nekroz Exomirror
 [13]  = 36006208, -- Fire Lake of the Burning Abyss
 }
 Deck = nil
@@ -44,7 +44,7 @@ DeckName={
 [9]   = "HAT",
 [10]  = "Qliphort",
 [11]  = "Noble Knight",
-[12]  = "Necloth",
+[12]  = "Nekroz",
 [13]  = "Burning Abyss",
 }
 function DeckCheck(opt)
@@ -105,25 +105,31 @@ AddPriority({
 [78156759] = {1,1,1,1,1,1,1,1,1,1},              -- Wind-Up Zenmaines
 [83531441] = {1,1,9,1,5,2,1,1,5,1,DanteCond},    -- BA Dante
 [16259549] = {1,1,1,1,1,1,1,1,1,1},              -- Fortune Tune
+[26563200] = {1,1,1,1,1,1,1,1,1,1},              -- Muzurythm the String Djinn
 })
 AddPriority({
--- Necloth: 
+-- Nekroz: 
 
-[90307777] = {6,3,1,1,1,1,1,1,1,1,ShritCond},         -- Shrit, Caster of Necloth
-[99185129] = {12,2,3,1,1,1,1,1,2,1,ClausCond},        -- The Necloth of Clausolas
-[89463537] = {8,1,7,1,1,1,1,1,6,1,UniCond},           -- The Necloth of Unicore
-[26674724] = {9,3,4,1,1,1,1,1,3,1,BrioCond},          -- The Necloth of Brionac
-[13700028] = {4,2,3,1,1,1,1,1,7,1,GungCond},          -- The Necloth of Gungnir
-[52068432] = {7,2,6,1,1,1,1,1,5,1,TrishCond},         -- The Necloth of Trishula
-[88240999] = {6,2,5,1,1,1,1,1,4,1,ArmorCond},         -- The Necloth of Decisive Armor
-[08903700] = {3,1,1,1,4,2,1,1,1,1,ReleaserCond},      -- Djinn Releaser of Rituals
-[95492061] = {4,1,1,1,1,1,1,1,1,1,nil},               -- Manju of the Ten Thousand Hands
-[23401839] = {5,1,1,1,1,1,1,1,1,1,nil},               -- Senju of the Thousand Hands
-[13974207] = {3,1,1,1,1,1,1,1,1,1,nil},               -- Denkou Sekka
+[90307777] = {6,3,1,1,1,1,1,1,1,1,ShritCond},         -- Shrit, Caster of Nekroz
+[52738610] = {3,2,1,1,7,1,1,1,8,1,PrincessCond},      -- Nekroz Dance Princess
+
+[25857246] = {6,2,3,1,3,1,1,1,3,1,ValkCond},          -- The Nekroz of Valkyrus
+[99185129] = {12,2,4,1,5,1,1,1,2,1,ClausCond},        -- The Nekroz of Clausolas
+[89463537] = {8,1,7,1,4,1,1,1,6,1,UniCond},           -- The Nekroz of Unicore
+[26674724] = {9,3,4,1,4,1,1,1,4,1,BrioCond},          -- The Nekroz of Brionac
+[74122412] = {4,2,3,1,4,1,1,1,7,1,GungCond},          -- The Nekroz of Gungnir
+[52068432] = {7,2,6,1,3,1,1,1,5,1,TrishCond},         -- The Nekroz of Trishula
+[88240999] = {5,2,5,1,1,1,1,1,3,1,ArmorCond},         -- The Nekroz of Decisive Armor
+[08903700] = {3,1,1,1,9,2,1,1,1,1,ReleaserCond},      -- Djinn Releaser of Rituals
+[95492061] = {4,1,1,1,5,1,1,1,1,1,nil},               -- Manju of the Ten Thousand Hands
+[23401839] = {4,1,1,1,6,1,1,1,1,1,nil},               -- Senju of the Thousand Hands
+[13974207] = {3,1,1,1,6,1,1,1,1,1,SekkaCond},         -- Denkou Sekka
+[30312361] = {2,1,1,1,7,1,1,1,1,1,nil},               -- Phantom of Chaos
 
 [96729612] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Preparation of Rites
-[14735698] = {10,3,1,1,3,1,1,1,1,1,ExoCond},          -- Necloth Exomirror
-[51124303] = {11,2,1,1,3,1,1,1,1,1,KaleidoCond},      -- Necloth Kaleidomirror
+[14735698] = {10,3,1,1,3,1,1,1,1,1,ExoCond},          -- Nekroz Exomirror
+[51124303] = {11,2,1,1,3,1,1,1,1,1,KaleidoCond},      -- Nekroz Kaleidomirror
+[97211663] = {11,2,1,1,3,1,1,1,1,1,CycleCond},        -- Nekroz Cycle
 
 [35952884] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Shooting Quasar Dragon
 [24696097] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Shooting Star Dragon
@@ -131,8 +137,10 @@ AddPriority({
 [15240268] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Mist Bird Clausolas
 [95113856] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Phantom Fortress Enterblathnir
 [44505297] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Inzektor Exa-Beetle
-[08809344] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Outer God Nyarla
+[08809344] = {1,1,1,1,6,3,1,1,1,1,NyarlaCond},        -- Outer God Nyarla
 [31563350] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Zubaba General
+[86346643] = {1,1,1,1,5,1,1,1,1,1,nil},               -- Rainbow Neos
+[63465535] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Underground Arachnid
 })
 
 AddPriority({
@@ -217,8 +225,8 @@ AddPriority({
 --[83531441] = {0,0,0,0,5,2,0,0,8,0,DanteCond},         -- BA Dante
 [15914410] = {0,0,0,0,5,2,0,0,8,0,AngineerCond},      -- Mechquipped Angineer
 [95992081] = {0,0,0,0,5,2,0,0,8,0,LeviairCond},       -- Leviair the Sea Dragon
-[34086406] = {0,0,0,0,5,2,0,0,8,0,ChainCond},         -- Lavalval Chain
-[48739166] = {0,0,0,0,5,2,0,0,8,0,SharkCond},         -- SHArk
+[34086406] = {0,0,0,0,5,3,0,0,8,0,ChainCond},         -- Lavalval Chain
+[48739166] = {0,0,0,0,5,3,0,0,8,0,SharkCond},         -- SHArk
 [15561463] = {0,0,0,0,4,2,0,0,8,0,GauntletCond},      -- Gauntlet Launcher
 [38495396] = {0,0,0,0,4,2,0,0,8,0,PtolemyCond},       -- Constellar Ptolemy M7
 [07391448] = {0,0,0,0,2,0,0,0,8,0,nil},               -- Goyo Guardian
@@ -311,7 +319,6 @@ AddPriority({
 [21501505] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Cairngorgon, Antiluminescent Knight
 [93568288] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Number 80: Rhapsody in Berserk
 [94380860] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Number 103: Ragnazero
-[34076406] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Lavalval Chain
 [42589641] = {1,1,1,1,6,2,8,1,1,1,nil},               -- Stellarknight Triveil
 [56638325] = {1,1,1,1,8,8,7,1,1,1,nil},               -- Stellarknight Delteros
 [17412721] = {1,1,6,1,1,1,1,1,1,1,NodenCond},         -- Elder God Noden
@@ -390,6 +397,9 @@ function AssignPriority(cards,loc,filter,opt)
     end
     if loc==PRIO_TOFIELD and cards[i].location==LOCATION_DECK then
       cards[i].prio=cards[i].prio+2
+    end
+   if loc==PRIO_TOFIELD and cards[i].location==LOCATION_GRAVE then
+      cards[i].prio=cards[i].prio+1
     end
     if loc==PRIO_TOFIELD and cards[i].location==LOCATION_EXTRA then
       cards[i].prio=cards[i].prio+5

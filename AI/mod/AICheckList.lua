@@ -300,10 +300,10 @@ NSBL={
 95772051,93085839,19680539,53550467, -- Black Sally, Eachtar, Gawayn, Drystan
 59057152,47120245,13391185,57690191, -- Medraut, Borz, Chad, Brothers
 19748583,10736540,92125819,73359475, -- Gwen, Lady, Artorigus, Peredur
-90307777,08903700,95492061,23401839, -- Shrit, Caster of Necloth, Djinn Releaser of Rituals, Manju, Senju 
+90307777,08903700,95492061,23401839, -- Shrit, Caster of Nekroz, Djinn Releaser of Rituals, Manju, Senju 
 13974207,57143342,73213494,47728740, -- Denkou Sekka, BA Cir, Calcab, Alich
 20758643,00734741,36551319,09342162, -- BA Graff, Rubic, Farfa, Cagna
-62957424, -- BA Libic
+62957424,52738610,30312361,  -- BA Libic, Necroz Dance Princess, Phantom of Chaos
 }
 function NormalSummonBlacklist(CardId) 
   for i=1,#NSBL do
@@ -393,7 +393,8 @@ SSBL={
 00601193,72167543,81330115, -- BA Virgil, Downerd Magician, Acid Golem of Destruction
 31320433,47805931,75367227, -- Nightmare Shark, Giga-Brillant, Ghostrick Alucard
 68836428,52558805,78156759, -- Tri-Edge Levia, Temptempo the Percussion Djinn, Wind-Up Zenmaines
-16259549,51617185, -- Fortune Tune, Machina Megaform
+16259549,51617185,16195942, -- Fortune Tune, Machina Megaform, Dark Rebellion Dragon
+26563200, -- Muzurythm
 }
 
 
@@ -416,8 +417,9 @@ SetBL={
   54447022,44394295,55742055, -- Soul Charge, Shadoll Fusion, Table
   07452945,14745409,23562407, -- Noble Arms Destiny, Gallatin, Caliburn
   46008667,83438826,66970385, -- Excaliburn, Arfeudutyr, Chapter
-  92512625,51124303,14735698, -- Advice, Necloth Kaleidomirror, Exomirror
-  96729612, -- Preparation of Rites
+  92512625,51124303,14735698, -- Advice, Nekroz Kaleidomirror, Exomirror
+  96729612,97211663,45986603, -- Preparation of Rites, Nekroz Cycle, Snatch Steal
+  12580477, -- Raigeki
 }
 
 
@@ -576,6 +578,7 @@ Unchainable={
 05318639,53582587,97077563,14087893, -- Mystical Space Typhoon, Torrential tribute, Call of the Haunted, Book of Moon
 78474168,50078509,29616929,19748583, -- Breakthrough Skill, Fiendish Chain, TTHN, Gwen
 25789292,36006208,71587526,63356631, -- Forbidden Chalice, Fire Lake, Karma Cut, PWWB
+25857246, -- Nekroz Valkyrus
 }
 function isUnchainableTogether(CardId)
   for i=1,#Unchainable do
@@ -740,8 +743,8 @@ ScriptedCards ={
 83438826,48009503,60645181,82944432,  -- Arfeudutyr, HC - Gandiva, Excalibur, Blade Armor Ninja
 21223277,10613952,83519853,03580032,  -- R4torigus, R5torigus, High Sally, Merlin
 66970385,30575681,95113856,44505297,  -- Chapter, Bedwyr, Phantom Fortress Enterblathnir, Inzektor Exa-Beetle
-90307777,99185129,89463537,26674724,  -- Necloth Shrit, Clausolas, Unicore, Brionac
-13700028,52068432,88240999,08903700,  -- Necloth Gungnir, Trishula, Decisive Armor, Djinn Releaser of Rituals
+90307777,99185129,89463537,26674724,  -- Nekroz Shrit, Clausolas, Unicore, Brionac
+74122412,52068432,88240999,08903700,  -- Nekroz Gungnir, Trishula, Decisive Armor, Djinn Releaser of Rituals
 95492061,23401839,13974207,08809344,  -- Manju, Senju, Denkou Sekka, Outer God Nyarla
 93016201,51124303,14735698,31563350,  -- Royal Oppression, Kaleidomirror, Exomirror, Zubaba General
 57143342,73213494,47728740,20758643,  -- BA Cir, Calcab, Alich, Graff
@@ -750,6 +753,9 @@ ScriptedCards ={
 47805931,75367227,68836428,52558805,  -- Giga-Brillant, Ghostrick Alucard, Tri-Edge Levia, Temptempo the Percussion Djinn
 16259549,51617185,36551319,09342162,  -- Fortune Tune, Machina Megaform, BA Farfa, Cagna
 62957424,00005497,62835876,73680966,  -- BA Libic, Malacoda, Good&Evil, The Beginning of the End
+25857246,52738610,97211663,30312361,  -- Necroz Valkyrus, Dance Princess, Cycle, Phantom of Chaos
+12580477,45986603,16195942,56574543,  -- Raigeki, Snatch Steal, Dark Rebellion Dragon, Bujingi Sinyou
+86346643,63465535,26563200,  -- Rainbow Neos, Underground Arachnid, Muzurythm
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do

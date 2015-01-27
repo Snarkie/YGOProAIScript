@@ -12,6 +12,7 @@ BujinPrio[05818294] = {3,1,2,2,8,4,0} -- Turtle
 BujinPrio[69723159] = {2,1,1,1,7,3,0} -- Quilin
 BujinPrio[88940154] = {2,1,1,1,6,3,0} -- Centipede
 BujinPrio[50474354] = {2,1,0,0,2,2,5} -- Peacock
+BujinPrio[56574543] = {3,1,0,0,10,6,0} -- Sinyou
 BujinPrio[37742478] = {8,2,0,0,0,0,0} -- Honest
 
 BujinPrio[73906480] = {4,2,0,0,0,0,0} -- Bujincarnation
@@ -111,7 +112,7 @@ function AmaterasuFilter(card)
   return card and card.level==4 and bit32.band(card.setcode,0x88)>0
 end
 function SummonAmaterasuBujin()
-  return CardsMatchingFilter(AIBanish(),AmaterasuFilter)>2 and BujinPriorityCheck(AIBanish(),LOCATION_GRAVE,2)>4
+  return CardsMatchingFilter(AIBanish(),AmaterasuFilter)>3
   and DeckCheck(DECK_BUJIN)
 end
 function SummonHirume()
@@ -243,6 +244,19 @@ function SummonSharkKnightBujin(cards)
   end
   return false
 end
+function CastelFilterBujin(c)
+  return bit32.band(c.type,TYPE_TOKEN)==0
+  and c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0 
+  and c:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE)>0 
+  and c.id~=22110647
+end
+function SummonCastelBujin(cards)
+  local targets=SubGroup(OppMon(),CastelFilterBujin)
+  if #targets > 0 and OPTCheck(48739166) then
+    return true
+  end
+  return false
+end
 function UseDualityBujin()
   return DeckCheck(DECK_BUJIN)
 end
@@ -298,6 +312,10 @@ function BujinOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   end
   if HasIDNotNegated(Activatable,48739166) then  -- SHArk Knight
     OPTSet(48739166)
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasID(Activatable,82633039,false,1322128625) and UseSkyblaster() then
+    OPTSet(82633039)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Activatable,96381979) and UseTigerKing() then  
@@ -632,6 +650,39 @@ function ChainHonest()
   local e
   for i=1,Duel.GetCurrentChain() do
     e = Duel.GetChainInfo(i, CHAININFO_TRIGGERING_EFFECT)
+    if e and e:GetHandler():GetCode()==56574543 and e:GetHandlerPlayer()==player_ai  then
+      return false
+    end
+  end
+  if Duel.GetCurrentPhase() == PHASE_DAMAGE then
+		local source = Duel.GetAttacker()
+		local target = Duel.GetAttackTarget()
+    if source and target then
+      if source:IsControler(player_ai) then
+        target = Duel.GetAttacker()
+        source = Duel.GetAttackTarget()
+      end
+      if target:IsControler(player_ai)
+      and (source:GetAttack() >= target:GetAttack() 
+      and source:IsPosition(POS_FACEUP_ATTACK) 
+      or source:GetDefence() >= target:GetAttack() 
+      and source:GetDefence() < target:GetAttack()+source:GetAttack()
+      and source:IsPosition(POS_FACEUP_DEFENCE))
+      and target:IsPosition(POS_FACEUP_ATTACK)
+      and not source:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE) 
+      and not target:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE) 
+      --and not target:IsHasEffect(EFFECT_IMMUNE_EFFECT) 
+      then
+        return true
+      end
+    end
+  end
+  return false
+end
+function ChainSinyou()
+  local e
+  for i=1,Duel.GetCurrentChain() do
+    e = Duel.GetChainInfo(i, CHAININFO_TRIGGERING_EFFECT)
     if e and e:GetHandler():GetCode()==68601507 and e:GetHandlerPlayer()==player_ai  then
       return false
     end
@@ -697,6 +748,9 @@ function BujinOnSelectChain(cards,only_chains_by_player)
     return {1,CurrentIndex}
   end
   if HasID(cards,68601507) and ChainCrane() then
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,56574543) and ChainSinyou() then
     return {1,CurrentIndex}
   end
   if HasID(cards,37742478) and ChainHonest() then

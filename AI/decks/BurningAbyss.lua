@@ -8,6 +8,7 @@ function BAMonsterFilter(c,exclude,boss)
 end
 function BASelfDestructFilter(c,exclude)
   return BAMonsterFilter(c,exclude) and not BAMonsterFilter(c,exclude,true)
+  and NotNegated(c)
 end
 function NotBAMonsterFilter(c)
   return FilterType(c,TYPE_MONSTER) and not BAMonsterFilter(c)
@@ -26,7 +27,6 @@ function ScarmDeckFilter(c)
   and FilterRace(c,RACE_FIEND) and c.id ~= 84764038
 end
 function ScarmCond(loc,c)
-  
   if loc == PRIO_TOHAND then
     return not HasID(UseLists(AIHand(),AIMon()),84764038,true)
   end
@@ -193,7 +193,9 @@ end
 function SSBA(c)
   return #AIST()==0 and (c == nil or OPTCheck(c.id)) 
   and CardsMatchingFilter(AIMon(),NotBAMonsterFilter)==0 and DualityCheck()
-  and (FieldCheck(3)==1 or FieldCheck(3)==0 and CardsMatchingFilter(AIHand(),BAMonsterFilter)>1 and not NormalSummonCheck(player_ai))
+  and (FieldCheck(3)==1 or FieldCheck(3)==0 and CardsMatchingFilter(AIHand(),BAMonsterFilter)>1 
+  and not NormalSummonCheck(player_ai))
+  and OverExtendCheck(3)
 end
 function TourguideFilter(c)
   return bit32.band(c.type,TYPE_MONSTER)>0 and bit32.band(c.race,RACE_FIEND)>0 and c.level==3
@@ -227,7 +229,7 @@ function SummonRubic()
   and not HasID(AIMon(),00734741,true) and SummonVirgil()
 end
 function VirgilFilter(c)
-  return Targetable(c,TYPE_MONSTER) and Affected(c,TYPE_MONSTER,6)
+  return Targetable(c,TYPE_MONSTER) and Affected(c,TYPE_MONSTER,6) and FilterLocation(c,LOCATION_ONFIELD)
 end
 function SummonVirgil()
   return (CardsMatchingFilter(OppField(),VirgilFilter)>0 and CardsMatchingFilter(AIHand(),BAFloater)>0
@@ -262,6 +264,53 @@ end
 function UseGE()
   return PriorityCheck(AIHand(),PRIO_TOGRAVE,1,BAFilter)>3
 end
+function SummonGigaBrillant()
+  return CardsMatchingFilter(AIMon(),BASelfDestructFilter)<3 and #AIMon()>3
+  and GlobalBPAllowed and Duel.GetCurrentPhase == PHASE_MAIN1
+end
+function AlucardFilter(c)
+  return FilterPosition(c,POS_FACEDOWN) and DestroyFilter(c)
+end
+function UseAlucard()
+  return CardsMatchingFilter(OppField(),AlucardFilter)>0
+end
+function SummonAlucard()
+  return CardsMatchingFilter(AIMon(),BASelfDestructFilter)<3 and UseAlucard()
+end
+function SummonLevia()
+  return CardsMatchingFilter(AIMon(),BASelfDestructFilter)<4
+end
+function TemtempoFilter(c)
+  return FilterType(c,TYPE_XYZ) and c.xyz_material_count>0 and Targetable(c,TYPE_MONSTER) and Affected(c,3)
+end
+function UseTemtempo()
+  return CardsMatchingFilter(OppField(),TemtempoFilter)>0
+end
+function SummonTemtempo()
+  return CardsMatchingFilter(AIMon(),BASelfDestructFilter)<3 and UseTemtempo()
+end
+function MuzurythmFilter(c)
+  return c.attack>=2500 and c.attack<3000 
+  and not FilterAffected(c,EFFECT_CANNOT_BE_BATTLE_TARGET)
+  and not FilterAffected(c,EFFECT_INDESTRUCTABLE_BATTLE)
+end
+function SummonMuzurythm()
+  return CardsMatchingFilter(AIMon(),BASelfDestructFilter)<3 and CardsMatchingFilter(OppMon(),MuzurythmFilter)>0
+  and GlobalBPAllowed and Duel.GetCurrentPhase == PHASE_MAIN1
+end
+function SummonNightmareSharkFinish()
+  return GlobalBPAllowed and Duel.GetCurrentPhase == PHASE_MAIN1 and AI.GetPlayerLP(2)<=2000
+end
+function SummonNightmareShark()
+  return CardsMatchingFilter(AIMon(),BASelfDestructFilter)<3 
+  and GlobalBPAllowed and Duel.GetCurrentPhase == PHASE_MAIN1 and AI.GetPlayerLP(2)<=4000
+end
+function UseNightmareShark()
+  return GlobalBPAllowed and Duel.GetCurrentPhase == PHASE_MAIN1
+end
+function SummonDownerd()
+  return CardsMatchingFilter(AIMon(),BASelfDestructFilter)==0 and HasID(AIMon(),83531441,true,nil,POS_FACEUP_ATTACK)
+end
 function BAInit(cards)
   GlobalPreparation = nil
   local Act = cards.activatable_cards
@@ -270,10 +319,19 @@ function BAInit(cards)
   local Rep = cards.repositionable_cards
   local SetMon = cards.monster_setable_cards
   local SetST = cards.st_setable_cards
-  if HasID(Act,70368879) then -- Upstart
+  if HasID(SpSum,31320433) and SummonNightmareSharkFinish() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(Act,70368879) and not HasID(AIMon(),31320433,true) then -- Upstart
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Act,73680966) then -- The Beginning of the End
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasID(Act,75367227) and UseAlucard() then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasID(Act,52558805) and UseTemtempo() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Act,00601193) and UseVirgil() then
@@ -283,6 +341,24 @@ function BAInit(cards)
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSum,83531441) and SummonDanteBA() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(SpSum,31320433) and SummonNightmareShark() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(SpSum,47805931) and SummonGigaBrillant() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(SpSum,75367227) and SummonAlucard() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(SpSum,68836428) and SummonLevia() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(SpSum,52558805) and SummonTemtempo() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+   if HasID(SpSum,26563200) and SummonMuzurythm() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(Act,62835876,false,nil,LOCATION_HAND) then -- Good & Evil
@@ -397,6 +473,21 @@ function BAInit(cards)
   if HasID(SSetMon,57143342) and SetBA() then
     return {COMMAND_SET_MONSTER,CurrentIndex}
   end
+  if HasID(SpSum,72167543) and SummonDownerd() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(SpSum,78156759) and SummonZenmaines() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(SpSum,16259549) and SummonFortuneTune() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(Act,47805931) then -- Giga-Brillant
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasID(Act,31320433) and UseNightmareShark() then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   return nil
 end
 function FireLakeTarget(cards,min,max)
@@ -428,7 +519,7 @@ function VirgilTarget(cards)
   if LocCheck(cards,LOCATION_HAND) then
     return Add(cards,PRIO_TOGRAVE)
   end
-  return BestTargets(cards)
+  return BestTargets(cards,1,TARGET_TODECK,VirgilFilter)
 end
 function MalacodaTarget(cards,c)
   if FilterLocation(c,LOCATION_GRAVE) then
@@ -444,6 +535,12 @@ function GETarget(cards,c)
     return Add(cards,PRIO_TOGRAVE)
   end
   return Add(cards,PRIO_TOHAND)
+end
+function AlucardTarget(cards)
+  if LocCheck(cards,LOCATION_OVERLAY) then
+    return Add(cards,PRIO_TOGRAVE)
+  end
+  return BestTargets(cards,TARGET_DESTROY)
 end
 function BACard(cards,min,max,id,c)
   if c then
@@ -490,6 +587,23 @@ function BACard(cards,min,max,id,c)
   end
    if id == 62835876 then
     return GETarget(cards,c)
+  end
+  if id == 47805931 or id == 81330115 
+  or id == 31320433 or id == 26563200
+  then
+    return Add(cards,PRIO_TOGRAVE)
+  end
+  if id == 75367227 then
+    return AlucardTarget(cards)
+  end
+  if id == 68836428 then
+    return LeviaTarget(cards)
+  end
+  if id == 52558805 then
+    return TemtempoTarget(cards)
+  end
+  if id == 16195942 then -- Dark Rebellion Dragon
+    return BestTargets(cards)
   end
   return nil
 end
@@ -651,7 +765,7 @@ function BAEffectYesNo(id,card)
   return result
 end
 BAAtt={
-  00601193, -- Virgil,
+  00601193,26563200, -- Virgil,Muzurythm
   72167543, -- Downerd
   81330115,31320433,47805931, -- Acid, Nightmare Shark, Giga-Brillant
   75367227,68836428,52558805, -- Alucard, Levia, Temtempo

@@ -31,6 +31,12 @@ function SummonExtraDeck(cards,prio)
   if HasID(Activatable,53129443) and UseDarkHole() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+  if HasID(Activatable,12580477) and UseRaigeki() then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end  
+  if HasID(Activatable,45986603) and UseSnatchSteal() then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   if HasID(Activatable,89882100) then                                     -- Night Beam
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -51,6 +57,9 @@ function SummonExtraDeck(cards,prio)
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSummonable,73580471) and UseFieldNuke(-2) then             -- Black Rose
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(SpSummonable,16195942) and SummonRebellionFinish() then 
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
 
@@ -94,6 +103,7 @@ function SummonExtraDeck(cards,prio)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Activatable,82633039,false,1322128625) and UseSkyblaster() then
+    OPTSet(82633039)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Activatable,61344030) then -- Paladynamo
@@ -174,6 +184,12 @@ function SummonExtraDeck(cards,prio)
   if HasID(SpSummonable,82633039) and SummonSkyblaster() then           -- Skyblaster
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
+  if HasID(SpSummonable,16195942) and SummonRebellion() then 
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(Activatable,16195942) and UseRebellion() then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   if HasID(SpSummonable,61344030) and SummonPaladynamo() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
@@ -190,7 +206,7 @@ function SummonExtraDeck(cards,prio)
   if HasID(SpSummonable,34086406) and SummonLavalvalChain() then -- Lavalval Chain
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasIDNotNegated(Activatable,34086406,false,545382497) then   
+  if HasIDNotNegated(Activatable,34086406,false,545382497) and not DeckCheck(DECK_NEKROZ) then   
     GlobalCardMode = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -236,7 +252,10 @@ function SummonExtraDeck(cards,prio)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   
-  
+-- if the opponent still has stronger monsters, use Raigeki  
+  if HasID(Activatable,12580477) and UseRaigeki2() then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end 
 -- use Soul Charge when other plays have been exhausted
   if HasID(Activatable,54447022) and UseSoulCharge() then
     return {COMMAND_ACTIVATE,CurrentIndex}
@@ -372,6 +391,18 @@ function UseDarkHole()
   local OppAtt=OppGetStrongestAttDef()
   return (AITargets==0 and OppAtt >= 2000) or diff>1 or (OppAtt >= 2000 and diff<=1 and AIAtt-OppAtt < diff*500)
 end
+function UseRaigeki()
+  local OppTargets=DestroyCheck(OppMon(),true)
+  local OppAtt=OppGetStrongestAttDef()
+  return OppTargets>2 or OppTargets>1 and OppAtt >=2000 or OppTargets>0 and OppAtt>=2500
+end
+function UseRaigeki2()
+  local OppTargets=DestroyCheck(OppMon(),true)
+  return OppTargets>0 and OppHasStrongestMonster()
+end
+function UseSnatchSteal()
+  return true
+end
 function UseEmeral()
   return true
 end
@@ -446,7 +477,7 @@ function DwellerFilter(c)
   return FilterAttribute(c,ATTRIBUTE_WATER) and FilterLevel(c,4)
 end
 function SummonDweller()
-  return MP2Check() and CardsMatchingFilter(AIMon(),DwellerFilter)>0 and OppGetStrongestAttDef()<2200
+  return false--MP2Check() and CardsMatchingFilter(AIMon(),DwellerFilter)>0 and OppGetStrongestAttDef()<2200
 end
 function SummonPleiades()
   return HasID(AIExtra(),73964868,true)
@@ -472,7 +503,27 @@ end
 function UseGagagaSamurai()
   return Duel.GetCurrentPhase()==PHASE_MAIN1 and GlobalBPAllowed and not OppHasStrongestMonster()
 end
-
+function RebellionFilter(c)
+  return FilterPosition(c,POS_FACEUP) and c.attack>0
+  and Targetable(c,TYPE_MONSTER) and Affected(c,TYPE_MONSTER,4) 
+end
+function RebellionFilter2(c)
+  return FilterPosition(c,POS_FACEUP_ATTACK)
+  and Targetable(c,TYPE_MONSTER) and Affected(c,TYPE_MONSTER,4) 
+end
+function SummonRebellion()
+  local OppAttDef=OppGetStrongestAttDef()
+  return OppHasStrongestMonster() and OppAttDef>2500
+  and 2500+OppGetStrongestAttack(RebellionFilter)*0.5 > OppAttDef
+  and Duel.GetCurrentPhase()==PHASE_MAIN1 and GlobalBPAllowed
+end
+function SummonRebellionFinish()
+  return CardsMatchingFilter(OppMon(),RebellionFilter2)>0 and AI.GetPlayerLP(2)<=2500
+  and Duel.GetCurrentPhase()==PHASE_MAIN1 and GlobalBPAllowed
+end
+function UseRebellion()
+  return CardsMatchingFilter(OppMon(),RebellionFilter)>0
+end
 ----
 
 function SummonNegateFilter(c)

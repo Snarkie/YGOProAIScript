@@ -398,7 +398,7 @@ function HeraldicToHand(cards)
 end
 function LavalvalChainTarget(cards)
     local result = nil
-    if DeckCheck(DECK_TELLARKNIGHT) then
+    if DeckCheck(DECK_TELLARKNIGHT) or DeckCheck(DECK_NEKROZ) then
       if GlobalCardMode == 2 then
         GlobalCardMode = 1
         result = Add(cards,PRIO_TOGRAVE)
@@ -482,7 +482,7 @@ function LanceTarget(cards)
     local filter = function(c) return c.id==GlobalTargetID and c.owner==GlobalPlayer end
     result=RandomIndexFilter(cards,filter)
     GlobalTargetID=nil
-    GlobalPlayer=nily
+    GlobalPlayer=nil
   end  
   if result == nil then result={math.random(#cards)} end
   return result

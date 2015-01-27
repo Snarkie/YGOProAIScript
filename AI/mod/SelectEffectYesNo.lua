@@ -42,7 +42,7 @@ function OnSelectEffectYesNo(id,triggeringCard)
     result = NobleEffectYesNo(id,triggeringCard)
   end
   if result==nil then
-    result = NeclothEffectYesNo(id,triggeringCard)
+    result = NekrozEffectYesNo(id,triggeringCard)
   end
   if result==nil then
     result = BAEffectYesNo(id,triggeringCard)

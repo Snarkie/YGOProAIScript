@@ -267,10 +267,13 @@ function SatellarknightOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     OPTSet(48739166)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasIDNotNegated(Activatable,34086406,false,545382497) and not HasAccess(75878039) then
+  if HasIDNotNegated(Activatable,34086406,false,545382497) 
+  and DeckCheck(DECK_TELLARKNIGHT) and not HasAccess(75878039) 
+  then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasIDNotNegated(Activatable,34086406,false,545382498) then
+  if HasIDNotNegated(Activatable,34086406,false,545382498)
+  and DeckCheck(DECK_TELLARKNIGHT) then
     GlobalCardMode = 2
     return {COMMAND_ACTIVATE,CurrentIndex}
   end

@@ -129,12 +129,14 @@ function AIGetStrongestAttack(skipbonus)
   end
   return result
 end
-function OppGetStrongestAttack()
+function OppGetStrongestAttack(filter)
   local cards=OppMon()
   local result=0
   ApplyATKBoosts(cards)
   for i=1,#cards do
-    if cards[i] and cards[i].attack>result then
+    if cards[i] and (filter==nil or filter(cards[i])) 
+    and cards[i].attack>result 
+    then
       result=cards[i].attack-cards[i].bonus
     end
   end
@@ -319,9 +321,16 @@ function RemovalCheck(id,category)
   return false
 end
 -- checks, if a card the AI controls is about to be negated in the current chain
-function NegateCheck()
+function NegateCheck(id)
   local ex,cg = Duel.GetOperationInfo(Duel.GetCurrentChain(),CATEGORY_DISABLE)
-  if ex then return cg end
+  if ex then 
+    if id==nil then 
+      return cg 
+    end
+    if cg and id~=nil and cg:IsExists(function(c) return c:IsControler(player_ai) and c:IsCode(id) end, 1, nil) then
+      return true
+    end
+  end
   return false
 end
 function ExpectedDamageFilter(card)
@@ -337,9 +346,9 @@ function ExpectedDamage(player)
   local result=0
   local g = nil
   if player and player == 2 then
-    g=Duel.GetMatchingGroup(ExpectedDamageFilter2,p,LOCATION_MZONE,0,nil,p) 
+    g=Duel.GetMatchingGroup(ExpectedDamageFilter2,player_ai,LOCATION_MZONE,0,nil,p) 
   else
-    g=Duel.GetMatchingGroup(ExpectedDamageFilter,p,LOCATION_MZONE,0,nil,p) 
+    g=Duel.GetMatchingGroup(ExpectedDamageFilter,1-player_ai,LOCATION_MZONE,0,nil,p) 
   end
   local c=nil
   if g then c=g:GetFirst() end
@@ -559,6 +568,9 @@ end
 function FilterLocation(c,loc)
   return bit32.band(c.location,loc)>0
 end
+function FilterPreviousLocation(c,loc)
+  return bit32.band(c.previous_location,loc)>0
+end
 function FilterStatus(c,status)
   return bit32.band(c.status,status)>0
 end
@@ -696,6 +708,7 @@ end
 
 
 function NormalSummonCheck(player)
+  if player == nil then player = player_ai end
   -- wrapper for changed card script function
   if Duel.CheckNormalSummonActivity then
     return Duel.CheckNormalSummonActivity(player)
@@ -705,6 +718,7 @@ function NormalSummonCheck(player)
 end
 
 function SpecialSummonCheck(player)
+  if player == nil then player = player_ai end
   -- wrapper for changed card script function
   if Duel.CheckSpecialSummonActivity then
     return Duel.CheckSpecialSummonActivity(player)
@@ -740,7 +754,7 @@ function Affected(c,type,level)
   if c.GetCode then
     id = c:GetCode()
     immune = c:IsHasEffect(EFFECT_IMMUNE) 
-    atkdiff = c:GetOriginalAttack() - c:GetAttack()
+    atkdiff = c:GetBaseAttack() - c:GetAttack()
   else
     id = c.id
     immune = c:is_affected_by(EFFECT_IMMUNE)>0
@@ -758,7 +772,7 @@ PriorityTargetList=
   82732705,30241314,81674782  -- Skill Drain, Macro Cosmos, Dimensional Fissure
 }
 function PriorityTarget(c,destroycheck,filter,opt) -- preferred target for removal
-  if bit32.band(c.type,TYPE_FUSION+TYPE_RITUAL+TYPE_XYZ+TYPE_SYNCHRO)>0 
+  if FilterType(c,TYPE_MONSTER) and bit32.band(c.type,TYPE_FUSION+TYPE_RITUAL+TYPE_XYZ+TYPE_SYNCHRO)>0 
   or c.level>4 and c.attack>2000
   then
     return FilterPublic(c) and (filter == nil or (opt==nil and filter(c) or filter(c,opt)))

@@ -111,7 +111,7 @@ function OnSelectPosition(id, available)
   if Position then result=Position end
   Position = NoblePosition(id,available)
   if Position then result=Position end
-  Position = NeclothPosition(id,available)
+  Position = NekrozPosition(id,available)
   if Position then result=Position end  
   Position = BAPosition(id,available)
   if Position then result=Position end

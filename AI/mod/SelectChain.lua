@@ -70,7 +70,7 @@ result=NobleChain(cards)
 if result ~= nil then
   return result[1],result[2]
 end
-result=NeclothChain(cards)
+result=NekrozChain(cards)
 if result ~= nil then
   return result[1],result[2]
 end

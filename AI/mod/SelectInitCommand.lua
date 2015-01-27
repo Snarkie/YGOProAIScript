@@ -162,7 +162,7 @@ DeckCheck()
 ExtraCheck=(DeckCheck(DECK_BUJIN) 
 or DeckCheck(DECK_TELLARKNIGHT) 
 or DeckCheck(DECK_NOBLEKNIGHT))
---or DeckCheck(DECK_NECLOTH))
+--or DeckCheck(DECK_NEKROZ))
 local DeckCommand = nil
 DeckCommand = SummonExtraDeck(cards,true)
 if DeckCommand ~= nil then
@@ -228,14 +228,14 @@ if not ExtraCheck then
     return DeckCommand[1],DeckCommand[2]
   end
 end
-if not (DeckCheck(DECK_BUJIN) or DeckCheck(DECK_TELLARKNIGHT) or DeckCheck(DECK_NECLOTH)) then 
+if not (DeckCheck(DECK_BUJIN) or DeckCheck(DECK_TELLARKNIGHT) or DeckCheck(DECK_NEKROZ)) then 
   DeckCommand = NobleInit(cards)
   if DeckCommand ~= nil then
     return DeckCommand[1],DeckCommand[2]
   end
 end
 if not (DeckCheck(DECK_BUJIN) or DeckCheck(DECK_TELLARKNIGHT) or DeckCheck(DECK_NOBLEKNIGHT)) then 
-  DeckCommand = NeclothInit(cards)
+  DeckCommand = NekrozInit(cards)
   if DeckCommand ~= nil then
     return DeckCommand[1],DeckCommand[2]
   end
