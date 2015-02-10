@@ -64,6 +64,10 @@ function TurgeCond(loc,c)
   end
   return true
 end
+function LindeCheck()
+  return DualityCheck() and MacroCheck() and CardsMatchingFilter(OppMon(),HandFilter,1500)>0 
+  and OPTCheck(23899727) and OppGetStrongestAttDef()<2700 
+end
 function LindeCond(loc)
   local cards=UseLists({AIHand(),AIMon()})
   local check = not(HasID(cards,23899727,true) 
@@ -362,8 +366,11 @@ function UseSquall()
   end
   return false
 end
+function SummonLinde()
+  return LindeCheck() and Duel.GetCurrentPhase()==PHASE_MAIN1 and GlobalBPAllowed
+end
 function SetLinde()
-return (Duel.GetCurrentPhase()==PHASE_MAIN2 or Duel.GetTurnCount()==1) and not HasID(AIMon(),23899727,true)
+  return (Duel.GetCurrentPhase()==PHASE_MAIN2 or not GlobalBPAllowed) and not HasID(AIMon(),23899727,true)
 end
 function UseUndine()
   return true
@@ -452,6 +459,9 @@ function MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(Summonable,68505803) and SummonController() then
     return {COMMAND_SUMMON,CurrentIndex}
   end
+  if HasID(Summonable,23899727) and SummonLinde() then
+    return {COMMAND_SUMMON,CurrentIndex}
+  end
   if HasID(Summonable,58471134) and (UsePike() or FieldCheck(4)==1) then
     return {COMMAND_SUMMON,CurrentIndex}
   end
@@ -515,6 +525,9 @@ function MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(SetableMon,68505803) and MermailOpenFieldCheck() then
     return {COMMAND_SET_MONSTER,CurrentIndex}
   end
+  if HasID(Repositionable,23899727,false,nil,nil,POS_FACEDOWN_DEFENCE) and SummonLinde() then
+    return {COMMAND_CHANGE_POS,CurrentIndex}
+  end
   cards=AIHand()
   --
   return nil
@@ -564,7 +577,7 @@ function SphereTarget(cards)
   end
   if GlobalSphere == 3 then
     GlobalSphere = nil
-    return MermailAdd(cards,PRIO_TOGRAVE,1,FilterAttack,AI.GetPlayerLP(2))
+    return MermailAdd(cards,PRIO_TOGRAVE,1,FilterAttackMin,AI.GetPlayerLP(2))
   end
   if GlobalSphere == 4 or GlobalSphere == 7 then
     local level = GlobalSphere

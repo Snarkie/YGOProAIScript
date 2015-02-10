@@ -303,7 +303,7 @@ NSBL={
 90307777,08903700,95492061,23401839, -- Shrit, Caster of Nekroz, Djinn Releaser of Rituals, Manju, Senju 
 13974207,57143342,73213494,47728740, -- Denkou Sekka, BA Cir, Calcab, Alich
 20758643,00734741,36551319,09342162, -- BA Graff, Rubic, Farfa, Cagna
-62957424,52738610,30312361,  -- BA Libic, Necroz Dance Princess, Phantom of Chaos
+62957424,52738610,30312361,41386308, -- BA Libic, Necroz Dance Princess, Phantom of Chaos, Mathematician
 }
 function NormalSummonBlacklist(CardId) 
   for i=1,#NSBL do
@@ -394,7 +394,7 @@ SSBL={
 31320433,47805931,75367227, -- Nightmare Shark, Giga-Brillant, Ghostrick Alucard
 68836428,52558805,78156759, -- Tri-Edge Levia, Temptempo the Percussion Djinn, Wind-Up Zenmaines
 16259549,51617185,16195942, -- Fortune Tune, Machina Megaform, Dark Rebellion Dragon
-26563200, -- Muzurythm
+26563200,00005500, -- Muzurythm, Clear Wing Synchro Dragon
 }
 
 
@@ -755,7 +755,8 @@ ScriptedCards ={
 62957424,00005497,62835876,73680966,  -- BA Libic, Malacoda, Good&Evil, The Beginning of the End
 25857246,52738610,97211663,30312361,  -- Necroz Valkyrus, Dance Princess, Cycle, Phantom of Chaos
 12580477,45986603,16195942,56574543,  -- Raigeki, Snatch Steal, Dark Rebellion Dragon, Bujingi Sinyou
-86346643,63465535,26563200,  -- Rainbow Neos, Underground Arachnid, Muzurythm
+86346643,63465535,26563200,74822425,  -- Rainbow Neos, Underground Arachnid, Muzurythm, Shaddoll Shekinaga
+48424886,06417578,60226558,73176465, -- El-Shaddoll Egrystal, Fusion, Nepheshaddoll Fusion, Lightsworn Felis
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do

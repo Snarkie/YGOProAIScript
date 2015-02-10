@@ -1748,45 +1748,6 @@ function ApplyATKBoosts(Cards)
     end
   end
   
-  -- Nephilim
-  for i=1,#Cards do
-    if Cards[i].id == 20366274 and NotNegated(Cards[i]) then
-      local OppAtt=OppGetStrongestAttDef(NephilimFilter,true)
-      Cards[i].attack = math.max(Cards[i].attack,OppAtt+1)
-    end
-  end
-  
-  -- Catastor
-  for i=1,#Cards do
-    if Cards[i].id == 26593852 and NotNegated(Cards[i]) then
-      local OppAtt=OppGetStrongestAttDef(CatastorFilter,true)
-      Cards[i].attack = math.max(Cards[i].attack,OppAtt+1)
-    end
-  end
-  
-  -- Gwen
-  for i=1,#Cards do
-    if HasID(Cards[i]:get_equipped_cards(),19748583,true) 
-    and FilterAttribute(Cards[i],ATTRIBUTE_DARK)
-    then
-      Cards[i].attack = math.max(Cards[i].attack,OppGetStrongestAttDef(GwenFilter,true)+2)
-    end
-  end
-  
-  -- Hands
-  for i=1,#Cards do
-    if Cards[i].id == 68535320 and Cards[i].owner == 1 and FireHandCheck()  then
-      --if bit32.band(Cards[i].position,POS_FACEUP_ATTACK) then
-        Cards[i].attack=HandAtt(OppMon(),1600)
-      --end
-    end
-    if Cards[i].id == 95929069 and Cards[i].owner == 1 and IceHandCheck() then
-      --if bit32.band(Cards[i].position,POS_FACEUP_ATTACK) then
-        Cards[i].attack=HandAtt(OppMon(),1400)
-      --end
-    end
-  end
-  
   -- Nekroz Decisive Armor
   for i=1,#Cards do
     if HasID(AIHand(),88240999,true) and NekrozMonsterFilter(Cards[i])
@@ -1796,17 +1757,6 @@ function ApplyATKBoosts(Cards)
       Cards[i].attack = Cards[i].attack + 1000
     end
   end
-  
-  -- Nekroz Gungnir
-  for i=1,#Cards do
-    if HasID(AIHand(),74122412,true) and NekrozMonsterFilter(Cards[i])
-    and Cards[i].owner==1 and not FilterAffected(Cards[i],EFFECT_CANNOT_BE_EFFECT_TARGET)
-    then
-      Cards[i].bonus = Cards[i].bonus + 1
-      Cards[i].attack = Cards[i].attack + 1
-    end
-  end
-  
   
   -- Nekroz Clausolas
   for i=1,#Cards do
@@ -1819,25 +1769,7 @@ function ApplyATKBoosts(Cards)
     end
   end
   
-  -- make indestructable monsters crash
-  local cards=AIMon()
-  local StardustSparkCheck=false
-  for i=1,#cards do
-    if cards[i].id == 83994433 and NotNegated(cards[i]) and bit32.band(cards[i].position,POS_FACEUP)>0
-    and GlobalStardustSparkActivation[cards[i].cardid]~=Duel.GetTurnCount()
-    then
-      StardustSparkCheck = true
-    end
-  end
-  for i=1,#Cards do
-    if Cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE)>0
-    or Cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_COUNT)>0
-    or Cards[i].owner==1 and (StardustSparkCheck 
-    or Cards[i].id==23649496)
-    then
-      Cards[i].attack=Cards[i].attack+1
-    end
-  end
+
   
   -- fix cards with attack < 0 after attack boosts
   for i=1,#Cards do

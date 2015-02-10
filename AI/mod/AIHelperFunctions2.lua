@@ -270,6 +270,7 @@ end
 function SubGroup(cards,filter,opt)
   result = {}
   if cards then
+    if filter == nil then return cards end
     for i=1,#cards do
       if opt and filter(cards[i],opt) or opt==nil and filter(cards[i]) then
         result[#result+1]=cards[i]
@@ -358,81 +359,92 @@ function ExpectedDamage(player)
   end
   return result
 end
-
+TARGET_OTHER    = 0
 TARGET_DESTROY  = 1
 TARGET_TOGRAVE  = 2
 TARGET_BANISH   = 3
 TARGET_TOHAND   = 4
 TARGET_TODECK   = 5
 TARGET_FACEDOWN = 6
+TARGET_CONTROL  = 7
+TARGET_BATTLE   = 8
 -- returns a list of the best targets given the parameters
-function BestTargets(cards,count,target,filter,immuneCheck)
+function BestTargets(cards,count,target,filter,opt,immuneCheck,source)
   local result = {}
   local AIMon=AIMon()
   local DestroyCheck = false
   if target == true then 
     target=TARGET_DESTROY 
   end
+  if target == TARGET_BATTLE then 
+    return BestAttackTarget(cards,source,filter,opt) 
+  end
   if count == nil then count = 1 end
   ApplyATKBoosts(AIMon)
   local AIAtt=Get_Card_Att_Def(AIMon,"attack",">",nil,"attack")
   for i=1,#cards do
-    cards[i].index = i
-    cards[i].prio = 0
-    if bit32.band(cards[i].type,TYPE_MONSTER)>0 then
-      if bit32.band(cards[i].position, POS_FACEUP)>0
-      or bit32.band(cards[i].status,STATUS_IS_PUBLIC)>0
+    local c = cards[i]
+    c.index = i
+    c.prio = 0
+    if bit32.band(c.type,TYPE_MONSTER)>0 then
+      if bit32.band(c.position, POS_FACEUP)>0
+      or bit32.band(c.status,STATUS_IS_PUBLIC)>0
       then
-        if cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)>0 and target==TARGET_DESTROY 
-        or cards[i]:is_affected_by(EFFECT_IMMUNE)>0
+        if c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)>0 and target==TARGET_DESTROY 
+        or c:is_affected_by(EFFECT_IMMUNE)>0
         then
-          cards[i].prio = 1
+          c.prio = 1
         else
-          cards[i].prio = math.max(cards[i].attack+1,cards[i].defense)+5
-          if cards[i].owner==2 and cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE)==0 then
-            cards[i].prio = math.max(5,cards[i].prio-AIAtt*.75)
+          c.prio = math.max(c.attack+1,c.defense)+5
+          if c.owner==2 and c:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE)==0 then
+            c.prio = math.max(5,c.prio-AIAtt*.75)
           end
         end
       else
-        cards[i].prio = 2
+        c.prio = 2
       end
     else
-      if cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)>0 and target==TARGET_DESTROY
-      or cards[i]:is_affected_by(EFFECT_IMMUNE)>0 
-      or bit32.band(cards[i].status,STATUS_LEAVE_CONFIRMED)>0
+      if c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)>0 and target==TARGET_DESTROY
+      or c:is_affected_by(EFFECT_IMMUNE)>0 
+      or bit32.band(c.status,STATUS_LEAVE_CONFIRMED)>0
       then
-        cards[i].prio = 1
+        c.prio = 1
       else    
-        if bit32.band(cards[i].position, POS_FACEUP)>0 then
-          cards[i].prio = 4
+        if bit32.band(c.position, POS_FACEUP)>0 then
+          c.prio = 4
         else
-          cards[i].prio = 3
+          c.prio = 3
         end
       end
     end
-    if PriorityTarget(cards[i]) then
-      cards[i].prio = cards[i].prio+2
+    if PriorityTarget(c) then
+      c.prio = c.prio+2
     end
-    if cards[i].level>4 then
-      cards[i].prio = cards[i].prio+1
+    if c.level>4 then
+      c.prio = c.prio+1
     end
-    if bit32.band(cards[i].position, POS_FACEUP_ATTACK)>0 then
-      cards[i].prio = cards[i].prio+1
+    if bit32.band(c.position, POS_FACEUP_ATTACK)>0 then
+      c.prio = c.prio+1
     end
-    if (bit32.band(cards[i].position, POS_FACEUP)>0 or bit32.band(cards[i].status,STATUS_IS_PUBLIC)>0)
-    and (target == TARGET_TOHAND and ToHandBlacklist(cards[i].id)   
-    or target == TARGET_DESTROY and DestroyBlacklist(cards[i])
-    or target == TARGET_FACEDOWN and bit32.band(cards[i].type,TYPE_FLIP)>0)
+    if (bit32.band(c.position, POS_FACEUP)>0 or bit32.band(c.status,STATUS_IS_PUBLIC)>0)
+    and (target == TARGET_TOHAND and ToHandBlacklist(c.id)   
+    or target == TARGET_DESTROY and DestroyBlacklist(c)
+    or target == TARGET_FACEDOWN and bit32.band(c.type,TYPE_FLIP)>0)
     then
-      cards[i].prio = -1
+      c.prio = -1
     end
-    if filter and not filter(cards[i]) then
-      cards[i].prio = -1
+    if FilterType(c,TYPE_PENDULUM) and HasIDNotNegated(OppST(),05851097,true,nil,nil,POS_FACEUP) then
+      c.prio = -1
     end
-    if cards[i].owner == 1 then 
-      cards[i].prio = -1 * cards[i].prio
+    if filter and (opt and not filter(c,opt) or not filter(c)) then
+      c.prio = -1
     end
-
+    if immuneCheck and source and not Affected(c,source.type,source.level) then
+      c.prio = -1
+    end
+    if c.owner == 1 then 
+      c.prio = -1 * c.prio
+    end
   end
   table.sort(cards,function(a,b) return a.prio > b.prio end)
   for i=1,count do
@@ -440,6 +452,7 @@ function BestTargets(cards,count,target,filter,immuneCheck)
   end
   return result
 end
+
 function GlobalTarget(cards,player,original)
   for i=1,#cards do
     if (not original and cards[i].id==GlobalTargetID
@@ -524,8 +537,15 @@ function WinsBattle(source,target)
   and source:IsPosition(POS_FACEUP_ATTACK)
   and not target:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE)
 end
-function NotNegated(card)
-  return card:is_affected_by(EFFECT_DISABLE)==0 and card:is_affected_by(EFFECT_DISABLE_EFFECT)==0
+function NotNegated(c)
+  if c.GetCode then
+    return not (c:IsHasEffect(EFFECT_DISABLE) or c:IsHasEffect(EFFECT_DISABLE_EFFECT))
+  else
+    return c:is_affected_by(EFFECT_DISABLE)==0 and c:is_affected_by(EFFECT_DISABLE_EFFECT)==0
+  end
+end
+function Negated(c)
+  return not NotNegated(c)
 end
 function DestroyFilter(c,nontarget)
   return c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0
@@ -556,8 +576,17 @@ end
 function FilterType(c,type)
   return bit32.band(c.type,type)>0
 end
-function FilterAttack(c,attack)
+function FilterAttackMin(c,attack)
   return bit32.band(c.type,TYPE_MONSTER)>0 and c.attack>=attack
+end
+function FilterAttackMax(c,attack)
+  return bit32.band(c.type,TYPE_MONSTER)>0 and c.attack<=attack
+end
+function FilterDefenseMin(c,defense)
+  return bit32.band(c.type,TYPE_MONSTER)>0 and c.defense<=defense
+end
+function FilterDefenseMax(c,defense)
+  return bit32.band(c.type,TYPE_MONSTER)>0 and c.defense<=defense
 end
 function FilterID(c,id)
   return c.id==id
@@ -583,6 +612,9 @@ end
 function FilterPublic(c)
   return FilterStatus(c,STATUS_IS_PUBLIC) or FilterPosition(c,POS_FACEUP)
 end
+function FilterPrivate(c)
+  return not FilterPublic(c)
+end
 function FilterSet(c,code)
   return IsSetCode(c.setcode,code)
 end
@@ -592,6 +624,9 @@ end
 function HasEquips(c,opt)
   return opt == nil and c.equip_count>0
   or opt and c.equip_count==opt
+end
+function FilterPendulum(c)
+  return not FilterType(c,TYPE_PENDULUM) 
 end
 --[[function ScaleCheck(p)
   local cards=AIST()
@@ -799,4 +834,257 @@ function HasPriorityTarget(cards,destroycheck,filter,opt)
   return count>0
 end
 
+-- Function to determine, if a player can special summon
+-- true = player can special summon
+GlobalDuality = 0
+function DualityCheck(player)
+  local cards = UseLists(AIField(),OppField())
+  if player == nil then player = 1 end
+  if player == 1 and Duel.GetTurnCount()==GlobalDuality then
+    return false -- Pot of Duality
+  end
+  if HasIDNotNegated(cards,05851097,true,nil,POS_FACEUP) then 
+    return false -- Vanity's Emptiness
+  end
+  if HasIDNotNegated(cards,59509952,true,nil,POS_FACEUP) then 
+    return false -- Archlord Kristya
+  end
+  if HasIDNotNegated(cards,42009836,true,nil,POS_FACEUP) then 
+    return false -- Fossil Dyna Pachycephalo
+  end
+  if HasIDNotNegated(cards,41855169,true,nil,POS_FACEUP) then 
+    return false -- Jowgen the Spiritualist
+  end
+  if HasIDNotNegated(cards,47084486,true,nil,POS_FACEUP) then 
+    return false -- Vanity's Fiend
+  end
+  if player == 1 and HasIDNotNegated(OppMon(),72634965,true,nil,POS_FACEUP) then 
+    return false -- Vanity's Ruler
+  end
+  return true
+end
 
+-- Function to determine, if a player's cards are being banished 
+-- instead of being sent to the grave
+-- true = cards are not being banished
+function MacroCheck(player)
+  local cards = UseLists(AIField(),OppField())
+  if player == nil then player = 1 end
+  if HasIDNotNegated(cards,30459350,true,nil,POS_FACEUP) then 
+    return true -- Imperial Iron Wall, cancels everything below
+  end
+  if HasIDNotNegated(cards,30241314,true,nil,POS_FACEUP) then 
+    return false -- Macro Cosmos
+  end
+  if HasIDNotNegated(cards,81674782,true,nil,POS_FACEUP) then 
+    return false -- Dimensional Fissure
+  end
+  if player == 1 and HasIDNotNegated(OppMon(),58481572,true,nil,POS_FACEUP) then
+    return false -- Dark Law
+  end
+  return true
+end
+
+DestRep={
+48739166,78156759,10002346, -- SHArk, Zenmaines, Gachi
+99469936,23998625,01855932, -- Crystal Zero Lancer, Heart-eartH, Kagutsuchi
+77631175,23232295,16259499, -- Comics Hero Arthur, Lead Yoke, Fortune Tune
+}
+-- function to determine, if a card has to be destroyed multiple times
+-- true = can be destroyed properly
+function DestroyCountCheck(c)
+  local id
+  local mats
+  local negated
+  if c.GetCode then
+    id = c:GetCode()
+    mats = c:GetGetMaterialCount()
+  else
+    id = c.id
+    mats = c.xyz_material_count
+  end
+  if Negated(c) then
+    return c:is_affected_by(EFFECT_INDESTRUCTABLE_COUNT)==0
+  end
+  for i=1,#DestRep do
+    if c.id==DestRep[i] then
+      return false
+    end
+  end
+  return c:is_affected_by(EFFECT_INDESTRUCTABLE_COUNT)==0
+end
+
+AttBL={
+78371393,04779091,31764700, -- Yubel 1,2 and 3
+54366836,88241506,23998625, -- Lion Heart, Maiden with the Eyes of Blue, Heart-eartH
+80344569,68535320,95929069, -- Grand Mole, Fire Hand, Ice Hand
+74530899, -- Metaion
+}
+-- cards that should not be attacked without negating them first
+-- (or under special circumstances) TODO: Define conditions
+-- true = free to attack
+function AttackBlacklistCheck(c,source)
+  local id=c.id
+  if Negated(c) then
+    return true
+  end
+  for i=1,#AttBL do
+    if id == AttBL[i] then
+      return false
+    end
+  end
+  return true
+end
+-- function to determine, if a card can be destroyed by battle
+-- and should be attacked at all
+function BattleTargetCheck(c,source)
+  return c:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE)==0
+  and c:is_affected_by(EFFECT_CANNOT_BE_BATTLE_TARGET)==0
+  and DestroyCountCheck(c)
+  and AttackBlacklistCheck(c,source)
+end
+
+function BattleDamageCheck(c,source)
+  return source:is_affected_by(EFFECT_NO_BATTLE_DAMAGE)==0
+  and c:is_affected_by(EFFECT_AVOID_BATTLE_DAMAGE)==0
+  and c:is_affected_by(EFFECT_REFLECT_BATTLE_DAMAGE)==0
+  and AttackBlacklistCheck(c,source)
+end
+
+function BattleDamage(c,source)
+  if c == nil then
+    return source.attack
+  end
+  if BattleDamageCheck(c,source) then
+    if FilterPosition(c,POS_FACEUP_ATTACK) then
+      return source.attack-c.attack
+    end
+    if FilterPosition(c,POS_DEFENCE) and FilterAffected(source,EFFECT_PIERCE) then
+      if FilterPublic(c) then
+        return source.attack-c.defense
+      end
+      if FilterPrivate(c) then
+        return source.attack-1500
+      end
+    end
+  end
+  return 0
+end
+
+function BattleDamageFilter(c,source)
+  return BattleDamage(c,source)>0
+end
+
+CrashList={
+83531441,00601193,23649496, -- Dante, Virgil,Plain-Coat
+23693634, -- Colossal Fighter
+}
+-- function to determine, if a card is allowed to 
+-- crash into a card with the same ATK
+function CrashCheck(c)
+  local cards=AIMon()
+  local StardustSparkCheck=false
+  for i=1,#cards do
+    if cards[i].id == 83994433 and NotNegated(cards[i]) and FilterPosition(cards[i],POS_FACEUP)
+    and GlobalStardustSparkActivation[cards[i].cardid]~=Duel.GetTurnCount()
+    then
+      return Targetable(c,TYPE_MONSTER) and Affected(c,TYPE_MONSTER,8)
+    end
+  end
+  if FilterAffected(c,EFFECT_INDESTRUCTABLE_BATTLE)then
+    return true
+  end
+  if not DestroyCountCheck(c) then
+    return true
+  end
+  if FilterType(c,TYPE_PENDULUM) and ScaleCheck(1)==true then
+    return true
+  end
+  if c.id == 99365553 and HasID(AIGrave(),88264978,true) then
+    return true -- Lightpulsar
+  end
+  if c.id == 99234526 and HasID(AIDeck(),61901281,true) then
+    return true -- Wyverbuster
+  end
+  if c.id == 61901281 and HasID(AIDeck(),99234526,true) then
+    return true -- Collapserpent
+  end
+  if c.id == 05556499 and #OppField()>1 then
+    return true -- Machina Fortress
+  end
+  if CurrentMonOwner(c.cardid) ~= c.owner then
+    return true
+  end
+  if #OppMon()==1 and #AIMon()>1 then
+    --return true
+  end
+  for i=1,#CrashList do
+    if CrashList[i]==c.id then
+      return true
+    end
+  end
+  return false
+end
+
+-- function to determine, if a card can win a battle against any of the targets, and if the 
+-- target is expected to hit the graveyard (for effects that trigger on battle destruction)
+function CanWinBattle(c,targets,tograve,filter,opt)
+  local sub = SubGroup(targets,filter,opt)
+  sub = SubGroup(sub,BattleTargetCheck,c)
+  if tograve == true then
+    sub = SubGroup(sub,FilterPendulum)
+    if not MacroCheck(1) then
+      return false
+    end
+  end
+  print(3)
+  for i=1,#sub do
+    if (FilterPosition(sub[i],POS_ATTACK) and (sub[i].attack<c.attack
+    or CrashCheck(c) and sub[i].attack==c.attack)
+    or FilterPosition(sub[i],POS_DEFENCE) and (sub[i].defense<c.attack)
+    and (FilterPosition(sub[i],POS_FACEUP) or sub[i]:is_affected_by(EFFECT_PUBLIC))) 
+    and BattleTargetCheck(sub[i],c) 
+    then
+      return true
+    end
+  end
+  return false
+end  
+
+-- function to determine, if a card can deal battle damage to a targets
+-- for search effects
+function CanDealBattleDamage(c,targets,filter,opt)
+  if #targets == 0 then
+    return true
+  end
+  local sub = SubGroup(targets,filter,opt)
+  sub = SubGroup(sub,AttackBlacklistCheck,c)
+  for i=1,#sub do
+    if BattleDamage(sub[i],c)>0 then 
+      return true
+    end
+  end
+  return false
+end
+    
+
+-- function to determine, if a card can attack for game 
+-- on an opponent's monster, or directly
+function CanFinishGame(c,target)
+  if target == nil or FilterAffected(c,EFFECT_DIRECT_ATTACK) then
+    return AI.GetPlayerLP(2)<=c.attack
+  end
+  if AttackBlacklistCheck(target,c) and BattleDamageCheck(target,c) then
+    if FilterPosition(target,POS_FACEUP_ATTACK) then
+      return AI.GetPlayerLP(2)<=c.attack-target.attack
+    end
+    if FilterPosition(target,POS_DEFENCE) and FilterAffected(c,EFFECT_PIERCE) then
+      if FilterPublic(target) then
+        return AI.GetPlayerLP(2)<=c.attack-target.defense
+      else
+        return AI.GetPlayerLP(2)<=c.attack-1500
+      end
+    end
+  end
+  return false
+end

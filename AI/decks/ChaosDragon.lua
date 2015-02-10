@@ -20,6 +20,10 @@ function ChaosSummonCheck()
   return math.min(PriorityCheck(AIGrave(),PRIO_BANISH,1,FilterAttribute,ATTRIBUTE_DARK)
   ,PriorityCheck(AIGrave(),PRIO_BANISH,1,FilterAttribute,ATTRIBUTE_LIGHT))
 end
+function LightpulsarCheck()
+  return DualityCheck() and MacroCheck() and (CardsMatchingFilter(OppMon(),HandFilter,2500)>0 
+  and HasID(AIGrave(),88264978,true))
+end
 function LightpulsarSummonCheck()
   return math.min(PriorityCheck(AIHand(),PRIO_TOGRAVE,1,FilterAttribute,ATTRIBUTE_DARK)
   ,PriorityCheck(AIHand(),PRIO_TOGRAVE,1,FilterAttribute,ATTRIBUTE_LIGHT))
@@ -181,7 +185,7 @@ function ScarmCond(loc,c)
   return true
 end
 function CollapserpentCond(loc,c)
-  if loc == PRIO_TOGRAVE and bit32.band(c.location,LOCATION_HAND)>0 then
+  if loc == PRIO_TOGRAVE and FilterLocation(c,LOCATION_HAND) then
     return MiniDragonCount(AIHand())>1
   end
   if loc == PRIO_TOHAND then
@@ -190,7 +194,7 @@ function CollapserpentCond(loc,c)
   return true
 end
 function WyverbusterCond(loc,c)
-  if loc == PRIO_TOGRAVE and bit32.band(c.location,LOCATION_HAND)>0 then
+  if loc == PRIO_TOGRAVE and FilterLocation(c,LOCATION_HAND) then
     return MiniDragonCount(AIHand())>1
   end
   if loc == PRIO_TOHAND then

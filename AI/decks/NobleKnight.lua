@@ -867,6 +867,9 @@ function SummonCastelNK()
   end
   return false
 end
+function UseChainNK()
+  return DeckCheck(DECK_NOBLEKNIGHT)
+end
 function NobleInit(cards)
   local Act = cards.activatable_cards
   local Sum = cards.summonable_cards
@@ -880,9 +883,6 @@ function NobleInit(cards)
   end
   if HasIDNotNegated(Act,73289035) and UseTsukuyomiNK() then
     OPTSet(Act[CurrentIndex].cardid)
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
-  if HasID(Act,00691925) then -- test
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Act,68618157) then -- Amaterasu
@@ -906,7 +906,7 @@ function NobleInit(cards)
   if HasID(Act,32807846) and UseRotA() then 
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasIDNotNegated(Activatable,34086406,false,545382497) and UseChainNK() then
+  if HasIDNotNegated(Act,34086406,false,545382497) and UseChainNK() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Act,10736540) and UseLady() then 

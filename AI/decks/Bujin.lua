@@ -252,7 +252,7 @@ function CastelFilterBujin(c)
 end
 function SummonCastelBujin(cards)
   local targets=SubGroup(OppMon(),CastelFilterBujin)
-  if #targets > 0 and OPTCheck(48739166) then
+  if #targets > 0 and OPTCheck(82633039) then
     return true
   end
   return false
@@ -343,6 +343,9 @@ if DeckCheck(DECK_BUJIN) then
   end
   if HasID(SpSummonable,48739166) and SummonSharkKnightBujin() then
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,48739166)}
+  end
+  if HasID(SpSummonable,82633039) and SummonCastelBujin() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSummonable,75840616) and SummonSusanowo() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}

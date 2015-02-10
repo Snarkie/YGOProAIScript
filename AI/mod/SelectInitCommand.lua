@@ -355,7 +355,7 @@ end
 	if ActivatableCards[i].type == TYPE_SPELL + TYPE_FIELD and
        ActivatableCards[i].position == POS_FACEDOWN then
        GlobalActivatedCardID = ActivatableCards[i].id
-	  --return COMMAND_ACTIVATE,i
+	    return COMMAND_ACTIVATE,i
      end
    end
  end
@@ -2312,7 +2312,7 @@ end
       end
     end
   end
- 
+  
 -------------------------------------------------
 -- **********************************************
 --         Spell and trap card setting :|

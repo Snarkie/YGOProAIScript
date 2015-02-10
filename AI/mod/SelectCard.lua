@@ -74,133 +74,18 @@ if result ~= nil then
 end
 result = {}
 
-  --------------------------------------------
-  -- Attack any non dark type monster regardless 
-  -- of it's attack.
-  --------------------------------------------   
-  if GlobalAIIsAttacking and GlobalAttackerID == 26593852 then
-   if AI.GetCurrentPhase() == PHASE_BATTLE then
-     GlobalAIIsAttacking = false
-	 for i=1,#cards do
-       if cards[i] ~= false then
-         if cards[i].position == POS_FACEUP_ATTACK and 
-		   IsUndestroyableByBattle(cards[i].id) == 0 and cards[i].attribute ~= ATTRIBUTE_DARK then
-			 GlobalAttackerID = 0
-			 result[1]=i
-             return result
-             end
-          end
-       end
-    end
- end
-  
-  ------------------------------------------------------
-  -- This is assuming the AI is attacking.
-  --
-  -- Obtain the index of the opponent's monster with the
-  -- highest ATK/DEF that is below that of the currently
-  -- attacking monster, and return that.
-  ------------------------------------------------------
-  if GlobalAIIsAttacking and GlobalAttackerID ~= 26593852 then
-	if AI.GetCurrentPhase() == PHASE_BATTLE then	
-    ApplyATKBoosts(cards)
-		GlobalAIIsAttacking = false
-		local FaceUpDestructibleGroup = {}
-		local FaceUpAttackPositionIndestructibleGroup = {}
-		local FaceDownDefensePositionGroup = {}
-		local c = 1
-		local m = 1
-		local n = 1
-		-- divide selectable attack targets into 3 groups
-		for i = 1, #cards do
-			-- 1st group
-			if cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE) == 0 
-      and (bit32.band(cards[i].position,POS_FACEUP_ATTACK) > 0 and cards[i].attack < GlobalCurrentATK
-      or bit32.band(cards[i].position,POS_FACEUP_DEFENCE) > 0 and cards[i].defense < GlobalCurrentATK)
-			then
-        FaceUpDestructibleGroup[c] = cards[i]
-				FaceUpDestructibleGroup[c].index = i
-				FaceUpDestructibleGroup[c].attack_or_defense = bit32.band(cards[i].position,POS_ATTACK) > 0 and cards[i].attack or cards[i].defense
-				-- give priority to each selectable target based on its type(s):
-				-- synchro effect -> xyz effect -> ritual effect -> fusion effect -> (just) effect -> others
-				if bit32.band(cards[i].type,TYPE_EFFECT) > 0 then
-					if bit32.band(cards[i].type,TYPE_SYNCHRO) > 0 then
-						FaceUpDestructibleGroup[c].priority = 1
-					elseif bit32.band(cards[i].type,TYPE_XYZ) > 0 then
-						FaceUpDestructibleGroup[c].priority = 2
-					elseif bit32.band(cards[i].type,TYPE_RITUAL) > 0 then
-						FaceUpDestructibleGroup[c].priority = 3
-					elseif bit32.band(cards[i].type,TYPE_FUSION) > 0 then
-						FaceUpDestructibleGroup[c].priority = 4
-					else
-						FaceUpDestructibleGroup[c].priority = 5
-					end
-				else
-					FaceUpDestructibleGroup[c].priority = 6
-				end
-				c = c + 1
-			-- 2nd group
-			elseif bit32.band(cards[i].position,POS_FACEUP_ATTACK) > 0 and cards[i]:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE) > 0 then
-        FaceUpAttackPositionIndestructibleGroup[m] = cards[i]
-				FaceUpAttackPositionIndestructibleGroup[m].index = i
-				m = m + 1
-			-- 3rd group
-			elseif bit32.band(cards[i].position,POS_FACEDOWN_DEFENCE) > 0 then
-				FaceDownDefensePositionGroup[n] = cards[i]
-				FaceDownDefensePositionGroup[n].index = i
-				n = n + 1
-			end
-		end
-		-- by default, select an attack target from the 1st group
-		if #FaceUpDestructibleGroup > 0 then
-			local function compare_1st_group(x,y)
-				-- compare selectable attack targets by their ATK then priorities
-				-- if both of them have ATK higher than or equal to that of AI's attacker
-				if x.attack >= GlobalCurrentATK and y.attack >= GlobalCurrentATK then
-					if x.attack ~= y.attack then
-						return x.attack > y.attack
-					else
-						return x.priority < y.priority
-					end
-				-- selectable attack target with ATK higher than or equal to that of AI's attacker
-				-- should always come before one with ATK lower
-				elseif x.attack >= GlobalCurrentATK and y.attack < GlobalCurrentATK then
-					return x.attack > y.attack
-				-- compare selectable attack targets by their ATK or DEF depending on their positions then priorities
-				-- if both of them have ATK lower than that of AI's attacker
-				elseif x.attack < GlobalCurrentATK and y.attack < GlobalCurrentATK then
-					if x.attack_or_defense ~= y.attack_or_defense then
-						return x.attack_or_defense > y.attack_or_defense
-					else
-						return x.priority < y.priority
-					end
-				end
-			end
-			table.sort(FaceUpDestructibleGroup,compare_1st_group)
-			for i = 1,#FaceUpDestructibleGroup do
-				if FaceUpDestructibleGroup[i].attack_or_defense < GlobalCurrentATK then
-					result[1] = FaceUpDestructibleGroup[i].index
-					return result
-				end
-			end
-		-- otherwise, select an attack target from the 2nd group
-		elseif #FaceUpAttackPositionIndestructibleGroup > 0 then
-			local function compare_2nd_group(x,y)
-				return x.attack-x.bonus < y.attack-y.bonus
-			end
-			table.sort(FaceUpAttackPositionIndestructibleGroup,compare_2nd_group)
-			if FaceUpAttackPositionIndestructibleGroup[1].attack < GlobalCurrentATK then
-				result[1] = FaceUpAttackPositionIndestructibleGroup[1].index
-				return result
-			end
-		-- otherwise, select an attack target from the 3rd group
-		elseif #FaceDownDefensePositionGroup > 0 then
-			result[1] = FaceDownDefensePositionGroup[1].index
-			return result
-		end
-	end
- end 
-  GlobalAIIsAttacking = false  
+
+-- AI attack target selection
+-- redirected to SelectBattleComand.lua
+if GlobalAIIsAttacking then 
+  local c = FindCard(GlobalCurrentAttacker)
+  result = AttackTargetSelection(cards,c,GlobalCurrentATK)
+  GlobalCurrentAttacker = nil
+  GlobalCurrentATK = nil
+  GlobalAIIsAttacking = nil
+  return result
+end
+ 
   
   --------------------------------------------
   -- Select minimum number of valid XYZ material monsters,   

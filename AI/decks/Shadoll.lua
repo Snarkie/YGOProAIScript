@@ -69,7 +69,21 @@ function RootsCond(loc)
   end
   return true
 end
-
+function FelisCond(loc,c)
+  if loc == PRIO_TOGRAVE then
+    return true
+  end
+  return true
+end
+function MathCond(loc,c)
+  return true
+end
+function ShekinagaCond(loc,c)
+  return true
+end
+function EgrystalCond(loc,c)
+  return true
+end
 function ShadollGetPriority(id,loc)
   local checklist = nil
   local result = 0
@@ -142,7 +156,7 @@ function LizardFilter(c)
   and c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
 end
 function UseLizard()
-  return OPTCheck(37445295) and CardsMatchingFilter(OppMon(),LizardFilter)>0
+  return CardsMatchingFilter(OppMon(),LizardFilter)>0-- and OPTCheck(37445295)
 end
 function DragonFilter2(c)
   return c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0 and (c.level>4 
@@ -296,6 +310,12 @@ function UseSoulCharge()
   return #AIMon()==0 and AI.GetPlayerLP(1)>1000 
   and CardsMatchingFilter (AIGrave(),function(c) return bit32.band(c.type,TYPE_MONSTER)>2 end)
 end
+function UseFelis()
+  return Duel.GetCurrentPhase()==PHASE_MAIN2 and DestroyCheck(OppMon())
+end
+function SummonMath()
+  return true
+end
 function ShadollOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local Activatable = cards.activatable_cards
   local Summonable = cards.summonable_cards
@@ -343,6 +363,9 @@ function ShadollOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_CHANGE_POS,CurrentIndex}
   end
 
+  if HasID(Summonable,41386308) and SummonMath() then
+    return {COMMAND_SUMMON,CurrentIndex}
+  end
   if HasID(Summonable,24062258) and SummonDru() then
     return {COMMAND_SUMMON,CurrentIndex}
   end
@@ -360,6 +383,13 @@ function ShadollOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   end
   if HasID(Summonable,03717252) and SummonBeast() then
     return {COMMAND_SUMMON,CurrentIndex}
+  end
+  if HasID(Summonable,41386308) then
+    return {COMMAND_SUMMON,CurrentIndex}
+  end
+  
+  if HasID(Activatable,73176465) and UseFelis() then
+    return {COMMAND_ACTIVATE,CurrentIndex}
   end
   
   if HasID(SetableMon,37445295) and SetFalcon() then
@@ -592,6 +622,9 @@ function SoulChargeTarget(cards,min,max)
   end
   return result
 end
+function MathTarget(cards)
+  return Add(cards,PRIO_TOGRAVE)
+end
 function ShadollOnSelectCard(cards, minTargets, maxTargets,triggeringID,triggeringCard)
   local ID 
   local result=nil
@@ -674,6 +707,12 @@ function ShadollOnSelectCard(cards, minTargets, maxTargets,triggeringID,triggeri
   end
   if ID == 72959823 then
     return PanzerDragonTarget(cards)
+  end
+  if ID == 73176465 then
+    return BestTargets(cards,1,TARGET_DESTROY)
+  end
+  if ID == 41386308 then
+    return MathTarget(cards)
   end
   return nil
 end
@@ -907,8 +946,9 @@ function ChainMST()
   end
   if e then
     local c = e:GetHandler()
-    if (c:IsType(TYPE_CONTINUOUS+TYPE_EQUIP+TYPE_FIELD) or
-    c:IsType(TYPE_PENDULUM) and ScaleCheck(2)==true or c:GetCode()==65518099)
+    if (c:IsType(TYPE_CONTINUOUS+TYPE_EQUIP+TYPE_FIELD) 
+    or (c:IsType(TYPE_PENDULUM) and c:IsType(TYPE_SPELL) 
+    and (ScaleCheck(2)==true or not e:IsHasType(EFFECT_TYPE_ACTIVATE))))
     and c:IsControler(1-player_ai)
     and targets>0
     and c:IsLocation(LOCATION_ONFIELD)
@@ -916,7 +956,6 @@ function ChainMST()
     and not c:IsHasEffect(EFFECT_INDESTRUCTABLE_EFFECT)
     and not c:IsHasEffect(EFFECT_IMMUNE_EFFECT)
     and (not DestroyBlacklist(c) or c:GetCode()==19337371 or c:GetCode()==05851097)
-    and not(c:GetCode()==65518099 and not(Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_TOHAND)))
     then
       GlobalTargetID=c:GetCode()
       GlobalPlayer=2
@@ -925,17 +964,19 @@ function ChainMST()
       return true
     end
   end
-  if HasPriorityTarget(OppST(),destroycheck) then
+  if HasPriorityTarget(OppST(),true) then
     return true
   end
   return false
 end
-function ChainIgnition()
+function ChainIgnition(c)
   local targets=CardsMatchingFilter(OppST(),MSTFilter)
   local targets2=CardsMatchingFilter(UseLists({OppMon(),OppST()}),MoralltachFilter)
   local targets3=CardsMatchingFilter(UseLists({OppMon(),OppST()}),SanctumFilter)
   local targets4=CardsMatchingFilter(OppST(),MSTEndPhaseFilter)
   local e = Duel.GetChainInfo(Duel.GetCurrentChain(),CHAININFO_TRIGGERING_EFFECT)
+  local loc = 0
+  if FilterLocation(c,LOCATION_HAND) then loc = 1 end
   if RemovalCheck(12444060) then
     if e and e:GetHandler():IsCode(12697630) then
       return false
@@ -944,8 +985,8 @@ function ChainIgnition()
     then
       return true
     end
-    if targets > 0 then
-      return Duel.GetLocationCount(player_ai,LOCATION_SZONE)>0
+    if targets > 0 and Duel.GetLocationCount(player_ai,LOCATION_MZONE)>loc then
+      return true
     end
   end
   if not UnchainableCheck(12444060) then
@@ -967,37 +1008,38 @@ function ChainIgnition()
     if targets2 > 0 and ArtifactCheck(true) then
       return true
     end
-    if targets4 > 0 then
+    if targets4 > 0 and Duel.GetLocationCount(player_ai,LOCATION_SZONE)>loc then
       local cards = SubGroup(OppST(),MSTEndPhaseFilter)
       GlobalTargetID=cards[math.random(#cards)].id
       GlobalPlayer=2
       GlobalCardMode=2
       GlobalPosition=POS_FACEDOWN
-      return Duel.GetLocationCount(player_ai,LOCATION_SZONE)>0
+      return true
     end
   end
   if e then
     local c = e:GetHandler()
-    if (c:IsType(TYPE_CONTINUOUS+TYPE_EQUIP+TYPE_FIELD) or
-    c:IsType(TYPE_PENDULUM) and ScaleCheck(2)==true or c:GetCode()==65518099)
+    if (c:IsType(TYPE_CONTINUOUS+TYPE_EQUIP+TYPE_FIELD) 
+    or (c:IsType(TYPE_PENDULUM) and c:IsType(TYPE_SPELL) 
+    and (ScaleCheck(2)==true or not e:IsHasType(EFFECT_TYPE_ACTIVATE))))
     and c:IsControler(1-player_ai)
     and targets>0
     and c:IsLocation(LOCATION_ONFIELD)
     and not c:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET)
     and not c:IsHasEffect(EFFECT_INDESTRUCTABLE_EFFECT)
     and not c:IsHasEffect(EFFECT_IMMUNE_EFFECT)
-    and (not DestroyBlacklist(c) or c:GetCode()==19337371)
-    and not(c:GetCode()==65518099 and not(Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_TOHAND)))
+    and (not DestroyBlacklist(c) or c:GetCode()==19337371 or c:GetCode()==05851097)
+    and Duel.GetLocationCount(player_ai,LOCATION_MZONE)>loc
     then
       GlobalTargetID=c:GetCode()
       GlobalPlayer=2
       GlobalCardMode=1
       GlobalPosition=POS_FACEUP
-      return Duel.GetLocationCount(player_ai,LOCATION_SZONE)>0
+      return true
     end
   end
-  if HasPriorityTarget(OppST(),destroycheck) then
-    return Duel.GetLocationCount(player_ai,LOCATION_SZONE)>0
+  if HasPriorityTarget(OppST(),true) and Duel.GetLocationCount(player_ai,LOCATION_MZONE)>loc then
+    return true
   end
   return false
 end
@@ -1023,7 +1065,7 @@ function ShadollOnSelectChain(cards,only_chains_by_player)
   if HasID(cards,12444060,false,nil,LOCATION_GRAVE) and SanctumYesNo() then
     return {1,CurrentIndex}
   end
-  if HasID(cards,29223325) and ChainIgnition() then
+  if HasID(cards,29223325) and ChainIgnition(cards[CurrentIndex]) then
     return {1,CurrentIndex}
   end
   if HasID(cards,37445295,false,nil,LOCATION_ONFIELD) and UseFalcon() then
@@ -1082,6 +1124,9 @@ function ShadollOnSelectChain(cards,only_chains_by_player)
     return {1,CurrentIndex}
   end
   if HasID(cards,04904633) and ChainRoots() then
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,73176465,false,nil,LOCATION_GRAVE) then -- Felis
     return {1,CurrentIndex}
   end
   return nil
@@ -1148,13 +1193,17 @@ function ShadollOnSelectEffectYesNo(id,triggeringCard)
     GlobalCardMode=1
     result = 1
   end
+  if id == 73176465 and grave then
+    result = 1
+  end
   return result
 end
 ShadollAtt={
-  85103922,94977269 -- Moralltach,Midrash
+  85103922,94977269,48424886 -- Moralltach,Midrash,Egrystal
 }
 ShadollDef={
-  12697630,31924889,04904633 -- Beagalltach,Arcanite Magician,Shadoll Roots
+  12697630,31924889,04904633, -- Beagalltach,Arcanite Magician,Shadoll Roots
+  73176465,74822425, -- Felis, Shekinaga
 }
 function ShadollOnSelectPosition(id, available)
   result = nil

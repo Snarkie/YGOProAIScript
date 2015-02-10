@@ -311,6 +311,9 @@ end
 function SummonDownerd()
   return CardsMatchingFilter(AIMon(),BASelfDestructFilter)==0 and HasID(AIMon(),83531441,true,nil,POS_FACEUP_ATTACK)
 end
+function SummonZenmaines()
+  return false -- temp
+end
 function BAInit(cards)
   GlobalPreparation = nil
   local Act = cards.activatable_cards
@@ -603,7 +606,7 @@ function BACard(cards,min,max,id,c)
     return TemtempoTarget(cards)
   end
   if id == 16195942 then -- Dark Rebellion Dragon
-    return BestTargets(cards)
+    return BestTargets(cards,min)
   end
   return nil
 end

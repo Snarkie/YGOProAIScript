@@ -56,6 +56,9 @@ function UseGorilla()
   local cards=OppST()
   return FireFormationCostCheck(AIST(),1)>1 and DestroyCheck(OppST())>0
 end
+function GorillaFilter(c)
+  return 
+end
 function GyokkoFilter(card)
   return bit32.band(card.position,POS_FACEDOWN)>0 and card:is_affected_by(EFFECT_CANNOT_TRIGGER)==0
 end

@@ -43,7 +43,8 @@ function ExoFilter(c)
 end
 function RitualTributeCheck(level,mirror,lvlrestrict,fav)
   local cards
-  if mirror == 1 then -- Kaleidomirror 
+  local ritual=UseLists(AIHand(),AIST())
+  if mirror == 1 or mirror == 0 and HasID(ritual,51124303) then -- Kaleidomirror 
     cards = UseLists(AIHand(),AIMon(),AIExtra())
     if fav then cards = AIExtra() end
     local result = false
@@ -54,12 +55,12 @@ function RitualTributeCheck(level,mirror,lvlrestrict,fav)
       result = true
     end
     return HasID(UseLists(AIHand(),AIMon()),90307777,true) or result
-  elseif mirror == 2 then -- Exomirror
+  elseif mirror == 2 or mirror == 0 and HasID(ritual,14735698)then -- Exomirror
     cards = UseLists(AIHand(),AIMon(),SubGroup(AIGrave(),ExoFilter))
     if fav then cards = SubGroup(AIGrave(),ExoFilter) end
     local result = CheckLvlSum(cards,level,lvlrestrict)
     return HasID(UseLists(AIHand(),AIMon(),SubGroup(AIGrave(),ExoFilter)),90307777,true) or result
-  elseif mirror == 3 then -- Cycle
+  elseif mirror == 3 or mirror == 0 and HasID(ritual,97211663) then -- Cycle
     cards = UseLists(AIHand(),AIMon())
     local result = CheckLvlSum(cards,level,lvlrestrict)
     return HasID(cards,90307777,true) or (result and not fav)
@@ -286,7 +287,7 @@ function UseClaus()
       and OPTCheck(99185129)
 end
 function UseBrio()
-  return OPTCheck(26674724) and not QuasarComboCheck()-- and not SummonBrio(1)
+  return OPTCheck(26674724) and not QuasarComboCheck() and not SummonBrio(0)
 end
 function BrioFilter(c)
   return FilterLocation(c,LOCATION_MZONE) and FilterPreviousLocation(c,LOCATION_EXTRA) 
@@ -295,7 +296,8 @@ function BrioFilter(c)
   and CurrentOwner(c)==2
 end
 function SummonBrio(mirror)
-  return OPTCheck(266747241) and CardsMatchingFilter(OppMon(),BrioFilter)>1 and RitualTributeCheck(6,mirror,false)
+  return OPTCheck(266747241) and CardsMatchingFilter(OppMon(),BrioFilter)>1 
+  and (mirror==nil or RitualTributeCheck(6,mirror,false))
 end
 function UseBrioField()
   return OPTCheck(266747241) and CardsMatchingFilter(OppMon(),BrioFilter)>0
@@ -420,17 +422,17 @@ function UseTradeIn()
   return true
 end
 function UseChainNekroz1()
-  return HasID(AIDeck(),08903700,true)
+  return DeckCheck(DECK_NEKROZ) and HasID(AIDeck(),08903700,true)
 end
 function UseChainNekroz2() 
-  return Duel.GetCurrentPhase()==PHASE_MAIN2 or not GlobalBPAllowed 
-  or HasID(AIMon(),25857246,true) and UseValk()
+  return DeckCheck(DECK_NEKROZ) and (Duel.GetCurrentPhase()==PHASE_MAIN2 or not GlobalBPAllowed 
+  or HasID(AIMon(),25857246,true) and UseValk())
 end
 function SummonDancePrincess()
   return true
 end
 function SummonPoC()
-  return UsePoC()
+  return UsePoC() and not QuasarComboCheck()
 end
 function UsePoC()
   return HasID(AIGrave(),86346643,true) and UseRainbowNeos()
@@ -574,12 +576,12 @@ function NekrozInit(cards)
     OPTSet(51124303)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Act,14735698,false,nil,LOCATION_HAND+LOCATION_SZONE) and UseExo() then
-    OPTSet(14735698)
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
   if HasID(Act,97211663,false,nil,LOCATION_HAND+LOCATION_SZONE) and UseCycle() then
     OPTSet(97211663)
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasID(Act,14735698,false,nil,LOCATION_HAND+LOCATION_SZONE) and UseExo() then
+    OPTSet(14735698)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Act,34086406,false,545382498) and UseChainNekroz2() then
@@ -647,6 +649,11 @@ function KaleidoTarget(cards)
   end
   for i=1,#cards do
     if cards[i].id == 86346643 and HasID(AIHand(),30312361,true) then
+      return {i}
+    end
+  end
+  for i=1,#cards do
+    if cards[i].level == 6 and SummonBrio() then
       return {i}
     end
   end
@@ -951,6 +958,9 @@ function NekrozCard(cards,min,max,id,c)
   if id == 63465535 then -- Underground Arachnid (for Phantom of Chaos)
     return BestTargets(cards)
   end
+  if id == 45986603 then -- Snatch Steal
+    return BestTargets(cards,1,TARGET_CONTROL)
+  end
   return nil
 end
 function KaleidoSum(cards,sum,card)
@@ -1154,6 +1164,7 @@ function ClausFilter2(c)
   and CurrentOwner(c)==2
 end
 function ChainClaus()
+  local targets = CardsMatchingFilter(OppMon(),ClausFilter2)
   local e = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
   if e then
     local c=e:GetHandler()
@@ -1167,7 +1178,7 @@ function ChainClaus()
     end  
   end
   if RemovalCheck(99185129) or NegateCheck(99185129) then
-    return true
+    return targets>0
   end
   if Duel.GetCurrentPhase()==PHASE_DAMAGE then
     local source = Duel.GetAttacker()

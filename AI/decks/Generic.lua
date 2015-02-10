@@ -13,6 +13,9 @@ function SummonExtraDeck(cards,prio)
 -- use certain effects before doing anything else
 ---- 
  if prio then 
+   if HasID(Activatable,72892473) then 
+    --return {COMMAND_ACTIVATE,CurrentIndex}                                -- test
+  end
   if HasID(Activatable,12014404,false,nil,nil,POS_DEFENCE) and UseCowboyDef() then 
     return {COMMAND_ACTIVATE,CurrentIndex}                                -- Gagaga Cowboy finish
   end
@@ -129,6 +132,9 @@ function SummonExtraDeck(cards,prio)
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSummonable,04779823) and SummonMichael() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(SpSummonable,00005500) and SummonClearWing() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
 
@@ -373,6 +379,10 @@ end
 function SummonJeweledRDA(card)
   return UseJeweledRDA(card,1) or OppGetStrongestAttDef() > 2500
 end
+
+function SummonClearWing()
+  return OppGetStrongestAttDef() < 2500 -- and MP2Check() or CardsMatchingFilter(
+end
 function UseBigEye()
   return true
 end
@@ -574,10 +584,10 @@ function ChainNegation(card)
     return EffectNegateFilter(c,card)
   else
     local cards = SubGroup(OppMon(),FilterStatus,STATUS_SUMMONING)
-    if #cards > 1 then
+    if #cards > 1 and Duel.GetCurrentChain()<1 then
       return true
     end
-    if #cards == 1 then
+    if #cards == 1 and Duel.GetCurrentChain()<1 then
       c=cards[1]
       return SummonNegateFilter(c)
     end
@@ -591,6 +601,9 @@ function PriorityChain(cards) -- chain these before anything else
     return {1,CurrentIndex}
   end
   if HasID(cards,44508094,false,nil,LOCATION_MZONE) and ChainNegation(cards[CurrentIndex]) then -- Stardust
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,00005500) and ChainNegation(cards[CurrentIndex]) then -- Clear Wing Synchro Dragon
     return {1,CurrentIndex}
   end
   if HasID(cards,61257789,false,nil,LOCATION_MZONE) and ChainNegation(cards[CurrentIndex]) then -- Stardust AM

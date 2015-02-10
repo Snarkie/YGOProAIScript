@@ -272,21 +272,28 @@ AddPriority({
 })
 AddPriority({
 -- Shaddoll
-[37445295] = {6,3,3,1,6,1,6,1,1,1,FalconCond},        -- Shadoll Falcon
+[37445295] = {6,3,3,1,7,1,6,1,1,1,FalconCond},        -- Shadoll Falcon
 [04939890] = {5,2,2,1,5,4,5,4,1,1,HedgehogCond},      -- Shadoll Hedgehog
-[30328508] = {4,1,5,1,9,1,9,1,1,1,LizardCond},        -- Shadoll Lizard
+[30328508] = {4,1,5,1,9,1,9,1,1,1,LizardCond},        -- Shadoll Lizard/Squamata
 [77723643] = {3,1,4,1,7,1,7,1,1,1,DragonCond},        -- Shadoll Dragon
-[03717252] = {2,1,6,1,8,1,8,1,1,1,BeastCond},         -- Shadoll Beast
+[03717252] = {2,1,6,1,5,1,8,1,1,1,BeastCond},         -- Shadoll Beast
 [24062258] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Secret Sect Druid Dru
+[73176465] = {1,1,1,1,6,5,1,1,1,1,FelisCond},         -- Lightsworn Felis
+[41386308] = {1,1,1,1,1,1,1,1,1,1,MathCond},          -- Mathematician
 
 [05318639] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Mystical Space Typhoon
 [44394295] = {9,5,1,1,1,1,1,1,1,1,ShadollFusionCond}, -- Shadoll Fusion
+[06417578] = {8,6,1,1,1,1,1,1,1,1,ElFusionCond},      -- El-Shadoll Fusion
+[60226558] = {7,4,1,1,1,1,1,1,1,1,NephFusionCond},    -- Nepheshadoll Fusion
 [77505534] = {3,1,1,1,1,1,1,1,1,1,nil},               -- Facing the Shadows
 [04904633] = {4,2,1,1,9,1,9,1,1,1,RootsCond},         -- Shadoll Roots
 
 
-[20366274] = {1,1,6,4,2,1,2,1,1,1,NephilimCond},      -- El-Shadoll Nephilim
-[94977269] = {1,1,7,3,2,1,2,1,1,1,MidrashCond},       -- El-Shadoll Midrash
+[20366274] = {1,1,6,4,2,1,2,1,1,1,NephilimCond},      -- El-Shadoll Nephilim/Construct
+[94977269] = {1,1,7,3,2,1,2,1,1,1,MidrashCond},       -- El-Shadoll Midrash/Winda
+[74822425] = {1,1,1,1,1,1,1,1,1,1,ShekinagaCond},     -- El-Shadoll Shekinaga
+[48424886] = {1,1,1,1,1,1,1,1,1,1,EgrystalCond},      -- El-Shadoll Egrystal
+[00005500] = {1,1,1,1,1,1,1,1,1,1,ClearWingCond},     -- Clear Wing Synchro Dragon
 [72959823] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Panzer Dragon
 [73964868] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Constellar Pleiades
 [29669359] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Number 61: Volcasaurus

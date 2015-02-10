@@ -107,11 +107,7 @@ function CanUseHand()
   and not NormalSummonCheck(player_ai)) and IceHandCheck())
   and Duel.GetCurrentPhase()==PHASE_MAIN1 and GlobalBPAllowed
 end
-GlobalDuality = 0
-function DualityCheck()
-  return Duel.GetTurnCount()~=GlobalDuality 
-  and not HasIDNotNegated(UseLists({AIST(),OppST()}),05851097,true,nil,nil,nil,FilterPosition,POS_FACEUP)
-end
+
 function UseDualityHAT()
   return DeckCheck(DECK_HAT) and (not (CanUseHand() or FieldCheck(4)>1 or FieldCheck(5)>1
   or HandCheck(4)>0 and FieldCheck(4)>0 and not NormalSummonCheck(player_ai) 
@@ -127,7 +123,7 @@ function SummonMyrmeleo()
 end
 function HandFilter(c,atk)
   return bit32.band(c.position,POS_FACEUP_ATTACK)>0 
-  and c.attack > atk and AI.GetPlayerLP(1)+atk-c.attack>800
+  and c.attack >= atk and AI.GetPlayerLP(1)+atk-c.attack>800
   and c:is_affected_by(EFFECT_CANNOT_BE_BATTLE_TARGET)==0
 end
 -- function to determine the lowest attack monster the hands can attack to get their effects
@@ -141,11 +137,11 @@ function HandAtt(cards,att)
   return lowest+1
 end
 function FireHandCheck()
-  return DualityCheck() and (CardsMatchingFilter(OppMon(),HandFilter,1600)>0 
+  return DualityCheck() and MacroCheck() and (CardsMatchingFilter(OppMon(),HandFilter,1600)>0 
   and CardsMatchingFilter(OppMon(),DestroyFilter)>0 and HasID(AIDeck(),95929069,true))
 end
 function IceHandCheck()
-  return DualityCheck() and (CardsMatchingFilter(OppMon(),HandFilter,1400)>0 
+  return DualityCheck() and MacroCheck() and (CardsMatchingFilter(OppMon(),HandFilter,1400)>0 
   and CardsMatchingFilter(OppST(),DestroyFilter)>0 and HasID(AIDeck(),68535320,true))
 end
 function SummonFireHand()
@@ -279,7 +275,7 @@ function CotHTarget(cards)
     result = Add(cards,PRIO_TOFIELD,1,FilterLevel,level)
   elseif GlobalCardMode == 2 then
     GlobalCardMode = nil
-    result = Add(cards,PRIO_TOFIELD,1,FilterAttack,AI.GetPlayerLP(2)-ExpectedDamage(2))
+    result = Add(cards,PRIO_TOFIELD,1,FilterAttackMin,AI.GetPlayerLP(2)-ExpectedDamage(2))
   elseif GlobalCardMode == 1 then
     local id = GlobalTargetID
     GlobalCardMode = nil
