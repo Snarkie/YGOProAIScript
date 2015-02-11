@@ -1097,9 +1097,9 @@ function ChainGungnir(c)
         c=cg:Filter(NekrozGungnirFilter,nil,EFFECT_INDESTRUCTABLE_EFFECT)
         if c and c:GetCount()>0 then c=c:GetMaxGroup(Card.GetAttack):GetFirst() end
       end
-      if c and c.GetCode then
+      if c and c.GetCode and UnchainableCheck(74122412) then
         GlobalTargetID=c:GetCode()
-        return UnchainableCheck(74122412)
+        return true
       end
     end
     if Duel.GetCurrentPhase()==PHASE_BATTLE then
@@ -1114,9 +1114,10 @@ function ChainGungnir(c)
       if WinsBattle(source,target) 
       and NekrozGungnirFilter(target,EFFECT_INDESTRUCTABLE_BATTLE) 
       and (not (HasID(AIHand(),88240999,true) and target:GetAttack()+1000>source:GetAttack()))
+      and UnchainableCheck(74122412)
       then
         GlobalTargetID=target:GetCode()
-        return UnchainableCheck(74122412)
+        return true
       end
     end
   end

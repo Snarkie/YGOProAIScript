@@ -122,7 +122,7 @@ function BestAttackTarget(cards,source,filter,opt)
       print("not matching filter, priority to -99999")
       c.prio = -99999
     end
-    if not BattleTargetCheck(c,source) then
+    if c.prio>0 and not BattleTargetCheck(c,source) then
       print("indestructable by battle etc, priority to -4")
       c.prio = -4
     end

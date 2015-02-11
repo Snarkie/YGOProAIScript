@@ -153,10 +153,12 @@ function SummonIceHand()
   and (IceHandCheck() or FieldCheck(4)==1)
 end
 function SetFireHand()
-  return OverExtendCheck() and #OppMon()>0 and (Duel.GetCurrentPhase()==PHASE_MAIN2 or not GlobalBPAllowed)
+  return OverExtendCheck() --and #OppMon()>0 
+  and (Duel.GetCurrentPhase()==PHASE_MAIN2 or not GlobalBPAllowed)
 end
 function SetIceHand()
-  return OverExtendCheck() and #OppMon()>0 and (Duel.GetCurrentPhase()==PHASE_MAIN2 or not GlobalBPAllowed)
+  return OverExtendCheck() ---and #OppMon()>0 
+  and (Duel.GetCurrentPhase()==PHASE_MAIN2 or not GlobalBPAllowed)
 end
 function UseCotH()
   if Duel.GetTurnPlayer()==player_ai then
@@ -230,6 +232,12 @@ function HATInit(cards)
   end
   if HasID(Summonable,91812341) and SummonMonster(Summonable[CurrentIndex].attack) then
     return {COMMAND_SUMMON,CurrentIndex}
+  end
+  if HasID(Repositionable,68535320,false,nil,nil,POS_FACEDOWN_DEFENCE) and SummonFireHand() then
+    return {COMMAND_CHANGE_POS,CurrentIndex}
+  end
+  if HasID(Repositionable,95929069,false,nil,nil,POS_FACEDOWN_DEFENCE) and SummonIceHand() then
+    return {COMMAND_CHANGE_POS,CurrentIndex}
   end
   if HasID(SetableMon,45803070) and SetMonster() then
     return {COMMAND_SET_MONSTER,CurrentIndex}

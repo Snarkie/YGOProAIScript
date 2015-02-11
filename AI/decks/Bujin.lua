@@ -608,9 +608,10 @@ function ChainHare()
       or HasID(AIHand(),27243130,true) and Duel.GetTurnPlayer()==player_ai
       or HasIDNotNegated(AIST(),27243130,true))
       or source:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE))
+      and UnchainableCheck(59251766)
       then
         GlobalTargetID=target:GetCode()
-        return UnchainableCheck(59251766)
+        return true
       end
     end
   end
