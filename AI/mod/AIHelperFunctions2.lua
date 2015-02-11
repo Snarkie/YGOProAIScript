@@ -1037,7 +1037,6 @@ function CanWinBattle(c,targets,tograve,filter,opt)
       return false
     end
   end
-  print(3)
   for i=1,#sub do
     if (FilterPosition(sub[i],POS_ATTACK) and (sub[i].attack<c.attack
     or CrashCheck(c) and sub[i].attack==c.attack)
@@ -1088,3 +1087,7 @@ function CanFinishGame(c,target)
   end
   return false
 end
+
+
+
+

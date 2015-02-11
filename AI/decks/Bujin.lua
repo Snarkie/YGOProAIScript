@@ -603,13 +603,14 @@ function ChainHare()
       and HareFilterBattle(target)
       and source:IsPosition(POS_FACEUP_ATTACK)
       and target:IsPosition(POS_FACEUP)
-      and (not (HasID(AIHand(),68601507,true) and target:GetBaseAttack()*2>source:GetAttack() or HasID(AIHand(),37742478,true)
+      and (not (HasID(AIHand(),68601507,true) and target:GetBaseAttack()*2>source:GetAttack() 
+      or HasID(AIHand(),37742478,true) or HasID(AIGrave(),56574543,true) 
       or HasID(AIHand(),27243130,true) and Duel.GetTurnPlayer()==player_ai
       or HasIDNotNegated(AIST(),27243130,true))
       or source:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE))
       then
         GlobalTargetID=target:GetCode()
-        return true
+        return UnchainableCheck(59251766)
       end
     end
   end
@@ -676,7 +677,7 @@ function ChainHonest()
       and not target:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE) 
       --and not target:IsHasEffect(EFFECT_IMMUNE_EFFECT) 
       then
-        return true
+        return UnchainableCheck(37742748)
       end
     end
   end
@@ -709,7 +710,7 @@ function ChainSinyou()
       and not target:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE) 
       --and not target:IsHasEffect(EFFECT_IMMUNE_EFFECT) 
       then
-        return true
+        return UnchainableCheck(56574543)
       end
     end
   end

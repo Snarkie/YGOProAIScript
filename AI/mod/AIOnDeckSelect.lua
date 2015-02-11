@@ -32,7 +32,7 @@ DeckIdent={ --card that identifies the deck
 }
 Deck = nil
 DeckName={
-[0]   = "Not Supported",
+[0]   = "Something else",
 [1]   = "Chaos Dragon",
 [2]   = "Fire Fist",
 [3]   = "Heraldic Beast", 
@@ -75,6 +75,7 @@ PRIO_BANISH = 9
 -- priority lists for decks:
 function PrioritySetup()
 AddPriority({
+
 -- Burning Abyss
 [57143342] = {7,2,7,3,7,1,1,1,2,1,CirCond},      -- BA Cir
 [73213494] = {3,2,3,1,3,3,1,1,6,1,CalcabCond},   -- BA Calcab
@@ -382,6 +383,15 @@ function GetPriority(card,loc)
       loc = loc + 1
     end
     result = checklist[loc]
+    if checklist[11] and checklist[11](loc,card) ~= false 
+    and checklist[11](loc,card) ~= true 
+    then
+      print("custom priority function, returning:")
+      print(checklist[11](loc,card))
+      result = checklist[11](loc,card)
+    end
+  else
+    print("no priority defined for id: "..id..", defaulting to 0")
   end
   return result
 end
@@ -405,7 +415,10 @@ function AssignPriority(cards,loc,filter,opt)
     if loc==PRIO_TOFIELD and cards[i].location==LOCATION_DECK then
       cards[i].prio=cards[i].prio+2
     end
-   if loc==PRIO_TOFIELD and cards[i].location==LOCATION_GRAVE then
+    if loc==PRIO_TOGRAVE and cards[i].location==LOCATION_DECK then
+      cards[i].prio=cards[i].prio+2
+    end
+    if loc==PRIO_TOFIELD and cards[i].location==LOCATION_GRAVE then
       cards[i].prio=cards[i].prio+1
     end
     if loc==PRIO_TOFIELD and cards[i].location==LOCATION_EXTRA then

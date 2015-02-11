@@ -1099,7 +1099,7 @@ function ChainGungnir(c)
       end
       if c and c.GetCode then
         GlobalTargetID=c:GetCode()
-        return true
+        return UnchainableCheck(74122412)
       end
     end
     if Duel.GetCurrentPhase()==PHASE_BATTLE then
@@ -1112,9 +1112,11 @@ function ChainGungnir(c)
         end
       end
       if WinsBattle(source,target) 
-      and NekrozGungnirFilter(target,EFFECT_INDESTRUCTABLE_BATTLE) then
+      and NekrozGungnirFilter(target,EFFECT_INDESTRUCTABLE_BATTLE) 
+      and (not (HasID(AIHand(),88240999,true) and target:GetAttack()+1000>source:GetAttack()))
+      then
         GlobalTargetID=target:GetCode()
-        return true
+        return UnchainableCheck(74122412)
       end
     end
   end

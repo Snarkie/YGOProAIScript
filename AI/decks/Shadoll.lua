@@ -728,9 +728,7 @@ function ChainBookOfMoon()
   return false
 end
 function SanctumFilter(c)
-  return (c.level>=5 or bit32.band(c.type,TYPE_FUSION+TYPE_RITUAL+TYPE_SYNCHRO+TYPE_XYZ)>0)
-  and c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0 and bit32.band(c.position,POS_FACEUP)>0 
-  and DestroyFilter(c,true)
+  return PriorityTarget(c,true,FilterPosition,POS_FACEUP)
 end
 function ChainSanctum()
   if RemovalCheck(12444060) and (HasID(AIDeck(),85103922,true) or HasID(AIDeck(),12697630,true) and HasID(AIST(),85103922,true) and MidrashCheck())then
@@ -874,6 +872,7 @@ function ArtifactCheck(sanctum)
     end
     GlobalTargetID = 12697630
     GlobalPlayer = 1
+    GlobalPosition=POS_FACEDOWN
     return true
   end
   if MoralltachCheck then
@@ -884,6 +883,7 @@ function ArtifactCheck(sanctum)
     end
     GlobalTargetID = 85103922
     GlobalPlayer = 1
+    GlobalPosition=POS_FACEDOWN
     return true
   end
   return false
@@ -985,7 +985,7 @@ function ChainIgnition(c)
     then
       return true
     end
-    if targets > 0 and Duel.GetLocationCount(player_ai,LOCATION_MZONE)>loc then
+    if targets > 0 and Duel.GetLocationCount(player_ai,LOCATION_SZONE)>loc then
       return true
     end
   end
@@ -1029,7 +1029,7 @@ function ChainIgnition(c)
     and not c:IsHasEffect(EFFECT_INDESTRUCTABLE_EFFECT)
     and not c:IsHasEffect(EFFECT_IMMUNE_EFFECT)
     and (not DestroyBlacklist(c) or c:GetCode()==19337371 or c:GetCode()==05851097)
-    and Duel.GetLocationCount(player_ai,LOCATION_MZONE)>loc
+    and Duel.GetLocationCount(player_ai,LOCATION_SZONE)>loc
     then
       GlobalTargetID=c:GetCode()
       GlobalPlayer=2
@@ -1038,7 +1038,7 @@ function ChainIgnition(c)
       return true
     end
   end
-  if HasPriorityTarget(OppST(),true) and Duel.GetLocationCount(player_ai,LOCATION_MZONE)>loc then
+  if HasPriorityTarget(OppST(),true) and Duel.GetLocationCount(player_ai,LOCATION_SZONE)>loc then
     return true
   end
   return false

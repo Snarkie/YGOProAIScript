@@ -578,7 +578,8 @@ Unchainable={
 05318639,53582587,97077563,14087893, -- Mystical Space Typhoon, Torrential tribute, Call of the Haunted, Book of Moon
 78474168,50078509,29616929,19748583, -- Breakthrough Skill, Fiendish Chain, TTHN, Gwen
 25789292,36006208,71587526,63356631, -- Forbidden Chalice, Fire Lake, Karma Cut, PWWB
-25857246, -- Nekroz Valkyrus
+25857246,74122412,99185129,56574543, -- Nekroz Valkyrus, Nekroz Gungnir, Nekroz Clausolas, Bujingi Sinyou
+59251766,37742748, -- Bujingi Hare, Honest
 }
 function isUnchainableTogether(CardId)
   for i=1,#Unchainable do

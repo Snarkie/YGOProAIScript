@@ -66,7 +66,7 @@ function TurgeCond(loc,c)
 end
 function LindeCheck()
   return DualityCheck() and MacroCheck() and CardsMatchingFilter(OppMon(),HandFilter,1500)>0 
-  and OPTCheck(23899727) and OppGetStrongestAttDef()<2700 
+  and OPTCheck(23899727) --and OppGetStrongestAttDef()<2700 
 end
 function LindeCond(loc)
   local cards=UseLists({AIHand(),AIMon()})
