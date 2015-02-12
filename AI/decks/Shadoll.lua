@@ -45,7 +45,8 @@ function BeastCond(loc)
 end
 function NephilimFilter(c)
   return bit32.band(c.summon_type,SUMMON_TYPE_SPECIAL)>0
-  and c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0 or c.attack<2800
+  and c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0 
+  and Affected(c,TYPE_MONSTER,8)
 end
 function NephilimCond(loc)
   if loc == PRIO_TOFIELD then

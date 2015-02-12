@@ -432,49 +432,6 @@ function ChainApoqliphort()
   return (Duel.GetCurrentPhase()==PHASE_END or Duel.GetTurnPlayer()==PLAYER_AI) 
   and PriorityCheck(AIExtra(),PRIO_EXTRA,3,QliphortFilter)>2
 end
-function ChainSkillDrain()
-  local e = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
-  if SkillDrainCheck() then
-    return false
-  end
-	if e then
-    local c=e:GetHandler()
-    if c and c:IsControler(1-player_ai) and c:IsLocation(LOCATION_MZONE) 
-    and NegateBlacklist(c:GetCode())==0 and not c:IsHasEffect(EFFECT_IMMUNE)
-    and not c:IsHasEffect(EFFECT_DISABLE)and not c:IsHasEffect(EFFECT_DISABLE_EFFECT)
-    then
-      return true
-    end
-  end
-  if Duel.GetCurrentPhase() == PHASE_BATTLE then
-    if Duel.GetTurnPlayer()==player_ai 
-    and not OppHasStrongestMonster() 
-    and CardsMatchingFilter(OppMon(),NegateBPCheck)>0 
-    then
-      return true
-    end
-    local source = Duel.GetAttacker()
-		local target = Duel.GetAttackTarget()
-    if source and target then
-      if source:IsControler(player_ai) then
-        target = Duel.GetAttacker()
-        source = Duel.GetAttackTarget()
-      end
-      if target:IsControler(player_ai)
-      and (source:IsPosition(POS_FACEUP_ATTACK) 
-      and source:GetAttack() >= target:GetAttack() 
-      and source:GetAttack() <= target:GetAttack()+QliphortAttackBonus(target:GetCode(),target:GetLevel())
-      or source:IsPosition(POS_FACEUP_DEFENCE)
-      and source:GetDefence() >= target:GetAttack() 
-      and source:GetDefence() <= target:GetAttack()+QliphortAttackBonus(target:GetCode(),target:GetLevel()))
-      and target:IsPosition(POS_FACEUP_ATTACK) 
-      then
-        return true
-      end
-    end
-  end
-  return false
-end
 function ChainVanity()
   for i=1,Duel.GetCurrentChain() do
     if Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_SPECIAL_SUMMON) 

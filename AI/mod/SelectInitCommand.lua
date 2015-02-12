@@ -2108,48 +2108,34 @@ end
   --       General normal summoning and setting logic 
   -- *****************************************************
   -------------------------------------------------------   
-  -- Normal Summon a monster if it has a higher ATK
-  -- than any of the opponent's attack position
-  -- monsters, or if the AI controls other monsters. 
-  --  
-  -- Certain monsters should not usually be normal
-  -- summoned, such as Ancient Gear Gadjiltron
-  -- Dragon, Tragoedia and Gorz.
-  --------------------------------------------------  
-  for i=1,#SummonableCards do
-    if SummonableCards[i].id ~= 31305911 and          -- Marshmallon
-       SummonableCards[i].id ~= 23205979 and          -- Spirit Reaper
-       SummonableCards[i].id ~= 62892347 and          -- A.F. The Fool
-       SummonableCards[i].id ~= 12538374 and          -- Treeborn Frog
-       SummonableCards[i].id ~= 15341821 and          -- Dandylion
-       SummonableCards[i].id ~= 41872150 then         -- Locusts
-	  if NormalSummonBlacklist(SummonableCards[i].id) == 0 and SummonableCards[i].level < 5 then
-        if NormalSummonWhitelist(SummonableCards[i].id) == 1 and SummonableCards[i].level < 5 then          
-		   GlobalSummonedThisTurn = GlobalSummonedThisTurn+1
-		  return COMMAND_SUMMON,i
-         end
-       end
-     end
+
       
-	  -----------------------------------------------------------------------
-      -- Check if monster isn't of a flip effect type, and has more attack points
-      -- than player's strongest monster, or if any actions can be takes to increase strength of summonable monster,
-	  -- or if any XYZ monsters can be special summoned as result, and Summon or Set monster depending on result.
-	  -----------------------------------------------------------------------
-	 for i=1,#SummonableCards do
-	  if NormalSummonBlacklist(SummonableCards[i].id) == 0 and 
-	  SummonableCards[i].type ~= TYPE_MONSTER + TYPE_EFFECT + TYPE_FLIP and SummonableCards[i].level < 5 then
-		if SummonableCards[i].attack >= SummonableCards[i].defense and SummonableCards[i].attack ~= 0 
-		or Get_Card_Count_Pos(OppMon(), POS_FACEUP) == 0 and SummonableCards[i].attack ~= 0 then
-          if SummonableCards[i].attack >= Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") or 
-		   CanChangeOutcome(cards, SummonableCards, cards.activatable_cards) == 1 then
-		   GlobalSummonedThisTurn = GlobalSummonedThisTurn+1
-			return COMMAND_SUMMON,i
-            end
-          end
-        end
-      end
+	-----------------------------------------------------------------------
+  -- Check if monster isn't of a flip effect type, and has more attack points
+  -- than player's strongest monster, or if any actions can be taken to increase strength of summonable monster,
+	-- or if any XYZ monsters can be special summoned as result, and Summon or Set monster depending on result.
+	-----------------------------------------------------------------------
+  for i=1,#SummonableCards do
+    local c = SummonableCards[i]
+	  if NormalSummonBlacklist(c.id) == 0 
+    and not FilterType(c,TYPE_FLIP)
+    and c.level < 5 
+    and c.id ~= 31305911          -- Marshmallon
+    and c.id ~= 23205979          -- Spirit Reaper
+    and c.id ~= 62892347          -- A.F. The Fool
+    and c.id ~= 12538374          -- Treeborn Frog
+    and c.id ~= 15341821          -- Dandylion
+    and c.id ~= 41872150          -- Locusts
+    and c.defense-c.attack < 1000
+    and c.attack >= 1000 
+    and (c.attack >= Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack")
+    or CanChangeOutcome(cards, SummonableCards, cards.activatable_cards) == 1 )
+    or NormalSummonWhitelist(c.id) == 1
+    then
+      GlobalSummonedThisTurn = GlobalSummonedThisTurn+1
+      return COMMAND_SUMMON,i
     end
+  end
   
   ---------------------------------------------------
   -- If an in-hand monster has a flip effect, set it.
@@ -2244,20 +2230,27 @@ end
   
   --------------------------------------------------
   -- If AI's monster has less attack than the
-  -- opponent's strongest monster, turn it to defence position.
+  -- opponent's strongest monster, turn it to defence position 
+  -- in MP2.
   --------------------------------------------------
+  if Duel.GetCurrentPhase() == PHASE_MAIN2 or not GlobalBPAllowed then
     for i=1,#RepositionableCards do	  
-	  if RepositionableCards[i].position == POS_FACEUP_ATTACK then      
-        if RepositionableCards[i].id ~= 88241506 and  -- Maiden with Eyes of Blue	
-        RepositionableCards[i].id ~= 15914410 and  -- Mechquipped Angineer	
-		   RepositionableCards[i].id ~= 23232295 then -- Battlin' Boxer Lead Yoke	
-		 if RepositionableCards[i].attack < Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack") and RepositionableCards[i].attack < 2400 and 
-		    isToonUndestroyable(RepositionableCards) == 0 then
-		  return COMMAND_CHANGE_POS,i
-         end
-       end
-     end
-   end
+    local c = RepositionableCards[i]
+      if c.position == POS_FACEUP_ATTACK 
+      and c.id ~= 88241506 -- Maiden with Eyes of Blue	
+      and c.id ~= 15914410 -- Mechquipped Angineer
+      and c.id ~= 23232295 -- Battlin' Boxer Lead Yoke	
+      and (c.attack < Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack") 
+      and c.attack < 2400
+      and c.attack-c.defense < 500
+      or c.attack<=1000 
+      or c.attack-c.defense <=1000)
+      and isToonUndestroyable(RepositionableCards) == 0 
+      then
+        return COMMAND_CHANGE_POS,i
+      end
+    end
+  end
   
   --------------------------------------------------
   -- If the AI controls a monster with higher attack
@@ -2303,11 +2296,13 @@ end
   end
   if ChangePosOK == 1 then
     for i=1,#RepositionableCards do
-      if RepositionBlacklist(RepositionableCards[i].id) ==0 
-      and RepositionableCards[i].attack > 0 then
-        if RepositionableCards[i].position == POS_FACEUP_DEFENCE or
-           RepositionableCards[i].position == POS_FACEDOWN_DEFENCE then
-		  return COMMAND_CHANGE_POS,i
+      local c = RepositionableCards[i]
+      if RepositionBlacklist(c.id) ==0 
+      and c.attack > 1000 
+      and c.defense-c.attack > 1000
+      then
+        if FilterPosition(c,POS_DEFENCE) then
+          return COMMAND_CHANGE_POS,i
         end
       end
     end

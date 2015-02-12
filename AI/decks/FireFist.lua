@@ -822,58 +822,8 @@ function VeilerTarget(card)
   end
   return false
 end
-function ChainVeiler()
-  local effect = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
-	if effect then
-    card=effect:GetHandler()
-    if player_ai==nil then
-      player=1
-    else
-      player=player_ai
-    end
-    if card and card:IsControler(1-player) and card:IsLocation(LOCATION_MZONE) 
-    and NegateBlacklist(card:GetCode())==0 and card:IsCanBeEffectTarget()
-    and not card:IsHasEffect(EFFECT_DISABLE)
-    and not card:IsHasEffect(EFFECT_DISABLE_EFFECT)
-    then
-      GlobalTargetID=card:GetCode()
-      return true
-    end
-  end
-  if Duel.GetCurrentPhase() == PHASE_BATTLE then --for Breakthrough Skill
-    if Duel.GetTurnPlayer()==player_ai then
-      local cards=OppMon()
-      for i=1,#cards do
-        if VeilerTarget(cards[i]) then
-          GlobalTargetID=cards[i].id
-          return true
-        end
-      end
-    end
-    local source = Duel.GetAttacker()
-		local target = Duel.GetAttackTarget()
-    if source and target then
-      if source:IsControler(player_ai) then
-        target = Duel.GetAttacker()
-        source = Duel.GetAttackTarget()
-      end
-      if source:GetAttack() <= target:GetAttack() and target:IsControler(player_ai) 
-      and target:IsPosition(POS_FACEUP_ATTACK) and source:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE)
-      then
-        --GlobalTargetID=source:GetCode()
-        --return true
-      end
-    end
-  end
-  return false
-end
+
 function FireFistOnChain(cards,only_chains_by_player)
-  if HasID(cards,97268402) and ChainVeiler() then
-    return {1,CurrentIndex}
-  end
-  if HasID(cards,78474168) and ChainVeiler() then
-    return {1,CurrentIndex}
-  end
   if HasID(cards,70329348) and ChainTenken() then
     return {1,CurrentIndex}
   end

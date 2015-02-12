@@ -309,9 +309,9 @@ function RemovalCheck(id,category)
   for i=1,#c do
     for j=1,Duel.GetCurrentChain() do
       local ex,cg = Duel.GetOperationInfo(j,c[i])
-      if ex then
+      if ex and CheckNegated(j) then
         if id==nil then 
-          return cg 
+          return cg
         end
         if cg and id~=nil and cg:IsExists(function(c) return c:IsControler(player_ai) and c:IsCode(id) end, 1, nil) then
           return true
@@ -391,7 +391,7 @@ function BestTargets(cards,count,target,filter,opt,immuneCheck,source)
       or bit32.band(c.status,STATUS_IS_PUBLIC)>0
       then
         if c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)>0 and target==TARGET_DESTROY 
-        or c:is_affected_by(EFFECT_IMMUNE)>0
+        or c:is_affected_by(EFFECT_IMMUNE_EFFECT)>0
         then
           c.prio = 1
         else
@@ -405,7 +405,7 @@ function BestTargets(cards,count,target,filter,opt,immuneCheck,source)
       end
     else
       if c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)>0 and target==TARGET_DESTROY
-      or c:is_affected_by(EFFECT_IMMUNE)>0 
+      or c:is_affected_by(EFFECT_IMMUNE_EFFECT)>0 
       or bit32.band(c.status,STATUS_LEAVE_CONFIRMED)>0
       then
         c.prio = 1
@@ -573,8 +573,12 @@ end
 function FilterLevel(c,level)
   return bit32.band(c.type,TYPE_MONSTER)>0 and c.level==level
 end
-function FilterType(c,type)
-  return bit32.band(c.type,type)>0
+function FilterType(c,type) -- TODO: change all filters to support card script
+  if c.GetCode then
+    return c:IsType(type)
+  else
+    return bit32.band(c.type,type)>0
+  end
 end
 function FilterAttackMin(c,attack)
   return bit32.band(c.type,TYPE_MONSTER)>0 and c.attack>=attack
@@ -765,6 +769,9 @@ function TargetProtection(id,type)
   if id == 16037007 or id == 58058134 then
     return true
   end
+  if id == 00005500 then
+    return bit32.band(type,TYPE_MONSTER)>0
+  end
   return false
 end
 function Targetable(c,type)
@@ -788,11 +795,11 @@ function Affected(c,type,level)
   local atkdiff
   if c.GetCode then
     id = c:GetCode()
-    immune = c:IsHasEffect(EFFECT_IMMUNE) 
+    immune = c:IsHasEffect(EFFECT_IMMUNE_EFFECT) 
     atkdiff = c:GetBaseAttack() - c:GetAttack()
   else
     id = c.id
-    immune = c:is_affected_by(EFFECT_IMMUNE)>0
+    immune = c:is_affected_by(EFFECT_IMMUNE_EFFECT)>0
     atkdiff = c.base_attack - c.attack
   end
   if immune and atkdiff == 800 

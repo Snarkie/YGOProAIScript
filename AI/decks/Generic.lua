@@ -359,7 +359,7 @@ function SummonStardustSpark()
 end
 function JeweledRDAFilter(card,id)
   return card.cardid~=id and bit32.band(card.position,POS_FACEUP_ATTACK)>0 
-  and card:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0 and card:is_affected_by(EFFECT_IMMUNE)==0
+  and card:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0 and card:is_affected_by(EFFECT_IMMUNE_EFFECT)==0
 end
 function UseJeweledRDA(card,mod)
   local aimon=AIMon()
@@ -577,11 +577,35 @@ function EffectNegateFilter(c,card)
   end
   return true
 end
+function CardNegateFilter(c,card,targeted,filter,opt)
+  return c and card and c:IsControler(1-player_ai) 
+  and c:IsLocation(LOCATION_ONFIELD) 
+  and NegateBlacklist(c:GetCode())==0 
+  and (not target or Targetable(c,card.type))
+  and Affected(c,card.type,card.level)
+  and NotNegated(c) and (filter==nil or opt==nil 
+  and filter(c) or filter(c,opt))
+end
+
+GlobalNegatedChainLinks = {}
+function CheckNegated(ChainLink)
+  return not GlobalNegatedChainLinks[ChainLink]
+end
+function SetNegated(ChainLink)
+  if ChainLink == nil then
+    ChainLink = Duel.GetCurrentChain()
+  end
+  GlobalNegatedChainLinks[ChainLink] = true
+end
 function ChainNegation(card)
+-- for negating the last chain link via trigger effect
   local e,c,id 
   if EffectCheck(1-player_ai)~=nil then
     e,c,id = EffectCheck()
-    return EffectNegateFilter(c,card)
+    if EffectNegateFilter(c,card) then
+      SetNegated()
+      return true
+    end
   else
     local cards = SubGroup(OppMon(),FilterStatus,STATUS_SUMMONING)
     if #cards > 1 and Duel.GetCurrentChain()<1 then
@@ -594,10 +618,144 @@ function ChainNegation(card)
   end
   return false
 end
-
-
+function ChainCardNegation(card,targeted,filter,opt)
+-- for negating cards on the field that activated
+-- an effect anywhere in the current chain
+  for i=1,Duel.GetCurrentChain() do
+    if CheckNegated(i) then
+      local e = Duel.GetChainInfo(i, CHAININFO_TRIGGERING_EFFECT)
+      if e then
+        c=e:GetHandler()
+        if player_ai==nil then -- Effect Veiler can be activated 
+          player_ai=1          -- before player setup is complete      
+        end                    -- which means the AI is player 2
+        if CardNegateFilter(c,card,targeted,filter,opt) then
+          SetNegated(i)
+          return true
+        end
+      end
+    end
+  end
+  return false
+end
+function ChainChalice(card)
+  if ChainCardNegation(card,true,FilterType,TYPE_MONSTER) then
+    GlobalTargetID=c:GetCode()
+    GlobalPlayer=2
+    return true
+  end
+end
+function ChainVeiler(card)
+  if ChainCardNegation(card,true,FilterType,TYPE_MONSTER) then
+    GlobalTargetID=c:GetCode()
+    return true
+  end
+  return false
+end
+function ChainBTS(card)
+  if ChainCardNegation(card,true,FilterType,TYPE_MONSTER) then
+    GlobalTargetID=c:GetCode()
+    return true
+  end
+  if Duel.GetCurrentPhase() == PHASE_BATTLE then --for Breakthrough Skill
+    if Duel.GetTurnPlayer()==player_ai then
+      local cards=OppMon()
+      for i=1,#cards do
+        if VeilerTarget(cards[i]) then
+          GlobalTargetID=cards[i].id
+          return true
+        end
+      end
+    end
+    local source = Duel.GetAttacker()
+		local target = Duel.GetAttackTarget()
+    if source and target then
+      if source:IsControler(player_ai) then
+        target = Duel.GetAttacker()
+        source = Duel.GetAttackTarget()
+      end
+      if source:GetAttack() <= target:GetAttack() and target:IsControler(player_ai) 
+      and target:IsPosition(POS_FACEUP_ATTACK) and source:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE)
+      then
+        --GlobalTargetID=source:GetCode()
+        --return true
+      end
+    end
+  end
+  return false
+end
+function ChainFiendish(card)
+  if ChainCardNegation(card,true,FilterType,TYPE_MONSTER) then
+    GlobalTargetID=c:GetCode()
+    return true
+  end
+  if Duel.GetCurrentPhase() == PHASE_BATTLE then
+		local source = Duel.GetAttacker()
+		local target = Duel.GetAttackTarget()
+    if source and target then
+      if target:IsControler(player_ai)
+      and (source:GetAttack() >= target:GetAttack()  and source:IsPosition(POS_FACEUP_ATTACK) 
+      or   source:GetAttack() >= target:GetDefence() and source:IsPosition(POS_FACEUP_DEFENCE))
+      and target:IsPosition(POS_FACEUP_ATTACK)
+      and source:IsType(TYPE_EFFECT) and not source:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET) 
+      and not target:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE) and not source:IsHasEffect(EFFECT_IMMUNE_EFFECT) 
+      then
+        GlobalTargetID=source:GetCode()
+        return true
+      end
+    end
+  end
+end
+function ChainSkillDrain(card)
+  if ChainCardNegation(card,false,FilterType,TYPE_MONSTER) then
+    return true
+  end
+  if Duel.GetCurrentPhase() == PHASE_BATTLE then
+    if Duel.GetTurnPlayer()==player_ai 
+    and not OppHasStrongestMonster() 
+    and CardsMatchingFilter(OppMon(),NegateBPCheck)>0 
+    then
+      return true
+    end
+    local source = Duel.GetAttacker()
+		local target = Duel.GetAttackTarget()
+    if source and target then
+      if source:IsControler(player_ai) then
+        target = Duel.GetAttacker()
+        source = Duel.GetAttackTarget()
+      end
+      if target:IsControler(player_ai)
+      and (source:IsPosition(POS_FACEUP_ATTACK) 
+      and source:GetAttack() >= target:GetAttack() 
+      and source:GetAttack() <= target:GetAttack()+QliphortAttackBonus(target:GetCode(),target:GetLevel())
+      or source:IsPosition(POS_FACEUP_DEFENCE)
+      and source:GetDefence() >= target:GetAttack() 
+      and source:GetDefence() <= target:GetAttack()+QliphortAttackBonus(target:GetCode(),target:GetLevel()))
+      and target:IsPosition(POS_FACEUP_ATTACK) 
+      then
+        return true
+      end
+    end
+  end
+  return false
+end
+function ChainGiantHand(card)
+  if ChainCardNegation(card,true,FilterType,TYPE_MONSTER) then
+    return true
+  end
+  return false
+end
 function PriorityChain(cards) -- chain these before anything else
   if HasID(cards,58120309) and ChainNegation(cards[CurrentIndex]) then -- Starlight Road
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,02956282) and ChainNegation(cards[CurrentIndex]) then -- Naturia Barkion
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,33198837) and ChainNegation(cards[CurrentIndex]) then -- Naturia Beast
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,99916754) and ChainNegation(cards[CurrentIndex]) then -- Naturia Exterio
     return {1,CurrentIndex}
   end
   if HasID(cards,44508094,false,nil,LOCATION_MZONE) and ChainNegation(cards[CurrentIndex]) then -- Stardust
@@ -616,6 +774,9 @@ function PriorityChain(cards) -- chain these before anything else
     return {1,CurrentIndex}
   end
   if HasID(cards,99188141) and ChainNegation(cards[CurrentIndex]) then -- THRIO
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,29616929) and ChainNegation(cards[CurrentIndex]) then -- Traptrix Trap Hole Nighmare
     return {1,CurrentIndex}
   end
   if HasID(cards,74294676) and ChainNegation(cards[CurrentIndex]) then -- Laggia
@@ -654,5 +815,23 @@ function PriorityChain(cards) -- chain these before anything else
   if HasID(cards,92512625) and ChainNegation(cards[CurrentIndex]) then -- Solemn Advice
     return {1,CurrentIndex}
   end
+  
+
+  if HasID(cards,78474168) and ChainBTS(cards[CurrentIndex]) then
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,50078509) and ChainFiendish(cards[CurrentIndex]) then
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,63746411) and ChainGiantHand(cards[CurrentIndex]) then
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,25789292) and ChainChalice(cards[CurrentIndex]) then
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,97268402) and ChainVeiler(cards[CurrentIndex]) then
+    return {1,CurrentIndex}
+  end
+
   return nil
 end

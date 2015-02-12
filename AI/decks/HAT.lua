@@ -455,11 +455,11 @@ function MoonWhitelist2(id) -- cards to chain Book of Moon to to save your monst
 end
 function MoonFilter(c)
   return bit32.band(c.type,TYPE_MONSTER)>0 and bit32.band(c.position,POS_FACEUP)>0 
-  and c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0 and c:is_affected_by(EFFECT_IMMUNE)==0
+  and c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0 and c:is_affected_by(EFFECT_IMMUNE_EFFECT)==0
 end
 function MoonFilter2(c,p)
   return c:IsType(TYPE_MONSTER) and c:IsPosition(POS_FACEUP) and c:IsControler(p)
-  and not c:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET) and not c:IsHasEffect(EFFECT_IMMUNE)
+  and not c:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET) and not c:IsHasEffect(EFFECT_IMMUNE_EFFECT)
 end
 function MoonFilter3(c)
   return MoonFilter(c) and ShadollFusionFilter(c)
@@ -593,21 +593,6 @@ function ChainTrapHole()
   end
   return true
 end
-function ChainGiantHand()
-  local e=Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
-  local c=nil
-  if e then
-    c=e:GetHandler()
-  end
-  if c:IsLocation(LOCATION_MZONE) and not c:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET)
-  and NegateBlacklist(c:GetCode())==0
-  then
-    GlobalCardMode = 1
-    GlobalTargetID = c:GetOriginalCode()
-    return true
-  end
-  return false
-end
 function PleiadesFilter(c)
   return c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
 end
@@ -710,14 +695,12 @@ function HATChain(cards)
     return {1,CurrentIndex}
   end
   if HasID(cards,29616929) and ChainTTHN() then
-    return {1,CurrentIndex}
+    --return {1,CurrentIndex}
   end
   if HasID(cards,04206964) and ChainTrapHole() then
     return {1,CurrentIndex}
   end
-  if HasID(cards,63746411) and ChainGiantHand() then -- Giant Hand
-    return {1,CurrentIndex}
-  end
+
   if HasID(cards,97077563) and ChainCotH() then
     return {1,CurrentIndex}
   end

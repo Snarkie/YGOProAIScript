@@ -243,6 +243,19 @@ end
 function SummonLavalvalChain1()
   return DeckCheck(DECK_TELLARKNIGHT) and MP2Check() and (not HasAccess(75878039) or OppGetStrongestAttack()<1800)
 end
+function UseChainTellar1()
+  return DeckCheck(DECK_TELLARKNIGHT) and not HasAccess(75878039)
+end
+function UseChainTellar2()
+ if DeckCheck(DECK_TELLARKNIGHT) 
+ and (Duel.GetCurrentPhase()==PHASE_MAIN2 or not GlobalBPAllowed
+ or not NormalSummonCheck() and HasID(AIHand(),38331564,true) and HasID(AIHand(),91110378,true))
+ then
+  GlobalStacked = Duel.GetTurnCount()
+  return true
+ end
+ return false
+end
 function SatellarknightOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local Activatable = cards.activatable_cards
   local Summonable = cards.summonable_cards
@@ -268,12 +281,13 @@ function SatellarknightOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Activatable,34086406,false,545382497) 
-  and DeckCheck(DECK_TELLARKNIGHT) and not HasAccess(75878039) 
+  and UseChainTellar1() 
   then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Activatable,34086406,false,545382498)
-  and DeckCheck(DECK_TELLARKNIGHT) then
+  and UseChainTellar2() 
+  then
     GlobalCardMode = 2
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -454,32 +468,24 @@ function ChainCotH2()
   if not DeckCheck(DECK_TELLARKNIGHT) then
     return false
   end
+  if GlobalStacked and (GlobalStacked == Duel.GetTurnCount() 
+  or GlobalStacked+1 == Duel.GetTurnCount())
+  then
+    return false
+  end
   if RemovalCheck(97077563) and SatellarknightPriorityCheck(AIGrave(),PRIO_TOFIELD)>1 then
     return true
   end
   if Duel.GetCurrentPhase()==PHASE_END and Duel.CheckTiming(TIMING_END_PHASE) and Duel.GetTurnPlayer() == 1-player_ai then
     return OverExtendCheck() and SatellarknightPriorityCheck(AIGrave(),PRIO_TOFIELD)>4
+    and not (CardsMatchingFilter(AIGrave(),SatellarknightFilter)==1
+    and HasID(AIGrave(),75878039) and HasID(AIHand(),02273734))
   end
 end
-function ChainChalice()
+function ChainChaliceAtk()
   local e = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
 	if e then
-    c=e:GetHandler()
-    if player_ai==nil then
-      player=1
-    else
-      player=player_ai
-    end
-    if c and c:IsControler(1-player) and c:IsLocation(LOCATION_MZONE) 
-    and NegateBlacklist(c:GetCode())==0 and c:IsCanBeEffectTarget()
-    and not c:IsHasEffect(EFFECT_IMMUNE_EFFECT)
-    and not c:IsHasEffect(EFFECT_DISABLE)
-    and not c:IsHasEffect(EFFECT_DISABLE_EFFECT)
-    then
-      GlobalTargetID=c:GetCode()
-      GlobalPlayer=2
-      return true
-    end
+    local c = e:GetHandler()
   end
   if c and (c:GetCode()==27243130 or c:GetCode()==37742478) then
     return false
@@ -533,7 +539,7 @@ function SatellarknightOnSelectChain(cards,only_chains_by_player)
   if HasID(cards,82732705) and ChainSkillDrain() then
     return {1,CurrentIndex}
   end
-  if HasID(cards,25789292) and ChainChalice() then
+  if HasID(cards,25789292) and ChainChaliceAtk() then
     return {1,CurrentIndex}
   end
   return nil

@@ -264,7 +264,7 @@ function UseDracossack2(card)
 end
 function JeweledRDAFilter(card,id)
   return card.cardid~=id and bit32.band(card.position,POS_FACEUP_ATTACK)>0 
-  and card:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0 and card:is_affected_by(EFFECT_IMMUNE)==0
+  and card:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0 and card:is_affected_by(EFFECT_IMMUNE_EFFECT)==0
 end
 function SummonGearGigant()
   return OppGetStrongestAttDef()<2300 and MP2Check()
@@ -502,7 +502,7 @@ end
 function FiendishChainTarget(cards)
   result = nil
   for i=1,#cards do
-    if cards[i].owner==2 and cards[i].id==GlobalTargetID then
+    if CurrentOwner(cards[i])==2 and cards[i].id==GlobalTargetID then
       result = i
     end
   end
@@ -572,41 +572,7 @@ function ChainCotHGadget()
   end
   return false
 end
-function ChainFiendish()
-  local effect = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
-	if effect then
-    card=effect:GetHandler()
-    if player_ai==nil then
-      player=1
-    else
-      player=player_ai
-    end
-    if card and card:IsControler(1-player) and card:IsLocation(LOCATION_MZONE)
-    and card:IsType(TYPE_EFFECT) and not card:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET) 
-    and not card:IsHasEffect(EFFECT_IMMUNE_EFFECT) and NegateBlacklist(card:GetCode())==0
-    and not card:IsCode(50078509)
-    then
-      GlobalTargetID=card:GetCode()
-      return true
-    end
-  end
-  if Duel.GetCurrentPhase() == PHASE_BATTLE then
-		local source = Duel.GetAttacker()
-		local target = Duel.GetAttackTarget()
-    if source and target then
-      if target:IsControler(player_ai)
-      and (source:GetAttack() >= target:GetAttack()  and source:IsPosition(POS_FACEUP_ATTACK) 
-      or   source:GetAttack() >= target:GetDefence() and source:IsPosition(POS_FACEUP_DEFENCE))
-      and target:IsPosition(POS_FACEUP_ATTACK)
-      and source:IsType(TYPE_EFFECT) and not source:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET) 
-      and not target:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE) and not source:IsHasEffect(EFFECT_IMMUNE_EFFECT) 
-      then
-        GlobalTargetID=source:GetCode()
-        return true
-      end
-    end
-  end
-end
+
 function ChainNaturiaBeast()
   return false
 end
@@ -687,9 +653,6 @@ function GadgetOnSelectChain(cards,only_chains_by_player)
   end
   if HasID(cards,97077563) and ChainCotHGadget() then
     return {1,IndexByID(cards,97077563)}
-  end
-  if HasID(cards,50078509) and ChainFiendish() then
-    return {1,IndexByID(cards,50078509)}
   end
   if HasID(cards,33198837) and ChainNaturiaBeast() then
     return {1,IndexByID(cards,33198837)}

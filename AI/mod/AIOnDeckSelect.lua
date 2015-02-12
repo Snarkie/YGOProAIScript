@@ -75,6 +75,8 @@ PRIO_BANISH = 9
 -- priority lists for decks:
 function PrioritySetup()
 AddPriority({
+-- test
+--[65367484] = {0,0,0,0,0,0,0,0,0,0,function(a,b)return 5 end},
 
 -- Burning Abyss
 [57143342] = {7,2,7,3,7,1,1,1,2,1,CirCond},      -- BA Cir
@@ -383,8 +385,8 @@ function GetPriority(card,loc)
       loc = loc + 1
     end
     result = checklist[loc]
-    if checklist[11] and checklist[11](loc,card) ~= false 
-    and checklist[11](loc,card) ~= true 
+    if checklist[11] and checklist[11](loc,card) 
+    and type(checklist[11](loc,card))=="number"  
     then
       print("custom priority function, returning:")
       print(checklist[11](loc,card))

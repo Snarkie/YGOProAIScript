@@ -425,8 +425,13 @@ function UseChainNekroz1()
   return DeckCheck(DECK_NEKROZ) and HasID(AIDeck(),08903700,true)
 end
 function UseChainNekroz2() 
-  return DeckCheck(DECK_NEKROZ) and (Duel.GetCurrentPhase()==PHASE_MAIN2 or not GlobalBPAllowed 
+  if DeckCheck(DECK_NEKROZ) and (Duel.GetCurrentPhase()==PHASE_MAIN2 or not GlobalBPAllowed 
   or HasID(AIMon(),25857246,true) and UseValk())
+  then
+    GlobalStacked=Duel.GetTurnCount()
+    return true
+  end
+  return false
 end
 function SummonDancePrincess()
   return true

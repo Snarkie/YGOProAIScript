@@ -81,6 +81,11 @@ function AttackTargetSelection(cards,attacker,atk)
       return BestAttackTarget(cards,attacker,HandFilter,atk)
     end
     
+    -- Gwen
+    if HasGwen(attacker) and CardsMatchingFilter(OppMon(),GwenFilter,atk) then
+      print("attacking with Gwen, selecting best valid target")
+      return BestTargets(cards,1,TARGET_DESTROY,GwenFilter,atk)
+    end
   end
   print("continuing to generic attack target selection")
   return BestAttackTarget(cards,attacker)
@@ -122,7 +127,7 @@ function BestAttackTarget(cards,source,filter,opt)
       print("not matching filter, priority to -99999")
       c.prio = -99999
     end
-    if c.prio>0 and not BattleTargetCheck(c,source) then
+    if c.prio and c.prio>0 and not BattleTargetCheck(c,source) then
       print("indestructable by battle etc, priority to -4")
       c.prio = -4
     end
@@ -144,7 +149,7 @@ function BestAttackTarget(cards,source,filter,opt)
         c.prio = -2
       end
     end
-    if c.prio>0 and FilterPublic(c) then
+    if c.prio and c.prio>0 and FilterPublic(c) then
       print("target is known and valid for attacking, adjusting priority based on type")
       if FilterType(c,TYPE_SYNCHRO+TYPE_RITUAL+TYPE_XYZ+TYPE_FUSION) then
         print("synch/ritual/fusion/xyz: +1")
@@ -172,14 +177,20 @@ function OnSelectBattleCommand(cards,activatable)
   -- shortcut function that returns the proper attack index and sets some globals 
   -- needed for attack target selection
   local function Attack(index,direct)
+    print("attack")
     local i = cards[index].index
+    print("list:")
+    for i=1,#cards do
+      print("id: "..cards[i].id.." , index: "..cards[i].index)
+    end
+    print("selected index: "..i)
     if direct then
       GlobalCurrentAttacker = nil
       GlobalCurrentATK = nil
       GlobalAIIsAttacking = nil
     else
-      GlobalCurrentAttacker = cards[i].cardid
-      GlobalCurrentATK = cards[i].attack
+      GlobalCurrentAttacker = cards[index].cardid
+      GlobalCurrentATK = cards[index].attack
       GlobalAIIsAttacking = true
     end
     return 1,i
@@ -268,10 +279,30 @@ function OnSelectBattleCommand(cards,activatable)
     return Attack(CurrentIndex)
   end
   
+  -- Shaddoll Construct
+  if HasID(cards,20366274) and CardsMatchingFilter(OppMon(),NephilimFilter)>0 then 
+    print("can probably get the effect of Shaddoll Construct, attack")
+    return Attack(CurrentIndex)
+  end
+  
+  -- Catastor
+  if HasID(cards,26593852) and CardsMatchingFilter(OppMon(),CatastorFilter)>0 then 
+    print("can probably get the effect of AoJ Catastor, attack")
+    return Attack(CurrentIndex)
+  end
+  
   -- Mermail Abysslinde
   if HasID(cards,23899727) and LindeCheck() then 
     print("can probably get the effect of Mermail Abysslinde, attack")
     return Attack(CurrentIndex)
+  end
+  
+  -- Gwen
+  for i=1,#cards do
+    if HasGwen(cards[i]) and CardsMatchingFilter(OppMon(),GwenFilter,atk) then
+      print("can probably get the effect of Gwen, attack")
+      return Attack(CurrentIndex)
+    end
   end
   
   print("no specific attackers, proceed to generic")

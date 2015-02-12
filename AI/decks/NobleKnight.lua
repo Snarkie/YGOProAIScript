@@ -480,7 +480,7 @@ function RequipArmsCond(loc,c)
   return true
 end
 function ArfFilter(c)
-  return bit32.band(c.position,POS_FACEDOWN)>0 and DestroyCheck(c)
+  return bit32.band(c.position,POS_FACEDOWN)>0 and DestroyFilter(c)
 end
 function ArfCond(loc,c)
   if loc == PRIO_TOGRAVE then
@@ -1571,10 +1571,13 @@ function NobleChain(cards)
   end
   return nil
 end
-function GwenFilter(c) -- for attack boosts
-  return c:is_affected_by(EFFECT_IMMUNE_EFFECT)==0
-  and c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0
-  and c:is_affected_by(EFFECT_INDESTRUCTABLE_COUNT)==0
+function HasGwen(c)
+  return NobleMonsterFilter(c) and FilterAttribute(c,ATTRIBUTE_DARK)
+  and HasID(c:get_equipped_cards(),19748583,true)
+end
+function GwenFilter(c,atk) -- for attack boosts
+  return Affected(c,TYPE_SPELL) and DestroyFilter(c)
+  and DestroyCountCheck(c) or atk>c.attack
 end
 function ChainGwen()
   local source = Duel.GetAttacker()
