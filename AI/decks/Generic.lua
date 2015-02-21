@@ -113,6 +113,9 @@ function SummonExtraDeck(cards,prio)
     GlobalCardMode = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+  if HasID(Activatable,16195942) and UseRebellion() then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   return nil
  end
   
@@ -192,9 +195,6 @@ function SummonExtraDeck(cards,prio)
   end
   if HasID(SpSummonable,16195942) and SummonRebellion() then 
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
-  end
-  if HasID(Activatable,16195942) and UseRebellion() then
-    return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(SpSummonable,61344030) and SummonPaladynamo() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}

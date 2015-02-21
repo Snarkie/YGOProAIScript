@@ -89,6 +89,9 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
     if Duel.GetTurnCount() == 1 then
       GlobalIsAIsTurn = 1
       GlobalAIPlaysFirst = 1
+      GlobalCurrentAttacker = nil
+      GlobalCurrentATK = nil
+      GlobalAIIsAttacking = nil
       Globals()
 	  ResetOncePerTurnGlobals()
     
@@ -122,8 +125,7 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
   end
   if card and bit32.band(card.position,POS_FACEUP)>0 
   and Duel.GetTurnCount() ~= GlobalC106
-  and card:is_affected_by(EFFECT_DISABLE_EFFECT)==0 
-  and card:is_affected_by(EFFECT_DISABLE)==0
+  and NotNegated(card)
   then
     local materials = card.xyz_materials
     for i=1,#materials do
@@ -400,29 +402,15 @@ end
   
   ---------------------------------------------------------
   -- Set a field spell if the AI doesn't currently control
-  -- a field spell (with the exception of Geartown).
-  --
-  -- Also, when given a choice, the AI should always choose
-  -- to set Geartown before other field spells.
+  -- a field spell 
   ---------------------------------------------------------
-  local AIField = AI.GetAISpellTrapZones()
-  local AIFieldExists = 0
-  for i=1,#AIField do
-    if AIField[i] ~= false then
-      if AIField[i].type == TYPE_SPELL + TYPE_FIELD then
-        AIFieldExists = 1
-      end
-    end
-  end
-  if AIFieldExists == 0 or Get_Card_Count_ID(UseLists({AIMon(), AIST()}), 37694547, POS_FACEUP) > 0 then
+  print("field spells")
+  if CardsMatchingFilter(AIST(),FilterType,TYPE_SPELL+TYPE_FIELD)==0 then
+    print("controls no field spell")
     for i=1,#cards.st_setable_cards do
-      if cards.st_setable_cards[i].id == 37694547 then
-        return COMMAND_SET_ST,i
-      end
-    end
-    for i=1,#cards.st_setable_cards do
-      if cards.st_setable_cards[i].type == TYPE_FIELD + TYPE_SPELL and 
-	    AIFieldExists == 0 and CardIsScripted(cards.st_setable_cards[i].id)==0 then
+      local c = cards.st_setable_cards[i]
+      if FilterType(c,TYPE_SPELL+TYPE_FIELD) and CardIsScripted(c.id)==0 then
+        print("can activate non-scripted field spell, set")
         return COMMAND_SET_ST,i
       end
     end
@@ -1406,18 +1394,15 @@ end
   -- *****************************************************
   ---------------------------------------------------------
   for i=1,#ActivatableCards do
-   if Get_Card_Count_ID(AIST(),ActivatableCards[i].id, POS_FACEUP) == 0 then
-    if (isUnactivableWithNecrovalley(ActivatableCards[i].id) == 1 and Get_Card_Count_ID(UseLists({AIMon(),AIST(),OppMon(),OppST()}), 47355498, POS_FACEUP) ==  0) or
-	   isUnactivableWithNecrovalley(ActivatableCards[i].id) == 0 then -- Check if card shouldn't be activated when Necrovalley is on field 
-	if ActivatableCards[i].type ~= TYPE_SPELL + TYPE_FIELD then                  
-	  if CardIsScripted(ActivatableCards[i].id) == 0 then -- Check if card's activation is already scripted above
-		  GlobalActivatedCardID = ActivatableCards[i].id
-      if ActivatableCards[i]:is_affected_by(EFFECT_DISABLE_EFFECT)==0 and ActivatableCards[i]:is_affected_by(EFFECT_DISABLE)==0 then
-		  return COMMAND_ACTIVATE,i
-            end
-          end
-        end
-      end
+    local c = ActivatableCards[i]
+    if Get_Card_Count_ID(AIST(),c.id, POS_FACEUP) == 0 
+    and NecrovalleyCheck(c)
+    and not FilterType(c,TYPE_FIELD)           
+    and CardIsScripted(c.id) == 0
+    and NotNegated(c) 
+    then
+      GlobalActivatedCardID = c.id
+      return COMMAND_ACTIVATE,i
     end
   end
   
@@ -2233,81 +2218,77 @@ end
   -- opponent's strongest monster, turn it to defence position 
   -- in MP2.
   --------------------------------------------------
-  if Duel.GetCurrentPhase() == PHASE_MAIN2 or not GlobalBPAllowed then
-    for i=1,#RepositionableCards do	  
-    local c = RepositionableCards[i]
-      if c.position == POS_FACEUP_ATTACK 
-      and c.id ~= 88241506 -- Maiden with Eyes of Blue	
-      and c.id ~= 15914410 -- Mechquipped Angineer
-      and c.id ~= 23232295 -- Battlin' Boxer Lead Yoke	
-      and (c.attack < Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack") 
-      and c.attack < 2400
-      and c.attack-c.defense < 500
-      or c.attack<=1000 
-      or c.attack-c.defense <=1000)
-      and isToonUndestroyable(RepositionableCards) == 0 
+  print("reposition to DEF")
+  for i=1,#RepositionableCards do	  
+  local c = RepositionableCards[i]
+    print("can reposition: "..c.id)
+    print(FilterPosition(c,POS_ATTACK))
+    print(RepositionBlacklist(c.id))
+    if FilterPosition(c,POS_ATTACK)
+    and RepositionBlacklist(c.id) == 0 	
+    then
+      local ChangePosOK = false
+      if c.attack < Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack")
+      and (Duel.GetCurrentPhase() == PHASE_MAIN2 or not GlobalBPAllowed)
+      or FilterAffected(c,EFFECT_CANNOT_ATTACK)
+      or FilterAffected(c,EFFECT_CANNOT_ATTACK_ANNOUNCE)
       then
+        ChangePosOK = true
+      end
+      if c.attack >= 1500 and c.defense >= c.attack and ChangePosOK then
+        print("stronger monster, more DEF than ATK, proceed")
+      elseif c.attack < 1500 and c.defense-c.attack <= 200 and ChangePosOK  then
+        print("weaker monster, not too bad DEF, proceed")
+      elseif c.attack < 1000 then
+        print("weak monster, proceed")
+      elseif c.defense-c.attack >= 0 and ChangePosOK then
+        print("more DEF than ATK, proceed")
+      elseif c.defense-c.attack >= 500 then
+        print("way more DEF than ATK, proceed")
+      end
+      if ChangePosOK and (c.attack >= 1500 and c.defense >= c.attack
+      or c.attack < 1500 and c.defense-c.attack <= 200
+      or c.defense-c.attack >= 0)
+      or c.attack < 1000 
+      or c.defense-c.attack >= 500
+      then
+        print("repositioning to DEF")
         return COMMAND_CHANGE_POS,i
       end
     end
   end
   
-  --------------------------------------------------
-  -- If the AI controls a monster with higher attack
-  -- than strongest players monster, or if AI controls 
-  -- monster with higher attack than players strongest defence position monster and attack position 
-  -- monster, turn him to attack position.
-  --------------------------------------------------  
-  --[[for i=1,#RepositionableCards do
-   if RepositionableCards[i].attack > 0 then
-    if RepositionableCards[i].attack >= Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") 
-    and Get_Card_Count_Pos(OppMon(), POS_FACEUP_ATTACK) > 0 
-    or  RepositionableCards[i].attack > Get_Card_Att_Def(OppMon(),"defense",">",POS_FACEUP_DEFENCE,"defense") 
-    and RepositionableCards[i].attack >= Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack") 
-    or  RepositionableCards[i].attack < Get_Card_Att_Def(OppMon(), "attack", ">", POS_FACEUP_DEFENCE, "attack") 
-    and RepositionableCards[i].attack > Get_Card_Att_Def(OppMon(),"attack", ">", POS_FACEUP_DEFENCE, "defense") 
-    and Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP_ATTACK,"attack") > Get_Card_Att_Def(OppMon(), "attack", ">", POS_FACEUP_DEFENCE, "defense") 
-    then
-      if RepositionableCards[i].position == POS_FACEUP_DEFENCE 
-      or RepositionableCards[i].position == POS_FACEDOWN_DEFENCE 
-      then
-        print(6)
-        return COMMAND_CHANGE_POS,i
-      end
-    end
-   end 
-  end]]--
- 
  --------------------------------------------------
  -- If the AI controls a monster with higher attack,
  -- than any of the opponent's monsters, 
  -- and opponent controls one or less monsters in attack position, 
  -- turn as many monsters as we can to attack position.
  --------------------------------------------------  
- local ChangePosOK = 0
- local AIMons = AI.GetAIMonsterZones()  
-  for i=1,#AIMons do
-	if AIMons[i] ~= false then
-      if AIMons[i].attack > Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack") 
-      and AIMons[i].attack > Get_Card_Att_Def(OppMon(),defense,">",POS_FACEUP_DEFENCE,defense) then
-        ChangePosOK = 1
-      end
+  print("reposition to ATK")
+  local ChangePosOK = false
+  for i=1,#AIMon() do
+    local c=AIMon()[i]
+    if c.attack > Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack") 
+    and c.attack > Get_Card_Att_Def(OppMon(),"defense",">",POS_FACEUP_DEFENCE,"defense") 
+    and Duel.GetCurrentPhase() == PHASE_MAIN1 and GlobalBPAllowed
+    then
+      ChangePosOK = true
     end
   end
-  if ChangePosOK == 1 then
-    for i=1,#RepositionableCards do
-      local c = RepositionableCards[i]
-      if RepositionBlacklist(c.id) ==0 
-      and c.attack > 1000 
-      and c.defense-c.attack > 1000
-      then
-        if FilterPosition(c,POS_DEFENCE) then
-          return COMMAND_CHANGE_POS,i
-        end
-      end
+  for i=1,#RepositionableCards do
+    local c = RepositionableCards[i]
+    if FilterPosition(c,POS_DEFENCE)
+    and RepositionBlacklist(c.id)==0
+    and (ChangePosOK and c.attack > 1000 and c.defense-c.attack < 500
+    and not FilterAffected(c,EFFECT_CANNOT_ATTACK)
+    and not FilterAffected(c,EFFECT_CANNOT_ATTACK_ANNOUNCE)
+    or c.attack >= 1500 and c.attack > c.defense)
+    then
+      print("repositioning to ATK")
+      return COMMAND_CHANGE_POS,i
     end
   end
-  
+
 -------------------------------------------------
 -- **********************************************
 --         Spell and trap card setting :|
@@ -2318,7 +2299,7 @@ end
   -- Set trap and quick-play cards in Main Phase 2, 
   -- or if it's the first turn of the duel.
   ---------------------------------------------------------
-  if #cards.st_setable_cards > 0 and (AI.GetCurrentPhase() == PHASE_MAIN2 or Duel.GetTurnCount() == 1) then
+  if #cards.st_setable_cards > 0 and (AI.GetCurrentPhase() == PHASE_MAIN2 or not GlobalBPAllowed) then
     local setCards = cards.st_setable_cards
     local setThisTurn = 0
     local aist=AIST()
@@ -2344,17 +2325,17 @@ end
   -- Treeborn Frog in the Graveyard or on the field, or
   -- if the AI has Gorz in hand.
   -------------------------------------------------------
-  if Get_Card_Count_ID(AIHand(), 12538374, nil) == 0 and -- Gorz
-	 Get_Card_Count_ID(UseLists({AIMon(),AIGrave()}), 12538374, nil) == 0 and   -- Treeborn Frog
-	 Get_Card_Count_ID(AIMon(), 98777036, POS_FACEUP) == 0 then  -- Tragoedia
-	if #cards.st_setable_cards > 0 and (AI.GetCurrentPhase() == PHASE_MAIN2 or Duel.GetTurnCount() == 1) then
-      local setCards = cards.st_setable_cards
-      for i=1,#setCards do
-        if bit32.band(setCards[i].type,TYPE_SPELL) > 0 and SetBlacklist(setCards[i].id)==0 then
-          if Get_Card_Count(AIST()) < 2 and not HasID(AIST(),92512625,true) then
-            return COMMAND_SET_ST,i
-          end
-        end
+  if not HasID(AIHand(),44330098,true) -- Gorz
+  and not HasID(UseLists(AIMon(),AIGrave()),12538374, nil) -- Treeborn Frog
+  and (AI.GetCurrentPhase() == PHASE_MAIN2 or not GlobalBPAllowed)
+  then
+    for i=1,#cards.st_setable_cards do
+      local c = cards.st_setable_cards[i]
+      if FilterType(c,TYPE_SPELL) and not FilterType(c,TYPE_FIELD)
+      and SetBlacklist(c.id)==0 and Get_Card_Count(AIST()) < 2
+      and not HasID(AIST(),92512625,true) -- Solemn Advice
+      then
+        return COMMAND_SET_ST,i
       end
     end
   end
@@ -2365,5 +2346,5 @@ end
   ------------------------------------------------------------
   -- there should be check here to see if the next phase is disallowed (like Karakuri having to attack)  I'm too lazy to make it right now, sorry. :*	
 	return COMMAND_TO_NEXT_PHASE,1
-  end
+end
     

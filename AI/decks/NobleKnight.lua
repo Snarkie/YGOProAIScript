@@ -400,7 +400,10 @@ function EachtarCond(loc,c)
     return bit32.band(c.location,LOCATION_REMOVED)>0
   end
   if loc == PRIO_TOFIELD then
-    return bit32.band(c.location,LOCATION_HAND+LOCATION_REMOVED)>0 or Duel.GetCurrentPhase()==PHASE_END
+    return bit32.band(c.location,LOCATION_REMOVED)>0 
+    or bit32.band(c.location,LOCATION_HAND)>0 
+    and (Duel.GetCurrentPhase()==PHASE_END or 
+    not (HasID(AIHand(),47120245,true) and HasID(AIHand(),93085839,true)))
   end
   if loc == PRIO_TOGRAVE and bit32.band(c.location,LOCATION_DECK)>0 then
     return not HasID(AIGrave(),93085839,true) 
@@ -529,8 +532,8 @@ end
 function SummonBorz(ss)
   return (((ArmsAvailable()>0 or ArmsRequip()) and OPTCheck(47120245) 
   and ArmsCount(AIDeck(),false,false,true)>3 or GawaynCheck() and not ss
-  or ArmsAvailable()>0 and FieldCheck(5,NobleMonsterFilter,9577205)==1 and SummonR5torigus()
-  or HasID(UseLists({AIHand(),AIGrave()}),95772051,true))
+  or ArmsAvailable()>0 and FieldCheck(5,NobleMonsterFilter,95772051)==1 and SummonR5torigus()
+  or HasID(UseLists({AIHand(),AIGrave()}),95772051,true) and not HasID(AIHand(),57690191,true))
   and (ss or not NormalSummonCheck(player_ai))) and not UseMedraut()
 end
 function SummonMedraut(ss)
@@ -538,7 +541,7 @@ function SummonMedraut(ss)
   and not HasID(AIHand(),47120245,true) and not HasID(AIHand(),03580032,true)))
   and #AIMon()==0 and OPTCheck(59057152) and DualityCheck()
   and (ss or not NormalSummonCheck(player_ai))) or GawaynCheck() and not ss and not HasID(AIHand(),47120245,true)
-  or ArmsAvailable()>0 and FieldCheck(5,NobleMonsterFilter,9577205)==1 and SummonR5torigus()
+  or ArmsAvailable()>0 and FieldCheck(5,NobleMonsterFilter,95772051)==1 and SummonR5torigus()
 end
 function SummonChad(ss)
   return (((OPTCheck(13391185) and (ss or not NormalSummonCheck(player_ai)))
@@ -580,7 +583,8 @@ function ChainBrothers()
   return HasID(AIHand(),95772051,true) or HasID(AIHand(),93085839,true) 
   or CardsMatchingFilter(AIHand(),LevelFilter,4)>1 and SummonR4torigus()
 end
-function SummonBrothers()
+function SummonBrothers(ss)
+  print("can summon bros")
   return OPTCheck(57690191) and (PriorityCheck(AIGrave(),PRIO_TODECK,6,NobleFilter)>1
   or PriorityCheck(AIGrave(),PRIO_TODECK,3,NobleFilter)>4 or ChainBrothers() and not ss)
   and (ss or not NormalSummonCheck(player_ai))
@@ -1235,6 +1239,9 @@ function BrothersTarget(cards,min)
   if min == 3 then
     return Add(cards,PRIO_TODECK,3)
   else
+    if HasID(cards,47120245,true) and HasID(AIHand(),95772051,true) then
+      return Add(cards,PRIO_TOFIELD,2)
+    end
     return Add(cards,PRIO_TOFIELD,math.min(min,2))
   end
 end

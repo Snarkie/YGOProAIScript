@@ -77,7 +77,11 @@ result = {}
 
 -- AI attack target selection
 -- redirected to SelectBattleComand.lua
-if GlobalAIIsAttacking then 
+if Duel.GetCurrentPhase()==PHASE_BATTLE 
+and GlobalAIIsAttacking 
+and Duel.GetCurrentChain()==0
+and not triggeringCard
+then 
   local c = FindCard(GlobalCurrentAttacker)
   result = AttackTargetSelection(cards,c,GlobalCurrentATK)
   GlobalCurrentAttacker = nil

@@ -148,7 +148,8 @@ function UseTool(c)
   end
 end
 function UseSacrifice()
-  return not HasID(AIST(),17639150,true,nil,nil,nil,FilterPosition,POS_FACEUP)
+  return not HasID(AIST(),17639150,true,nil,nil,nil,FilterPosition,POS_FACEUP) 
+  and CardsMatchingFilter(AIMon(),QliphortFilter)>0
 end
 function PendulumSummon(count)
   if count == nil then count = 1 end

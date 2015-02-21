@@ -583,8 +583,7 @@ function TwinEagleTarget(cards,minTargets)
       result=IndexByID(cards,48739166)
     end
     if cards[i].id==23649496 and cards[i].xyz_material_count==0 
-    and (UsePlainCoat() and cards[i]:is_affected_by(EFFECT_DISABLE_EFFECT)==0 
-    and cards[i]:is_affected_by(EFFECT_DISABLE)==0 
+    and (UsePlainCoat() and NotNegated(cards[i])
     or HasID(AIHand(),92365601) and HasID(AIGrave(),82293134)) then
       result=IndexByID(cards,23649496)
     end

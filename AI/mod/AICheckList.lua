@@ -432,9 +432,10 @@ function RepositionBlacklist(id)
   return 0
 end
 RepoBL={
-  374452950,4939890,30328508,  -- Shadoll Falcon,Hedgehog,Lizard
-  777236430,3717252,21502796, -- Shadoll Dragon, Beast,Ryko
-  23899727 -- Mermail Abysslinde
+  37445295,04939890,30328508, -- Shadoll Falcon,Hedgehog,Lizard
+  77723643,03717252,21502796, -- Shadoll Dragon, Beast,Ryko
+  23899727,88241506,15914410, -- Mermail Abysslinde, Blue-Eyes Maiden, Mechquipped Angineer
+  23232295, -- Lead Yoke
 }
 ---------------------------------------------------------
 -- Checks if the specified card ID is in this "blacklist"
@@ -556,6 +557,19 @@ function isUnactivableWithNecrovalley(CardId)
     return 1
   end
   return 0
+end
+
+function NecrovalleyCheck(c)
+  local id
+  if c.GetCode then
+    id = c:GetCode()
+  else
+    id = c.id
+  end
+  if HasID(Field(),47355498,true) then
+    return isUnactivableWithNecrovalley(id)==0
+  end
+  return true
 end
 
 -----------------------------------------------------

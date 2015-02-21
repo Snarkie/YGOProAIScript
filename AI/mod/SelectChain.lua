@@ -148,15 +148,6 @@ result = 0
   end
 
   
-  ---------------------------------------------------
-  -- Check if Trap or Spell cards shouldn't be activated here.
-  -- 
-  -- For now it simply checks if Royal Decree or Imperial Order
-  -- is face up on the field.
-  ---------------------------------------------------
-  local TrapsNegated = Get_Card_Count_ID(UseLists({AIMon(),AIST(),OppMon(),OppST()}), 51452091, POS_FACEUP)
-  local SpellsNegated = Get_Card_Count_ID(UseLists({AIMon(),AIST(),OppMon(),OppST()}), 61740673, POS_FACEUP)
-  
   ---------------------------------------------
   -- Don't activate anything if the AI controls
   -- a face-up Light and Darkness Dragon.
@@ -181,8 +172,7 @@ result = 0
   end
   if card and bit32.band(card.position,POS_FACEUP)>0 
   and Duel.GetTurnCount() ~= GlobalC106
-  and card:is_affected_by(EFFECT_DISABLE_EFFECT)==0 
-  and card:is_affected_by(EFFECT_DISABLE)==0
+  and NotNegated(card)
   then
     local materials = card.xyz_materials
     for i=1,#materials do
@@ -210,18 +200,17 @@ result = 0
   -- and set ChainAllowed variable to 1 if they are.
   -----------------------------------------------------
   for i=1,#cards do
-   if Get_Card_Count_ID(AIST(),cards[i].id, POS_FACEUP) == 0 or
-	  MultiActivationOK(cards[i].id) == 1 then 
-	  if bit32.band(cards[i].type,TYPE_MONSTER) > 0 or (bit32.band(cards[i].type,TYPE_TRAP) > 0 and TrapsNegated == 0) or (bit32.band(cards[i].type,TYPE_SPELL) > 0 and SpellsNegated == 0) then		
-		if UnchainableCheck(cards[i].id) then  -- Checks if any cards from UnchainableTogether list are already in chain.
-          if isUnactivableWithNecrovalley(cards[i].id) == 0 or
-		    (isUnactivableWithNecrovalley(cards[i].id) == 1 and Get_Card_Count_ID(UseLists({AIMon(),AIST(),OppMon(),OppST()}),47355498,POS_FACEUP) == 0) then -- Check if card shouldn't be activated when Necrovalley is on field
-		    ChainAllowed = 1
-		   end
-         end
-       end
-     end
-   end
+    local c = cards[i]
+    if Get_Card_Count_ID(AIST(),c.id, POS_FACEUP) == 0 or MultiActivationOK(c.id) == 1 then 
+      if NotNegated(c) then		
+        if UnchainableCheck(c.id) then  -- Checks if any cards from UnchainableTogether list are already in chain.
+          if NecrovalleyCheck(c) then
+            ChainAllowed = 1
+          end
+        end
+      end
+    end
+  end
   
   -----------------------------------------------------
   -- Proceed to chain any cards and check other chaining
@@ -573,24 +562,17 @@ end
   ----------------------------------------------------------
   
   for i=1,#cards do
-   if Get_Card_Count_ID(AIST(),cards[i].id, POS_FACEUP) == 0 or
-	  MultiActivationOK(cards[i].id) == 1 then 
-    if bit32.band(cards[i].type,TYPE_MONSTER) > 0 or (bit32.band(cards[i].type,TYPE_TRAP) > 0 and TrapsNegated == 0) or 
-	  (bit32.band(cards[i].type,TYPE_SPELL) > 0 and SpellsNegated == 0) then
-	if UnchainableCheck(cards[i].id) then  -- Checks if any cards from UnchainableTogether list are already in chain.
-    if isUnactivableWithNecrovalley(cards[i].id) == 0 or
-	  (isUnactivableWithNecrovalley(cards[i].id) == 1 and Get_Card_Count_ID(UseLists({AIMon(),AIST(),OppMon(),OppST()}),47355498,POS_FACEUP) == 0) then -- Check if card shouldn't be activated when Necrovalley is on field
-	 if CardIsScripted(cards[i].id) == 0 and cards[i]:is_affected_by(EFFECT_DISABLE)==0 and cards[i]:is_affected_by(EFFECT_DISABLE_EFFECT) == 0 then -- Check if card's activation is already scripted above
-     GlobalActivatedCardID = cards[i].id 
-	      return 1,i
-         end
-        else
-          return 0,i
-         end       
-       end
-     end
-   end
- end
+    local c = cards[i]
+    if (Get_Card_Count_ID(AIST(),c.id, POS_FACEUP) == 0 or MultiActivationOK(c.id) == 1)
+    and UnchainableCheck(c.id) 
+    and NecrovalleyCheck(c)
+    and CardIsScripted(c.id) == 0 
+    and NotNegated(c) 
+    then
+      GlobalActivatedCardID = c.id 
+        return 1,i
+    end
+  end
   
   -------------------------------------
   -- Otherwise don't activate anything.

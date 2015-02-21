@@ -791,7 +791,7 @@ function ChainMaxxC()
   return false
 end
 function NegateBPCheck(card)
-  if card:is_affected_by(EFFECT_DISABLE)>0 or card:is_affected_by(EFFECT_DISABLE_EFFECT)>0 then
+  if Negated(card) then
     return false
   end
   if card.id==22110647 then --Dracossack

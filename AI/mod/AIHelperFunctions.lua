@@ -210,6 +210,9 @@ end
 function OppAll() 
   return UseLists({OppHand(),OppField(),OppGrave(),OppDeck(),OppBanish(),OppExtra()})
 end
+function Field()
+  return UseLists(AIField(),OppField())
+end
 -------------------------------------------------
 -- **********************************************
 -- Functions related to monster count returning, 

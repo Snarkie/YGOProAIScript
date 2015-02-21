@@ -1177,8 +1177,7 @@ function ChainClaus()
   if e then
     local c=e:GetHandler()
     if c and ClausFilter(c) 
-    and not c:IsHasEffect(EFFECT_DISABLE)
-    and not c:IsHasEffect(EFFECT_DISABLE_EFFECT)
+    and NotNegated(c)
     then
       GlobalTargetID=c:GetCode()
       GlobalPlayer=2

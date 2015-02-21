@@ -299,10 +299,16 @@ function OnSelectBattleCommand(cards,activatable)
   
   -- Gwen
   for i=1,#cards do
-    if HasGwen(cards[i]) and CardsMatchingFilter(OppMon(),GwenFilter,atk) then
+    if HasGwen(cards[i]) and CardsMatchingFilter(OppMon(),GwenFilter,atk)>0 then
       print("can probably get the effect of Gwen, attack")
-      return Attack(CurrentIndex)
+      return Attack(i)
     end
+  end
+  
+  -- Bujin Susanowo
+  if HasID(cards,75840616) and CanWinBattle(cards[i],targets) then 
+    print("can still hit targets with Susanowo, attack")
+    return Attack(CurrentIndex)
   end
   
   print("no specific attackers, proceed to generic")
@@ -319,10 +325,21 @@ function OnSelectBattleCommand(cards,activatable)
   
   SortByATK(cards,true)
   if #targets>0 and #cards>0 then
-    print("checking for generic attack possibilities")
+    print("checking for generic attack possibilities without boosting cards")
+    for i=1,#cards do
+      if CanWinBattle(cards[i],targets,nil,true) then
+        print("can destroy a monster without help, attack")
+        return Attack(i)
+      end
+    end
+  end
+  
+  SortByATK(cards,true)
+  if #targets>0 and #cards>0 then
+    print("checking for generic attack possibilities with boosting cards")
     for i=1,#cards do
       if CanWinBattle(cards[i],targets) then
-        print("can destroy a monster, attack")
+        print("can destroy a monster, with a boost, attack")
         return Attack(i)
       end
     end

@@ -42,7 +42,7 @@ function GundeCond(loc)
 end
 function PikeCond(loc,c)
   if loc == PRIO_TOFIELD then
-    return (c==nil or c:is_affected_by(EFFECT_DISABLE)==0 and c:is_affected_by(EFFECT_DISABLE_EFFECT)==0)
+    return (c==nil or NotNegated(c))
     and (MermailPriorityCheck(AIHand(),PRIO_DISCARD) > 4 
     and OPTCheck(58471134)
     and Duel.GetCurrentChain()<=1
@@ -55,7 +55,7 @@ function TurgeFilter(c)
 end
 function TurgeCond(loc,c)
   if loc == PRIO_TOFIELD then
-    return (c==nil or c:is_affected_by(EFFECT_DISABLE)==0 and c:is_affected_by(EFFECT_DISABLE_EFFECT)==0)
+    return (c==nil or NotNegated(c))
     and (MermailPriorityCheck(AIHand(),PRIO_DISCARD) > 4 
     and CardsMatchingFilter(AIGrave(),TurgeFilter)>0
     and OPTCheck(22076135)

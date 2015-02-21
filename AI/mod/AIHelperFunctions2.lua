@@ -69,16 +69,14 @@ function HasIDNotNegated(cards,id,skipglobal,desc,loc,pos,filter,opt)
       and (filter == nil or (opt==nil and filter(cards[i]) or filter(cards[i],opt)))
       then
         if bit32.band(cards[i].type,TYPE_MONSTER)>0 
-        and cards[i]:is_affected_by(EFFECT_DISABLE_EFFECT)==0 
-        and cards[i]:is_affected_by(EFFECT_DISABLE)==0
+        and NotNegated(cards[i])
         then
           if not skipglobal then CurrentIndex = i end
           result = true  
         end
         if bit32.band(cards[i].type,TYPE_SPELL+TYPE_TRAP)>0
         and bit32.band(cards[i].status,STATUS_SET_TURN)==0        
-        and cards[i]:is_affected_by(EFFECT_CANNOT_TRIGGER)==0
-        and cards[i]:is_affected_by(EFFECT_DISABLE)==0
+        and NotNegated(cards[i])
         then
           if not skipglobal then CurrentIndex = i end
           result = true 
@@ -538,11 +536,46 @@ function WinsBattle(source,target)
   and not target:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE)
 end
 function NotNegated(c)
+  local disabled = false
+  local id
+  local type
+  local player
   if c.GetCode then
-    return not (c:IsHasEffect(EFFECT_DISABLE) or c:IsHasEffect(EFFECT_DISABLE_EFFECT))
+    disabled = (c:IsHasEffect(EFFECT_DISABLE) or c:IsHasEffect(EFFECT_DISABLE_EFFECT))
+    id = c:GetCode()
+    if c:IsControler(player_ai) then
+      player = 1
+    else
+      player = 2
+    end
   else
-    return c:is_affected_by(EFFECT_DISABLE)==0 and c:is_affected_by(EFFECT_DISABLE_EFFECT)==0
+    disabled = c:is_affected_by(EFFECT_DISABLE)>0 or c:is_affected_by(EFFECT_DISABLE_EFFECT)>0
+    id = c.id
+    player = CurrentMonOwner(c.cardid)
   end
+  if not GlobalNegatedLoop then
+    GlobalNegatedLoop = true
+    if FilterType(c,TYPE_SPELL) 
+    and (HasIDNotNegated(Field(),84636823,true) -- Spell Canceller
+    or HasIDNotNegated(Field(),61740673,true)   -- Imperial Order
+    or HasIDNotNegated(OppMon(),33198837,true)  -- Naturia Beast
+    or HasIDNotNegated(OppMon(),99916754,true)) -- Naturia Exterio
+    then
+      return false
+    end
+    if FilterType(c,TYPE_TRAP) 
+    and (HasIDNotNegated(Field(),77585513,true) -- Jinzo
+    or HasIDNotNegated(Field(),51452091,true)  -- Royal Decree
+    or HasIDNotNegated(OppMon(),02956282,true) and #OppGrave()>1 -- Naturia Barkion
+    or HasIDNotNegated(OppMon(),99916754,true)) -- Naturia Exterio
+    then
+      return false
+    end
+    if FilterType(c,TYPE_MONSTER) then
+    end
+  end
+  GlobalNegatedLoop=false
+  return not disabled
 end
 function Negated(c)
   return not NotNegated(c)
@@ -1035,8 +1068,9 @@ end
 
 -- function to determine, if a card can win a battle against any of the targets, and if the 
 -- target is expected to hit the graveyard (for effects that trigger on battle destruction)
-function CanWinBattle(c,targets,tograve,filter,opt)
+function CanWinBattle(c,targets,tograve,ignorebonus,filter,opt)
   local sub = SubGroup(targets,filter,opt)
+  local atk = c.attack
   sub = SubGroup(sub,BattleTargetCheck,c)
   if tograve == true then
     sub = SubGroup(sub,FilterPendulum)
@@ -1044,10 +1078,17 @@ function CanWinBattle(c,targets,tograve,filter,opt)
       return false
     end
   end
+  if ignorebonus and c.bonus and c.bonus > 0 then
+    atk = math.max(0,atk - c.bonus)
+  end
   for i=1,#sub do
-    if (FilterPosition(sub[i],POS_ATTACK) and (sub[i].attack<c.attack
-    or CrashCheck(c) and sub[i].attack==c.attack)
-    or FilterPosition(sub[i],POS_DEFENCE) and (sub[i].defense<c.attack)
+    local oppatk = sub[i].attack
+    if ignorebonus and sub[i].bonus and sub[i].bonus > 0 then
+      oppatk = math.max(0,oppatk - sub[i].bonus)
+    end
+    if (FilterPosition(sub[i],POS_ATTACK) and (oppatk<atk
+    or CrashCheck(c) and oppatk==atk)
+    or FilterPosition(sub[i],POS_DEFENCE) and (sub[i].defense<atk)
     and (FilterPosition(sub[i],POS_FACEUP) or sub[i]:is_affected_by(EFFECT_PUBLIC))) 
     and BattleTargetCheck(sub[i],c) 
     then
