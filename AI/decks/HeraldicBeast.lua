@@ -466,9 +466,7 @@ function SafeZoneTarget(cards)
     GlobalCardMode = nil
     result=Index_By_Loc(cards,2,"Highest",TYPE_MONSTER,nil,"==",LOCATION_MZONE)
   else
-    local filter = function(c) return c.id==GlobalTargetID and c.owner==1 end
-    result=RandomIndexFilter(cards,filter)
-    GlobalTargetID=nil
+    result=GlobalTargetGet(cards,true)
   end  
   if result == nil then result={math.random(#cards)} end
   return result
@@ -479,10 +477,7 @@ function LanceTarget(cards)
     GlobalCardMode = nil
     result=Index_By_Loc(cards,2,"Highest",TYPE_MONSTER,nil,"==",LOCATION_MZONE)
   else
-    local filter = function(c) return c.id==GlobalTargetID and c.owner==GlobalPlayer end
-    result=RandomIndexFilter(cards,filter)
-    GlobalTargetID=nil
-    GlobalPlayer=nil
+    result=GlobalTargetGet(cards,true)
   end  
   if result == nil then result={math.random(#cards)} end
   return result
@@ -815,13 +810,13 @@ function ChainSafeZone()
     if tg then
       local g = tg:GetMaxGroup(Card.GetAttack)
       if g then
-        GlobalTargetID = g:GetFirst():GetCode() 
+        GlobalTargetSet(g:GetFirst(),AIMon())
       end
       return tg:IsExists(SafeZoneFilter, 1, nil) and Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_PLAYER)~=player_ai
     else
       local g = cg:Filter(SafeZoneFilter, nil):GetMaxGroup(Card.GetAttack)
       if g then
-        GlobalTargetID = g:GetFirst():GetCode()
+        GlobalTargetSet(g:GetFirst(),AIMon())
       end
     return cg:IsExists(SafeZoneFilter, 1, nil) and Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_PLAYER)~=player_ai
     end
@@ -838,7 +833,7 @@ function ChainSafeZone()
       and source:IsPosition(POS_FACEUP_ATTACK) and target:IsPosition(POS_FACEUP_ATTACK) and not target:IsCode(23649496)
       and not target:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE) and not target:IsHasEffect(EFFECT_IMMUNE_EFFECT) 
       then
-        GlobalTargetID=target:GetCode()
+        GlobalTargetSet(target,AIMon())
         return true
       end
     end
@@ -888,8 +883,7 @@ function ChainLance()
     then
       return false
     end
-    GlobalTargetID = g:GetFirst():GetCode()
-    GlobalPlayer=1
+    GlobalTargetSet(g:GetFirst(),AIMon())
     return true
   end
   if Duel.GetCurrentPhase() == PHASE_DAMAGE and source and target then
@@ -897,8 +891,7 @@ function ChainLance()
     and source:IsPosition(POS_FACEUP_ATTACK) and target:IsPosition(POS_FACEUP_ATTACK) and target:IsControler(player_ai)
     and not source:IsHasEffect(EFFECT_IMMUNE_EFFECT) 
     then
-      GlobalTargetID=source:GetCode()
-      GlobalPlayer=2
+      GlobalTargetSet(source,OppMon())
       return true
     end
   end

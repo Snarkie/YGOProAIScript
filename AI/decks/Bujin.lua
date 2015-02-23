@@ -430,7 +430,7 @@ function AmaterasuTargetBujin(cards)
   end
 end
 function HareTarget(cards)
-  return {IndexByID(cards,GlobalTargetID)}
+  return GlobalTargetGet(cards,true)
 end
 function QuilinTarget(cards)
   return BestTargets(cards,1,TARGET_DESTROY)
@@ -584,7 +584,7 @@ function ChainHare()
         if hp<p or hp==p and ha<a then
           hp=p
           ha=a
-          GlobalTargetID = c:GetCode() 
+          GlobalTargetSet(c,AIMon())
         end
         c=g:GetNext()
       end
@@ -610,7 +610,7 @@ function ChainHare()
       or source:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE))
       and UnchainableCheck(59251766)
       then
-        GlobalTargetID=target:GetCode()
+        GlobalTargetSet(target,AIMon())
         return true
       end
     end

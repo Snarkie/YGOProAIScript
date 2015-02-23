@@ -89,8 +89,6 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
     if Duel.GetTurnCount() == 1 then
       GlobalIsAIsTurn = 1
       GlobalAIPlaysFirst = 1
-      GlobalCurrentAttacker = nil
-      GlobalCurrentATK = nil
       GlobalAIIsAttacking = nil
       Globals()
 	  ResetOncePerTurnGlobals()
@@ -100,6 +98,7 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
 
   set_player_turn()
   GlobalBPAllowed = to_bp_allowed
+  SurrenderCheck()
   ---------------------------------------
   -- Don't do anything if the AI controls
   -- a face-up Light and Darkness Dragon.
@@ -165,6 +164,101 @@ ExtraCheck=(DeckCheck(DECK_BUJIN)
 or DeckCheck(DECK_TELLARKNIGHT) 
 or DeckCheck(DECK_NOBLEKNIGHT))
 --or DeckCheck(DECK_NEKROZ))
+
+-- ExodiaLib:
+if DeckCheck(DECK_EXODIA) then
+  local summon = cards.summonable_cards
+  local activate = cards.activatable_cards
+  local cardid = 0
+  
+  for i=1,#summon do
+    if summon[i].id == 70791313 then --royal magic library
+      return COMMAND_SUMMON,i
+    end
+  end
+  
+  for i=1,#activate do
+    cardid = activate[i].id
+    if cardid == 39910367 then --endymion
+      return COMMAND_ACTIVATE,i
+    end
+  end
+  
+  for i=1,#activate do
+    cardid = activate[i].id
+    if cardid == 70791313 then --royal magic library
+      return COMMAND_ACTIVATE,i
+    end
+  end
+  for i=1,#activate do
+    cardid = activate[i].id
+    if cardid == 89997728 then --toon table of contents
+      if HasID(AIMon(),70791313,true) then
+        return COMMAND_ACTIVATE,i
+      end
+    end
+  end
+  local c = FindID(70791313,AIMon())
+  if HasID(activate,75014062) and c and c:get_counter(0x3001)<2 then -- Spell Power Grasp
+    return COMMAND_ACTIVATE,CurrentIndex
+  end
+  if HasID(activate,74029853) then -- Golden Bamboo Sword
+    return COMMAND_ACTIVATE,CurrentIndex
+  end
+  if HasID(activate,41587307) then -- Broken Bamboo Sword
+    return COMMAND_ACTIVATE,CurrentIndex
+  end
+  for i=1,#activate do
+    cardid = activate[i].id
+    if cardid == 39701395 then --cards of consonance
+      return COMMAND_ACTIVATE,i
+    end
+  end
+  for i=1,#activate do
+    cardid = activate[i].id
+    if cardid == 38120068 then --trade-in
+      return COMMAND_ACTIVATE,i
+    end
+  end
+  
+  for i=1,#activate do
+    cardid = activate[i].id
+    if cardid == 98645731 then --pot of duality
+      return COMMAND_ACTIVATE,i
+    end
+  end
+  
+  for i=1,#activate do
+    cardid = activate[i].id
+    if cardid == 70368879 then -- upstart
+      return COMMAND_ACTIVATE,i
+    end
+  end
+  if HasID(activate,33782437) then -- One Day of Piece
+    return COMMAND_ACTIVATE,CurrentIndex
+  end
+  for i=1,#activate do
+    cardid = activate[i].id
+    if cardid == 85852291 then --magical mallet
+      return COMMAND_ACTIVATE,i
+    end
+  end
+  
+  for i=1,#activate do
+    cardid = activate[i].id
+    if cardid == 15259703 then --toon world
+      if HasID(AIMon(),70791313,true) then
+        return COMMAND_ACTIVATE,i
+      end
+    end
+  end
+  if HasID(activate,75014062) then -- Spell Power Grasp
+    return COMMAND_ACTIVATE,CurrentIndex
+  end
+  --go to end phase
+  return COMMAND_TO_END_PHASE,1
+end
+  
 local DeckCommand = nil
 DeckCommand = SummonExtraDeck(cards,true)
 if DeckCommand ~= nil then
@@ -254,6 +348,11 @@ if not ExtraCheck then
     return DeckCommand[1],DeckCommand[2]
   end
 end
+
+
+
+
+--
 -------------------------------------------------
 -- **********************************************
 --   Activate these cards before anything else :O
@@ -404,13 +503,10 @@ end
   -- Set a field spell if the AI doesn't currently control
   -- a field spell 
   ---------------------------------------------------------
-  print("field spells")
   if CardsMatchingFilter(AIST(),FilterType,TYPE_SPELL+TYPE_FIELD)==0 then
-    print("controls no field spell")
     for i=1,#cards.st_setable_cards do
       local c = cards.st_setable_cards[i]
       if FilterType(c,TYPE_SPELL+TYPE_FIELD) and CardIsScripted(c.id)==0 then
-        print("can activate non-scripted field spell, set")
         return COMMAND_SET_ST,i
       end
     end
@@ -1967,7 +2063,6 @@ end
   -------------------------------------------------------
   for i=1,#SummonableCards do   
 	if SummonableCards[i].id == 41269771 then -- Constellar Algiedi
-       ----print("Archetype_Card_Count",Archetype_Card_Count(AIHand(),83,nil) )
 	   if Archetype_Card_Count(AIHand(),83,nil) -1 > 0 then 
 		GlobalSummonedThisTurn = GlobalSummonedThisTurn+1
 		GlobalActivatedCardID = SummonableCards[i].id
@@ -2218,12 +2313,8 @@ end
   -- opponent's strongest monster, turn it to defence position 
   -- in MP2.
   --------------------------------------------------
-  print("reposition to DEF")
   for i=1,#RepositionableCards do	  
   local c = RepositionableCards[i]
-    print("can reposition: "..c.id)
-    print(FilterPosition(c,POS_ATTACK))
-    print(RepositionBlacklist(c.id))
     if FilterPosition(c,POS_ATTACK)
     and RepositionBlacklist(c.id) == 0 	
     then
@@ -2235,24 +2326,12 @@ end
       then
         ChangePosOK = true
       end
-      if c.attack >= 1500 and c.defense >= c.attack and ChangePosOK then
-        print("stronger monster, more DEF than ATK, proceed")
-      elseif c.attack < 1500 and c.defense-c.attack <= 200 and ChangePosOK  then
-        print("weaker monster, not too bad DEF, proceed")
-      elseif c.attack < 1000 then
-        print("weak monster, proceed")
-      elseif c.defense-c.attack >= 0 and ChangePosOK then
-        print("more DEF than ATK, proceed")
-      elseif c.defense-c.attack >= 500 then
-        print("way more DEF than ATK, proceed")
-      end
       if ChangePosOK and (c.attack >= 1500 and c.defense >= c.attack
       or c.attack < 1500 and c.defense-c.attack <= 200
       or c.defense-c.attack >= 0)
       or c.attack < 1000 
       or c.defense-c.attack >= 500
       then
-        print("repositioning to DEF")
         return COMMAND_CHANGE_POS,i
       end
     end
@@ -2264,7 +2343,6 @@ end
  -- and opponent controls one or less monsters in attack position, 
  -- turn as many monsters as we can to attack position.
  --------------------------------------------------  
-  print("reposition to ATK")
   local ChangePosOK = false
   for i=1,#AIMon() do
     local c=AIMon()[i]
@@ -2284,7 +2362,6 @@ end
     and not FilterAffected(c,EFFECT_CANNOT_ATTACK_ANNOUNCE)
     or c.attack >= 1500 and c.attack > c.defense)
     then
-      print("repositioning to ATK")
       return COMMAND_CHANGE_POS,i
     end
   end

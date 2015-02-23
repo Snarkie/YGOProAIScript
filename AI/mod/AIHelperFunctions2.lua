@@ -450,7 +450,30 @@ function BestTargets(cards,count,target,filter,opt,immuneCheck,source)
   end
   return result
 end
-
+function GlobalTargetSet(c,cards)
+  if cards == nil then
+    cards = All()
+  end
+  if c.GetCode then
+    c = GetCardFromScript(c,cards)
+  end
+  GlobalTargetID = c.cardid
+  return GlobalTargetID
+end
+function GlobalTargetGet(cards,index)
+  if cards == nil then
+    cards = All()
+  end
+  local cardid = GlobalTargetID
+  GlobalTargetID = nil
+  local c = FindCard(cardid,cards,index)
+  if c == nil then
+    c = FindCard(All(),cards,index)
+  end
+  if c == nil then
+  end
+  return c
+end
 function GlobalTarget(cards,player,original)
   for i=1,#cards do
     if (not original and cards[i].id==GlobalTargetID
@@ -716,11 +739,29 @@ function EffectCheck(player)
   return nil
 end 
 
-function FindCard(cardid,cards)
-  if cards == nil then cards = UseLists({AIAll(),OppAll()}) end
+function FindCard(cardid,cards,index)
+  if cards == nil then cards = All() end
   for i=1,#cards do
     if cards[i].cardid==cardid then
-      return cards[i]
+      if index then
+        return {i}
+      else
+        return cards[i]
+      end
+    end
+  end
+  return nil
+end
+
+function FindID(id,cards,index)
+  if cards == nil then cards = All() end
+  for i=1,#cards do
+    if cards[i].id == id then
+      if index then
+        return i
+      else
+        return cards[i]
+      end
     end
   end
   return nil
@@ -980,7 +1021,7 @@ end
 function BattleTargetCheck(c,source)
   return c:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE)==0
   and c:is_affected_by(EFFECT_CANNOT_BE_BATTLE_TARGET)==0
-  and DestroyCountCheck(c)
+  --and DestroyCountCheck(c)
   and AttackBlacklistCheck(c,source)
 end
 
@@ -1083,13 +1124,17 @@ function CanWinBattle(c,targets,tograve,ignorebonus,filter,opt)
   end
   for i=1,#sub do
     local oppatk = sub[i].attack
+    local oppdef = sub[i].defense
     if ignorebonus and sub[i].bonus and sub[i].bonus > 0 then
       oppatk = math.max(0,oppatk - sub[i].bonus)
     end
+    if FilterPosition(sub[i],POS_FACEDOWN_DEFENCE) and not FilterPublic(sub[i]) then
+      oppdef = 1500
+    end
     if (FilterPosition(sub[i],POS_ATTACK) and (oppatk<atk
     or CrashCheck(c) and oppatk==atk)
-    or FilterPosition(sub[i],POS_DEFENCE) and (sub[i].defense<atk)
-    and (FilterPosition(sub[i],POS_FACEUP) or sub[i]:is_affected_by(EFFECT_PUBLIC))) 
+    or FilterPosition(sub[i],POS_DEFENCE) and (oppdef<atk)
+    and (FilterPosition(sub[i],POS_FACEUP) or FilterPublic(sub[i]))) 
     and BattleTargetCheck(sub[i],c) 
     then
       return true
@@ -1136,6 +1181,61 @@ function CanFinishGame(c,target)
   return false
 end
 
-
+-- convert a card script card to an AI script card, as well as possible
+function GetCardFromScript(c,cards)
+  local id = c:GetCode()
+  local id2 = c:GetOriginalCode()
+  local pos = c:GetPosition()
+  local owner = c:GetOwner()
+  local controller = c:GetControler()
+  local loc = c:GetLocation()
+  local result = nil
+  local atk = c:GetAttack()
+  local def = c:GetDefence()
+  if cards == nil then
+    cards = All()
+  end
+  if owner == player_ai then
+    owner = 1
+  else
+    owner = 2
+  end
+  if controller == player_ai then
+    controller = 1
+  else
+    controller = 2
+  end
+  for i=1,#cards do
+    c=cards[i]
+    if c.id == id and c.original_id == id2
+    and c.position == pos and c.location == loc
+    and c.owner == owner and CurrentMonOwner(c.cardid) == controller
+    and c.attack == atk and c.defense == def 
+    then
+      result = c
+    end
+  end
+  if result then 
+    return result
+  end
+  return nil
+end
+function Surrender()
+  AI.Chat("I give up!")
+  Duel.Win(1-player_ai,REASON_RULE)
+end
+Exodia={44519536,08124921,07902349,70903634,33396948}
+function SurrenderCheck()
+  local cards = UseLists(AIDeck(),AIHand())
+  if DeckCheck(DECK_EXODIA) then
+    for i=1,#Exodia do
+      if not HasID(cards,Exodia[i],true) then
+        Surrender()
+        return
+      end
+    end
+  end
+  return
+end
 
 

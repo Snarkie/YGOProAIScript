@@ -584,7 +584,6 @@ function ChainBrothers()
   or CardsMatchingFilter(AIHand(),LevelFilter,4)>1 and SummonR4torigus()
 end
 function SummonBrothers(ss)
-  print("can summon bros")
   return OPTCheck(57690191) and (PriorityCheck(AIGrave(),PRIO_TODECK,6,NobleFilter)>1
   or PriorityCheck(AIGrave(),PRIO_TODECK,3,NobleFilter)>4 or ChainBrothers() and not ss)
   and (ss or not NormalSummonCheck(player_ai))

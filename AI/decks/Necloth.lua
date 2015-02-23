@@ -124,7 +124,7 @@ function UniCond(loc,c)
     and HasID(AIHand(),51124303,true) 
     and Duel.GetTurnPlayer()==player_ai
   end
-  if loc == PRIO_FIELD then
+  if loc == PRIO_TOFIELD then
     return false
   end
   return true
@@ -304,6 +304,7 @@ function UseBrioField()
 end
 function UseUnicore()
   return not SummonUnicore(1) and OPTCheck(89463537)
+  and not HasID(UseLists(AIHand(),AIST()),97211663,true) and UseCycle()
 end
 function SummonValk(mirror)
   return DualityCheck() and RitualTributeCheck(8,mirror,true,true)
@@ -699,27 +700,23 @@ function ExoTarget(cards)
   local result = Add(cards,PRIO_TOFIELD)
   GlobalKaleidoTarget = nil
   GlobalCycleTarget = nil
-  GlobalExoTarget = cards[result[1]].cardid
+  GlobalExoTarget = cards[1].cardid
   return result
 end
 function CycleTarget(cards)
-  print("selecting target for Cycle")
   if GlobalCardMode == 1 then
-    print("banish")
     GlobalCardMode = nil
     return Add(cards,PRIO_BANISH)
   end
   if FilterLocation(cards[1],LOCATION_DECK) 
   and FilterType(cards[1],TYPE_SPELL) 
   then
-    print("add spell")
     return ClausTarget(cards)
   end
   local result = Add(cards,PRIO_TOFIELD,1,FilterLocation,LOCATION_GRAVE)
-  print("Cycle target: "..cards[result[1]].id)
   GlobalKaleidoTarget = nil
   GlobalExoTarget = nil
-  GlobalCycleTarget = cards[result[1]].cardid
+  GlobalCycleTarget = cards[1].cardid
   return result
 end
 function NyarlaTarget(cards)
@@ -758,13 +755,8 @@ function ExaBeetleTarget(cards)
 end
 function GungnirTarget(cards)
   local result = {}
-  if GlobalTargetID then
-    for i=1,#cards do
-      if cards[i].id == GlobalTargetID then
-        result = {i}
-      end
-    end
-    GlobalTargetID = nil
+  if GlobalCardMode == 1 then
+    result = GlobalTargetGet(cards,true)
   end
   if #result==0 then result = {math.random(#cards)} end
   return result
@@ -773,8 +765,7 @@ function ArmorTarget(cards)
   if FilterPosition(cards[1],POS_FACEDOWN) then
     return BestTargets(cards,1,PRIO_BANISH,ArmorFilter)
   else
-    local result = {IndexByID(cards,GlobalTargetID)}
-    GlobalTargetID = nil
+    local result = GlobalTargetGet(cards,true)
     return result
   end
 end
@@ -816,10 +807,9 @@ function ClausTarget(cards)
       return {CurrentIndex}
     end
   end
-  if GlobalTargetID then
-    local p = GlobalPlayer
-    GlobalPlayer = nil
-    return GlobalTarget(cards,p)
+  if GlobalCardMode == 1 then
+    GlobalCardMode = nil
+    return GlobalTargetGet(cards,true)
   end
   return BestTargets(cards)
 end
@@ -1075,9 +1065,9 @@ function ChainArmor()
   if Duel.GetCurrentPhase() == PHASE_DAMAGE then
     if AttackBoostCheck(1000,player_ai,ArmorAtkFilter) then
       if Duel.GetTurnPlayer() == player_ai then
-        GlobalTargetID = Duel.GetAttacker():GetCode()
+        GlobalTargetSet(Duel.GetAttacker(),AIMon())
       else
-        GlobalTargetID = Duel.GetAttackTarget():GetCode()
+        GlobalTargetSet(Duel.GetAttackTarget(),AIMon())
       end
       return true
     end
@@ -1103,7 +1093,8 @@ function ChainGungnir(c)
         if c and c:GetCount()>0 then c=c:GetMaxGroup(Card.GetAttack):GetFirst() end
       end
       if c and c.GetCode and UnchainableCheck(74122412) then
-        GlobalTargetID=c:GetCode()
+        GlobalTargetSet(c,AIMon())
+        GlobalCardMode = 1
         return true
       end
     end
@@ -1121,7 +1112,8 @@ function ChainGungnir(c)
       and (not (HasID(AIHand(),88240999,true) and target:GetAttack()+1000>source:GetAttack()))
       and UnchainableCheck(74122412)
       then
-        GlobalTargetID=target:GetCode()
+        GlobalTargetSet(target,AIMon())
+        GlobalCardMode = 1
         return true
       end
     end
@@ -1179,8 +1171,8 @@ function ChainClaus()
     if c and ClausFilter(c) 
     and NotNegated(c)
     then
-      GlobalTargetID=c:GetCode()
-      GlobalPlayer=2
+      GlobalTargetSet(c,OppMon())
+      GlobalCardMode = 1
       return true
     end  
   end
@@ -1198,8 +1190,8 @@ function ChainClaus()
     end
     if WinsBattle(source,target) and source:IsPosition(POS_FACEUP_ATTACK) 
     and ClausFilter(source) then
-      GlobalPlayer = 2
-      GlobalTargetID = source:GetCode()
+      GlobalTargetSet(source,OppMon())
+      GlobalCardMode = 1
       return true
     end
   end

@@ -11,6 +11,8 @@
 --
 -- Return: 
 -- result = table containing target indices
+
+
 function OnSelectCard(cards, minTargets, maxTargets, triggeringID,triggeringCard)
   local result = {}
 -------------------------------------------------
@@ -20,75 +22,108 @@ function OnSelectCard(cards, minTargets, maxTargets, triggeringID,triggeringCard
 -- **********************************************
 -------------------------------------------------
 
-local result = FireFistCard(cards, minTargets, maxTargets, triggeringID, triggeringCard)
-if result ~= nil then
+-- ExodiaLib
+if DeckCheck(DECK_EXODIA) then
+  local id = triggeringID
+  local result = {}
+  if triggeringCard then
+    id = triggeringCard.id
+  end
+  if id == 89997728 then --toon table of contents
+    for i=1,#cards do
+      if cards[i].id == 89997728 then -- find toon table of contents
+        result[1]=i
+        return result
+      end
+    end
+  elseif id == 98645731 then --duality
+    if not HasID(AIMon(),70791313,true) then
+      --ai does not control royal magic library, search for it
+      for i=1,#cards do
+        if cards[i].id == 70791313 then
+          result[1]=i
+          return result
+        end
+      end
+    else
+      --ai controls royal magic library, search for a spell card
+      for i=1,#cards do
+        if bit32.band(cards[i].type, TYPE_SPELL) > 0 then
+          result[1]=i
+          return result
+        end
+      end
+    end
+  elseif id == 85852291 then --mallet
+    if not HasID(AIMon(),70791313,true)then
+      for i=1,maxTargets do
+        result[i]=i
+      end
+    else
+      for i=1,#cards do
+        if bit32.band(TYPE_MONSTER,cards[i].type) > 0 
+        or cards[i].id == 75014062 and not HasID(AIDeck(),75014062,true)
+        or cards[i].id == 15259703 and HasID(AIHand(),89997728,true)
+        or cards[i].id == 89997728 and CardsMatchingFilter(AIHand(),FilterID,89997728)>1
+        then
+          result[#result+1] = i
+        end
+      end
+    end
+    if #result < minTargets then
+      for i=1,maxTargets do
+        result[i]=i
+      end
+    end
+    return result
+  elseif id == 75014062 then
+    result = {IndexByID(cards,70791313)} 
+  end
+  if #result < minTargets then
+    for i=1,minTargets do
+      result[i]=i
+    end
+  end
+  
   return result
 end
-result = HeraldicOnSelectCard(cards, minTargets, maxTargets, triggeringID, triggeringCard)
-if result ~= nil then
-  return result
-end
-result = GadgetOnSelectCard(cards, minTargets, maxTargets, triggeringID, triggeringCard)
-if result ~= nil then
-  return result
-end
-result = BujinOnSelectCard(cards, minTargets, maxTargets, triggeringID, triggeringCard)
-if result ~= nil then
-  return result
-end
-result = MermailOnSelectCard(cards, minTargets, maxTargets, triggeringID, triggeringCard)
-if result ~= nil then
-  return result
-end
-result = ShadollOnSelectCard(cards, minTargets, maxTargets, triggeringID, triggeringCard)
-if result ~= nil then
-  return result
-end
-result = SatellarknightOnSelectCard(cards, minTargets, maxTargets, triggeringID, triggeringCard)
-if result ~= nil then
-  return result
-end
-result = ChaosDragonOnSelectCard(cards, minTargets, maxTargets, triggeringID, triggeringCard)
-if result ~= nil then
-  return result
-end
-result = HATCard(cards, minTargets, maxTargets, triggeringID, triggeringCard)
-if result ~= nil then
-  return result
-end
-result = QliphortCard(cards, minTargets, maxTargets, triggeringID, triggeringCard)
-if result ~= nil then
-  return result
-end
-result = NobleCard(cards, minTargets, maxTargets, triggeringID, triggeringCard)
-if result ~= nil then
-  return result
-end
-result = NekrozCard(cards, minTargets, maxTargets, triggeringID, triggeringCard)
-if result ~= nil then
-  return result
-end
-result = BACard(cards, minTargets, maxTargets, triggeringID, triggeringCard)
-if result ~= nil then
-  return result
-end
-result = {}
+
+-- other decks 
+-- redirect to respective deck files
+
+  local SelectCardFunctions={
+  FireFistCard,HeraldicOnSelectCard,GadgetOnSelectCard,
+  BujinOnSelectCard,MermailOnSelectCard,ShadollOnSelectCard,
+  SatellarknightOnSelectCard,ChaosDragonOnSelectCard,HATCard,
+  QliphortCard,NobleCard,NekrozCard,BACard,
+  }
+  local result = nil
+  for i=1,#SelectCardFunctions do
+    local func = SelectCardFunctions[i]
+    result = func(cards,minTargets,maxTargets,triggeringID,triggeringCard)
+    if result ~= nil then
+      if type(result) == "table" then
+        return result
+      else
+        print("WARNING: returning invalid card selection: "..triggeringID)
+      end
+    end
+  end
+  result = {}
 
 
--- AI attack target selection
--- redirected to SelectBattleComand.lua
-if Duel.GetCurrentPhase()==PHASE_BATTLE 
-and GlobalAIIsAttacking 
-and Duel.GetCurrentChain()==0
-and not triggeringCard
-then 
-  local c = FindCard(GlobalCurrentAttacker)
-  result = AttackTargetSelection(cards,c,GlobalCurrentATK)
-  GlobalCurrentAttacker = nil
-  GlobalCurrentATK = nil
-  GlobalAIIsAttacking = nil
-  return result
-end
+  -- AI attack target selection
+  -- redirected to SelectBattleComand.lua
+  if Duel.GetCurrentPhase()==PHASE_BATTLE 
+  and GlobalAIIsAttacking 
+  and Duel.GetCurrentChain()==0
+  and not triggeringCard
+  then 
+    local c = FindCard(GlobalCurrentAttacker)
+    result = AttackTargetSelection(cards,c,GlobalCurrentATK)
+    GlobalAIIsAttacking = nil
+    return result
+  end
  
   
   --------------------------------------------

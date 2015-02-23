@@ -500,17 +500,12 @@ function GearframeTarget(cards)
   return result
 end
 function FiendishChainTarget(cards)
-  result = nil
-  for i=1,#cards do
-    if CurrentOwner(cards[i])==2 and cards[i].id==GlobalTargetID then
-      result = i
-    end
-  end
-  if result == nil then result = math.random(#cards) end
-  return {result}
+  result = GlobalTargetGet(cards,true)
+  if result == nil then result = {math.random(#cards)} end
+  return result
 end
 function StardustSparkTarget(cards)
-  return {IndexByID(cards,GlobalTargetID)}
+  return GlobalTargetGet(cards,true)
 end
 function GadgetOnSelectCard(cards, minTargets, maxTargets,ID,triggeringCard)
   if ID == 05556499 then
@@ -594,13 +589,13 @@ function ChainStardustSpark()
     if tg then
       local g = tg:Filter(StardustSparkFilter, nil):GetMaxGroup(Card.GetAttack)
       if g then
-        GlobalTargetID = g:GetFirst():GetCode() 
+        GlobalTargetSet(g:GetFirst(),AIMon()) 
       end
       return tg:IsExists(StardustSparkFilter, 1, nil)
     else
       local g = cg:Filter(StardustSparkFilter, nil):GetMaxGroup(Card.GetAttack)
       if g then
-        GlobalTargetID = g:GetFirst():GetCode()
+        GlobalTargetSet(g:GetFirst(),AIMon()) 
       end
       return cg:IsExists(StardustSparkFilter, 1, nil)
     end
@@ -616,7 +611,7 @@ function ChainStardustSpark()
       if source:GetAttack() >= target:GetAttack() and target:IsControler(player_ai) 
       and not target:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE) and not target:IsHasEffect(EFFECT_IMMUNE_EFFECT) 
       then
-        GlobalTargetID=target:GetCode()
+        GlobalTargetSet(target,AIMon())
         return true
       end
     end
@@ -624,7 +619,7 @@ function ChainStardustSpark()
   if RemovalCheck(83994433) then
     local g=Duel.GetMatchingGroup(StardustSparkFilter,player_ai,LOCATION_ONFIELD,0,nil,83994433):GetMaxGroup(Card.GetAttack)
     if g then
-      GlobalTargetID = g:GetFirst():GetCode()
+      GlobalTargetSet(g:GetFirst(),AIMon())
       return true
     end
   end	
@@ -633,7 +628,7 @@ function ChainStardustSpark()
 		if cg:IsExists(function(c) return c:IsControler(player_ai) and c:IsCode(83994433) end, 1, nil) then
       local g=Duel.GetMatchingGroup(StardustSparkFilter,player_ai,LOCATION_ONFIELD,0,nil):GetMaxGroup(Card.GetAttack)
       if g then
-        GlobalTargetID = g:GetFirst():GetCode()
+        GlobalTargetSet(g:GetFirst(),AIMon())
         return true
       end
     end	

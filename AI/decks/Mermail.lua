@@ -615,15 +615,6 @@ function GungnirTarget(cards,Min,Max)
   if result == nil then result = {math.random(#cards)} end
   return result
 end
-function MechquippedTarget(cards)
-  result = nil
-  if GlobalCardMode == nil then
-    result = {IndexByID(cards,GlobalTargetID)}
-  end
-  GlobalCardMode = nil
-  if result == nil then result = {math.random(#cards)} end
-  return result
-end
 function KappaTarget(cards)
   return MermailAdd(cards,PRIO_DISCARD)
 end
@@ -646,7 +637,7 @@ end
 function MechquippedTarget(cards)
   local result = nil
   if GlobalCardMode==nil then
-    result = IndexByID(cards,GlobalTargetID)
+    result = GlobalTargetGet(cards,true)
   end
   GlobalCardMode=nil
   if result == nil then result = {math.random(#cards)} end
@@ -793,13 +784,13 @@ function ChainMechquipped()
     if tg then
       local g = tg:Filter(MechquippedFilter, nil):GetMaxGroup(Card.GetAttack)
       if g then
-        GlobalTargetID = g:GetFirst():GetCode() 
+        GlobalTargetSet(g:GetFirst(),AIMon())
       end
       return tg:IsExists(MechquippedFilter, 1, nil)
     else
       local g = cg:Filter(MechquippedFilter, nil):GetMaxGroup(Card.GetAttack)
       if g then
-        GlobalTargetID = g:GetFirst():GetCode()
+        GlobalTargetSet(g:GetFirst(),AIMon())
       end
       return cg:IsExists(MechquippedFilter, 1, nil)
     end
@@ -816,7 +807,7 @@ function ChainMechquipped()
       and target:IsPosition(POS_FACEUP_ATTACK)
       and not target:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE)
       then
-        GlobalTargetID=target:GetCode()
+        GlobalTargetSet(target,AIMon())
         return true
       end
     end
@@ -824,7 +815,7 @@ function ChainMechquipped()
   if RemovalCheck(15914410) then
     local g=Duel.GetMatchingGroup(MechquippedFilter,player_ai,LOCATION_ONFIELD,0,nil,15914410):GetMaxGroup(Card.GetAttack)
     if g then
-      GlobalTargetID = g:GetFirst():GetCode()
+      GlobalTargetSet(g:GetFirst(),AIMon())
       return true
     end
   end
@@ -833,7 +824,7 @@ function ChainMechquipped()
 		if cg:IsExists(function(c) return c:IsControler(player_ai) and c:IsCode(15914410) end, 1, nil) then
       local g=Duel.GetMatchingGroup(MechquippedFilter,player_ai,LOCATION_ONFIELD,0,nil):GetMaxGroup(Card.GetAttack)
       if g then
-        GlobalTargetID = g:GetFirst():GetCode()
+        GlobalTargetSet(g:GetFirst(),AIMon())
         return true
       end
     end	

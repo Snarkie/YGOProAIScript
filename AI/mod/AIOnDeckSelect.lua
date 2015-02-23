@@ -12,8 +12,9 @@ DECK_TELLARKNIGHT = 8
 DECK_HAT          = 9
 DECK_QLIPHORT     = 10
 DECK_NOBLEKNIGHT  = 11
-DECK_NEKROZ      = 12
+DECK_NEKROZ       = 12
 DECK_BA           = 13
+DECK_EXODIA       = 14
 
 DeckIdent={ --card that identifies the deck
 [1]   = 99365553, -- Lightpulsar Dragon
@@ -29,6 +30,7 @@ DeckIdent={ --card that identifies the deck
 [11]  = 59057152, -- Noble Knight Medraut
 [12]  = 14735698, -- Nekroz Exomirror
 [13]  = 36006208, -- Fire Lake of the Burning Abyss
+[14]  = 33396948, -- Exodia the Forbidden One
 }
 Deck = nil
 DeckName={
@@ -46,6 +48,7 @@ DeckName={
 [11]  = "Noble Knight",
 [12]  = "Nekroz",
 [13]  = "Burning Abyss",
+[14]  = "Exodia",
 }
 function DeckCheck(opt)
   if Deck == nil then
@@ -54,6 +57,14 @@ function DeckCheck(opt)
       if HasID(UseLists({AIDeck(),AIHand()}),DeckIdent[i],true) then
         Deck = i
         print("AI deck is "..DeckName[i])
+        if Deck == DECK_EXODIA then
+          local e1=Effect.GlobalEffect()
+          e1:SetType(EFFECT_TYPE_FIELD)
+          e1:SetCode(EFFECT_PUBLIC)
+          e1:SetRange(LOCATION_MZONE)
+          e1:SetTargetRange(LOCATION_HAND,LOCATION_HAND)
+          Duel.RegisterEffect(e1,0)
+        end
       end
     end
   end
@@ -388,12 +399,10 @@ function GetPriority(card,loc)
     if checklist[11] and checklist[11](loc,card) 
     and type(checklist[11](loc,card))=="number"  
     then
-      print("custom priority function, returning:")
-      print(checklist[11](loc,card))
       result = checklist[11](loc,card)
     end
   else
-    print("no priority defined for id: "..id..", defaulting to 0")
+    --print("no priority defined for id: "..id..", defaulting to 0")
   end
   return result
 end

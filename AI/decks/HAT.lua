@@ -173,12 +173,12 @@ function UseCotH()
     if Duel.GetCurrentPhase() == PHASE_MAIN1 and GlobalBPAllowed and OverExtendCheck() then
       if HasID(AIGrave(),68535320,true) and FireHandCheck() then
         GlobalCardMode = 1
-        GlobalTargetID = 68535320
+        GlobalTargetSet(FindCard(68535320,AIGrave()))
         return true
       end
       if HasID(AIGrave(),95929069,true) and FireHandCheck() then
         GlobalCardMode = 1
-        GlobalTargetID = 95929069
+        GlobalTargetSet(FindCard(95929069,AIGrave()))
         return true
       end
     end
@@ -285,10 +285,7 @@ function CotHTarget(cards)
     GlobalCardMode = nil
     result = Add(cards,PRIO_TOFIELD,1,FilterAttackMin,AI.GetPlayerLP(2)-ExpectedDamage(2))
   elseif GlobalCardMode == 1 then
-    local id = GlobalTargetID
-    GlobalCardMode = nil
-    GlobalTargetID = nil
-    result = {IndexByID(cards,id)}
+    result = GlobalTargetGet(cards,true)
   else
     result = Add(cards,PRIO_TOFIELD,1,TargetCheck)
   end
@@ -297,10 +294,7 @@ function CotHTarget(cards)
 end
 function BoMTarget(cards)
   if GlobalCardMode == 1 then
-    local p = GlobalPlayer
-    GlobalCardMode = nil
-    GlobalPlayer = nil
-    return GlobalTarget(cards,p,true)
+    return GlobalTargetGet(cards,true)
   end
   return BestTargets(cards,1,TARGET_FACEDOWN)
 end
@@ -309,20 +303,16 @@ function PleiadesTarget(cards)
     GlobalCardMode = 1
     return BestTargets(cards,1,TARGET_TOGRAVE)
   elseif GlobalCardMode == 1 then
-    local p = GlobalPlayer
-    GlobalCardMode = nil
-    GlobalPlayer = nil
-    return GlobalTarget(cards,p,true)
+    return GlobalTargetGet(cards,true)
   else
   return BestTargets(cards,1,TARGET_TOHAND)
   end
 end
-function GiantHandTarget(cards)
-  if GlobalCardMode==1 then
-    GlobalCardMode = nil
+function GiantHandTarget(cards,min)
+  if min>1 then
     return {1,2}
   else
-    return GlobalTarget(cards,2,true)
+    return GlobalTargetGet(cards,true)
   end
 end
 
@@ -349,7 +339,7 @@ function HATCard(cards,min,max,id,c)
     return BoMTarget(cards)
   end
   if id == 63746411 then 
-    return GiantHandTarget(cards)
+    return GiantHandTarget(cards,min)
   end
   if id == 73964868 then 
     return PleiadesTarget(cards)
@@ -367,15 +357,11 @@ function ArtifactCheckGrave(sanctum)
   local BeagalltachCheck = HasID(AIGrave(),12697630,true) and HasID(AIST(),85103922,true) 
   and Duel.GetTurnPlayer()==1-player_ai and MidrashCheck()
   if BeagalltachCheck then
-    GlobalCardMode = 1
-    GlobalTargetID = 12697630
-    GlobalPlayer = 1
+    GlobalTargetSet(FindID(12697630),AIGrave())
     return true
   end
   if MoralltachCheck then
-    GlobalCardMode = 1
-    GlobalTargetID = 85103922
-    GlobalPlayer = 1
+    GlobalTargetSet(FindID(85103922),AIGrave())
     return true
   end
   return false
@@ -408,7 +394,7 @@ function ChainCotH()
     end
     if MyrmeleoCheck then
       GlobalCardMode = 1
-      GlobalTargetID = 91812341
+      GlobalTargetSet(FindID(91812341),AIGrave())
       return true
     end
     return true -- return true anyways to avoid destruction effects that only destroy face-down cards
@@ -437,7 +423,7 @@ function ChainCotH()
     end
     if MyrmeleoCheck and CardsMatchingFilter(OppST(),MSTEndPhaseFilter)>0 then
       GlobalCardMode = 1
-      GlobalTargetID = 91812341
+      GlobalTargetSet(FindID(91812341),AIGrave())
       return true
     end
   end
@@ -490,8 +476,7 @@ function ChainBoM()
       local g=cg:Filter(MoonFilter2,nil,player_ai):GetMaxGroup(Card.GetAttack)
       if g then
         GlobalCardMode = 1
-        GlobalTargetID = g:GetFirst():GetOriginalCode()
-        GlobalPlayer = 1
+        GlobalTargetSet(g:GetFirst(),AIMon())
         return true
       end
     end	
@@ -502,8 +487,7 @@ function ChainBoM()
       local g=cg:Filter(MoonFilter2,nil,player_ai):GetMaxGroup(Card.GetAttack)
       if g and e and MoonWhitelist2(e:GetHandler():GetCode()) then
         GlobalCardMode = 1
-        GlobalTargetID = g:GetFirst():GetOriginalCode()
-        GlobalPlayer = 1
+        GlobalTargetSet(g:GetFirst(),AIMon())
         return true
       end
     end
@@ -512,8 +496,7 @@ function ChainBoM()
     for i=1,#OppMon() do
       if MoonPriorityFilter(OppMon()[i]) then
         GlobalCardMode = 1
-        GlobalTargetID = OppMon()[i].original_id
-        GlobalPlayer = 2
+        GlobalTargetSet(OppMon()[i],OppMon())
         return true
       end
     end
@@ -526,8 +509,7 @@ function ChainBoM()
     and not (target:GetCode()==95929069 and CardsMatchingFilter(OppST(),DestroyFilter)>0)
     then
       GlobalCardMode = 1
-      GlobalTargetID = source:GetOriginalCode()
-      GlobalPlayer = 2
+      GlobalTargetSet(source,OppMon())
       return true
     end
   end
@@ -538,8 +520,7 @@ function ChainBoM()
     for i=1,#AIMon() do
       if MoonFilter3(AIMon()[i]) then
         GlobalCardMode = 1
-        GlobalTargetID = AIMon()[i].original_id
-        GlobalPlayer = 1
+        GlobalTargetSet(AIMon()[i],AIMon())
         return true
       end
     end
@@ -617,8 +598,7 @@ function ChainPleiades()
       return true
     else
       GlobalCardMode = 2
-      GlobalTargetID = 73964868
-      GlobalPlayer = 1
+      GlobalTargetSet(FindID(73964868,AIMon()),AIMon())
       return true
     end
   end
@@ -634,8 +614,7 @@ function ChainPleiades()
       local g=cg:Filter(MoonFilter2,nil,player_ai):GetMaxGroup(Card.GetAttack)
       if g then
         GlobalCardMode = 2
-        GlobalTargetID = g:GetFirst():GetOriginalCode()
-        GlobalPlayer = 1
+        GlobalTargetSet(g:GetFirst(),AIMon())
         return true
       end
     end	
@@ -646,8 +625,7 @@ function ChainPleiades()
       local g=cg:Filter(MoonFilter2,nil,player_ai):GetMaxGroup(Card.GetAttack)
       if g then
         GlobalCardMode = 2
-        GlobalTargetID = g:GetFirst():GetOriginalCode()
-        GlobalPlayer = 1
+        GlobalTargetSet(g:GetFirst(),AIMon())
         return true
       end
     end	
@@ -659,8 +637,7 @@ function ChainPleiades()
     and target:IsControler(player_ai)
     then
       GlobalCardMode = 2
-      GlobalTargetID = source:GetOriginalCode()
-      GlobalPlayer = 2
+      GlobalTargetSet(source,OppMon())
       return true
     end
   end

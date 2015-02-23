@@ -213,6 +213,15 @@ end
 function Field()
   return UseLists(AIField(),OppField())
 end
+function All()
+  return UseLists(AIAll(),OppAll())
+end
+function AllMon()
+  return UseLists(AIMon(),OppMon())
+end
+function AllST()
+  return UseLists(AIST(),OppST())
+end
 -------------------------------------------------
 -- **********************************************
 -- Functions related to monster count returning, 

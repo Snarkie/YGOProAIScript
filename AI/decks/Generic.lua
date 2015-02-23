@@ -40,7 +40,7 @@ function SummonExtraDeck(cards,prio)
   if HasID(Activatable,45986603) and UseSnatchSteal() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Activatable,89882100) then                                     -- Night Beam
+  if HasID(Activatable,89882100) then  -- Night Beam
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   
@@ -631,7 +631,7 @@ function ChainCardNegation(card,targeted,filter,opt)
         end                    -- which means the AI is player 2
         if CardNegateFilter(c,card,targeted,filter,opt) then
           SetNegated(i)
-          return true
+          return c
         end
       end
     end
@@ -639,22 +639,25 @@ function ChainCardNegation(card,targeted,filter,opt)
   return false
 end
 function ChainChalice(card)
-  if ChainCardNegation(card,true,FilterType,TYPE_MONSTER) then
-    GlobalTargetID=c:GetCode()
-    GlobalPlayer=2
+  local c = ChainCardNegation(card,true,FilterType,TYPE_MONSTER)
+  if c then
+    GlobalTargetSet(c,OppMon())
     return true
   end
+  return false
 end
 function ChainVeiler(card)
-  if ChainCardNegation(card,true,FilterType,TYPE_MONSTER) then
-    GlobalTargetID=c:GetCode()
+  local c = ChainCardNegation(card,true,FilterType,TYPE_MONSTER)
+  if c then
+    GlobalTargetSet(c,OppMon())
     return true
   end
   return false
 end
 function ChainBTS(card)
-  if ChainCardNegation(card,true,FilterType,TYPE_MONSTER) then
-    GlobalTargetID=c:GetCode()
+  local c = ChainCardNegation(card,true,FilterType,TYPE_MONSTER)
+  if c then
+    GlobalTargetSet(c,OppMon())
     return true
   end
   if Duel.GetCurrentPhase() == PHASE_BATTLE then --for Breakthrough Skill
@@ -662,7 +665,7 @@ function ChainBTS(card)
       local cards=OppMon()
       for i=1,#cards do
         if VeilerTarget(cards[i]) then
-          GlobalTargetID=cards[i].id
+          GlobalTargetSet(cards[i],OppMon())
           return true
         end
       end
@@ -677,7 +680,7 @@ function ChainBTS(card)
       if source:GetAttack() <= target:GetAttack() and target:IsControler(player_ai) 
       and target:IsPosition(POS_FACEUP_ATTACK) and source:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE)
       then
-        --GlobalTargetID=source:GetCode()
+        --GlobalTargetSet(source)
         --return true
       end
     end
@@ -685,8 +688,9 @@ function ChainBTS(card)
   return false
 end
 function ChainFiendish(card)
-  if ChainCardNegation(card,true,FilterType,TYPE_MONSTER) then
-    GlobalTargetID=c:GetCode()
+  local c = ChainCardNegation(card,true,FilterType,TYPE_MONSTER)
+  if c then
+    GlobalTargetSet(c,OppMon())
     return true
   end
   if Duel.GetCurrentPhase() == PHASE_BATTLE then
@@ -700,14 +704,16 @@ function ChainFiendish(card)
       and source:IsType(TYPE_EFFECT) and not source:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET) 
       and not target:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE) and not source:IsHasEffect(EFFECT_IMMUNE_EFFECT) 
       then
-        GlobalTargetID=source:GetCode()
+        GlobalTargetSet(source,OppMon())
         return true
       end
     end
   end
 end
 function ChainSkillDrain(card)
-  if ChainCardNegation(card,false,FilterType,TYPE_MONSTER) then
+  local c = ChainCardNegation(card,false,FilterType,TYPE_MONSTER)
+  if c then
+    GlobalTargetSet(c,OppMon())
     return true
   end
   if Duel.GetCurrentPhase() == PHASE_BATTLE then
@@ -740,7 +746,9 @@ function ChainSkillDrain(card)
   return false
 end
 function ChainGiantHand(card)
-  if ChainCardNegation(card,true,FilterType,TYPE_MONSTER) then
+  local c = ChainCardNegation(card,true,FilterType,TYPE_MONSTER)
+  if c then
+    GlobalTargetSet(c,OppMon())
     return true
   end
   return false

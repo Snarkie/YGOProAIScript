@@ -251,6 +251,7 @@ end
 function SSScarm()
   return CardsMatchingFilter(AIMon(),NotBAMonsterFilter)==0 
   and CardsMatchingFilter(AIMon(),BAMonsterFilter)==1
+  and CardsMatchingFilter(AIGrave(),ScarmGraveFilter)==0
 end
 function SummonDanteBA()
   return true

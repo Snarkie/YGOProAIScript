@@ -23,6 +23,8 @@ function OnSelectChain(cards,only_chains_by_player,forced)
   local index = 1
   local ChainAllowed = 0
   
+  SurrenderCheck()
+  
 local result=PriorityChain(cards,only_chains_by_player)
 if result ~= nil then
   return result[1],result[2]

@@ -713,7 +713,7 @@ function FireFistCard(cards, minTargets, maxTargets, triggeringID, triggeringCar
   or triggeringID == 97268402 or triggeringID == 78474168 -- Effect Veiler, Breakthrough Skill
   or triggeringID == 70329348
   then 
-    return GlobalTarget(cards)     
+    return GlobalTargetGet(cards,true)     
   end
   return nil
 end
@@ -734,7 +734,7 @@ function ChainTensen()
       or source:GetDefence() >= target:GetAttack() and source:GetDefence() <= target:GetAttack()+1000 and source:IsPosition(POS_FACEUP_DEFENCE))
       and target:IsPosition(POS_FACEUP_ATTACK) and target:IsControler(player_ai) and target:IsRace(RACE_BEASTWARRIOR) 
       then
-        GlobalTargetID=target:GetCode()
+        GlobalTargetSet(target,AIMon())
         return true
       end
     end
@@ -748,7 +748,7 @@ function ChainHornOfPhantomBeast()
     if source and target and source:GetAttack() >= target:GetAttack() and source:GetAttack() <= target:GetAttack()+800
     and target:IsControler(player_ai) and target:IsRace(RACE_BEAST+RACE_BEASTWARRIOR) and target:IsPosition(POS_FACEUP_ATTACK)
     then
-      GlobalTargetID=target:GetCode()
+      GlobalTargetSet(target,AIMon())
       return true
     end
     return false
@@ -766,16 +766,17 @@ function ChainTenken()
   local tg = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TARGET_CARDS)
   if ex then
     local g = cg:Filter(TenkenFilter, nil):GetMaxGroup(Card.GetAttack)
-    if g then
-      GlobalTargetID = g:GetFirst():GetCode()
-   end
-    return cg:IsExists(TenkenFilter, 1, nil) and Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_PLAYER)~=player_ai
-  elseif tg then
-    local g = tg:GetMaxGroup(Card.GetAttack)
-    if g then
-      GlobalTargetID = g:GetFirst():GetCode() 
+    if g and cg:IsExists(TenkenFilter, 1, nil) and Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_PLAYER)~=player_ai then
+      GlobalTargetSet(g:GetFirst(),AIMon())
+      return true
+    elseif tg then
+      local g = tg:GetMaxGroup(Card.GetAttack)
+      if g and tg:IsExists(TenkenFilter, 1, nil) and Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_PLAYER)~=player_ai then
+        GlobalTargetSet(g:GetFirst(),AIMon()) 
+        return true
+      end
     end
-    return tg:IsExists(TenkenFilter, 1, nil) and Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_PLAYER)~=player_ai
+    return 
   else 
     return false
   end

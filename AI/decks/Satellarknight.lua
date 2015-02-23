@@ -442,7 +442,7 @@ function SatellarknightOnSelectCard(cards, minTargets, maxTargets,triggeringID,t
     return SatellarknightAdd(cards,PRIO_TOFIELD)
   end
   if ID == 25789292 then
-    return GlobalTarget(cards,GlobalPlayer)
+    return GlobalTargetGet(cards,true)
   end
   if ID == 93568288 then
     return BestTargets(cards)
@@ -504,8 +504,7 @@ function ChainChaliceAtk()
     and source:IsPosition(POS_FACEUP_ATTACK) and target:IsPosition(POS_FACEUP_ATTACK) and target:IsControler(player_ai)
     and (not target:IsHasEffect(EFFECT_IMMUNE_EFFECT) or target:IsSetCard(0xaa) and target:GetCode()~=27279764)
     then
-      GlobalTargetID=target:GetCode()
-      GlobalPlayer=1
+      GlobalTargetSet(target,AIMon())
       return true
     end
   end

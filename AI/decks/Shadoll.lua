@@ -542,28 +542,16 @@ end
 function CompulseTarget(cards)
   local result = nil
   if GlobalCardMode == 1 then
-    for i=1,#cards do
-      if cards[i].id == GlobalTargetID and cards[i].owner == GlobalPlayer then
-        result={i}
-      end
-    end
+    result=GlobalTargetGet(cards,true)
   end
   GlobalCardMode = nil
-  GlobalTargetID = nil
-  GlobalPlayer = nil
   if result == nil then result = BestTargets(cards,1,TARGET_TOHAND) end
   return result
 end
 function IgnitionTarget(cards)
   local result = {}
   if GlobalCardMode == 2 then
-    for i=1,#cards do
-      if cards[i].id==GlobalTargetID and cards[i].owner==GlobalPlayer 
-      and FilterPosition(cards[i],GlobalPosition)
-      then
-        result = {i}
-      end
-    end
+    result=GlobalTargetGet(cards,true)
   elseif GlobalCardMode == 1 then
     result = BestTargets(cards,1,true)
   else
@@ -574,9 +562,6 @@ function IgnitionTarget(cards)
     end
   end 
   GlobalCardMode=nil
-  GlobalTargetID=nil
-  GlobalPlayer=nil
-  GlobalPosition=nil
   if #result == 0 then result = {math.random(#cards)} end
   if cards[1].prio then TargetSet(cards[1]) else TargetSet(cards[result[1]]) end
   return result
@@ -584,18 +569,9 @@ end
 function MSTTarget(cards)
   result = nil
   if GlobalCardMode == 1 then
-    for i=1,#cards do
-      if cards[i].id==GlobalTargetID and cards[i].owner==GlobalPlayer 
-      and FilterPosition(cards[i],GlobalPosition)
-      then
-        result = {i}
-      end
-    end
+    result=GlobalTargetGet(cards,true)
   end
   GlobalCardMode=nil
-  GlobalTargetID=nil
-  GlobalPlayer=nil
-  GlobalPosition=nil
   if result==nil then result=BestTargets(cards,1,TARGET_DESTROY,TargetCheck) end
   if cards[1].prio then TargetSet(cards[1]) else TargetSet(cards[result[1]]) end
   return result
@@ -852,8 +828,7 @@ function ChainCompulse()
       and not source:IsHasEffect(EFFECT_IMMUNE_EFFECT)
       then
         GlobalCardMode = 1
-        GlobalTargetID = source:GetCode()
-        GlobalPlayer = 2
+        GlobalTargetSet(source,OppMon())
         return true
       end
     end
@@ -871,9 +846,7 @@ function ArtifactCheck(sanctum)
     else 
       GlobalCardMode = 1
     end
-    GlobalTargetID = 12697630
-    GlobalPlayer = 1
-    GlobalPosition=POS_FACEDOWN
+    GlobalTargetSet(FindID(12697630,AIST()),AIST())
     return true
   end
   if MoralltachCheck then
@@ -882,9 +855,7 @@ function ArtifactCheck(sanctum)
     else 
       GlobalCardMode = 1
     end
-    GlobalTargetID = 85103922
-    GlobalPlayer = 1
-    GlobalPosition=POS_FACEDOWN
+    GlobalTargetSet(FindID(85103922,AIST()),AIST())
     return true
   end
   return false
@@ -938,10 +909,8 @@ function ChainMST()
     end
     if targets4 > 0 then
       local cards = SubGroup(OppST(),MSTEndPhaseFilter)
-      GlobalTargetID=cards[math.random(#cards)].id
-      GlobalPlayer=2
-      GlobalCardMode=1
-      GlobalPosition=POS_FACEDOWN
+      GlobalCardMode = 1
+      GlobalTargetSet(cards[math.random(#cards)],OppST())
       return true
     end
   end
@@ -958,10 +927,8 @@ function ChainMST()
     and not c:IsHasEffect(EFFECT_IMMUNE_EFFECT)
     and (not DestroyBlacklist(c) or c:GetCode()==19337371 or c:GetCode()==05851097)
     then
-      GlobalTargetID=c:GetCode()
-      GlobalPlayer=2
-      GlobalCardMode=1
-      GlobalPosition=POS_FACEUP
+      GlobalCardMode = 1
+      GlobalTargetSet(c,OppST())
       return true
     end
   end
@@ -1011,10 +978,8 @@ function ChainIgnition(c)
     end
     if targets4 > 0 and Duel.GetLocationCount(player_ai,LOCATION_SZONE)>loc then
       local cards = SubGroup(OppST(),MSTEndPhaseFilter)
-      GlobalTargetID=cards[math.random(#cards)].id
-      GlobalPlayer=2
-      GlobalCardMode=2
-      GlobalPosition=POS_FACEDOWN
+      GlobalTargetSet(cards[math.random(#cards)],OppST())
+      GlobalCardMode = 2
       return true
     end
   end
@@ -1032,10 +997,8 @@ function ChainIgnition(c)
     and (not DestroyBlacklist(c) or c:GetCode()==19337371 or c:GetCode()==05851097)
     and Duel.GetLocationCount(player_ai,LOCATION_SZONE)>loc
     then
-      GlobalTargetID=c:GetCode()
-      GlobalPlayer=2
-      GlobalCardMode=1
-      GlobalPosition=POS_FACEUP
+      GlobalTargetSet(c,OppST())
+      GlobalCardMode = 2
       return true
     end
   end
