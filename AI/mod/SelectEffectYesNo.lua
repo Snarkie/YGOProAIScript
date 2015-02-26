@@ -16,6 +16,7 @@ function OnSelectEffectYesNo(id,triggeringCard)
   HeraldicOnSelectEffectYesNo,SatellarknightOnSelectEffectYesNo,
   ChaosDragonOnSelectEffectYesNo,HATEffectYesNo,QliphortEffectYesNo,
   NobleEffectYesNo,NekrozEffectYesNo,BAEffectYesNo,DarkWorldEffectYesNo,
+  BujinOnSelectEffectYesNo,
   }
   local result = nil
   for i=1,#YesNoFunctions do

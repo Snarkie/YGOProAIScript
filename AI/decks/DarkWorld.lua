@@ -453,32 +453,22 @@ end
 
 function CheckTarget(source,cards,targeted,filter,opt)
 -- for disrupting card effects that target specific cards
-  print("checking for targets")
   for i=1,Duel.GetCurrentChain() do
-    print("chain link: "..i)
     if CheckNegated(i) then
-      print("not negated, proceed")
       local e = Duel.GetChainInfo(i, CHAININFO_TRIGGERING_EFFECT)
       if e then
-        print("effect exists, proceed")
         if player_ai==nil then 
           player_ai=1                
         end
         local p=e:GetOwnerPlayer()
         local tg = Duel.GetChainInfo(i, CHAININFO_TARGET_CARDS)
-        print("owner: "..p)
-        print("AI: "..player_ai)
-        print(tg)
         if p and p == 1-player_ai and tg and tg:GetCount()>0 then
-          print("enemy player and targets exist, proceed")
           tg=tg:Filter(CheckTargetFilter,nil,source,targeted,filter,opt)
           if tg then
             c=tg:GetFirst() 
             if c then
-              print("target matches filters, proceed")
               c=GetCardFromScript(c,cards)
               if ListHasCard(cards,c) then
-                print("found target, returning: "..c.id..", "..c.cardid)
                 return c
               end
             end
@@ -518,28 +508,19 @@ function CheckSSFilter(c,source,targeted,filter,opt)
 end
 function CheckSS(source,cards,targeted,filter,opt)
 -- for disrupting cards that Special Summon themselves by their own effects
-  print("checking for cards that special summon themselves")
   for i=1,Duel.GetCurrentChain() do
-    print("chain link: "..i)
     if CheckNegated(i) then
-      print("not negated, proceed")
       local e = Duel.GetChainInfo(i, CHAININFO_TRIGGERING_EFFECT)
       if e then
-        print("effect exists, proceed")
         if player_ai==nil then 
           player_ai=1                
         end
         local p=e:GetOwnerPlayer()
         local c = e:GetHandler()
-        print("owner: "..p)
-        print("AI: "..player_ai)
         if p and p == 1-player_ai then
-          print("enemy player, proceed")
           if c and CheckSSFilter(c,source,targeted,filter,opt) then
-            print("card matches filter, proceed")
             c=GetCardFromScript(c,cards)
             if ListHasCard(cards,c) then
-              print("found target, returning: "..c.id..", "..c.cardid)
               return c
             end
           end
@@ -555,13 +536,15 @@ function ChainDarkSmog(card)
   then
     return true
   end
-  if UnchainableCheck(41930553) then
+  if not UnchainableCheck(41930553) then
     return false
   end
   if Duel.GetCurrentPhase() == PHASE_END 
   and Duel.GetTurnPlayer() == 1-player_ai
   and PriorityCheck(AIHand(),PRIO_DISCARD,1,FilterRace,RACE_FIEND)>4 
   and CardsMatchingFilter(OppGrave(),FilterType,TYPE_MONSTER)>0
+  and not (SummonGraphaCheck(true) 
+  and CardsMatchingFilter(AIHand(),DarkWorldMonsterFilter,34230233)==1)
   then
     return UnchainableCheck(41930553)
   end
