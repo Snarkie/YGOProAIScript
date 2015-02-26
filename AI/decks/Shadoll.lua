@@ -423,12 +423,19 @@ end
 function BeagalltachTarget(cards)
   local result={}
   local targets=CardsMatchingFilter(UseLists({OppMon(),OppST()}),MoralltachFilter)
+  local Scythe=false
   for i=1,#cards do
+    if cards[i].id == 20292186 and ScytheCheck()
+    and #result<math.min(targets,2) and not Scythe
+    then
+      Scythe = true
+      result[#result+1]=i
+    end
     if cards[i].id == 85103922 and #result<math.min(targets,2) then
       result[#result+1]=i
     end
   end
-  if #result==0 then result={math.random(#cards)} end
+  if #result==0 then result=BestTargets(cards,1,TARGET_DESTROY) end
   return result
 end
 function FalconTarget(cards)

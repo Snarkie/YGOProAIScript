@@ -677,7 +677,7 @@ function ChainCardNegation(card,targeted,removalonly,filter,opt)
           player_ai=1          -- before player setup is complete      
         end                    -- which means the AI is player 2
         if CardNegateFilter(c,card,targeted,filter,opt) 
-        and (removalonly==nil or RemovalCheckList(AIField(),nil,i))
+        and (not removalonly or RemovalCheckList(AIField(),nil,i))
         then
           SetNegated(i)
           return c
