@@ -60,6 +60,7 @@ function MoralltachCond(loc)
   if loc == PRIO_TOFIELD then 
     return CardsMatchingFilter(UseLists({OppMon(),OppST()}),MoralltachFilter)>0 
     and Duel.GetTurnPlayer()==1-player_ai
+    and not ScytheCheck()
   end
   return true
 end
@@ -69,7 +70,20 @@ function BeagalltachCond(loc)
     return HasID(card,29223325,true) and HasID(AIDeck(),85103922,true)
   end
   if loc == PRIO_TOFIELD then 
-    return MidrashCheck() and HasID(AIST(),85103922,true) and MoralltachCond(PRIO_TOFIELD)
+    return MidrashCheck() and (HasID(AIST(),85103922,true) and MoralltachCond(PRIO_TOFIELD)
+    or HasID(AIST(),20292186,true) and ScytheCond(PRIO_TOFIELD))
+    and Duel.GetTurnPlayer()==1-player_ai
+  end
+  return true
+end
+function ScytheCond(loc)
+  if loc == PRIO_TOHAND then
+    local cards = UseLists({AIHand(),AIST()})
+    return HasID(cards,12444060,true) and HasID(AIDeck(),12697630,true)
+    or HasID(card,29223325,true)
+  end
+  if loc == PRIO_TOFIELD then 
+    return ScytheCheck()
     and Duel.GetTurnPlayer()==1-player_ai
   end
   return true
@@ -77,9 +91,11 @@ end
 function SanctumCond(loc,c)
   if loc == LOCATION_TOHAND then
     local cards = UseLists({AIHand(),AIST()})
-    return (HasID(AIDeck(),85103922,true) 
-    or HasID(UseLists({AIHand(),AIST()}),85103922,true) 
-    and HasID(AIDeck(),12697630,true))
+    return (HasID(AIDeck(),85103922,true)
+    or HasID(AIDeck(),20292186,true)    
+    or (HasID(UseLists({AIHand(),AIST()}),85103922,true) 
+    or HasID(UseLists({AIHand(),AIST()}),20292186,true) )
+    and HasID(AIDeck(),12697630,true) )
     and not HasID(cards,12444060,true)
   end
   return true
@@ -88,8 +104,10 @@ function IgnitionCond(loc,c)
   if loc == LOCATION_TOHAND then
     local cards = UseLists({AIHand(),AIST()})
     return (HasID(cards,85103922,true) 
+    or HasID(cards,20292186,true) 
     or HasID(cards,12697630,true) 
-    and HasID(AIDeck(),85103922,true))
+    and (HasID(AIDeck(),85103922,true)
+    or HasID(AIDeck(),20292186,true)) )
     and not HasID(cards,29223325,true)
   end
   return true
@@ -193,6 +211,36 @@ end
 function SetMonster()
   return #AIMon()==0 and (Duel.GetCurrentPhase()==PHASE_MAIN2 or not GlobalBPAllowed)
 end
+function ScytheCheck()
+  local tuners = 0
+  local nontuners = 0
+  local level = {}
+  local lvlcount = 0
+  for i=1,#OppMon() do
+    local c = OppMon()[i]
+    if FilterPosition(c,POS_FACEUP) then
+      if FilterType(c,TYPE_TUNER) then
+        tuners = tuners + 1
+      end
+      if not FilterType(c,TYPE_TUNER) then
+        nontuners = nontuners + 1
+      end
+      if level[c.level] then
+        level[c.level]=level[c.level]+1
+        lvlcount = math.max(level[c.level],lvlcount)
+      else
+        level[c.level]=1
+        lvlcount=math.max(lvlcount,1)
+      end
+    end
+  end
+  return (tuners>0 and nontuners>0 or lvlcount>1)
+  and Duel.GetTurnPlayer()==1-player_ai
+  and DualityCheck()
+  and not SkillDrainCheck()
+  and (Duel.GetCurrentPhase()==PHASE_MAIN1
+  or Duel.GetCurrentPhase()==PHASE_MAIN2)
+end
 function HATInit(cards)
   local Activatable = cards.activatable_cards
   local Summonable = cards.summonable_cards
@@ -246,6 +294,9 @@ function HATInit(cards)
     return {COMMAND_SET_MONSTER,CurrentIndex}
   end
   if HasID(SetableST,85103922) and SetArtifacts() then
+    return {COMMAND_SET_ST,CurrentIndex}
+  end
+  if HasID(SetableST,20292186) and SetArtifacts() then
     return {COMMAND_SET_ST,CurrentIndex}
   end
   if HasID(SetableST,12697630) and SetArtifacts() then
@@ -426,6 +477,11 @@ function ChainCotH()
       GlobalTargetSet(FindID(91812341),AIGrave())
       return true
     end
+  end
+  if ScytheCheck() and HasID(AIGrave(),20292186,true) then
+    GlobalCardMode = 1
+    GlobalTargetSet(FindID(20292186),AIGrave())
+    return true
   end
   return false
 end
@@ -700,7 +756,8 @@ function HATEffectYesNo(id,card)
   return result
 end
 HATAtt={
-  91812341,45803070,91499077 -- Traptrix Myrmeleo, Dionaea, Gagaga Samurai
+  91812341,45803070,91499077, -- Traptrix Myrmeleo, Dionaea, Gagaga Samurai
+  20292186 -- Artifact Scythe
 }
 HATDef={
 }

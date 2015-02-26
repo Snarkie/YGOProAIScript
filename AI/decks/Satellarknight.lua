@@ -535,7 +535,7 @@ function SatellarknightOnSelectChain(cards,only_chains_by_player)
   if HasID(cards,97077563) and ChainCotH2() then
     return {1,CurrentIndex}
   end
-  if HasID(cards,82732705) and ChainSkillDrain() then
+  if HasID(cards,82732705) and ChainSkillDrain(cards[CurrentIndex]) then
     return {1,CurrentIndex}
   end
   if HasID(cards,25789292) and ChainChaliceAtk() then

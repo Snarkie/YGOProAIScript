@@ -705,7 +705,7 @@ function ChainBookOfMoon()
   return false
 end
 function SanctumFilter(c)
-  return PriorityTarget(c,true,FilterPosition,POS_FACEUP)
+  return PriorityTarget(c,true,nil,FilterPosition,POS_FACEUP)
 end
 function ChainSanctum()
   if RemovalCheck(12444060) and (HasID(AIDeck(),85103922,true) or HasID(AIDeck(),12697630,true) and HasID(AIST(),85103922,true) and MidrashCheck())then
@@ -736,6 +736,12 @@ function ChainSanctum()
       GlobalCardMode = 1
       return true
     end
+  end
+  local check = HasID(AIDeck(),20292186,true) or HasID(AIDeck(),12697630,true) 
+  and HasID(AIST(),20292186,true) and MidrashCheck()
+  if ScytheCheck() and check then
+    GlobalCardMode = 1
+    return true
   end
   return nil
 end
@@ -835,28 +841,53 @@ function ChainCompulse()
   end
   return false
 end
-function ArtifactCheck(sanctum)
+function ArtifactCheck(sanctum,scythe)
   local MoralltachCheck = HasID(AIST(),85103922,true) and Duel.GetTurnPlayer()==1-player_ai
   local BeagalltachCheck = HasID(AIST(),12697630,true) and (HasID(AIST(),85103922,true) 
   or sanctum and HasID(AIDeck(),85103922,true))
   and MidrashCheck() and Duel.GetTurnPlayer()==1-player_ai
-  if BeagalltachCheck then
-    if sanctum then
-      GlobalCardMode = 2
-    else 
-      GlobalCardMode = 1
+  local BeagalltachCheckScythe = HasID(AIST(),12697630,true) and (HasID(AIST(),20292186,true) 
+  or sanctum and HasID(AIDeck(),20292186,true))
+  and MidrashCheck() and Duel.GetTurnPlayer()==1-player_ai
+  local CheckScythe = HasID(AIST(),20292186,true) and Duel.GetTurnPlayer()==1-player_ai
+  if scythe then
+    if BeagalltachCheckScythe then
+      if sanctum then
+        GlobalCardMode = 2
+      else 
+        GlobalCardMode = 1
+      end
+      GlobalTargetSet(FindID(20292186,AIST()),AIST())
+      return true
     end
-    GlobalTargetSet(FindID(12697630,AIST()),AIST())
-    return true
-  end
-  if MoralltachCheck then
-    if sanctum then
-      GlobalCardMode = 2
-    else 
-      GlobalCardMode = 1
+    if CheckScythe then
+      if sanctum then
+        GlobalCardMode = 2
+      else 
+        GlobalCardMode = 1
+      end
+      GlobalTargetSet(FindID(20292186,AIST()),AIST())
+      return true
     end
-    GlobalTargetSet(FindID(85103922,AIST()),AIST())
-    return true
+  else
+    if BeagalltachCheck then
+      if sanctum then
+        GlobalCardMode = 2
+      else 
+        GlobalCardMode = 1
+      end
+      GlobalTargetSet(FindID(12697630,AIST()),AIST())
+      return true
+    end
+    if MoralltachCheck then
+      if sanctum then
+        GlobalCardMode = 2
+      else 
+        GlobalCardMode = 1
+      end
+      GlobalTargetSet(FindID(85103922,AIST()),AIST())
+      return true
+    end
   end
   return false
 end
@@ -935,6 +966,9 @@ function ChainMST()
   if HasPriorityTarget(OppST(),true) then
     return true
   end
+  if ScytheCheck() and ArtifactCheck(nil,true) then
+    return true
+  end
   return false
 end
 function ChainIgnition(c)
@@ -1003,6 +1037,9 @@ function ChainIgnition(c)
     end
   end
   if HasPriorityTarget(OppST(),true) and Duel.GetLocationCount(player_ai,LOCATION_SZONE)>loc then
+    return true
+  end
+  if ScytheCheck() and ArtifactCheck(true,true) then
     return true
   end
   return false

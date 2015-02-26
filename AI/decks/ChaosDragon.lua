@@ -133,9 +133,15 @@ function TourGuideCond(loc,c)
     local cards = UseLists(AIHand(),AIST())
     return not HasID(AIHand(),10802915,true) 
     and not (HasID(cards,63356631,true) or HasID(cards,71587526 ,true))
+    and not SkillDrainCheck()
+    and (DiscardOutlets()==0 or CardsMatchingFilter(AIMon(),DarkWorldMonsterFilter)>0)
   end
   if loc == PRIO_BANISH then
     return bit32.band(c.location,LOCATION_HAND)==0 or CardsMatchingFilter(AIHand(),FilterID,10802915)>1
+  end
+  if loc == PRIO_DISCARD then
+    return #AIHand()>5 or CardsMatchingFilter(AIHand(),FilterID,10802915)>1
+    or SkillDrainCheck() --or NormalSummonCheck() 
   end
   return true
 end
@@ -370,9 +376,9 @@ end
 function SummonWyverbuster()
   return PriorityCheck(AIGrave(),PRIO_BANISH,1,FilterAttribute,ATTRIBUTE_DARK)>4 and SummonMini()
 end
-function SetScarm()
+function SetScarm(deck)
   return (Duel.GetTurnCount()==1 or Duel.GetCurrentPhase() == PHASE_MAIN2) 
-  and #AIMon()==0 and DeckCheck(DECK_CHAOSDRAGON)
+  and #AIMon()==0 and (deck == nil or DeckCheck(deck))
 end
 function LuminaFilter(c)
   return bit32.band(c.type,TYPE_MONSTER) and c.level<5 and IsSetCode(c.setcode,0x38)
@@ -595,7 +601,7 @@ function ChaosDragonOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(Summonable,10802915) and DeckCheck(DECK_CHAOSDRAGON) then
     return {COMMAND_SUMMON,CurrentIndex}
   end
-  if HasID(SetableMon,84764038) and SetScarm() then
+  if HasID(SetableMon,84764038) and SetScarm(DECK_CHAOSDRAGON) then
     return {COMMAND_SET_MONSTER,CurrentIndex}
   end
   return nil

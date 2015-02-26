@@ -238,7 +238,7 @@ function SummonVirgil()
 end
 function UseVirgil()
   local targets = CardsMatchingFilter(OppField(),VirgilFilter)
-  return HasPriorityTarget(OppField(),false,VirgilFilter) or targets>0 and PriorityCheck(AIHand(),PRIO_TOGRAVE,1,BAFilter)>3
+  return HasPriorityTarget(OppField(),false,nil,VirgilFilter) or targets>0 and PriorityCheck(AIHand(),PRIO_TOGRAVE,1,BAFilter)>3
 end
 function SSGraff()
   return CardsMatchingFilter(AIMon(),NotBAMonsterFilter)==0 
@@ -257,7 +257,7 @@ function SummonDanteBA()
   return true
 end
 function SetBA()
-  return #AIMon() == 0
+  return #AIMon() == 0 and DeckCheck(DECK_BA)
 end
 function SetCir()
   return SetBA() and CardsMatchingFilter(AIGrave(),BAMonsterFilter,57143342)>0
@@ -276,7 +276,8 @@ function UseAlucard()
   return CardsMatchingFilter(OppField(),AlucardFilter)>0
 end
 function SummonAlucard()
-  return CardsMatchingFilter(AIMon(),BASelfDestructFilter)<3 and UseAlucard()
+  return CardsMatchingFilter(AIMon(),BASelfDestructFilter)<3 
+  and UseAlucard() and DeckCheck(DECK_BA)
 end
 function SummonLevia()
   return CardsMatchingFilter(AIMon(),BASelfDestructFilter)<4
@@ -312,7 +313,7 @@ end
 function SummonDownerd()
   return CardsMatchingFilter(AIMon(),BASelfDestructFilter)==0 and HasID(AIMon(),83531441,true,nil,POS_FACEUP_ATTACK)
 end
-function SummonZenmaines()
+function SummonZenmainesBA()
   return false -- temp
 end
 function BAInit(cards)
@@ -480,7 +481,7 @@ function BAInit(cards)
   if HasID(SpSum,72167543) and SummonDownerd() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasID(SpSum,78156759) and SummonZenmaines() then
+  if HasID(SpSum,78156759) and SummonZenmainesBA() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSum,16259549) and SummonFortuneTune() then

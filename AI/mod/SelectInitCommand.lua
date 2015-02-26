@@ -87,6 +87,7 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
   ------------------------------------------
   if GlobalAIPlaysFirst == nil then
     if Duel.GetTurnCount() == 1 then
+      DeckCheck()
       GlobalIsAIsTurn = 1
       GlobalAIPlaysFirst = 1
       GlobalAIIsAttacking = nil
@@ -159,7 +160,6 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
 --        Functions for specific decks
 -- **********************************************
 -------------------------------------------------
-DeckCheck()
 ExtraCheck=(DeckCheck(DECK_BUJIN) 
 or DeckCheck(DECK_TELLARKNIGHT) 
 or DeckCheck(DECK_NOBLEKNIGHT))
@@ -343,6 +343,12 @@ if not ExtraCheck then
   end
 end
 if not ExtraCheck then 
+  DeckCommand = DarkWorldInit(cards)
+  if DeckCommand ~= nil then
+    return DeckCommand[1],DeckCommand[2]
+  end
+end
+if not ExtraCheck then 
   DeckCommand = SummonExtraDeck(cards)
   if DeckCommand ~= nil then
     return DeckCommand[1],DeckCommand[2]
@@ -461,28 +467,6 @@ end
    end
  end
 
-  -----------------------------------------------
-  -- Activate The Gates of Dark World if there is
-  -- a Fiend-type monster in the graveyard other
-  -- than Grapha, Dragon Lord of Dark World.
-  -----------------------------------------------
-  for i=1,#ActivatableCards do
-    if ActivatableCards[i].location == LOCATION_SZONE then
-      if ActivatableCards[i].type == TYPE_SPELL + TYPE_FIELD then
-        if ActivatableCards[i].id == 33017655 then
-          local AIGrave = AIGrave()
-          for x=1,#AIGrave do
-            if AIGrave[x].race == RACE_FIEND and
-               AIGrave[x].id ~= 34230233 then
-               GlobalActivatedCardID = ActivatableCards[i].id
-               GlobalCardMode = 1
-              return COMMAND_ACTIVATE,i
-            end
-          end
-        end
-      end
-    end
-  end
 
   -----------------------------------
   -- Activate a face-up field spell
@@ -999,47 +983,6 @@ end
  end
   
   ---------------------------------------------
-  -- AI should activate: Dark World Dealings,
-  -- if he has any "Dark World" monsters in hand
-  ---------------------------------------------
-  for i=1,#ActivatableCards do  
-   if ActivatableCards[i].id == 74117290 then -- Dark World Dealings
-    if Get_Card_Count_ID(AIHand(),34230233,nil) > 0 or Get_Card_Count_ID(AIHand(),33731070,nil) > 0
-	or Get_Card_Count_ID(AIHand(),79126789,nil) > 0 or Get_Card_Count_ID(AIHand(),32619583,nil) > 0 then
-       GlobalActivatedCardID = ActivatableCards[i].id
-	  return COMMAND_ACTIVATE,i
-     end
-   end
- end
-  
-  ---------------------------------------------
-  -- AI should activate: Dark World Lightning, 
-  -- only if Player controls any face down cards.
-  ---------------------------------------------
-  for i=1,#ActivatableCards do  
-   if ActivatableCards[i].id == 93554166 then -- Dark World Lightning
-    if Get_Card_Count_Pos(OppMon(), POS_FACEDOWN) > 0 or Get_Card_Count_Pos(OppST(), POS_FACEDOWN) > 0 then
-       GlobalCardMode = 1
-	   GlobalActivatedCardID = ActivatableCards[i].id
-	  return COMMAND_ACTIVATE,i
-     end
-   end
- end
-  
-  ---------------------------------------------
-  -- AI should activate: Dragged Down into the Grave, 
-  -- only if AI has no other cards then "Dark World" monsters in hand
-  ---------------------------------------------
-  for i=1,#ActivatableCards do  
-   if ActivatableCards[i].id == 16435215 then -- Dragged Down into the Grave
-    if Card_Count_From_List(IsDiscardEffDWMonster,AIHand(),"~=") == 0 then
-	   GlobalActivatedCardID = ActivatableCards[i].id
-	  return COMMAND_ACTIVATE,i
-     end
-   end
- end
-  
-  ---------------------------------------------
   -- AI should activate: Card Destruction, 
   -- only if AI has no other spell or trap cards in hand.
   ---------------------------------------------
@@ -1270,22 +1213,6 @@ end
     end
   end
   
-    --------------------------------------------------------
-  -- Activate Trance Archfiend's discard effect only if
-  -- the AI has an appropriate Dark World monster in hand.
-  --------------------------------------------------------
-  for i=1,#ActivatableCards do
-    if ActivatableCards[i].id == 94283662 then
-      local AIHand = AI.GetAIHand()
-      for x=1,#AIHand do
-        if IsDiscardEffDWMonster(AIHand[x].id) then
-           GlobalActivatedCardID = ActivatableCards[i].id
-          return COMMAND_ACTIVATE,i
-        end
-      end
-    end
-  end
-
   ---------------------------------------------
   -- Activate Worm King's effect only if the AI
   -- controls a "Worm" monster other than King
@@ -1375,19 +1302,6 @@ end
      end
    end
  
-  -------------------------------------------------------  
-  -- AI should activate "Fabled Raven","The Cheerful Coffin" 
-  -- if AI has any "Dark world" monsters in hand.
-  -------------------------------------------------------
-   for i=1,#ActivatableCards do  
-	if ActivatableCards[i].id == 47217354 or ActivatableCards[i].id == 41142615 then -- Fabled Raven
-      if Archetype_Card_Count(AIHand(),6,nil) > 0 then
-	     GlobalActivatedCardID = ActivatableCards[i].id
-		return COMMAND_ACTIVATE,i
-       end
-     end
-   end
-   
   -------------------------------------------------------
   -- AI should activate "Constellar Kaust" if players
   -- strongest attack position monster has more attack points than AI's.
@@ -1642,19 +1556,6 @@ end
     end
   end
   
-  -----------------------------------------
-  -- Special Summon: Grapha, Dragon Lord of Dark World
-  -- if AI controls weaker monster.
-  -----------------------------------------
-  for i=1,#SpSummonableCards do
-    if SpSummonableCards[i].id == 34230233 then -- Grapha, Dragon Lord of Dark World
-      if Get_Card_Att_Def(OppMon(), "attack", ">", POS_FACEUP_ATTACK, "defense") < SpSummonableCards[i].attack then
-        SpSummonedCardID = SpSummonableCards[i].id
-		return COMMAND_SPECIAL_SUMMON,i
-      end
-    end
-  end
-    
   -------------------------------------------------------  
   -- AI should summon "Constellar Pollux" if he
   -- has any "Constellar" monsters in hand
@@ -1963,19 +1864,6 @@ end
 		return COMMAND_SUMMON,i
        end
      end 
-  
-  -------------------------------------------------------  
-  -- AI should summon Winged "Fabled Raven" if he
-  -- has any "Dark world" monsters in hand
-  -------------------------------------------------------
-  for i=1,#SummonableCards do   
-	if SummonableCards[i].id == 47217354 then -- Fabled Raven
-       if Archetype_Card_Count(AIHand(),6,nil) > 0 then 
-		GlobalSummonedThisTurn = GlobalSummonedThisTurn+1
-	    return COMMAND_SUMMON,i
-        end
-      end
-    end
   
   -------------------------------------------------------  
   -- AI should summon "Battlin' Boxer Headgeared" if he
@@ -2386,7 +2274,7 @@ end
       end
     end
     for i=1,#setCards do
-      if (setThisTurn < 3 or DeckCheck(DECK_HAT)) --and #AIST()<4
+      if (setThisTurn < 3 or DeckCheck(DECK_HAT)) and #AIST()<4
       and SetBlacklist(setCards[i].id)==0 
       and (bit32.band(setCards[i].type,TYPE_TRAP) > 0 
       or bit32.band(setCards[i].type,TYPE_QUICKPLAY) > 0 )
@@ -2415,6 +2303,12 @@ end
         return COMMAND_SET_ST,i
       end
     end
+  end
+  
+  if (Duel.GetCurrentPhase() == PHASE_MAIN2 or not GlobalBPAllowed)
+  and #AIHand()>6 and #cards.st_setable_cards > 0 
+  then
+    return COMMAND_SET_ST,1
   end
 
   ----print("DECISION: go to next phase")

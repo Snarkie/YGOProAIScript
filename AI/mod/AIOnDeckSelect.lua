@@ -15,6 +15,7 @@ DECK_NOBLEKNIGHT  = 11
 DECK_NEKROZ       = 12
 DECK_BA           = 13
 DECK_EXODIA       = 14
+DECK_DARKWORLD    = 15
 
 DeckIdent={ --card that identifies the deck
 [1]   = 99365553, -- Lightpulsar Dragon
@@ -31,6 +32,7 @@ DeckIdent={ --card that identifies the deck
 [12]  = 14735698, -- Nekroz Exomirror
 [13]  = 36006208, -- Fire Lake of the Burning Abyss
 [14]  = 33396948, -- Exodia the Forbidden One
+[15]  = 34230233, -- DW Grapha
 }
 Deck = nil
 DeckName={
@@ -49,6 +51,7 @@ DeckName={
 [12]  = "Nekroz",
 [13]  = "Burning Abyss",
 [14]  = "Exodia",
+[15]  = "Dark World",
 }
 function DeckCheck(opt)
   if Deck == nil then
@@ -57,13 +60,16 @@ function DeckCheck(opt)
       if HasID(UseLists({AIDeck(),AIHand()}),DeckIdent[i],true) then
         Deck = i
         print("AI deck is "..DeckName[i])
-        if Deck == DECK_EXODIA then
+        if GlobalDebug or Deck == DECK_EXODIA then
           local e1=Effect.GlobalEffect()
           e1:SetType(EFFECT_TYPE_FIELD)
           e1:SetCode(EFFECT_PUBLIC)
           e1:SetRange(LOCATION_MZONE)
-          e1:SetTargetRange(LOCATION_HAND,LOCATION_HAND)
-          Duel.RegisterEffect(e1,0)
+          e1:SetTargetRange(LOCATION_HAND+LOCATION_MZONE+LOCATION_SZONE,LOCATION_HAND+LOCATION_MZONE+LOCATION_SZONE)
+          e1:SetTarget(function (e,c)
+              return c:GetControler()==player_ai
+            end)
+          --Duel.RegisterEffect(e1,0)
         end
       end
     end
@@ -85,6 +91,9 @@ PRIO_DISCARD,PRIO_TODECK,PRIO_EXTRA = 7,7,7
 PRIO_BANISH = 9
 -- priority lists for decks:
 function PrioritySetup()
+
+  DarkWorldPriority()
+  
 AddPriority({
 -- test
 --[65367484] = {0,0,0,0,0,0,0,0,0,0,function(a,b)return 5 end},
@@ -94,8 +103,8 @@ AddPriority({
 [73213494] = {3,2,3,1,3,3,1,1,6,1,CalcabCond},   -- BA Calcab
 [47728740] = {2,2,3,1,3,3,1,1,6,1,AlichCond},    -- BA Alich
 [20758643] = {6,2,8,2,8,2,1,1,5,1,GraffCond},    -- BA Graff
-[10802915] = {8,2,3,2,2,1,1,1,8,3,TourGuideCond},-- Tour Guide
-[84764038] = {5,2,5,4,5,2,1,1,4,2,ScarmCond},    -- BA Scarm
+[10802915] = {8,2,3,2,2,1,4,1,8,3,TourGuideCond},-- Tour Guide
+[84764038] = {5,2,5,4,5,2,6,1,4,2,ScarmCond},    -- BA Scarm
 [00734741] = {4,2,3,1,3,3,1,1,6,1,RubicCond},    -- BA Rubic
 [36551319] = {4,2,4,1,4,3,1,1,6,1,FarfaCond},    -- BA Farfa
 [09342162] = {3,2,6,1,6,3,1,1,6,1,CagnaCond},    -- BA Cagna
@@ -351,7 +360,8 @@ AddPriority({
 [68535320] = {5,2,2,1,1,1,1,1,1,1,FireHandCond},      -- Fire Hand
 [95929069] = {4,2,2,1,1,1,1,1,1,1,IceHandCond},       -- Ice Hand
 [85103922] = {4,1,6,4,3,1,3,1,1,1,MoralltachCond},    -- Artifact Moralltach
-[12697630] = {5,1,7,3,4,1,4,1,1,1,BeagalltachCond},   -- Artifact Beagalltach
+[12697630] = {5,1,7,3,5,1,5,1,1,1,BeagalltachCond},   -- Artifact Beagalltach
+[20292186] = {4,1,5,3,4,1,4,1,1,1,ScytheCond},        -- Artifact Scythe
 
 [14087893] = {2,1,1,1,1,1,1,1,1,1,nil},               -- Book of Moon
 [98645731] = {2,1,1,1,1,1,1,1,1,1,nil},               -- Pot of Duality
@@ -467,6 +477,7 @@ function Add(cards,loc,count,filter,opt)
   local compare = function(a,b) return a.prio>b.prio end
   AssignPriority(cards,loc,filter,opt)
   table.sort(cards,compare)
+  --print("priority list:")
   for i=1,#cards do
     --print(cards[i].id..", prio:"..cards[i].prio)
   end

@@ -88,33 +88,17 @@ function OnSelectPosition(id, available)
 	 id == 23232295 or id == 88241506 then -- Battlin' Boxer Lead Yoke, Maiden with Eyes of Blue
 	result = POS_FACEUP_ATTACK
   end
-
-  local Position = FireFistOnSelectPosition(id,available)
-  if Position then result=Position end
-  Position = HeraldicOnSelectPosition(id,available)
-  if Position then result=Position end
-  Position = GadgetOnSelectPosition(id,available)
-  if Position then result=Position end
-  Position = BujinOnSelectPosition(id,available)
-  if Position then result=Position end
-  Position = MermailOnSelectPosition(id,available)
-  if Position then result=Position end
-  Position = ShadollOnSelectPosition(id,available)
-  if Position then result=Position end
-  Position = SatellarknightOnSelectPosition(id,available)
-  if Position then result=Position end
-  Position = ChaosDragonOnSelectPosition(id,available)
-  if Position then result=Position end
-  Position = HATPosition(id,available)
-  if Position then result=Position end
-  Position = QliphortPosition(id,available)
-  if Position then result=Position end
-  Position = NoblePosition(id,available)
-  if Position then result=Position end
-  Position = NekrozPosition(id,available)
-  if Position then result=Position end  
-  Position = BAPosition(id,available)
-  if Position then result=Position end
+  local positionfunctions={
+  FireFistOnSelectPosition,HeraldicOnSelectPosition,GadgetOnSelectPosition,
+  BujinOnSelectPosition,MermailOnSelectPosition,ShadollOnSelectPosition,
+  SatellarknightOnSelectPosition,ChaosDragonOnSelectPosition,HATPosition,
+  QliphortPosition,NoblePosition,NekrozPosition,BAPosition,GenericPosition,
+  }
+  for i=1,#positionfunctions do
+    local func = positionfunctions[i]
+    local Position = func(id,available)
+    if Position then result=Position end
+  end
   
   if band(result,available) == 0 then
     if band(POS_FACEUP_ATTACK,available) > 0 then

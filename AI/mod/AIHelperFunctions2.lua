@@ -74,8 +74,13 @@ function HasIDNotNegated(cards,id,skipglobal,desc,loc,pos,filter,opt)
           if not skipglobal then CurrentIndex = i end
           result = true  
         end
-        if bit32.band(cards[i].type,TYPE_SPELL+TYPE_TRAP)>0
-        and bit32.band(cards[i].status,STATUS_SET_TURN)==0        
+        if (FilterType(cards[i],TYPE_SPELL) 
+        and not FilterType(cards[i],TYPE_QUICKPLAY)
+        or FilterType(cards[i],TYPE_SPELL) 
+        and FilterType(cards[i],TYPE_QUICKPLAY)
+        and not FilterStatus(cards[i],STATUS_SET_TURN)
+        or FilterType(cards[i],TYPE_TRAP)
+        and not FilterStatus(cards[i],STATUS_SET_TURN))      
         and NotNegated(cards[i])
         then
           if not skipglobal then CurrentIndex = i end
@@ -319,6 +324,46 @@ function RemovalCheck(id,category)
   end
   return false
 end
+function RemovalCheckCard(target,category,chainlink)
+  local cat={CATEGORY_DESTROY,CATEGORY_REMOVE,
+  CATEGORY_TOGRAVE,CATEGORY_TOHAND,
+  CATEGORY_TODECK,CATEGORY_CONTROL}
+  if category then cat={category} end
+  local a=1
+  local b=Duel.GetCurrentChain()
+  if chainlink then
+    a=chainlink
+    b=chainlink
+  end
+  for i=1,#cat do
+    for j=a,b do
+      local ex,cg = Duel.GetOperationInfo(j,cat[i])
+      if ex and CheckNegated(j) then
+        if target==nil then 
+          return cg
+        end
+        if cg and target then
+          local card=false
+          cg:ForEach(function(c) 
+            c=GetCardFromScript(c,Field())
+            if CardsEqual(c,target) then
+              card=c
+            end  end) 
+          return card
+        end
+      end
+    end
+  end
+  return false
+end
+function RemovalCheckList(cards,category,chainlink)
+  local result = nil
+  for i=1,#cards do
+    result = RemovalCheckCard(cards[i],category,chainlink)
+    if result then return result end
+  end
+  return false
+end
 -- checks, if a card the AI controls is about to be negated in the current chain
 function NegateCheck(id)
   local ex,cg = Duel.GetOperationInfo(Duel.GetCurrentChain(),CATEGORY_DISABLE)
@@ -366,6 +411,8 @@ TARGET_TODECK   = 5
 TARGET_FACEDOWN = 6
 TARGET_CONTROL  = 7
 TARGET_BATTLE   = 8
+TARGET_DISCARD  = 9
+TARGET_PROTECT  = 10
 -- returns a list of the best targets given the parameters
 function BestTargets(cards,count,target,filter,opt,immuneCheck,source)
   local result = {}
@@ -443,8 +490,14 @@ function BestTargets(cards,count,target,filter,opt,immuneCheck,source)
     if c.owner == 1 then 
       c.prio = -1 * c.prio
     end
+    if target == TARGET_PROTECT then 
+      c.prio = -1 * c.prio
+    end
   end
   table.sort(cards,function(a,b) return a.prio > b.prio end)
+  for i=1,#cards do
+    --print("id: "..cards[i].id..", prio: "..cards[i].prio)
+  end
   for i=1,count do
     result[i]=cards[i].index
   end
@@ -655,7 +708,11 @@ function FilterPosition(c,pos)
   return bit32.band(c.position,pos)>0
 end
 function FilterLocation(c,loc)
-  return bit32.band(c.location,loc)>0
+  if c.GetCode then
+    return c:IsLocation(loc)
+  else
+    return bit32.band(c.location,loc)>0
+  end
 end
 function FilterPreviousLocation(c,loc)
   return bit32.band(c.previous_location,loc)>0
@@ -677,6 +734,13 @@ function FilterPrivate(c)
 end
 function FilterSet(c,code)
   return IsSetCode(c.setcode,code)
+end
+function FilterOPT(c,hard)
+  if hard then 
+    return OPTCheck(c.id)
+  else
+    return OPTCheck(c.cardid)
+  end
 end
 function HasMaterials(c)
   return c.xyz_material_count>0
@@ -767,16 +831,6 @@ function FindID(id,cards,index)
   return nil
 end
 
-function CurrentOwner(c)
-  local cards = AIField()
-  local result = 2
-  for i=1,#cards do
-    if cards[i].cardid == c.cardid then
-      result = 1
-    end
-  end
-  return result
-end
 
 function AttackBoostCheck(bonus,player,filter,cond)
   local source = Duel.GetAttacker()
@@ -839,12 +893,23 @@ function SpecialSummonCheck(player)
     return Duel.GetActivityCount(player,ACTIVITY_SPSUMMON)>0
   end
 end
-function TargetProtection(id,type)
+function TargetProtection(c,type)
+  local id
+  local mats
+  if c.GetCode then
+    id = c:GetCode()
+    mats = c:GetMaterialCount()
+  else
+    id = c.id
+    mats = c.xyz_material_count
+  end
   if id == 16037007 or id == 58058134 then
-    return true
+    return NotNegated(c) and mats>0
+    and FilterLocation(c,LOCATION_MZONE)
   end
   if id == 00005500 then
-    return bit32.band(type,TYPE_MONSTER)>0
+    return NotNegated(c) and bit32.band(type,TYPE_MONSTER)>0
+    and FilterLocation(c,LOCATION_MZONE)
   end
   return false
 end
@@ -853,11 +918,11 @@ function Targetable(c,type)
   if c.GetCode then
     id = c:GetCode()
     return not c:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET) 
-    and not TargetProtection(id,type)
+    and not TargetProtection(c,type)
   else
     id = c.id
     return c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
-    and not TargetProtection(id,type)
+    and not TargetProtection(c,type)
   end
 end
 function AffectedProtection(id,type,level)
@@ -887,28 +952,41 @@ PriorityTargetList=
 {
   82732705,30241314,81674782  -- Skill Drain, Macro Cosmos, Dimensional Fissure
 }
-function PriorityTarget(c,destroycheck,filter,opt) -- preferred target for removal
-  if FilterType(c,TYPE_MONSTER) and bit32.band(c.type,TYPE_FUSION+TYPE_RITUAL+TYPE_XYZ+TYPE_SYNCHRO)>0 
-  or c.level>4 and c.attack>2000
-  then
-    return FilterPublic(c) and (filter == nil or (opt==nil and filter(c) or filter(c,opt)))
-  end
-  for i=1,#PriorityTargetList do
-    if PriorityTargetList[i]==c.id then
-      if not destroycheck or DestroyCheck(c) then
-        return FilterPublic(c) and (filter == nil or (opt==nil and filter(c) or filter(c,opt)))
+PriorityGraveTargetList=
+{
+  34230233 -- Grapha
+}
+function PriorityTarget(c,destroycheck,loc,filter,opt) -- preferred target for removal
+  if loc == nil then loc = LOCATION_ONFIELD end
+  if loc == LOCATION_ONFIELD then
+    if FilterType(c,TYPE_MONSTER) and bit32.band(c.type,TYPE_FUSION+TYPE_RITUAL+TYPE_XYZ+TYPE_SYNCHRO)>0 
+    or c.level>4 and c.attack>2000
+    then
+      return FilterPublic(c) and (filter == nil or (opt==nil and filter(c) or filter(c,opt)))
+    end
+    for i=1,#PriorityTargetList do
+      if PriorityTargetList[i]==c.id then
+        if not destroycheck or DestroyCheck(c) then
+          return FilterPublic(c) and (filter == nil or (opt==nil and filter(c) or filter(c,opt)))
+        end
+      end
+    end
+  elseif loc == LOCATION_GRAVE then
+    for i=1,#PriorityGraveTargetList do
+      if PriorityGraveTargetList[i]==c.id then
+        return filter == nil or (opt==nil and filter(c) or filter(c,opt))
       end
     end
   end
   return false
 end
-function HasPriorityTarget(cards,destroycheck,filter,opt)
+function HasPriorityTarget(cards,destroycheck,loc,filter,opt)
   if HasID(cards,05851097,true,nil,nil,nil,FilterPublic) then -- Vanity's Emptiness
     return true
   end
   local count = 0
   for i=1,#cards do
-    if PriorityTarget(cards[i],destroycheck,filter,opt) then
+    if PriorityTarget(cards[i],destroycheck,loc,filter,opt) then
       count = count +1
     end
   end
@@ -1021,7 +1099,7 @@ end
 function BattleTargetCheck(c,source)
   return c:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE)==0
   and c:is_affected_by(EFFECT_CANNOT_BE_BATTLE_TARGET)==0
-  --and DestroyCountCheck(c)
+  and DestroyCountCheck(c)
   and AttackBlacklistCheck(c,source)
 end
 
@@ -1032,20 +1110,29 @@ function BattleDamageCheck(c,source)
   and AttackBlacklistCheck(c,source)
 end
 
-function BattleDamage(c,source)
+function BattleDamage(c,source,atk,oppatk,oppdef)
+  if atk == nil then
+    atk = source.attack
+  end
+  if oppatk == nil then
+    oppatk = c.attack
+  end
+  if oppdef == nil then
+    oppdef = c.defense
+  end
   if c == nil then
     return source.attack
   end
   if BattleDamageCheck(c,source) then
     if FilterPosition(c,POS_FACEUP_ATTACK) then
-      return source.attack-c.attack
+      return atk-oppatk
     end
     if FilterPosition(c,POS_DEFENCE) and FilterAffected(source,EFFECT_PIERCE) then
       if FilterPublic(c) then
-        return source.attack-c.defense
+        return atk-oppdef
       end
       if FilterPrivate(c) then
-        return source.attack-1500
+        return atk-1500
       end
     end
   end
@@ -1058,7 +1145,7 @@ end
 
 CrashList={
 83531441,00601193,23649496, -- Dante, Virgil,Plain-Coat
-23693634, -- Colossal Fighter
+23693634,34230233, -- Colossal Fighter, Grapha
 }
 -- function to determine, if a card is allowed to 
 -- crash into a card with the same ATK
@@ -1092,6 +1179,9 @@ function CrashCheck(c)
   end
   if c.id == 05556499 and #OppField()>1 then
     return true -- Machina Fortress
+  end
+  if c.id == 94283662 and UseTrance(3) then
+    return true -- Trance Archfiend
   end
   if CurrentMonOwner(c.cardid) ~= c.owner then
     return true
@@ -1144,15 +1234,24 @@ function CanWinBattle(c,targets,tograve,ignorebonus,filter,opt)
 end  
 
 -- function to determine, if a card can deal battle damage to a targets
--- for search effects
-function CanDealBattleDamage(c,targets,filter,opt)
+-- for search effects, or just to push damage against battle-immune targets
+function CanDealBattleDamage(c,targets,ignorebonus,filter,opt)
   if #targets == 0 then
     return true
   end
-  local sub = SubGroup(targets,filter,opt)
+  local atk = c.attack
+  if ignorebonus and c.bonus and c.bonus > 0 then
+    atk = math.max(0,atk - c.bonus)
+  end
+  local sub = CopyTable(targets)
+  sub = SubGroup(sub,filter,opt)
   sub = SubGroup(sub,AttackBlacklistCheck,c)
   for i=1,#sub do
-    if BattleDamage(sub[i],c)>0 then 
+    local oppatk = sub[i].attack
+    if ignorebonus and sub[i].bonus and sub[i].bonus > 0 then
+      oppatk = math.max(0,oppatk - sub[i].bonus)
+    end
+    if BattleDamage(sub[i],c,atk,oppatk)>0 then 
       return true
     end
   end
@@ -1190,8 +1289,12 @@ function GetCardFromScript(c,cards)
   local controller = c:GetControler()
   local loc = c:GetLocation()
   local result = nil
-  local atk = c:GetAttack()
-  local def = c:GetDefence()
+  local atk = 0
+  local def = 0
+  if FilterType(c,TYPE_MONSTER) then
+    atk = c:GetAttack()
+    def = c:GetDefence()
+  end
   if cards == nil then
     cards = All()
   end
@@ -1209,7 +1312,7 @@ function GetCardFromScript(c,cards)
     c=cards[i]
     if c.id == id and c.original_id == id2
     and c.position == pos and c.location == loc
-    and c.owner == owner and CurrentMonOwner(c.cardid) == controller
+    and c.owner == owner and CurrentOwner(c) == controller
     and c.attack == atk and c.defense == def 
     then
       result = c
@@ -1236,6 +1339,14 @@ function SurrenderCheck()
     end
   end
   return
+end
+
+function CopyTable(cards)
+  local cards2 = {}
+  for k,v in pairs(cards) do
+    cards2[k] = v
+  end
+  return cards2
 end
 
 

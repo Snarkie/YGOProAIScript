@@ -1,4 +1,4 @@
-Version = "0.25i"
+Version = "0.25j"
 Experimental = true
 
 --[[
@@ -52,6 +52,7 @@ require("ai.decks.Qliphort")
 require("ai.decks.NobleKnight")
 require("ai.decks.Necloth")
 require("ai.decks.BurningAbyss")
+require("ai.decks.DarkWorld")
 
 math.randomseed( require("os").time() )
 

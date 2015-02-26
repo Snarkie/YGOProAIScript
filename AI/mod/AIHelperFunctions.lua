@@ -735,7 +735,18 @@ function CurrentSTOwner(CardsID)
   end
   return Result
 end
-
+function CurrentOwner(c,cards)
+  if cards == nil then
+    cards = AIField()
+  end
+  local result = 2
+  for i=1,#cards do
+    if cards[i].cardid == c.cardid then
+      result = 1
+    end
+  end
+  return result
+end
 ----------------------------------------
 -- Checks whether or not the opponent
 -- controls a face-up monster with a
@@ -1919,4 +1930,11 @@ function CardsEqual(Card1, Card2)
   return Card1 and Card2 and Card1.cardid==Card2.cardid
 end
 
-
+function ListHasCard(cards,c)
+  for i=1,#cards do
+    if CardsEqual(cards[i],c) then
+      return true
+    end
+  end
+  return false
+end

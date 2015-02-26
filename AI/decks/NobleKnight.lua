@@ -1492,18 +1492,22 @@ function ChainMerlin()
       GlobalMerlinID ={}
       for i=1,tg:GetCount() do
         local c=tg:Filter(MerlinFilter,nil):GetMaxGroup(Card.GetAttack):GetFirst()
-        GlobalMerlinID[i]=c:GetCode()
-        tg:RemoveCard(c)
+        if c then
+          GlobalMerlinID[i]=c:GetCode()
+          tg:RemoveCard(c)
+        end
       end
-      return true
+      return #GlobalMerlinID>0
     elseif cg and cg:GetCount()==1 then
       GlobalMerlinID ={}
       for i=1,cg:GetCount() do
         local c=cg:Filter(MerlinFilter,nil):GetMaxGroup(Card.GetAttack):GetFirst()
-        GlobalMerlinID[i]=c:GetCode()
-        cg:RemoveCard(c)
+        if c then
+          GlobalMerlinID[i]=c:GetCode()
+          cg:RemoveCard(c)
+        end
       end
-      return true
+      return #GlobalMerlinID>0
     end
   end
   if Duel.GetCurrentPhase() == PHASE_BATTLE then

@@ -10,42 +10,19 @@
 -- 0 = no
 
 function OnSelectEffectYesNo(id,triggeringCard)
-  local result = FireFistOnSelectEffectYesNo(id,triggeringCard)
-  if result==nil then
-    result = BujinOnSelectEffectYesNo(id,triggeringCard)
-  end
-  if result==nil then
-    result = MermailOnSelectEffectYesNo(id,triggeringCard)
-  end
-  if result==nil then
-    result = ShadollOnSelectEffectYesNo(id,triggeringCard)
-  end
-  if result==nil then
-    result = GadgetOnSelectEffectYesNo(id,triggeringCard)
-  end
-  if result==nil then
-    result = HeraldicOnSelectEffectYesNo(id,triggeringCard)
-  end
-  if result==nil then
-    result = SatellarknightOnSelectEffectYesNo(id,triggeringCard)
-  end
-  if result==nil then
-    result = ChaosDragonOnSelectEffectYesNo(id,triggeringCard)
-  end
-  if result==nil then
-    result = HATEffectYesNo(id,triggeringCard)
-  end
-  if result==nil then
-    result = QliphortEffectYesNo(id,triggeringCard)
-  end
-  if result==nil then
-    result = NobleEffectYesNo(id,triggeringCard)
-  end
-  if result==nil then
-    result = NekrozEffectYesNo(id,triggeringCard)
-  end
-  if result==nil then
-    result = BAEffectYesNo(id,triggeringCard)
+  local YesNoFunctions = {
+  FireFistOnSelectEffectYesNo,MermailOnSelectEffectYesNo,
+  ShadollOnSelectEffectYesNo,GadgetOnSelectEffectYesNo,
+  HeraldicOnSelectEffectYesNo,SatellarknightOnSelectEffectYesNo,
+  ChaosDragonOnSelectEffectYesNo,HATEffectYesNo,QliphortEffectYesNo,
+  NobleEffectYesNo,NekrozEffectYesNo,BAEffectYesNo,DarkWorldEffectYesNo,
+  }
+  local result = nil
+  for i=1,#YesNoFunctions do
+    local func = YesNoFunctions[i]
+    if result == nil then
+      result = func(id,triggeringCard)
+    end
   end
   if result then return result end
   if CardIsScripted(id)>0 then

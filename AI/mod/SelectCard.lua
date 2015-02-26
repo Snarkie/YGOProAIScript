@@ -95,7 +95,8 @@ end
   FireFistCard,HeraldicOnSelectCard,GadgetOnSelectCard,
   BujinOnSelectCard,MermailOnSelectCard,ShadollOnSelectCard,
   SatellarknightOnSelectCard,ChaosDragonOnSelectCard,HATCard,
-  QliphortCard,NobleCard,NekrozCard,BACard,
+  QliphortCard,NobleCard,NekrozCard,BACard,DarkWorldCard,
+  GenericCard,
   }
   local result = nil
   for i=1,#SelectCardFunctions do
@@ -294,17 +295,6 @@ end
       end
    end
 
-  --------------------------------------------     
-  -- Select Players strongest monster, if he controls any
-  -- stronger monsters than AI, or select any spell or trap card player controls (for now)
-  --------------------------------------------   
-  if triggeringID == 34230233 then -- Grapha, Dragon Lord of Dark World
-	if Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") < Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") then 
-      return Get_Card_Index(cards, 2, "Highest", TYPE_MONSTER, POS_FACEUP)
-	  else
-       return getRandomSTIndex(cards, 2)
-      end
-   end
   
   
   --------------------------------------------     
@@ -543,19 +533,7 @@ end
       end
     end	
   end
-    
-  --------------------------------------------     
-  -- Select Players strongest monster, if he controls any
-  -- stronger monsters than AI, or select any spell or trap card player controls (for now)
-  --------------------------------------------   
-  if triggeringID == 78156759 then -- Wind-Up Zenmaines
-    if Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") < Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") then 
-	  return Get_Card_Index(cards, 2, "Highest", TYPE_MONSTER, POS_FACEUP)
-		 else
-          return getRandomSTIndex(cards, 2)
-        end
-     end
-  
+   
 
   --------------------------------------------     
   -- Select Players strongest monster by attack points on the field.
@@ -711,14 +689,6 @@ end
 	  GlobalCardMode = nil
       return Get_Card_Index(cards, 1, "Lowest", nil, nil)
       end
-   end
-  
-  --------------------------------------------     
-  -- Select AI's weakest monster by attack points on the field.
-  --------------------------------------------   
-  if SpSummonedCardID == 34230233 then -- Grapha, Dragon Lord of Dark World
-     SpSummonedCardID = nil
-     return Get_Card_Index(cards, 1, "Lowest", nil, nil)
    end
 
   --------------------------------------------     
@@ -969,15 +939,6 @@ end
        return Index_By_ID(cards,1,"Highest",nil,POS_FACEUP,"==",79979666)
       end
 
-  --------------------------------------------
-  -- select any face down card controlled by player (for now)
-  --------------------------------------------   
-   if GlobalActivatedCardID == 93554166 then -- Dark World Lightning 
-    if GlobalCardMode == 1 then
-	   GlobalCardMode = nil
-       return Get_Card_Index(cards,2,"Highest", nil,POS_FACEDOWN) 
-      end 
-   end
 	  
   --------------------------------------------
   -- Make sure Ai uses power up cards only on his own monsters,
@@ -1077,20 +1038,6 @@ end
   return result
 end
   
-  --------------------------------------------
-  -- Discard all possible "Dark world" monster cards 
-  --------------------------------------------   
-  if GlobalActivatedCardID == 47217354 then -- Fabled Raven
-	local DiscardCount= 1
-	for i=1,#cards do
-      if bit32.band(cards[i].type,TYPE_MONSTER) == TYPE_MONSTER and cards[i].setcode == 6 then
-      result[DiscardCount]= i;
-	  GlobalActivatedCardID = nil
-	   if (DiscardCount<maxTargets) then DiscardCount=DiscardCount+1 else break end
-      end
-   end
-  return result
-end
   
   --------------------------------------------
   -- Banish monster's from AI's grave only, and select max available count
@@ -1134,7 +1081,6 @@ end
      GlobalActivatedCardID == 71453557 or   -- Autonomous Action Unit
 	 GlobalActivatedCardID == 42534368 or   -- Silent Doom
 	 GlobalActivatedCardID == 43434803 or   -- The Shallow Grave
-	 GlobalActivatedCardID == 93431518 or   -- Gateway to Dark World
 	 GlobalActivatedCardID == 37694547 then -- Geartown    
 	local HighestATK = 0
     local HighestIndex = 1
@@ -1236,76 +1182,6 @@ end
       end
     end
 
-  --------------------------------------------------------
-  -- After activating Dark World Dealings, the AI should
-  -- look for and discard a Dark World monster if one
-  -- exists in hand. If not, then discard another monster.
-  --------------------------------------------------------
-  if GlobalActivatedCardID == 74117290 then
-     for i=1,#cards do
-		if Get_Card_Count_ID(AIHand(),34230233,nil) > 0 then
-		   GlobalActivatedCardID = nil
-		  return Index_By_ID(cards,1,"Highest",TYPE_MONSTER, nil,"~=",34230233)
-        end
-     end
-	 for i=1,#cards do
-		if IsDiscardEffDWMonster(cards[i].id) == 1 then
-          GlobalActivatedCardID = nil
-		  return {i}
-        end
-     end
-     for i=1,#cards do
-        if bit32.band(cards[i].type,TYPE_MONSTER) > 0 then
-           GlobalActivatedCardID = nil
-		  return {i}
-        end
-      end
-    end
-
-
-  ----------------------------------------------------------
-  -- When paying the banish cost of The Gates of Dark World,
-  -- the AI should choose to banish something other than
-  -- Grapha, Dragon Lord of Dark World.
-  --
-  -- To do: Restrict this to level 4 or lower monsters?
-  ----------------------------------------------------------
-  if GlobalActivatedCardID == 33017655 then
-    if GlobalCardMode == 1 then
-      GlobalCardMode = nil
-      return Index_By_ID(cards, 1, "Lowest", nil, nil, "~=", 34230233)
-      end
-   end
-
-  -------------------------------------------------
-  -- When Snoww's effect activates 
-  -- search The Gates of Dark World if
-  -- the AI doesn't already control it or has it 
-  -- in hand. Search Dark World Dealings if no
-  -- Gates in hand, field, or deck. Otherwise add
-  -- the highest ATK monster.
-  -------------------------------------------------
-  if triggeringID == 60228941 then -- Snoww, Unlight of Dark World
-      if Get_Card_Count_ID(AIST(),33017655,POS_FACEUP) == 0 and
-         Get_Card_Count_ID(AIHand(),33017655,nil) == 0 and 
-         Get_Card_Count_ID(AIDeck(),33017655,nil) > 0  then 
-			return Index_By_ID(cards, 1, "Highest", nil, nil, "==", 33017655)
-          end
-        if Get_Card_Count_ID(AIDeck(),74117290,nil) > 0 then
-		    return Index_By_ID(cards, 1, "Highest", nil, nil, "==", 74117290)
-        end
-     local HighestAttack = 0
-     local Index  = 1  
-	 for i=1,#cards do
-		if cards[i].attack > HighestAttack then
-          HighestAttack = cards[i].attack
-          Index = i
-		  end
-       end
-      result[1] = Index
-      return result
-   end                                                        
-  
   --------------------------------------------
   -- For Worm Xex's effect, the AI should look
   -- for and send Worm Yagan to the grave.
@@ -1346,76 +1222,6 @@ end
   if triggeringID == 05361647 then
      return Index_By_ID(cards, 1, "Highest", nil, nil, "==", 68144350) -- Battlin' Boxer Switchitter
     end
- 
-  -----------------------------------------------
-  -- The Gates of Dark World logic.
-  -----------------------------------------------
-  if GlobalActivatedCardID == 54031490 then   -- The Gates of Dark World	
-	if Get_Card_Count_ID(AIHand(),83039729,nil) > 0 then
-       GlobalActivatedCardID = nil
-	  return Index_By_ID(cards, 1, "Highest", nil, nil, "==", 65685470)
-    end
-    if Get_Card_Count_ID(AIHand(),02511717,nil) > 0 then
-       GlobalActivatedCardID = nil
-	  return Index_By_ID(cards, 1, "Highest", nil, nil, "==", 01498130)
-    end
-    if Get_Card_Count_ID(AIHand(),01498130,nil) > 0 then
-       GlobalActivatedCardID = nil
-	  return Index_By_ID(cards, 1, "Highest", nil, nil, "==", 02511717)
-    end
-    if Get_Card_Count_ID(AIHand(),49721904,nil) > 0 then
-      GlobalActivatedCardID = nil
-	  return Index_By_ID(cards, 1, "Highest", nil, nil, "==", 01498130)
-    end
-    if Get_Card_Count_ID(AIHand(),27821104,nil) > 0 then
-       GlobalActivatedCardID = nil
-	  return Index_By_ID(cards, 1, "Highest", nil, nil, "==", 61737116)
-    end
-	if Get_Card_Count_ID(AIHand(),65685470,nil) > 0 then 
-       GlobalActivatedCardID = nil
-	   return Index_By_ID(cards, 1, "Highest", nil, nil, "==", 02511717)
-      end
-   end
-  
-  -----------------------------------------------
-  -- Certain cards should discard the correct
-  -- Dark World monster for the situation.
-  -- If the opp controls a card, discard Grapha.
-  -- If a monster, discard Kahkki. S/T, Gren.
-  -- If no Gates in hand or field, Snoww.
-  -- If not that, the first effective DW monster.
-  -- Otherwise the first card found.
-  -----------------------------------------------
-  if GlobalActivatedCardID == 33017655 or   -- The Gates of Dark World
-	 GlobalActivatedCardID == 93554166 and  -- Dark World Lightning          
-	 GlobalCardMode == nil             or 
-	 GlobalActivatedCardID == 74117290 or   -- Dark World Dealings
-     GlobalActivatedCardID == 94283662 or   -- Trance Archfiend
-	 GlobalActivatedCardID == 81439173 then   -- Foolish Burial   
-	if Get_Card_Count(AIMon()) > 0 or Get_Card_Count(OppST()) > 0 then
-       GlobalActivatedCardID = nil
-	   return Index_By_ID(cards, 1, "Highest", nil, nil, "==", 34230233)
-     end
-	if Get_Card_Count(OppMon()) > 0 then
-       GlobalActivatedCardID = nil
-	   return Index_By_ID(cards, 1, "Highest", nil, nil, "==", 25847467)
-     end
-    if Get_Card_Count(OppST()) > 0 then 
-       GlobalActivatedCardID = nil
-	   return Index_By_ID(cards, 1, "Highest", nil, nil, "==", 51232472)
-     end
-    if Get_Card_Count_ID(AIST(),33017655,POS_FACEUP) == 0 and
-       Get_Card_Count_ID(AIHand(),33017655,nil) == 0 then
-       GlobalActivatedCardID = nil
-	   return Index_By_ID(cards, 1, "Highest", nil, nil, "==", 60228941)
-     end
-    for i=1,#cards do
-      if IsDiscardEffDWMonster(cards[i].id) then
-        GlobalActivatedCardID = nil
-        return {i}
-      end
-    end
-  end
 
 
   --------------------------------------------

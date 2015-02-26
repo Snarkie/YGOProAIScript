@@ -70,8 +70,13 @@ function AttackTargetSelection(cards,attacker,atk)
     end
     
     -- Gwen
-    if HasGwen(attacker) and CardsMatchingFilter(OppMon(),GwenFilter,atk) then
+    if HasGwen(attacker) and CardsMatchingFilter(cards,GwenFilter,atk) then
       return BestTargets(cards,1,TARGET_DESTROY,GwenFilter,atk)
+    end
+    
+    -- Zenmaines
+    if id == 78156759 and ZenmainesCheck(attacker,cards) then
+      return BestAttackTarget(cards,attacker,ZenmainesFilter,attacker)
     end
   end
   return BestAttackTarget(cards,attacker)
@@ -252,6 +257,14 @@ function OnSelectBattleCommand(cards,activatable)
     return Attack(CurrentIndex)
   end
   
+  -- Zenmaines
+  if HasID(cards,78156759) and ZenmainesCheck(cards[CurrentIndex],targets) then 
+    return Attack(CurrentIndex)
+  end
+  
+  -- generic attacks
+  
+  -- can attack for game on a certain target
   SortByATK(cards)
   if #targets>0 and #cards>0 then
     for i=1,#targets do
@@ -261,6 +274,7 @@ function OnSelectBattleCommand(cards,activatable)
     end
   end
   
+  -- can destroy a monster without additional attack boosting cards
   SortByATK(cards,true)
   if #targets>0 and #cards>0 then
     for i=1,#cards do
@@ -270,6 +284,7 @@ function OnSelectBattleCommand(cards,activatable)
     end
   end
   
+  -- can destroy a monster with additional boost
   SortByATK(cards,true)
   if #targets>0 and #cards>0 then
     for i=1,#cards do
@@ -279,6 +294,7 @@ function OnSelectBattleCommand(cards,activatable)
     end
   end
 
+  -- can probably destroy an unknown face-down monster
   SortByATK(cards,true)
   if #targets>0 and #cards>0  then
     for i=1,#cards do
@@ -291,12 +307,24 @@ function OnSelectBattleCommand(cards,activatable)
       end
     end
   end
+  
+  -- can deal battle damage (against battle-immune targets etc)
+  SortByATK(cards,true)
+  if #targets>0 and #cards>0 then
+    for i=1,#cards do
+      if CanDealBattleDamage(cards[i],targets,true) then
+        return Attack(i)
+      end
+    end
+  end
 
+  -- direct attack
   SortByATK(cards,true)
   if #OppMon()==0 and #cards>0 then
     return Attack(1,true)
   end
   
+  -- forced to attack
   SortByATK(cards)
   for i=1,#cards do
     if cards[i] and cards[i]:is_affected_by(EFFECT_MUST_ATTACK)>0 then

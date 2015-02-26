@@ -11,76 +11,36 @@
 --		1 = yes, chain a card
 --		0 = no, don't chain
 -- index = index of the chain
+
 GlobalChain = 0
 function OnSelectChain(cards,only_chains_by_player,forced)
   if Duel.GetCurrentChain()<=GlobalChain then
     GlobalTargetList = {} -- reset variables for new chain
-    GlobalNegatedChainLink = {}
-  else
-    GlobalChain=Duel.GetCurrentChain()
+    GlobalNegatedChainLinks = {}
   end
+  GlobalChain=Duel.GetCurrentChain()
   local result = 0
   local index = 1
   local ChainAllowed = 0
   
   SurrenderCheck()
   
-local result=PriorityChain(cards,only_chains_by_player)
-if result ~= nil then
-  return result[1],result[2]
+local SelectChainFunctions = {
+PriorityChain,FireFistOnChain,HeraldicOnSelectChain,
+GadgetOnSelectChain,BujinOnSelectChain,MermailOnSelectChain,
+ShadollOnSelectChain,SatellarknightOnSelectChain,
+ChaosDragonOnSelectChain,HATChain,QliphortChain,
+NobleChain,NekrozChain,BAChain,DarkWorldChain,
+}
+  
+for i=1,#SelectChainFunctions do
+  local func = SelectChainFunctions[i]
+  local result = func(cards,only_chains_by_player)
+  if result ~= nil then
+    return result[1],result[2]
+  end
 end
-local result=FireFistOnChain(cards,only_chains_by_player)
-if result ~= nil then
-  return result[1],result[2]
-end
-result=HeraldicOnSelectChain(cards,only_chains_by_player)
-if result ~= nil then
-  return result[1],result[2]
-end
-result=GadgetOnSelectChain(cards,only_chains_by_player)
-if result ~= nil then
-  return result[1],result[2]
-end
-result=BujinOnSelectChain(cards,only_chains_by_player)
-if result ~= nil then
-  return result[1],result[2]
-end
-result=MermailOnSelectChain(cards,only_chains_by_player)
-if result ~= nil then
-  return result[1],result[2]
-end
-result=ShadollOnSelectChain(cards,only_chains_by_player)
-if result ~= nil then
-  return result[1],result[2]
-end
-result=SatellarknightOnSelectChain(cards,only_chains_by_player)
-if result ~= nil then
-  return result[1],result[2]
-end
-result=ChaosDragonOnSelectChain(cards,only_chains_by_player)
-if result ~= nil then
-  return result[1],result[2]
-end
-result=HATChain(cards)
-if result ~= nil then
-  return result[1],result[2]
-end
-result=QliphortChain(cards)
-if result ~= nil then
-  return result[1],result[2]
-end
-result=NobleChain(cards)
-if result ~= nil then
-  return result[1],result[2]
-end
-result=NekrozChain(cards)
-if result ~= nil then
-  return result[1],result[2]
-end
-result=BAChain(cards)
-if result ~= nil then
-  return result[1],result[2]
-end
+
 result = 0
  
   ------------------------------------------
