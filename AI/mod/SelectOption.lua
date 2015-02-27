@@ -8,19 +8,19 @@
 --
 -- Return: index of the selected option
 function OnSelectOption(options)
-local result = 0
-  result = HeraldicOnSelectOption(options)
-  if result ~= nil then
-    return result
+  local result = 0
+  local optionfunctions={
+  HeraldicOnSelectOption,QliphortOption,
+  NekrozOption,DarkWorldOption
+  }
+  for i=1,#optionfunctions do
+    local func = optionfunctions[i]
+    result = func(options)
+    if result ~= nil then
+      return result
+    end
   end
-  result = QliphortOption(options)
-  if result ~= nil then
-    return result
-  end
-  result = NekrozOption(options)
-  if result ~= nil then
-    return result
-  end
+  
 	result = 0
    ------------------------------------------------------    
    -- Return random result if it isn't specified below.

@@ -240,9 +240,11 @@ end
 function MichaelFilter(c)
   return c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
 end
-function SummonMichael()
-  return CardsMatchingFilter(UseLists({OppMon(),OppST()}),MichaelFilter)>0 
-  and AI.GetPlayerLP(1)>1000 and MP2Check() and HasID(AIExtra(),04779823,true)
+function SummonMichael(c)
+  return (CardsMatchingFilter(UseLists({OppMon(),OppST()}),MichaelFilter)>0 
+  and AI.GetPlayerLP(1)>1000 and NotNegated(c)  
+  or Negated (c) and OppGetStrongestAttDef()<2600)
+  and MP2Check() and HasID(AIExtra(),04779823,true)
 end
 function UseMichael()
   return CardsMatchingFilter(UseLists({OppMon(),OppST()}),MichaelFilter)>0

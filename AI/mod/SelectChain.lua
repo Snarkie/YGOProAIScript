@@ -25,23 +25,7 @@ function OnSelectChain(cards,only_chains_by_player,forced)
   
   SurrenderCheck()
   
-local SelectChainFunctions = {
-PriorityChain,FireFistOnChain,HeraldicOnSelectChain,
-GadgetOnSelectChain,BujinOnSelectChain,MermailOnSelectChain,
-ShadollOnSelectChain,SatellarknightOnSelectChain,
-ChaosDragonOnSelectChain,HATChain,QliphortChain,
-NobleChain,NekrozChain,BAChain,DarkWorldChain,
-}
-  
-for i=1,#SelectChainFunctions do
-  local func = SelectChainFunctions[i]
-  local result = func(cards,only_chains_by_player)
-  if result ~= nil then
-    return result[1],result[2]
-  end
-end
 
-result = 0
  
   ------------------------------------------
   -- The first time around, it sets the AI's
@@ -143,6 +127,34 @@ result = 0
       end
     end
   end
+  
+      -- Lancelot
+  for i=1,#AIMon() do
+    local c = AIMon()[i]
+    if c.id == 66547759 and NotNegated(c)
+    and OPTCheck(c.cardid) and c.xyz_material_count>0
+    then
+      return 0,0
+    end
+  end
+  
+local SelectChainFunctions = {
+PriorityChain,FireFistOnChain,HeraldicOnSelectChain,
+GadgetOnSelectChain,BujinOnSelectChain,MermailOnSelectChain,
+ShadollOnSelectChain,SatellarknightOnSelectChain,
+ChaosDragonOnSelectChain,HATChain,QliphortChain,
+NobleChain,NekrozChain,BAChain,DarkWorldChain,
+}
+  
+for i=1,#SelectChainFunctions do
+  local func = SelectChainFunctions[i]
+  local result = func(cards,only_chains_by_player)
+  if result ~= nil then
+    return result[1],result[2]
+  end
+end
+
+result = 0
 
  ---------------------------------------------
  -- Cocoon of Evolution on field turn counter

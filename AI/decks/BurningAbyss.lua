@@ -300,15 +300,11 @@ function SummonMuzurythm()
   return CardsMatchingFilter(AIMon(),BASelfDestructFilter)<3 and CardsMatchingFilter(OppMon(),MuzurythmFilter)>0
   and GlobalBPAllowed and Duel.GetCurrentPhase == PHASE_MAIN1
 end
-function SummonNightmareSharkFinish()
-  return GlobalBPAllowed and Duel.GetCurrentPhase == PHASE_MAIN1 and AI.GetPlayerLP(2)<=2000
-end
 function SummonNightmareShark()
   return CardsMatchingFilter(AIMon(),BASelfDestructFilter)<3 
-  and GlobalBPAllowed and Duel.GetCurrentPhase == PHASE_MAIN1 and AI.GetPlayerLP(2)<=4000
-end
-function UseNightmareShark()
-  return GlobalBPAllowed and Duel.GetCurrentPhase == PHASE_MAIN1
+  and GlobalBPAllowed and Duel.GetCurrentPhase() == PHASE_MAIN1 
+  and AI.GetPlayerLP(2)<=4000
+  and DeckCheck(DECK_BA)
 end
 function SummonDownerd()
   return CardsMatchingFilter(AIMon(),BASelfDestructFilter)==0 and HasID(AIMon(),83531441,true,nil,POS_FACEUP_ATTACK)
@@ -324,9 +320,6 @@ function BAInit(cards)
   local Rep = cards.repositionable_cards
   local SetMon = cards.monster_setable_cards
   local SetST = cards.st_setable_cards
-  if HasID(SpSum,31320433) and SummonNightmareSharkFinish() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
-  end
   if HasID(Act,70368879) and not HasID(AIMon(),31320433,true) then -- Upstart
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -488,9 +481,6 @@ function BAInit(cards)
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(Act,47805931) then -- Giga-Brillant
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
-  if HasID(Act,31320433) and UseNightmareShark() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   return nil

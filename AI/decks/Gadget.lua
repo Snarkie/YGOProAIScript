@@ -214,7 +214,7 @@ function RedoxFilter(card)
   return bit32.band(card.attribute,ATTRIBUTE_EARTH)>0
 end
 function RedoxFilter1(card,id)
-  return card.id~=id and bit32.band(card.attribute,ATTRIBUTE_EARTH)>0
+  return card.cardid~=id and bit32.band(card.attribute,ATTRIBUTE_EARTH)>0
 end
 function UseRedox1(card)
   local cards=SubGroup(AIHand(),RedoxFilter1,card.cardid)
@@ -225,10 +225,12 @@ function UseRedox1(card)
   return false
 end
 function RedoxFilter2(card,id)
-  return card.id~=id and (bit32.band(card.attribute,ATTRIBUTE_EARTH)>0 or bit32.band(card.race,RACE_DRAGON)>0)
+  return card.cardid~=id and (bit32.band(card.attribute,ATTRIBUTE_EARTH)>0 or bit32.band(card.race,RACE_DRAGON)>0)
 end
 function UseRedox2(card)
-  local cards=SubGroup(UseLists({AIHand(),AIGrave()}),RedoxFilter2,card.cardid)
+  local cards = AIGrave()
+  if #AIHand()>4 then cards = UseLists(AIHand(),AIGrave()) end
+  cards=SubGroup(cards,RedoxFilter2,card.cardid)
   if cards and #cards>0 then
     local check = BanishCostCheck(cards,2)
     local mon = AIMon()

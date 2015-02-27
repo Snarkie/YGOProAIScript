@@ -109,6 +109,16 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
     return COMMAND_TO_NEXT_PHASE,1
   end
   
+  -- Lancelot
+  for i=1,#AIMon() do
+    local c = AIMon()[i]
+    if c.id == 66547759 and NotNegated(c)
+    and OPTCheck(c.cardid) and c.xyz_material_count>0
+    then
+      return COMMAND_TO_NEXT_PHASE,1
+    end
+  end
+  
   ---------------------------------------
   -- Don't do anything if if the AI controls
   -- a face-up C106: Giant Hand Red with
@@ -487,10 +497,10 @@ end
   -- Set a field spell if the AI doesn't currently control
   -- a field spell 
   ---------------------------------------------------------
-  if CardsMatchingFilter(AIST(),FilterType,TYPE_SPELL+TYPE_FIELD)==0 then
+  if CardsMatchingFilter(AIST(),FilterType,TYPE_FIELD)==0 then
     for i=1,#cards.st_setable_cards do
       local c = cards.st_setable_cards[i]
-      if FilterType(c,TYPE_SPELL+TYPE_FIELD) and CardIsScripted(c.id)==0 then
+      if FilterType(c,TYPE_SPELL) and FilterType(c,TYPE_FIELD) and CardIsScripted(c.id)==0 then
         return COMMAND_SET_ST,i
       end
     end

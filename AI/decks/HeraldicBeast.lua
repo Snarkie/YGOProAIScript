@@ -398,7 +398,10 @@ function HeraldicToHand(cards)
 end
 function LavalvalChainTarget(cards)
     local result = nil
-    if DeckCheck(DECK_TELLARKNIGHT) or DeckCheck(DECK_NEKROZ) then
+    if DeckCheck(DECK_TELLARKNIGHT) 
+    or DeckCheck(DECK_NEKROZ)
+    or DeckCheck(DECK_DARKWORLD)
+    then
       if GlobalCardMode == 2 then
         GlobalCardMode = 1
         result = Add(cards,PRIO_TOGRAVE)

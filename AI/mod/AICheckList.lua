@@ -397,7 +397,7 @@ SSBL={
 68836428,52558805,78156759, -- Tri-Edge Levia, Temptempo the Percussion Djinn, Wind-Up Zenmaines
 16259549,51617185,16195942, -- Fortune Tune, Machina Megaform, Dark Rebellion Dragon
 26563200,00005500,73445448, -- Muzurythm, Clear Wing Synchro Dragon, Zombiestein
-01639384,10406322,66547759, -- Felgrand, Sylvan Arusei, Lancelot
+01639384,10406322,66547759, -- Felgrand, Sylvan Alsei, Lancelot
 88120966,78156759, -- Giant Grinder, Zenmaines
 }
 
@@ -778,7 +778,7 @@ ScriptedCards ={
 48424886,06417578,60226558,73176465,  -- El-Shaddoll Egrystal, Fusion, Nepheshaddoll Fusion, Lightsworn Felis
 94283662,16435215,74117290,33017655,  -- Trance Archfiend, Dragged Down, DWD, Gates
 54974237,41930553,73445448,01639384,  -- EEV, Dark Smog, Zombiestein, Felgrand
-10406322,66547759,88120966,78156759,  -- Sylvan Arusei, Lancelot, Giant Grinder, Zenmaines
+10406322,66547759,88120966,78156759,  -- Sylvan Alsei, Lancelot, Giant Grinder, Zenmaines
 74294676,42752141,71068247,50323155,  -- Laggia, Dolkka, Totem Bird, Black Horn
 02956282,00005500,99188141,  -- Naturia Barkion, Clear Wing Synchro Dragon, THRIO
 }

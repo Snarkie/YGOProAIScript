@@ -92,7 +92,8 @@ function OnSelectPosition(id, available)
   FireFistOnSelectPosition,HeraldicOnSelectPosition,GadgetOnSelectPosition,
   BujinOnSelectPosition,MermailOnSelectPosition,ShadollOnSelectPosition,
   SatellarknightOnSelectPosition,ChaosDragonOnSelectPosition,HATPosition,
-  QliphortPosition,NoblePosition,NekrozPosition,BAPosition,GenericPosition,
+  QliphortPosition,NoblePosition,NekrozPosition,BAPosition,
+  DarkWorldPosition,GenericPosition,
   }
   for i=1,#positionfunctions do
     local func = positionfunctions[i]

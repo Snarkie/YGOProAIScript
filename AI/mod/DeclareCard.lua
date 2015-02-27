@@ -10,6 +10,10 @@
 function OnDeclareCard()
  local result = 85138716	
  
+  if GlobalActivatedCardID == 10406322 then --Sylvan Alsei
+    GlobalActivatedCardID = nil
+    return 14141448 --return ID of Great Moth, to get his 2nd effect
+  end
 --------------------------------------------------
 -- Select random card in player's hand when using 
 -- "Mind Crush".

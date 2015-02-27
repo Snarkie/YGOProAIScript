@@ -324,10 +324,15 @@ function RemovalCheck(id,category)
   end
   return false
 end
-function RemovalCheckCard(target,category,chainlink)
+function RemovalCheckCard(target,category,chainlink,filter,opt)
   local cat={CATEGORY_DESTROY,CATEGORY_REMOVE,
   CATEGORY_TOGRAVE,CATEGORY_TOHAND,
   CATEGORY_TODECK,CATEGORY_CONTROL}
+  if card and filter and (opt and not filter(card,opt)
+  or opt==nil and not filter(card))
+  then
+    return false
+  end
   if category then cat={category} end
   local a=1
   local b=Duel.GetCurrentChain()
@@ -356,13 +361,22 @@ function RemovalCheckCard(target,category,chainlink)
   end
   return false
 end
-function RemovalCheckList(cards,category,chainlink)
-  local result = nil
+function RemovalCheckList(cards,category,chainlink,filter,opt)
+  local result = {}
   for i=1,#cards do
-    result = RemovalCheckCard(cards[i],category,chainlink)
-    if result then return result end
+    local c = RemovalCheckCard(cards[i],category,chainlink,filter,opt)
+    if c then result[#result+1]=c end
+  end
+  if #result>0 then
+    return result
   end
   return false
+end
+function NegateCheckCard(target,chainlink,filter,opt)
+  return RemovalCheckCard(target,CATEGORY_DISABLE,chainlink,filter,opt)
+end
+function NegateCheckCardList(cards,chainlink,filter,opt)
+  return RemovalCheckCardList(cards,CATEGORY_DISABLE,chainlink,filter,opt)
 end
 -- checks, if a card the AI controls is about to be negated in the current chain
 function NegateCheck(id)
@@ -481,7 +495,7 @@ function BestTargets(cards,count,target,filter,opt,immuneCheck,source)
     if FilterType(c,TYPE_PENDULUM) and HasIDNotNegated(OppST(),05851097,true,nil,nil,POS_FACEUP) then
       c.prio = -1
     end
-    if filter and (opt and not filter(c,opt) or not filter(c)) then
+    if filter and (opt == nil and not filter(c) or opt and not filter(c,opt)) then
       c.prio = -1
     end
     if immuneCheck and source and not Affected(c,source.type,source.level) then
@@ -647,7 +661,22 @@ function NotNegated(c)
     then
       return false
     end
-    if FilterType(c,TYPE_MONSTER) then
+    if FilterType(c,TYPE_MONSTER) 
+    then
+      if SkillDrainCheck() then
+        return false
+      end
+      if HasIDNotNegated(Field(),33746252,true) then -- Majesty's Fiend
+        return false
+      end
+      if HasIDNotNegated(Field(),56784842,true) then -- Angel 07
+        return false
+      end
+      if FilterLocation(c,LOCATION_EXTRA) 
+      and HasIDNotNegated(Field(),89463537,true) -- Necroz Unicore
+      then 
+        return false
+      end
     end
   end
   GlobalNegatedLoop=false

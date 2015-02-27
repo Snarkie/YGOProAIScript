@@ -2,7 +2,7 @@ function DarkWorldPriority()
 AddPriority({
 [34230233] = {7,2,9,1,9,1,10,5,1,1,GraphaCond},       -- DW Grapha
 [60228941] = {4,3,7,1,3,1,8,1,10,3,SnowwCond},        -- DW Snoww
-[33731070] = {6,3,5,1,3,1,9,1,7,4,BeiigeCond},        -- DW Beiige
+[33731070] = {6,3,5,1,3,1,9,3,7,4,BeiigeCond},        -- DW Beiige
 [94283662] = {3,2,8,1,3,1,5,1,4,3,TranceCond},        -- Trance Archfiend
 [79126789] = {5,3,6,4,4,1,7,1,9,4,BrowwCond},         -- DW Broww
 
@@ -15,7 +15,7 @@ AddPriority({
 
 [73445448] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Zombiestein
 [01639384] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Felgrand
-[10406322] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Sylvan Arusei
+[10406322] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Sylvan Alsei
 [66547759] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Lancelot
 [88120966] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Giant Grinder
 })
@@ -72,6 +72,9 @@ function SnowwCond(loc,c)
   if loc == PRIO_BANISH then
     return FilterLocation(c,LOCATION_GRAVE)
   end
+  if loc == PRIO_TOGRAVE then
+    return not FilterLocation(c,LOCATION_MZONE)
+  end
   return true
 end
 function BrowwCond(loc,c)
@@ -89,6 +92,9 @@ function BrowwCond(loc,c)
   end
   if loc == PRIO_BANISH then
     return FilterLocation(c,LOCATION_GRAVE)
+  end
+  if loc == PRIO_TOGRAVE then
+    return not FilterLocation(c,LOCATION_MZONE)
   end
   return true
 end
@@ -115,7 +121,7 @@ function BeiigeCond(loc,c)
     and Duel.GetLocationCount(player_ai,LOCATION_MZONE)>0
   end
   if loc == PRIO_TOGRAVE then
-    return true
+    return not FilterLocation(c,LOCATION_MZONE)
   end
   if loc == PRIO_BANISH then
     return FilterLocation(c,LOCATION_GRAVE)
@@ -203,18 +209,23 @@ end
 function UseGates()
   return CardsMatchingFilter(AIGrave(),GatesFilter)>0
   and PriorityCheck(AIHand(),PRIO_DISCARD,1,FilterRace,RACE_FIEND)>3
+  and HasIDNotNegated(UseLists(AIHand(),AIField()),33017655,true)
 end
 function UseDragged()
   local result = false
   GlobalDragged = true
-  if PriorityCheck(AIHand(),PRIO_DISCARD,#AIHand())>4 and #OppHand()>0 then
+  if PriorityCheck(AIHand(),PRIO_DISCARD,#AIHand())>4 
+  and #OppHand()>0 
+  and HasIDNotNegated(UseLists(AIHand(),AIField()),16435215,true) 
+  then
     result = true
   end
   GlobalDragged = nil
   return result
 end
 function UseDWD()
-  return PriorityCheck(AIHand(),PRIO_DISCARD)>3
+  return HasIDNotNegated(UseLists(AIHand(),AIField()),74117290,true) 
+  and PriorityCheck(AIHand(),PRIO_DISCARD)>3
 end
 function UseLeviairDW()
   return CardsMatchingFilter(AIBanish(),LeviairDWFilter)>0
@@ -232,6 +243,7 @@ function SummonGraphaCheck(skipmonster)
   or skipmonster) and DualityCheck()
 end
 function SummonGrapha()
+  GlobalDWSS = 1
   return true
 end
 function UseTrance(mode)
@@ -252,12 +264,46 @@ end
 function UseAllureDW()
   return DeckCheck(DECK_DARKWORLD) 
   and PriorityCheck(AIHand(),PRIO_BANISH,1,FilterAttribute,ATTRIBUTE_DARK)>2
+  and HasIDNotNegated(UseLists(AIHand(),AIField()),01475311,true) 
 end
 function UseDarkSmog()
   return PriorityCheck(AIHand(),PRIO_DISCARD)>4
   and CardsMatchingFilter(OppGrave(),FilterType,TYPE_MONSTER)>0
 end
-
+function SummonChainDW(card)
+  local dw=SubGroup(AIMon(),DarkWorldMonsterFilter,34230233)
+  local difflvl=SubGroup(dw,function(c)return c.level~=4 end)
+  if (#dw > 2 or #dw > 1 and FieldCheck(4)>2 or #difflvl>1
+  or CardsMatchingFilter(AIHand(),DarkWorldMonsterFilter,34230233)>0
+  and not NormalSummonCheck()
+  or HasID(AIHand(),33731070,true) and DiscardOutlets()>0
+  or MP2Check() --and not HasAccess(34230233)
+  )
+  and HasID(AIDeck(),34230233,true)
+  then
+    GlobalDWSS = 2
+    return true
+  end
+  return false
+end
+function UseChainDW(mode)
+  if mode == 1 then
+    return NeedsCard(34230233,AIDeck(),AIGrave(),true)
+  elseif mode == 2 then
+    return HasID(AIDeck(),34230233,true)
+  elseif mode == 3 then
+    if UseGates() or UseDragged() or UseDWD() then
+      GlobalCardMode = 2
+      return true
+    end
+  elseif mode == 4 then
+    if Duel.GetCurrentPhase()==PHASE_MAIN2 or not GlobalBPAllowed then
+      GlobalCardMode = 2
+      return true
+    end
+  end
+  return false
+end
 function DarkWorldInit(cards)
   local Act = cards.activatable_cards
   local Sum = cards.summonable_cards
@@ -273,7 +319,17 @@ function DarkWorldInit(cards)
   if HasIDNotNegated(Act,95992081) and UseLeviairDW() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(SpSum,95992081) and LeviairDWCheck() then
+  if HasIDNotNegated(Act,34086406,false,545382497) and UseChainDW(1) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Act,34086406,false,545382498) and UseChainDW(3) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Act,34086406,false,545382497) and UseChainDW(2) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(SpSum,95992081) and LeviairDWCheck() then
+    GlobalDWSS=2
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSum,34230233) and SummonGrapha() then
@@ -283,7 +339,7 @@ function DarkWorldInit(cards)
     OPTSet(Act[CurrentIndex].cardid)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Sum,10802915) and SummonTourGuideDW(1) then
+  if HasIDNotNegated(Sum,10802915) and SummonTourGuideDW(1) then
     return {COMMAND_SUMMON,CurrentIndex} 
   end
   if HasID(Sum,94283662) and UseTrance(1) then
@@ -298,7 +354,10 @@ function DarkWorldInit(cards)
   if HasID(Sum,60228941) and SummonDW() then
     return {COMMAND_SUMMON,CurrentIndex}
   end
-  if HasID(Sum,10802915) and SummonTourGuideDW(2) then
+  if HasIDNotNegated(SpSum,34086406) and SummonChainDW() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasIDNotNegated(Sum,10802915) and SummonTourGuideDW(2) then
     return {COMMAND_SUMMON,CurrentIndex} 
   end
   if DraggedCheck() and not UseDragged() then
@@ -351,7 +410,7 @@ function DarkWorldInit(cards)
   if HasID(Sum,60228941) and SummonDW(4) then
     return {COMMAND_SUMMON,CurrentIndex} 
   end
-  if HasID(Sum,10802915) and SummonTourGuideDW(3) then
+  if HasIDNotNegated(Sum,10802915) and SummonTourGuideDW(3) then
     return {COMMAND_SUMMON,CurrentIndex} 
   end
   if HasID(Sum,79126789) and SummonDW(3) then
@@ -368,6 +427,9 @@ function DarkWorldInit(cards)
   end
   if HasID(Sum,79126789) and SummonDW(0) then
     return {COMMAND_SUMMON,CurrentIndex} 
+  end
+  if HasIDNotNegated(Act,34086406,false,545382498) and UseChainDW(4) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Sum,85138716) then -- temp
     return {COMMAND_SUMMON,CurrentIndex} 
@@ -409,9 +471,26 @@ function SmogTarget(cards)
   end
   return BestTargets(cards,1,TARGET_BANISH)
 end
+function EEVTarget(cards)
+  if GlobalCardMode == 1 then
+    GlobalCardMode = nil
+    return GlobalTargetGet(cards,true)
+  end
+  return Add(cards,PRIO_TOGRAVE)
+end
 function DarkWorldCard(cards,min,max,id,c)
   if c then
     id = c.id
+  end
+  if GlobalDWSS then
+    if not c then
+      if GlobalDWSS == 1 then
+        return Add(cards,PRIO_TOHAND,min)
+      else
+        return Add(cards,PRIO_TOGRAVE,min)
+      end
+    end
+    GlobalDWSS = nil
   end
   if id == 94283662 then 
     return TranceTarget(cards)
@@ -437,10 +516,49 @@ function DarkWorldCard(cards,min,max,id,c)
   if id == 41142615 then 
     return Add(cards,PRIO_DISCARD,3)
   end
+  if id == 54974237 then
+    return EEVTarget(cards)
+  end
   return nil
 end
-function ChainEEV()
-  return true
+function EEVFilter(c)
+  return FilterAttribute(c,ATTRIBUTE_DARK) and c.attack>=2500
+end
+function ChainEEV(card)
+  local c = nil
+  local targets = RemovalCheckList(AIMon(),nil,nil,EEVFilter)
+  if targets and #targets == 1 then
+    GlobalTargetSet(targets[1],AIMon())
+    GlobalCardMode = 1
+    return true
+  elseif targets and #targets > 1 then
+    return true
+  end
+  if RemovalCheckCard(card) then
+    return true
+  end
+  if Duel.GetCurrentPhase()==PHASE_END 
+  and Duel.GetTurnPlayer()==1-player_ai 
+  and HasID(AIMon(),34230233,true)
+  and CardsMatchingFilter(AIHand(),DarkWorldMonsterFilter,34230233)>0
+  then
+    return true
+  end
+  local count = 0
+  for i=1,#OppST() do
+    local c = OppST()[i]
+    if not FilterStatus(c,STATUS_LEAVE_CONFIRMED) 
+    and DestroyFilter(c)
+    and (FilterPosition(c,POS_FACEUP)
+    or FilterPublic(c))
+    then
+      count=count+1
+    end
+  end
+  if count>2 or count>1 and #OppST()>3 then
+    return true
+  end
+  return false
 end
 function CheckTargetFilter(c,source,targeted,filter,opt)
   return c and source 
@@ -574,7 +692,7 @@ function DarkWorldChain(cards)
     end
     return {1,CurrentIndex}
   end
-  if HasID(cards,54974237) and ChainEEV() then 
+  if HasID(cards,54974237,false,nil,nil,nil,ChainEEV) then 
     return {1,CurrentIndex}
   end
   return nil
@@ -587,6 +705,37 @@ function DarkWorldEffectYesNo(id,card)
   end
   return result
 end
+
+function EEVOptions()
+  local spells = 0
+  local traps = 0
+  local unknown = 0
+  for i=1,#OppST() do
+    local c = OppST()[i]
+    if DestroyFilter(c) then
+      if FilterPosition(c,POS_FACEDOWN) and not FilterPublic(c) then
+        unknown = unknown + 1
+      elseif FilterType(c,TYPE_SPELL) then
+        spells = spells + 1
+      elseif FilterType(c,TYPE_TRAP) then
+        traps = traps + 1
+      end
+    end
+  end
+  return 2+spells>traps+unknown
+end
+function DarkWorldOption(options)
+  for i=1,#options do
+    if options[i] == 879587792 and EEVOptions() then
+      return i
+    end
+    if options[i] == 879587793 and not EEVOptions() then
+      return i
+    end
+  end
+  return nil
+end
+
 DarkWorldAtt={
 34230233,60228941,33731070,94283662,
 73445448,01639384,66547759,
@@ -594,7 +743,6 @@ DarkWorldAtt={
 DarkWorldDef={
 10406322,88120966,
 }
-
 function DarkWorldPosition(id,available)
   result = nil
   for i=1,#DarkWorldAtt do
