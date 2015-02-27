@@ -630,6 +630,10 @@ function NotNegated(c)
   local id
   local type
   local player
+  if c==nil then
+    print("warning: NotNegated null card")
+    return true
+  end
   if c.GetCode then
     disabled = (c:IsHasEffect(EFFECT_DISABLE) or c:IsHasEffect(EFFECT_DISABLE_EFFECT))
     id = c:GetCode()
