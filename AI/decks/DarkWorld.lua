@@ -287,6 +287,7 @@ function SummonChainDW(card)
   return false
 end
 function UseChainDW(mode)
+  if not DeckCheck(DECK_DARKWORLD) then return false end
   if mode == 1 then
     return NeedsCard(34230233,AIDeck(),AIGrave(),true)
   elseif mode == 2 then
