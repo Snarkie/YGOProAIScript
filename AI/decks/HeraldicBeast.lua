@@ -539,7 +539,7 @@ function AHATarget(cards)
     if HasID(cards,34086406) and SummonChainHeraldic() then
       result=IndexByID(cards,34086406)
     end
-    if HasID(cards,11398059) and SummonImpKing(SpSum[CurrentIndex]) then
+    if HasID(cards,11398059) and SummonImpKing(cards[CurrentIndex]) then
       result=IndexByID(cards,11398059)
     end
     if HasID(cards,23649496) and SummonPlainCoat() then
@@ -551,7 +551,7 @@ function AHATarget(cards)
     if HasID(cards,22653490) and SummonChidori() then
       result=IndexByID(cards,22653490)
     end
-    if HasID(cards,94380860) and SummonRagnaZero(FindID(94380860,cards)) then
+    if HasID(cards,94380860) and SummonRagnaZero(cards[CurrentIndex]) then
       result=IndexByID(cards,94380860)
     end
     if HasID(cards,61344030) and SummonPaladynamo() then
