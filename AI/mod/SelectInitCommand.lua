@@ -265,6 +265,10 @@ if DeckCheck(DECK_EXODIA) then
   if HasID(activate,75014062) then -- Spell Power Grasp
     return COMMAND_ACTIVATE,CurrentIndex
   end
+  if #AIHand()>6 and #cards.st_setable_cards > 0 
+  then
+    return COMMAND_SET_ST,1
+  end
   --go to end phase
   return COMMAND_TO_END_PHASE,1
 end

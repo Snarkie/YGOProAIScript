@@ -570,7 +570,7 @@ function SphereTarget(cards)
       if cards[i].level == 4 and SummonGungnir() then
         return {i}
       end
-      if cards[i].level == 7 and SummonLeoh() then
+      if cards[i].level == 7 and SummonLeoh(FindID(08561192,AIExtra())) then
         return {i}
       end
     end

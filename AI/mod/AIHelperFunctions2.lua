@@ -940,7 +940,7 @@ function TargetProtection(c,type)
     return NotNegated(c) and mats>0
     and FilterLocation(c,LOCATION_MZONE)
   end
-  if id == 00005500 then
+  if id == 82044279 then
     return NotNegated(c) and bit32.band(type,TYPE_MONSTER)>0
     and FilterLocation(c,LOCATION_MZONE)
   end

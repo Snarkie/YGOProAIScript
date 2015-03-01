@@ -302,10 +302,10 @@ NSBL={
 19748583,10736540,92125819,73359475, -- Gwen, Lady, Artorigus, Peredur
 90307777,08903700,95492061,23401839, -- Shrit, Caster of Nekroz, Djinn Releaser of Rituals, Manju, Senju 
 13974207,57143342,73213494,47728740, -- Denkou Sekka, BA Cir, Calcab, Alich
-20758643,00734741,36551319,09342162, -- BA Graff, Rubic, Farfa, Cagna
+20758643,00734741,36553319,09342162, -- BA Graff, Rubic, Farfa, Cagna
 62957424,52738610,30312361,41386308, -- BA Libic, Necroz Dance Princess, Phantom of Chaos, Mathematician
 34230233,60228941,33731070,79126789, -- DW Grapha, Snoww, Beiige, Broww
-94283662, -- Trance Archfiend
+94283662,20292186, -- Trance Archfiend, Artifact Scythe
 }
 function NormalSummonBlacklist(CardId) 
   for i=1,#NSBL do
@@ -396,7 +396,7 @@ SSBL={
 31320433,47805931,75367227, -- Nightmare Shark, Giga-Brillant, Ghostrick Alucard
 68836428,52558805,78156759, -- Tri-Edge Levia, Temptempo the Percussion Djinn, Wind-Up Zenmaines
 16259549,51617185,16195942, -- Fortune Tune, Machina Megaform, Dark Rebellion Dragon
-26563200,00005500,73445448, -- Muzurythm, Clear Wing Synchro Dragon, Zombiestein
+26563200,82044279,73445448, -- Muzurythm, Clear Wing Synchro Dragon, Zombiestein
 01639384,10406322,66547759, -- Felgrand, Sylvan Alsei, Lancelot
 88120966,78156759, -- Giant Grinder, Zenmaines
 }
@@ -597,7 +597,7 @@ Unchainable={
 78474168,50078509,29616929,19748583, -- Breakthrough Skill, Fiendish Chain, TTHN, Gwen
 25789292,36006208,71587526,63356631, -- Forbidden Chalice, Fire Lake, Karma Cut, PWWB
 25857246,74122412,99185129,56574543, -- Nekroz Valkyrus, Nekroz Gungnir, Nekroz Clausolas, Bujingi Sinyou
-59251766,37742748,41930553, -- Bujingi Hare, Honest, Dark Smog
+59251766,37742748,41930553,20292186, -- Bujingi Hare, Honest, Dark Smog, Artifact Scythe
 }
 function isUnchainableTogether(CardId)
   for i=1,#Unchainable do
@@ -770,7 +770,7 @@ ScriptedCards ={
 00734741,36006208,00601193,63356631,  -- BA Rubic, Fire Lake, Virgil, PWWB
 71587526,72167543,81330115,31320433,  -- Karma Cut, Downerd Magician, Acid Golem, Nightmare Shark
 47805931,75367227,68836428,52558805,  -- Giga-Brillant, Ghostrick Alucard, Tri-Edge Levia, Temptempo the Percussion Djinn
-16259549,51617185,36551319,09342162,  -- Fortune Tune, Machina Megaform, BA Farfa, Cagna
+16259549,51617185,36553319,09342162,  -- Fortune Tune, Machina Megaform, BA Farfa, Cagna
 62957424,00005497,62835876,73680966,  -- BA Libic, Malacoda, Good&Evil, The Beginning of the End
 25857246,52738610,97211663,30312361,  -- Necroz Valkyrus, Dance Princess, Cycle, Phantom of Chaos
 12580477,45986603,16195942,56574543,  -- Raigeki, Snatch Steal, Dark Rebellion Dragon, Bujingi Sinyou
@@ -780,7 +780,7 @@ ScriptedCards ={
 54974237,41930553,73445448,01639384,  -- EEV, Dark Smog, Zombiestein, Felgrand
 10406322,66547759,88120966,78156759,  -- Sylvan Alsei, Lancelot, Giant Grinder, Zenmaines
 74294676,42752141,71068247,50323155,  -- Laggia, Dolkka, Totem Bird, Black Horn
-02956282,00005500,99188141,  -- Naturia Barkion, Clear Wing Synchro Dragon, THRIO
+02956282,82044279,99188141,  -- Naturia Barkion, Clear Wing Synchro Dragon, THRIO
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do

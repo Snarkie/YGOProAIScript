@@ -155,7 +155,7 @@ function SummonExtraDeck(cards,prio)
   if HasID(SpSum,04779823) and SummonMichael(SpSum[CurrentIndex]) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasID(SpSum,00005500) and SummonClearWing(SpSum[CurrentIndex]) then
+  if HasID(SpSum,82044279) and SummonClearWing(SpSum[CurrentIndex]) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
 
@@ -406,7 +406,7 @@ end
 function SummonBigEye()
   return CardsMatchingFilter(OppMon(),BigEyeFilter)>0 and MP2Check()
 end
-function SummonNaturiaBeast()
+function SummonNaturiaBeast(c)
   return OppGetStrongestAttDef()<2200 and MP2Check()
 end
 function SummonArmades()
@@ -542,7 +542,7 @@ function UseSkyblaster()
   return CardsMatchingFilter(OppField(),SkyblasterFilter)>0
 end
 function SummonLeoh(c)
-  return OppGetStrongestAttDef() < c.attack and MP2Check() and HasID(AIExtra(),08561192,true)
+  return c and OppGetStrongestAttDef() < c.attack and MP2Check() and HasID(AIExtra(),08561192,true)
 end
 function SummonMechquipped()
   return Duel.GetCurrentPhase() == PHASE_MAIN2 or Duel.GetTurnCount()==1
@@ -626,7 +626,6 @@ function RepoZenmaines(c)
   and Duel.GetTurnPlayer()==player_ai
   and Duel.GetCurrentPhase()==PHASE_MAIN1
   and GlobalBPAllowed
-  and FilterPosition(c,POS_DEFENCE)
   then
     return FilterPosition(c,POS_DEFENCE)
   else
@@ -970,7 +969,7 @@ function PriorityChain(cards) -- chain these before anything else
   if HasID(cards,44508094,false,nil,LOCATION_MZONE) and ChainNegation(cards[CurrentIndex]) then -- Stardust
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,00005500) and ChainNegation(cards[CurrentIndex]) then -- Clear Wing Synchro Dragon
+  if HasIDNotNegated(cards,82044279) and ChainNegation(cards[CurrentIndex]) then -- Clear Wing Synchro Dragon
     return {1,CurrentIndex}
   end
   if HasID(cards,61257789,false,nil,LOCATION_MZONE) and ChainNegation(cards[CurrentIndex]) then -- Stardust AM

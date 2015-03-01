@@ -241,7 +241,7 @@ function MichaelFilter(c)
   return c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
 end
 function SummonMichael(c)
-  return (CardsMatchingFilter(UseLists({OppMon(),OppST()}),MichaelFilter)>0 
+  return c and (CardsMatchingFilter(UseLists({OppMon(),OppST()}),MichaelFilter)>0 
   and AI.GetPlayerLP(1)>1000 and NotNegated(c)  
   or Negated (c) and OppGetStrongestAttDef()<2600)
   and MP2Check() and HasID(AIExtra(),04779823,true)
@@ -267,7 +267,7 @@ function FalconFilter3(c)
   return bit32.band(c.race,RACE_SPELLCASTER)>0 and c.level==5 and bit32.band(c.position,POS_FACEUP)>0
 end
 function SummonFalcon()
-  return (SummonMichael() and CardsMatchingFilter(AIMon(),FalconFilter2)>0 
+  return (SummonMichael(FindID(04779823,AIExtra())) and CardsMatchingFilter(AIMon(),FalconFilter2)>0 
   or SummonArcanite() and CardsMatchingFilter(AIMon(),FalconFilter3)>0 
   or SummonArmades() and FieldCheck(3)>0)
   and (MidrashCheck() or not SpecialSummonCheck(player_ai))

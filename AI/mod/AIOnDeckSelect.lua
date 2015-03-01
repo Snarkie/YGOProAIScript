@@ -106,7 +106,7 @@ AddPriority({
 [10802915] = {8,2,3,2,2,1,4,1,8,3,TourGuideCond},-- Tour Guide
 [84764038] = {5,2,5,4,5,2,6,1,4,2,ScarmCond},    -- BA Scarm
 [00734741] = {4,2,3,1,3,3,1,1,6,1,RubicCond},    -- BA Rubic
-[36551319] = {4,2,4,1,4,3,1,1,6,1,FarfaCond},    -- BA Farfa
+[36553319] = {4,2,4,1,4,3,1,1,6,1,FarfaCond},    -- BA Farfa
 [09342162] = {3,2,6,1,6,3,1,1,6,1,CagnaCond},    -- BA Cagna
 [62957424] = {3,2,3,1,3,3,1,1,6,1,LibicCond},    -- BA Libic
 [00005497] = {8,2,1,1,2,2,1,1,5,1,MalacodaCond}, -- BA Malacoda
@@ -316,7 +316,7 @@ AddPriority({
 [94977269] = {1,1,7,3,2,1,2,1,1,1,MidrashCond},       -- El-Shadoll Midrash/Winda
 [74822425] = {1,1,1,1,1,1,1,1,1,1,ShekinagaCond},     -- El-Shadoll Shekinaga
 [48424886] = {1,1,1,1,1,1,1,1,1,1,EgrystalCond},      -- El-Shadoll Egrystal
-[00005500] = {1,1,1,1,1,1,1,1,1,1,ClearWingCond},     -- Clear Wing Synchro Dragon
+[82044279] = {1,1,1,1,1,1,1,1,1,1,ClearWingCond},     -- Clear Wing Synchro Dragon
 [72959823] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Panzer Dragon
 [73964868] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Constellar Pleiades
 [29669359] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Number 61: Volcasaurus

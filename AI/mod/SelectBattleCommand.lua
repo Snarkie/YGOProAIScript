@@ -17,6 +17,8 @@ function AttackTargetSelection(cards,attacker,atk)
   local result ={}
   ApplyATKBoosts(cards)
   attacker.attack=atk
+  print("attack target selection")
+  print("specific attacker")
   if NotNegated(attacker) then
     
     -- High Laundsallyn
@@ -79,9 +81,11 @@ function AttackTargetSelection(cards,attacker,atk)
       return BestAttackTarget(cards,attacker,ZenmainesFilter,attacker)
     end
   end
+  print("generic attacker")
   return BestAttackTarget(cards,attacker)
 end
 function BestAttackTarget(cards,source,filter,opt)
+  print("best attack target")
   local atk = source.attack
   local result = nil
   for i=1,#cards do
@@ -135,12 +139,17 @@ function BestAttackTarget(cards,source,filter,opt)
     end
   end  
   table.sort(cards,function(a,b) return a.prio > b.prio end)
+  print("table:")
+  print("attacker: "..source.id..", atk: "..atk)
+  for i=1,#cards do
+    print(i..") id: "..cards[i].id.." index: "..cards[i].index.." prio: "..cards[i].prio)
+  end
   result={cards[1].index}
   return result
 end
 
 function OnSelectBattleCommand(cards,activatable)
- 
+  print("battle command selection")
   -- shortcut function that returns the proper attack index and sets some globals 
   -- needed for attack target selection
   local function Attack(index,direct)
@@ -194,7 +203,7 @@ function OnSelectBattleCommand(cards,activatable)
   ApplyATKBoosts(targets)
   
   -- First, attack with monsters, that get beneficial effects from destroying stuff
-  
+  print("specific attackers")
   -- High Laundsallyn
   if HasIDNotNegated(cards,83519853) and CanWinBattle(cards[CurrentIndex],targets,true) then 
     return Attack(CurrentIndex)
@@ -253,6 +262,10 @@ function OnSelectBattleCommand(cards,activatable)
   end
   
   -- Bujin Susanowo
+  if HasID(cards,75840616) and CanWinBattle(cards[CurrentIndex],targets,nil,true) then 
+    return Attack(CurrentIndex)
+  end
+  
   if HasID(cards,75840616) and CanWinBattle(cards[CurrentIndex],targets) then 
     return Attack(CurrentIndex)
   end
@@ -263,7 +276,8 @@ function OnSelectBattleCommand(cards,activatable)
   end
   
   -- generic attacks
-  
+  print("generic attackers")
+  print("for game")
   -- can attack for game on a certain target
   SortByATK(cards)
   if #targets>0 and #cards>0 then
@@ -273,7 +287,7 @@ function OnSelectBattleCommand(cards,activatable)
       end
     end
   end
-  
+  print("without boost")
   -- can destroy a monster without additional attack boosting cards
   SortByATK(cards,true)
   if #targets>0 and #cards>0 then
@@ -283,7 +297,7 @@ function OnSelectBattleCommand(cards,activatable)
       end
     end
   end
-  
+  print("with boost")
   -- can destroy a monster with additional boost
   SortByATK(cards,true)
   if #targets>0 and #cards>0 then
@@ -293,7 +307,7 @@ function OnSelectBattleCommand(cards,activatable)
       end
     end
   end
-
+  print("face-down")
   -- can probably destroy an unknown face-down monster
   SortByATK(cards,true)
   if #targets>0 and #cards>0  then
@@ -307,7 +321,7 @@ function OnSelectBattleCommand(cards,activatable)
       end
     end
   end
-  
+  print("battle damage")
   -- can deal battle damage (against battle-immune targets etc)
   SortByATK(cards,true)
   if #targets>0 and #cards>0 then
@@ -317,20 +331,21 @@ function OnSelectBattleCommand(cards,activatable)
       end
     end
   end
-
+  print("direct")
   -- direct attack
   SortByATK(cards,true)
   if #OppMon()==0 and #cards>0 then
     return Attack(1,true)
   end
-  
+  print("forced")
   -- forced to attack
   SortByATK(cards)
   for i=1,#cards do
     if cards[i] and cards[i]:is_affected_by(EFFECT_MUST_ATTACK)>0 then
-      return Attack(i,true)
+      return Attack(i)
     end
   end
+  print("not attack")
   
 ---
 -- activate cards 

@@ -114,13 +114,13 @@ function FarfaFilter(c)
 end
 function FarfaCond(loc,c)
   if loc == PRIO_TOHAND then
-    return not HasID(UseLists(AIHand(),AIMon()),36551319,true)
+    return not HasID(UseLists(AIHand(),AIMon()),36553319,true)
   end
   if loc == PRIO_TOFIELD then
     return not(FilterLocation(c,LOCATION_GRAVE))
   end
   if loc == PRIO_TOGRAVE then
-    return OPTCheck(36551319) and CardsMatchingFilter(OppMon(),FarfaFilter)>0
+    return OPTCheck(36553319) and CardsMatchingFilter(OppMon(),FarfaFilter)>0
   end
   return true
 end
@@ -400,8 +400,8 @@ function BAInit(cards)
     OPTSet(09342162)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Act,36551319,false,nil,LOCATION_HAND) and SSBA(Act[CurrentIndex]) then -- Farfa
-    OPTSet(36551319)
+  if HasID(Act,36553319,false,nil,LOCATION_HAND) and SSBA(Act[CurrentIndex]) then -- Farfa
+    OPTSet(36553319)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Act,00734741,false,nil,LOCATION_HAND) and SSBA(Act[CurrentIndex]) then -- Rubic
@@ -411,7 +411,7 @@ function BAInit(cards)
   if HasID(Sum,800734741) and SummonRubic() then
     return {COMMAND_SUMMON,CurrentIndex}
   end
-  if HasID(Sum,36551319) and SummonBA() then
+  if HasID(Sum,36553319) and SummonBA() then
     return {COMMAND_SUMMON,CurrentIndex}
   end
   if HasID(Sum,09342162) and SummonBA() then
@@ -453,7 +453,7 @@ function BAInit(cards)
   if HasID(SetMon,73213494) and SetBA() then
     return {COMMAND_SET_MONSTER,CurrentIndex}
   end
-  if HasID(SetMon,36551319) and SetBA() then
+  if HasID(SetMon,36553319) and SetBA() then
     return {COMMAND_SET_MONSTER,CurrentIndex}
   end
   if HasID(SetMon,09342162) and SetBA() then
@@ -568,7 +568,7 @@ function BACard(cards,min,max,id,c)
   if id == 00601193 then
     return VirgilTarget(cards)
   end
-  if id == 36551319 then
+  if id == 36553319 then
     return BestTargets(cards) 
   end
   if id == 09342162 then
@@ -687,8 +687,8 @@ function BAChain(cards)
     OPTSet(73213494)
     return {1,CurrentIndex}
   end
-  if HasID(cards,36551319,false,nil,LOCATION_GRAVE) and ChainFarfa() then -- Farfa
-    OPTSet(36551319)
+  if HasID(cards,36553319,false,nil,LOCATION_GRAVE) and ChainFarfa() then -- Farfa
+    OPTSet(36553319)
     return {1,CurrentIndex}
   end
   if HasID(cards,09342162,false,nil,LOCATION_GRAVE) then -- Cagna
@@ -735,8 +735,8 @@ function BAEffectYesNo(id,card)
     OPTSet(73213494)
     result = 1
   end
- if id==36551319 and FilterLocation(card,LOCATION_GRAVE) and ChainFarfa() then
-    OPTSet(36551319)
+ if id==36553319 and FilterLocation(card,LOCATION_GRAVE) and ChainFarfa() then
+    OPTSet(36553319)
     result = 1
   end
   if id==09342162 and FilterLocation(card,LOCATION_GRAVE) then -- Cagna
@@ -771,7 +771,7 @@ BAVary={
 }
 BADef={
   84764038,00734741,78156759, -- Scarm, Rubic, Zenmaines
-  16259549,62957424,36551319,  -- Fortune Tune, Farfa
+  16259549,62957424,36553319,  -- Fortune Tune, Farfa
 }
 
 function BAPosition(id,available)

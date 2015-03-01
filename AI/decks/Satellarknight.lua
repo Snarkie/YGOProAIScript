@@ -354,7 +354,7 @@ if DeckCheck(DECK_TELLARKNIGHT) then
   if HasID(SpSummonable,34086406) and SummonLavalvalChain1() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasID(SpSummonable,21501505) and SummonCairngorgon() then
+  if HasID(SpSummonable,21501505) and SummonCairngorgon(SpSum[CurrentIndex]) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   SatellarknightAssignPriority(Summonable,PRIO_TOFIELD)
