@@ -204,6 +204,12 @@ end
 function OppField() 
   return UseLists({OppMon(),OppST()})
 end
+function AICards() 
+  return UseLists(AIField(),AIHand())
+end
+function OppCards() 
+  return UseLists(OppField(),OppHand())
+end
 function AIAll() 
   return UseLists({AIHand(),AIField(),AIGrave(),AIDeck(),AIBanish(),AIExtra()})
 end
@@ -221,6 +227,16 @@ function AllMon()
 end
 function AllST()
   return UseLists(AIST(),OppST())
+end
+function AIMaterials()
+  local result = {}
+  for i=1,#AIMon() do
+    local cards = AIMon()[i].xyz_materials
+    if cards and #cards>0 then
+      result = UseLists(result,cards)
+    end
+  end
+  return result
 end
 -------------------------------------------------
 -- **********************************************
@@ -1792,7 +1808,17 @@ function ApplyATKBoosts(Cards)
     end
   end
   
-
+  -- Utopia Lightning
+  for i=1,#Cards do
+    local c = Cards[i]
+    if c.id == 00005509 
+    and c.xyz_material_count>1
+    and NotNegated(c)
+    and #OppMon()>0
+    then
+      c.attack = 5000
+    end
+  end
   
   -- fix cards with attack < 0 after attack boosts
   for i=1,#Cards do

@@ -363,6 +363,12 @@ if not ExtraCheck then
   end
 end
 if not ExtraCheck then 
+  DeckCommand = ConstellarInit(cards)
+  if DeckCommand ~= nil then
+    return DeckCommand[1],DeckCommand[2]
+  end
+end
+if not ExtraCheck then 
   DeckCommand = SummonExtraDeck(cards)
   if DeckCommand ~= nil then
     return DeckCommand[1],DeckCommand[2]
@@ -1316,54 +1322,7 @@ end
      end
    end
  
-  -------------------------------------------------------
-  -- AI should activate "Constellar Kaust" if players
-  -- strongest attack position monster has more attack points than AI's.
-  -------------------------------------------------------
- for i=1,#ActivatableCards do  
-	if ActivatableCards[i].id == 70908596 then -- Constellar Kaust
-	  if Card_Count_Specified(AIMon(), nil, nil, nil, "==", 5, nil, 83, nil, nil) > 1 or 
-	     Card_Count_Specified(AIMon(), nil, nil, nil, "==", 6, nil, 83, nil, nil) > 0 and  
-	     Card_Count_Specified(AIMon(), nil, nil, nil, "==", 5, nil, 83, nil, nil) > 0 then
-	   if GlobalKaustActivated == nil or 
-		  Card_Count_Specified(AIMon(), nil, nil, nil, "==", 6, nil, 83, nil, nil) > 0 or 
-		  Get_Card_Count_ID(AIMon(), 70908596, POS_FACEUP) > 1 then 
-		  GlobalActivatedCardID = ActivatableCards[i].id
-		  return COMMAND_ACTIVATE,i
-         end
-       end
-     end
-   end
-   for i=1,#ActivatableCards do  
-	if ActivatableCards[i].id == 70908596 then -- Constellar Kaust
-	  if Card_Count_Specified(AIMon(), nil, nil, POS_FACEUP, "==", 4, nil, 83, 3, nil) > 0 or
-	     Card_Count_Specified(AIMon(), nil, nil, POS_FACEUP, "==", 5, nil, 83, 3, nil) > 0 and
-		 Card_Count_Specified(AIMon(), nil, nil, POS_FACEUP, "==", 4, nil, 83, 3, nil) > 0 then
-		 GlobalActivatedCardID = ActivatableCards[i].id
-		return COMMAND_ACTIVATE,i
-       end
-     end
-   end
-   
-  -------------------------------------------------------
-  -- AI should activate "Constellar Siat" if players
-  -- strongest attack position monster has more attack points than AI's.
-  -------------------------------------------------------
-   for i=1,#ActivatableCards do  
-	 if ActivatableCards[i].id == 44635489 then -- Constellar Siat
-	  if Card_Count_Specified(UseLists({AIMon(),AIGrave()}),nil,nil,nil, "==", 6, nil, 83, nil, nil) > 0 and 
-	     Card_Count_Specified(AIMon(),nil,nil,nil, "==", 6, nil, 83, nil, nil) > 0 or 
-	     Card_Count_Specified(UseLists({AIMon(),AIGrave()}),nil,nil,nil, "==", 5, nil, 83, nil, nil) > 0 and 
-	     Card_Count_Specified(AIMon(),nil,nil,nil, "==", 5, nil, 83, nil, nil) > 0 or 
-	     Card_Count_Specified(UseLists({AIMon(),AIGrave()}),nil,nil,nil, "==", 4, nil, 83, nil, nil) > 0 and 
-	     Card_Count_Specified(AIMon(),nil,nil,nil, "==", 4, nil, 83, nil, nil) > 0 then
-		 GlobalActivatedCardID = ActivatableCards[i].id
-		return COMMAND_ACTIVATE,i
-       end
-     end
-   end
-  
-  
+ 
    -----------------------------------------------------
   -- Activate Destiny Hero - Malicious only, if a lvl
   -- 6 monster or a tuner is faceup on the field
@@ -1569,18 +1528,6 @@ end
       end
     end
   end
-  
-  -------------------------------------------------------  
-  -- AI should summon "Constellar Pollux" if he
-  -- has any "Constellar" monsters in hand
-  -------------------------------------------------------
-  for i=1,#SpSummonableCards do
-	if SpSummonableCards[i].id == 70908596 then -- Constellar Kaus
-	   if Archetype_Card_Count(AIMon(),83,POS_FACEUP) > 0 then 
-		return COMMAND_SPECIAL_SUMMON,i
-        end
-      end
-    end
     
   -----------------------------------------------------
   -- Summon "Ghost Ship" if valid monsters can be banished
@@ -1944,79 +1891,6 @@ end
    end
  end
  
-  -------------------------------------------------------  
-  -- AI should summon "Constellar Pollux" if he
-  -- has any "Constellar" monsters in hand
-  -------------------------------------------------------
-  for i=1,#SummonableCards do   
-	if SummonableCards[i].id == 78364470 then -- Constellar Pollux
-	   if Archetype_Card_Count(AIHand(),83,nil) -1 > 0 and Global1PTPollux == nil or 
-	   AIArchetypeMonNotID(83, 78364470) == 0 then 
-		Global1PTPollux = 1
-		GlobalSummonedThisTurn = GlobalSummonedThisTurn+1
-		return COMMAND_SUMMON,i
-        end
-      end
-    end
-  
-  -------------------------------------------------------  
-  -- AI should summon "Constellar Algiedi" if he
-  -- has any "Constellar" monsters in hand
-  -------------------------------------------------------
-  for i=1,#SummonableCards do   
-	if SummonableCards[i].id == 41269771 then -- Constellar Algiedi
-	   if Archetype_Card_Count(AIHand(),83,nil) -1 > 0 then 
-		GlobalSummonedThisTurn = GlobalSummonedThisTurn+1
-		GlobalActivatedCardID = SummonableCards[i].id
-		return COMMAND_SUMMON,i
-        end
-      end
-    end
-  
-  -------------------------------------------------------  
-  -- AI should summon "Constellar Kaus" if he
-  -- has any "Constellar" monsters on field
-  -------------------------------------------------------
-  for i=1,#SummonableCards do   
-	if SummonableCards[i].id == 70908596 then -- Constellar Kaus
-       if Archetype_Card_Count(AIMon(),83,POS_FACEUP) > 0 then 
-		GlobalSummonedThisTurn = GlobalSummonedThisTurn+1
-		return COMMAND_SUMMON,i
-        end
-      end
-    end
-  
-  -------------------------------------------------------  
-  -- AI should summon "Constellar Siat" if he
-  -- controls level 5 or 6 "Constellar" monster.
-  -------------------------------------------------------
-  for i=1,#SummonableCards do   
-	if SummonableCards[i].id == 78364470 then -- Constellar Siat
-       if Card_Count_Specified(UseLists({AIMon(),AIGrave()}), nil, nil, nil, "==", 6, nil, 83, nil, nil) > 0 and 
-	      Card_Count_Specified(AIMon(), nil, nil, nil, "==", 6, nil, 83, nil, nil) > 0 or 
-		  Card_Count_Specified(UseLists({AIMon(),AIGrave()}), nil, nil, nil, "==", 5, nil, 83, nil, nil) > 0 and 
-		  Card_Count_Specified(AIMon(), nil, nil, nil, "==", 5, nil, 83, nil, nil) > 0 then 
-		GlobalSummonedThisTurn = GlobalSummonedThisTurn+1
-		return COMMAND_SUMMON,i
-        end
-      end
-    end
-  
-  -------------------------------------------------------  
-  -- AI should summon "Constellar Sheratan" if he
-  -- has specified monster in deck.
-  -------------------------------------------------------
-  for i=1,#SummonableCards do   
-	if SummonableCards[i].id == 78486968 then -- Constellar Sheratan
-       if Get_Card_Count_ID(AIDeck(),78364470,nil) > 0 or Get_Card_Count_ID(AIDeck(),70908596,nil) > 0 or Get_Card_Count_ID(AIDeck(),41269771,nil) > 0 then 
-		GlobalActivatedCardID = SummonableCards[i].id
-		GlobalSummonedThisTurn = GlobalSummonedThisTurn+1
-		return COMMAND_SUMMON,i
-        end
-      end
-    end
-  
-  
   -------------------------------------------------------
   -- Venus should be summoned if AI can bring out stronger monster to the field 
   -------------------------------------------------------
@@ -2151,37 +2025,7 @@ end
 --         Card position changing :)
 -- **********************************************
 -------------------------------------------------
- 
-  --------------------------------------------------
-  -- Flip "Constellar Kaust" to attack position if AI
-  -- controls any other "Constellar" monster
-  --------------------------------------------------
-  for i=1,#RepositionableCards do  
-   if RepositionableCards[i] ~= false then
-    if RepositionableCards[i].id ==  70908596 and -- Constellar Kaust
-	   RepositionableCards[i].position == POS_FACEDOWN_DEFENCE then 
-     if Archetype_Card_Count(AIMon(),83,POS_FACEUP) > 0 then 
-	   return COMMAND_CHANGE_POS,i
-       end 
-     end
-   end 
- end 
-  
-  --------------------------------------------------
-  -- Flip any level 4+ face down "Constellar" monster
-  -- if AI has "Constellar Kaust" on field.
-  --------------------------------------------------
-  for i=1,#RepositionableCards do  
-   if RepositionableCards[i] ~= false then
-    if RepositionableCards[i].setcode == 83 and RepositionableCards[i].level >= 4 and 
-	   RepositionableCards[i].position == POS_FACEDOWN_DEFENCE then
-     if Get_Card_Count_ID(AIMon(), 70908596, nil) > 0 then -- Constellar Kaust
-	   return COMMAND_CHANGE_POS,i
-       end 
-     end
-   end 
- end 
-  
+
   --------------------------------------------------
   -- Flip any "Toon" monster to attack position if AI
   -- controls "Toon World" or "Toon Kingdom".

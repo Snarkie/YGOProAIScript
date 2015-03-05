@@ -307,11 +307,11 @@ function OverExtendCheck(limit)
 end
 -- checks, if a card the AI controls is about to be removed in the current chain
 function RemovalCheck(id,category)
-  local c={CATEGORY_DESTROY,CATEGORY_REMOVE,CATEGORY_TOGRAVE,CATEGORY_TOHAND,CATEGORY_TODECK}
-  if category then c={category} end
-  for i=1,#c do
+  local cat={CATEGORY_DESTROY,CATEGORY_REMOVE,CATEGORY_TOGRAVE,CATEGORY_TOHAND,CATEGORY_TODECK}
+  if category then cat={category} end
+  for i=1,#cat do
     for j=1,Duel.GetCurrentChain() do
-      local ex,cg = Duel.GetOperationInfo(j,c[i])
+      local ex,cg = Duel.GetOperationInfo(j,cat[i])
       if ex and CheckNegated(j) then
         if id==nil then 
           return cg
@@ -324,7 +324,7 @@ function RemovalCheck(id,category)
   end
   return false
 end
-function RemovalCheckCard(target,category,chainlink,filter,opt)
+function RemovalCheckCard(target,category,type,chainlink,filter,opt)
   local cat={CATEGORY_DESTROY,CATEGORY_REMOVE,
   CATEGORY_TOGRAVE,CATEGORY_TOHAND,
   CATEGORY_TODECK,CATEGORY_CONTROL}
@@ -343,14 +343,17 @@ function RemovalCheckCard(target,category,chainlink,filter,opt)
   for i=1,#cat do
     for j=a,b do
       local ex,cg = Duel.GetOperationInfo(j,cat[i])
-      if ex and CheckNegated(j) then
+      local e = Duel.GetChainInfo(j,CHAININFO_TRIGGERING_EFFECT)
+      if ex and CheckNegated(j) and (type==nil
+      or e and e:GetHandler():IsType(type))
+      then
         if target==nil then 
           return cg
         end
         if cg and target then
           local card=false
           cg:ForEach(function(c) 
-            c=GetCardFromScript(c,Field())
+            local c=GetCardFromScript(c,Field())
             if CardsEqual(c,target) then
               card=c
             end  end) 
@@ -361,10 +364,10 @@ function RemovalCheckCard(target,category,chainlink,filter,opt)
   end
   return false
 end
-function RemovalCheckList(cards,category,chainlink,filter,opt)
+function RemovalCheckList(cards,category,type,chainlink,filter,opt)
   local result = {}
   for i=1,#cards do
-    local c = RemovalCheckCard(cards[i],category,chainlink,filter,opt)
+    local c = RemovalCheckCard(cards[i],category,type,chainlink,filter,opt)
     if c then result[#result+1]=c end
   end
   if #result>0 then
@@ -372,11 +375,11 @@ function RemovalCheckList(cards,category,chainlink,filter,opt)
   end
   return false
 end
-function NegateCheckCard(target,chainlink,filter,opt)
-  return RemovalCheckCard(target,CATEGORY_DISABLE,chainlink,filter,opt)
+function NegateCheckCard(target,type,chainlink,filter,opt)
+  return RemovalCheckCard(target,CATEGORY_DISABLE,type,chainlink,filter,opt)
 end
-function NegateCheckCardList(cards,chainlink,filter,opt)
-  return RemovalCheckCardList(cards,CATEGORY_DISABLE,chainlink,filter,opt)
+function NegateCheckCardList(cards,type,chainlink,filter,opt)
+  return RemovalCheckCardList(cards,CATEGORY_DISABLE,type,chainlink,filter,opt)
 end
 -- checks, if a card the AI controls is about to be negated in the current chain
 function NegateCheck(id)
@@ -535,7 +538,7 @@ function GlobalTargetGet(cards,index)
   GlobalTargetID = nil
   local c = FindCard(cardid,cards,index)
   if c == nil then
-    c = FindCard(All(),cards,index)
+    c = FindCard(cardid,All(),index)
   end
   if c == nil then
   end
@@ -575,15 +578,37 @@ OPT={}
 -- pass an id for hard OPT clauses, 
 -- pass the unique cardid for a simple OPT 
 function OPTCheck(id)
-  return OPT[id]~=Duel.GetTurnCount()
+  if type(id) == "table" and id.id then
+    id = id.cardid
+  end
+  return OPTCount(id)==0 
+end
+function OPTCount(id)
+  if type(id) == "table" and id.id then
+    id = id.cardid
+  end
+  local result = OPT[id*100+Duel.GetTurnCount()]
+  if result == nil then
+    return 0
+  end
+  return result 
 end
 function OPTSet(id)
-  OPT[id]=Duel.GetTurnCount()
+  if type(id) == "table" and id.id then
+    id = id.cardid
+  end
+  local i = id*100+Duel.GetTurnCount()
+  if OPT[i] == nil then
+    OPT[i] = 1
+  else
+    OPT[i]=OPT[i]+1
+  end
+  return
 end
 -- used to keep track, if the OPT was reset willingly
 -- for example if the card was bounced back to the hand
 function OPTReset(id)
-  OPT[id]=0
+  OPT[id*100+Duel.GetTurnCount()]=nil
 end
 -- used to keep track of how many cards with the same id got a priority request
 -- so the AI does not discard multiple Marksmen to kill one card, for example
@@ -618,12 +643,15 @@ end
 -- returns true, if the source is expected to win a battle against the target
 function WinsBattle(source,target)
   return source and target 
+  and FilterLocation(source,LOCATION_MZONE)
+  and FilterLocation(target,LOCATION_MZONE)
   and (target:IsPosition(POS_FACEUP_ATTACK) 
   and source:GetAttack() >= target:GetAttack()
   or target:IsPosition(POS_FACEUP_DEFENCE)
   and source:GetAttack() >= target:GetDefence()) 
   and source:IsPosition(POS_FACEUP_ATTACK)
   and not target:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE)
+  and not source:IsHasEffect(EFFECT_CANNOT_ATTACK)
 end
 function NotNegated(c)
   local disabled = false
@@ -715,6 +743,13 @@ end
 function FilterLevel(c,level)
   return bit32.band(c.type,TYPE_MONSTER)>0 and c.level==level
 end
+function FilterRank(c,rank)
+  if c.GetCode then
+    return FilterType(c,TYPE_XYZ) and c:GetRank()==rank
+  else
+    return FilterType(c,TYPE_XYZ) and c.rank==rank
+  end
+end
 function FilterType(c,type) -- TODO: change all filters to support card script
   if c.GetCode then
     return c:IsType(type)
@@ -738,7 +773,11 @@ function FilterID(c,id)
   return c.id==id
 end
 function FilterPosition(c,pos)
-  return bit32.band(c.position,pos)>0
+  if c.GetCode then
+    return c:IsPosition(pos)
+  else
+    return bit32.band(c.position,pos)>0
+  end
 end
 function FilterLocation(c,loc)
   if c.GetCode then
@@ -751,13 +790,21 @@ function FilterPreviousLocation(c,loc)
   return bit32.band(c.previous_location,loc)>0
 end
 function FilterStatus(c,status)
-  return bit32.band(c.status,status)>0
+  if c.GetCode then
+    return c:IsStatus(status)
+  else
+    return bit32.band(c.status,status)>0
+  end
 end
 function FilterSummon(c,type)
   return bit32.band(c.summon_type,type)>0
 end
 function FilterAffected(c,effect)
-  return c:is_affected_by(effect)>0
+  if c.GetCode then
+    return c:IsHasEffect(effect)
+  else
+    return c:is_affected_by(effect)>0
+  end
 end
 function FilterPublic(c)
   return FilterStatus(c,STATUS_IS_PUBLIC) or FilterPosition(c,POS_FACEUP)
@@ -850,12 +897,16 @@ function FindCard(cardid,cards,index)
   return nil
 end
 
-function FindID(id,cards,index)
+function FindID(id,cards,index,filter,opt)
   if cards == nil then cards = All() end
   for i=1,#cards do
-    if cards[i].id == id then
+    if cards[i].id == id 
+    and (filter == nil
+    or opt == nil and filter(cards[i])
+    or filter(cards[i],opt))
+    then
       if index then
-        return i
+        return {i}
       else
         return cards[i]
       end
@@ -885,7 +936,9 @@ function AttackBoostCheck(bonus,player,filter,cond)
     and source:GetDefence() >= target:GetAttack() 
     and source:GetDefence() <= target:GetAttack()+bonus)
     and not source:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE)
-    and (opt == nil and filter(target) or opt and filter(target,opt))
+    and (filter == nil 
+    or opt == nil and filter(target)
+    or opt and filter(target,opt))
     then
       return true
     end
@@ -948,15 +1001,26 @@ function TargetProtection(c,type)
 end
 function Targetable(c,type)
   local id
+  local p
+  local targetable
   if c.GetCode then
     id = c:GetCode()
-    return not c:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET) 
-    and not TargetProtection(c,type)
+    p = c:GetControler()
+    targetable = not(c:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET)) 
   else
     id = c.id
-    return c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
-    and not TargetProtection(c,type)
+    p = CurrentOwner(c)
+    if p==1 then
+      p = player_ai
+    else
+      p = 1-player_ai
+    end
+    targetable = c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
   end
+  if id == 08561192 then
+    return Duel.GetCurrentPhase()==PHASE_MAIN2 and Duel.GetTurnPlayer()==p
+  end
+  return targetable and not TargetProtection(c,type)
 end
 function AffectedProtection(id,type,level)
   return false
@@ -983,38 +1047,46 @@ function Affected(c,type,level)
 end
 PriorityTargetList=
 {
-  82732705,30241314,81674782  -- Skill Drain, Macro Cosmos, Dimensional Fissure
+  82732705,30241314,81674782,47084486,  -- Skill Drain, Macro Cosmos, Dimensional Fissure, Vanity's Fiend
+  72634965,59509952,58481572, -- Vanity's Ruler, Archlord Kristya, Dark Law
 }
 PriorityGraveTargetList=
 {
   34230233 -- Grapha
 }
 function PriorityTarget(c,destroycheck,loc,filter,opt) -- preferred target for removal
+  local result = false
   if loc == nil then loc = LOCATION_ONFIELD end
   if loc == LOCATION_ONFIELD then
-    if FilterType(c,TYPE_MONSTER) and bit32.band(c.type,TYPE_FUSION+TYPE_RITUAL+TYPE_XYZ+TYPE_SYNCHRO)>0 
-    or c.level>4 and c.attack>2000
+    if FilterType(c,TYPE_MONSTER) and (bit32.band(c.type,TYPE_FUSION+TYPE_RITUAL+TYPE_XYZ+TYPE_SYNCHRO)>0 
+    or c.level>4 and c.attack>2000)
+    and (not FiendishCheck(c) or AIGetStrongestAttack()<=c.attack)
+    and (not destroycheck or DestroyCheck(c))
     then
-      return FilterPublic(c) and (filter == nil or (opt==nil and filter(c) or filter(c,opt)))
+      result = true
     end
     for i=1,#PriorityTargetList do
       if PriorityTargetList[i]==c.id then
-        if not destroycheck or DestroyCheck(c) then
-          return FilterPublic(c) and (filter == nil or (opt==nil and filter(c) or filter(c,opt)))
-        end
+        result = true
       end
     end
+    result = (result or not AttackBlacklistCheck(c))
   elseif loc == LOCATION_GRAVE then
     for i=1,#PriorityGraveTargetList do
       if PriorityGraveTargetList[i]==c.id then
-        return filter == nil or (opt==nil and filter(c) or filter(c,opt))
+        result = true
       end
     end
+  end
+  if result and (not destroycheck or DestroyCheck(c)) 
+  and FilterPublic(c) and (filter == nil or (opt==nil and filter(c) or filter(c,opt)))
+  then
+    return true
   end
   return false
 end
 function HasPriorityTarget(cards,destroycheck,loc,filter,opt)
-  if HasID(cards,05851097,true,nil,nil,nil,FilterPublic) then -- Vanity's Emptiness
+  if HasID(cards,05851097,true,nil,POS_FACEUP,nil,FilterPublic) then -- Vanity's Emptiness
     return true
   end
   local count = 0
@@ -1116,7 +1188,12 @@ AttBL={
 -- (or under special circumstances) TODO: Define conditions
 -- true = free to attack
 function AttackBlacklistCheck(c,source)
-  local id=c.id
+  local id
+  if c.GetCode then
+    id=c:GetCode()
+  else
+    id=c.id
+  end
   if Negated(c) then
     return true
   end
@@ -1137,13 +1214,13 @@ function BattleTargetCheck(c,source)
 end
 
 function BattleDamageCheck(c,source)
-  return source:is_affected_by(EFFECT_NO_BATTLE_DAMAGE)==0
-  and c:is_affected_by(EFFECT_AVOID_BATTLE_DAMAGE)==0
-  and c:is_affected_by(EFFECT_REFLECT_BATTLE_DAMAGE)==0
+  return not FilterAffected(source,EFFECT_NO_BATTLE_DAMAGE)
+  and not FilterAffected(c,EFFECT_AVOID_BATTLE_DAMAGE)
+  and not FilterAffected(c,EFFECT_REFLECT_BATTLE_DAMAGE)
   and AttackBlacklistCheck(c,source)
 end
 
-function BattleDamage(c,source,atk,oppatk,oppdef)
+function BattleDamage(c,source,atk,oppatk,oppdef,pierce)
   if atk == nil then
     atk = source.attack
   end
@@ -1154,13 +1231,16 @@ function BattleDamage(c,source,atk,oppatk,oppdef)
     oppdef = c.defense
   end
   if c == nil then
-    return source.attack
+    return atk
+  end
+  if pierce == nil then
+    pierce = FilterAffected(source,EFFECT_PIERCE) and NotNegated(source)
   end
   if BattleDamageCheck(c,source) then
     if FilterPosition(c,POS_FACEUP_ATTACK) then
       return atk-oppatk
     end
-    if FilterPosition(c,POS_DEFENCE) and FilterAffected(source,EFFECT_PIERCE) then
+    if FilterPosition(c,POS_DEFENCE) and pierce then
       if FilterPublic(c) then
         return atk-oppdef
       end
@@ -1294,19 +1374,37 @@ end
 
 -- function to determine, if a card can attack for game 
 -- on an opponent's monster, or directly
-function CanFinishGame(c,target)
+function CanFinishGame(c,target,atk)
+  if c == nil then
+    return false
+  end
+  if atk == nil then 
+    if c.GetCode then
+      atk = c:GetAttack()
+    else
+      atk = c.attack
+    end
+  end  
   if target == nil or FilterAffected(c,EFFECT_DIRECT_ATTACK) then
-    return AI.GetPlayerLP(2)<=c.attack
+    return AI.GetPlayerLP(2)<=atk
+  end
+  local oppatk, oppdef
+  if c.GetCode then
+    oppatk = target:GetAttack()
+    oppdef = target:GetDefence()
+  else
+    oppatk = target.attack
+    opdef = target.defense
   end
   if AttackBlacklistCheck(target,c) and BattleDamageCheck(target,c) then
     if FilterPosition(target,POS_FACEUP_ATTACK) then
-      return AI.GetPlayerLP(2)<=c.attack-target.attack
+      return AI.GetPlayerLP(2)<=atk-oppatk
     end
     if FilterPosition(target,POS_DEFENCE) and FilterAffected(c,EFFECT_PIERCE) then
       if FilterPublic(target) then
-        return AI.GetPlayerLP(2)<=c.attack-target.defense
+        return AI.GetPlayerLP(2)<=atk-oppatk
       else
-        return AI.GetPlayerLP(2)<=c.attack-1500
+        return AI.GetPlayerLP(2)<=atk-1500
       end
     end
   end
@@ -1382,4 +1480,24 @@ function CopyTable(cards)
   return cards2
 end
 
-
+function GetBattlingMons()
+  local oppmon = Duel.GetAttacker()
+  local aimon = Duel.GetAttackTarget()
+  if oppmon and aimon 
+  and oppmon:IsLocation(LOCATION_MZONE) 
+  and aimon:IsLocation(LOCATION_MZONE)
+  then
+    if Duel.GetTurnPlayer()==player_ai then
+      aimon = Duel.GetAttacker()
+      oppmon = Duel.GetAttackTarget()
+    end
+    return aimon,oppmon
+  end
+  return nil,nil
+end
+function TurnEndCheck()
+  return Duel.GetCurrentPhase()==PHASE_MAIN2 or not GlobalBPAllowed
+end
+function BattlePhaseCheck()
+  return Duel.GetCurrentPhase()==PHASE_MAIN1 and GlobalBPAllowed
+end

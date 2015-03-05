@@ -501,8 +501,9 @@ function GearframeTarget(cards)
   if result == nil then result = {math.random(#cards)} end
   return result
 end
-function FiendishChainTarget(cards)
+function FiendishChainTarget(cards,source)
   result = GlobalTargetGet(cards,true)
+  FiendishSet(cards[result[1]],source)
   if result == nil then result = {math.random(#cards)} end
   return result
 end
@@ -538,7 +539,7 @@ function GadgetOnSelectCard(cards, minTargets, maxTargets,ID,triggeringCard)
     return CotHTargetGadget(cards)
   end
   if ID == 50078509 then
-    return FiendishChainTarget(cards)
+    return FiendishChainTarget(cards,triggeringCard)
   end
   if ID == 83994433 then
     return StardustSparkTarget(cards)

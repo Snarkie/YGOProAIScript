@@ -209,13 +209,7 @@ end
 function SummonOuroboros()
   return (MP2Check() or SeraphCheck())  and (UseOuroboros1() or UseOuroboros2())
 end
-function NodenFilter(c)
-  return c.level==4 and c.id~=17412721
-end
-function UseInstantFusion2()
-  return CardsMatchingFilter(AIGrave(),NodenFilter)>0 and (FieldCheck(4)==1 
-  and OverExtendCheck() or #AIMon()==0) and not DeckCheck(DECK_SHADOLL)
-end
+
 function UseCotH2()
   return OverExtendCheck() and (SatellarknightPriorityCheck(AIGrave(),PRIO_TOFIELD,1)>4 
   or FieldCheck(4)<2 and SatellarknightPriorityCheck(AIGrave(),PRIO_TOFIELD,1)>0)
@@ -362,9 +356,6 @@ if DeckCheck(DECK_TELLARKNIGHT) then
   if #Summonable>0 and (Summonable[1].prio > 4 or Summonable[1].prio > 0 and (HasBackrow(SetableST) or FieldCheck(4)==1))then
     return {COMMAND_SUMMON,Summonable[1].index}
   end
-  if HasID(Activatable,01845204) and UseInstantFusion2() then
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
   if HasID(Activatable,54447022) and UseSoulCharge() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -422,9 +413,6 @@ function SatellarknightOnSelectCard(cards, minTargets, maxTargets,triggeringID,t
   end
   if ID == 32807846 then
     return Add(cards)
-  end
-  if ID == 01845204 then
-    return SatellarknightAdd(cards,PRIO_TOFIELD)
   end
   if ID == 56638325 then
     return DelterosTarget(cards,triggeringCard)

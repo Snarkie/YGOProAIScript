@@ -144,6 +144,7 @@ GadgetOnSelectChain,BujinOnSelectChain,MermailOnSelectChain,
 ShadollOnSelectChain,SatellarknightOnSelectChain,
 ChaosDragonOnSelectChain,HATChain,QliphortChain,
 NobleChain,NekrozChain,BAChain,DarkWorldChain,
+ConstellarChain,
 }
   
 for i=1,#SelectChainFunctions do
@@ -277,18 +278,6 @@ result = 0
       if cards[i].id == 93816465 then
         return 1,i
       end
-    end
-  end
-
-  -------------------------------------------
-  -- Activate Number 39: Utopia's effect only
-  -- if it's the opponent's turn for now.
-  -------------------------------------------
-  for i=1,#cards do
-    if cards[i].id == 84013237 and
-       GlobalIsAIsTurn == 0 then
-      GlobalActivatedCardID = cards[i].id
-      return 1,i
     end
   end
 

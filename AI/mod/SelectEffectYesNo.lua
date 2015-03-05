@@ -16,7 +16,7 @@ function OnSelectEffectYesNo(id,triggeringCard)
   HeraldicOnSelectEffectYesNo,SatellarknightOnSelectEffectYesNo,
   ChaosDragonOnSelectEffectYesNo,HATEffectYesNo,QliphortEffectYesNo,
   NobleEffectYesNo,NekrozEffectYesNo,BAEffectYesNo,DarkWorldEffectYesNo,
-  BujinOnSelectEffectYesNo,GenericEffectYesNo,
+  BujinOnSelectEffectYesNo,GenericEffectYesNo,ConstellarEffectYesNo,
   }
   local result = nil
   for i=1,#YesNoFunctions do
@@ -38,12 +38,6 @@ function OnSelectEffectYesNo(id,triggeringCard)
   then 
     result = 1
   end
-  if id  == 84013237 then -- Number 39: Utopia
-    if GlobalIsAIsTurn == 0 and AI.GetCurrentPhase() == PHASE_BATTLE and Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") < Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") then 
-      GlobalActivatedEffectID = id
-      result = 1
-      end
-   end
   
   if id  == 40619825 then -- Axe of Despair
     if Get_Card_Count(AIMon()) >= 2 then 

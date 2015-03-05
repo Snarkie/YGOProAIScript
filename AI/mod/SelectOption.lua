@@ -11,7 +11,7 @@ function OnSelectOption(options)
   local result = 0
   local optionfunctions={
   HeraldicOnSelectOption,QliphortOption,
-  NekrozOption,DarkWorldOption
+  NekrozOption,DarkWorldOption,ConstellarOption
   }
   for i=1,#optionfunctions do
     local func = optionfunctions[i]
@@ -54,14 +54,5 @@ function OnSelectOption(options)
        end
       end
     end  
-	
-	if GlobalActivatedCardID == 70908596 then -- Constellar Kaust
-	for i=1,#options do
-      if options[i] == 1134537537 then
-      result = i
-      GlobalActivatedCardID = nil
-	    return result
-	    end
-      end
-    end  	
+	 	
   end

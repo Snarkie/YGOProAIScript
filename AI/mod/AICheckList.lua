@@ -305,7 +305,8 @@ NSBL={
 20758643,00734741,36553319,09342162, -- BA Graff, Rubic, Farfa, Cagna
 62957424,52738610,30312361,41386308, -- BA Libic, Necroz Dance Princess, Phantom of Chaos, Mathematician
 34230233,60228941,33731070,79126789, -- DW Grapha, Snoww, Beiige, Broww
-94283662,20292186, -- Trance Archfiend, Artifact Scythe
+94283662,20292186,70908596,78364470, -- Trance Archfiend, Artifact Scythe, Constellar Kaus, Pollux
+41269771,78358521, -- Constellar Algiedi, Sombre
 }
 function NormalSummonBlacklist(CardId) 
   for i=1,#NSBL do
@@ -398,7 +399,8 @@ SSBL={
 16259549,51617185,16195942, -- Fortune Tune, Machina Megaform, Dark Rebellion Dragon
 26563200,82044279,73445448, -- Muzurythm, Clear Wing Synchro Dragon, Zombiestein
 01639384,10406322,66547759, -- Felgrand, Sylvan Alsei, Lancelot
-88120966,78156759, -- Giant Grinder, Zenmaines
+88120966,78156759,31386180, -- Giant Grinder, Zenmaines, Tiras
+84013237,00005509,31437713, -- Utopia, Utopia Lightning, Heartlanddraco
 }
 
 
@@ -598,6 +600,7 @@ Unchainable={
 25789292,36006208,71587526,63356631, -- Forbidden Chalice, Fire Lake, Karma Cut, PWWB
 25857246,74122412,99185129,56574543, -- Nekroz Valkyrus, Nekroz Gungnir, Nekroz Clausolas, Bujingi Sinyou
 59251766,37742748,41930553,20292186, -- Bujingi Hare, Honest, Dark Smog, Artifact Scythe
+38296564, -- Safe Zone
 }
 function isUnchainableTogether(CardId)
   for i=1,#Unchainable do
@@ -738,7 +741,7 @@ ScriptedCards ={
 30328508,77723643,37445295,04939890,  -- Shadoll Lizard, Shadoll Dragon, Shadoll Falcon, Shadoll Hedgehog
 44394295,29223325,03717252,24062258,  -- Shadoll Fusion, Artifact Ignition, Shadoll Beast, Secret Sect Druid Dru
 04904633,12444060,01845204,77505534,  -- Facing the Shadows, Artifact Sanctum, Instant Fusion, Facing the Shadows
-29669359,82633039,20366274,94977269,  -- Volcasaurus, Skyblaster Castel, El-Shadoll Nephilim, El-Shadoll Midrash
+29669359,82633039,20366274,94977269,  -- Volcasaurus, Skyblaster Castel, El-Shadoll Construct, El-Shadoll Winda
 04779823,31924889,00581014,33698022,  -- Michael, Arcanite Magician, Emeral, Moonlight Rose
 54447022,74845897,34507039,14087893,  -- Soul Charge, Rekindling, Wiretap, Book of Moon
 19665973,18964575,37576645,21954587,  -- Battle Fader, Swift Scarecrow, Reckless Greed, Mermail AbyssMegalo
@@ -780,7 +783,9 @@ ScriptedCards ={
 54974237,41930553,73445448,01639384,  -- EEV, Dark Smog, Zombiestein, Felgrand
 10406322,66547759,88120966,78156759,  -- Sylvan Alsei, Lancelot, Giant Grinder, Zenmaines
 74294676,42752141,71068247,50323155,  -- Laggia, Dolkka, Totem Bird, Black Horn
-02956282,82044279,99188141,  -- Naturia Barkion, Clear Wing Synchro Dragon, THRIO
+02956282,82044279,99188141,41269771,  -- Naturia Barkion, Clear Wing Synchro Dragon, THRIO, Constellar Algiedi
+78358521,35544402,31386180,00005509,  -- Constellar Sombre, Twinkle, Tiras, Utopia Lightning
+31437713,57103969, -- Heartlanddraco, Tenki
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do

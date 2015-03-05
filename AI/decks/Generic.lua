@@ -53,6 +53,12 @@ function SummonExtraDeck(cards,prio)
   if HasIDNotNegated(SpSum,29669359) and SummonVolcasaurusFinish() then  
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
+  if HasIDNotNegated(SpSum,29669359) and SummonVolcaGaiaFinish(1) then  
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasIDNotNegated(SpSum,91949988) and SummonVolcaGaiaFinish(2) then  
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
   if HasIDNotNegated(SpSum,88120966) and SummonGiantGrinderFinish(SpSum[CurrentIndex]) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
@@ -72,6 +78,15 @@ function SummonExtraDeck(cards,prio)
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasIDNotNegated(SpSum,66547759) and SummonLancelotFinish() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasIDNotNegated(SpSum,31437713) and SummonHeartlanddracoFinish() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasIDNotNegated(SpSum,00005509) and SummonUtopiaLightningFinish(SpSum[CurrentIndex],2) then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasIDNotNegated(SpSum,84013237) and SummonUtopiaLightningFinish(SpSum[CurrentIndex],1) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
 ---- 
@@ -97,7 +112,6 @@ function SummonExtraDeck(cards,prio)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Act,38495396) and UsePtolemy() then
-    GlobalCardMode = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Act,15561463) and UseGauntletLauncher() then
@@ -124,6 +138,9 @@ function SummonExtraDeck(cards,prio)
     GlobalActivatedCardID = 10406322
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+  if HasIDNotNegated(Act,73964868,nil,nil,nil,nil,ChainPleiades)  then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   if HasIDNotNegated(Act,61344030) then -- Paladynamo
     GlobalCardMode = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
@@ -134,8 +151,16 @@ function SummonExtraDeck(cards,prio)
   if HasID(Act,31320433) and UseNightmareShark() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+  if HasID(Act,31437713) and UseHeartlanddraco() then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   return nil
  end
+ 
+ -- summon Gaia Dragon after removal effects
+   if HasIDNotNegated(SpSum,91949988) and SummonGaiaDragonFinish(SpSum[CurrentIndex]) then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
   
 ---- 
 -- Generic extra deck monster summons
@@ -199,8 +224,10 @@ function SummonExtraDeck(cards,prio)
   if HasID(SpSum,38495396) and SummonPtolemy(SpSum[CurrentIndex]) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-
   if HasIDNotNegated(SpSum,15561463) and SummonGauntletLauncher() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(SpSum,91949988) and SummonGaiaDragon(SpSum[CurrentIndex]) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
 
@@ -223,6 +250,9 @@ function SummonExtraDeck(cards,prio)
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasIDNotNegated(SpSum,82633039) and SummonSkyblaster() then           -- Skyblaster
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(SpSum,26329679) and SummonOmega(SpSum[CurrentIndex]) then 
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSum,16195942) and SummonRebellion(SpSum[CurrentIndex]) then 
@@ -307,6 +337,15 @@ function SummonExtraDeck(cards,prio)
   if HasID(Act,54447022) and UseSoulCharge() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+  if HasIDNotNegated(Act,01845204) and UseInstantFusion(2) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Act,01845204) and UseInstantFusion(1) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Act,01845204) and UseInstantFusion(3) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   return nil
 end
 function SummonZombiestein(c)
@@ -344,6 +383,7 @@ end
 function SummonLavalvalChain()
   if DeckCheck(DECK_HAT) or DeckCheck(DECK_HERALDIC) 
   or DeckCheck(DECK_QLIPHORT) or DeckCheck(DECK_DARKWORLD)
+  or DeckCheck(DECK_CONSTELLAR)
   then
     return false
   else
@@ -351,7 +391,8 @@ function SummonLavalvalChain()
   end
 end
 function UseLavalvalChain()
-  return not DeckCheck(DECK_NEKROZ)and not DeckCheck(DECK_DARKWORLD)
+  return not (DeckCheck(DECK_NEKROZ) or DeckCheck(DECK_DARKWORLD)
+  or DeckCheck(DECK_CONSTELLAR))
 end
 function SummonChidori()
   local cards = UseLists({OppMon(),OppST()})
@@ -490,6 +531,74 @@ end
 function UseVolcasaurus()
   return DestroyCheck(OppMon())>0
 end
+function VolcasaurusFilter(c,lp)
+  return FilterType(c,TYPE_MONSTER)
+  --and not FilterType(c,TYPE_PENDULUM+TYPE_TOKEN)
+  and Targetable(c,TYPE_MONSTER)
+  and Affected(c,TYPE_MONSTER,5)
+  and DestroyFilter(c)
+  and DestroyCountCheck(c)
+  and bit32.band(c.position,POS_FACEUP)>0
+  and (lp==nil or c.text_attack and c.text_attack>=AI.GetPlayerLP(2))
+end
+function SummonVolcasaurus(c)
+  return NotNegated(c) and (WindaCheck() or FieldCheck(5)>2) and HasID(AIExtra(),29669359,true)
+  and CardsMatchingFilter(OppMon(),VolcasaurusFilter)>0 and MP2Check()
+  or Negated(c) and OppHasStrongestMonster() and OppGetStrongestAttack()<c.attack
+end
+function SummonVolcasaurusFinish()
+  return HasID(AIExtra(),29669359,true) and CardsMatchingFilter(OppMon(),VolcasaurusFilter,true)>0
+end
+function SummonVolcaGaiaFinish(mode)
+  local cards = OppMon()
+  if not BattlePhaseCheck() then return false end
+  if mode == 1 and HasID(AIExtra(),29669359,true) and HasID(AIExtra(),91949988,true) 
+  then
+    local result = 0
+    local index = 0
+    for i=1,#cards do
+      local c = cards[i]
+      if VolcasaurusFilter(c) and c.text_attack>result then
+        result=c.text_attack
+        index = i
+      end
+    end
+    table.remove(cards,index)
+    local result2 = 0
+    if #cards == 0 then
+      result2 = 2600
+    else 
+      for i=1,#cards do
+        local dmg = BattleDamage(cards[i],FindID(91949988,AIExtra()),nil,nil,nil,true)
+        if dmg>result2 then
+          result2 = dmg
+        end
+      end
+    end
+    return result>0 and result + result2 >= AI.GetPlayerLP(2)
+  elseif mode == 2 and HasID(AIMon(),29669359,true) and HasID(AIExtra(),91949988,true) 
+  then
+    local result = 0
+    local result2 = 0
+    for i=1,#cards do
+      if #cards == 0 then
+        result = 2600
+      else 
+        for i=1,#cards do
+          local dmg = BattleDamage(cards[i],FindID(91949988,AIExtra()),nil,nil,nil,true)
+          if dmg>result then
+            result = dmg
+          end
+          dmg = BattleDamage(cards[i],FindID(29669359,AIMon()))
+          if dmg>result2 then
+            result2 = dmg
+          end
+        end
+      end
+    end
+    return result >= AI.GetPlayerLP(2) and result2 < AI.GetPlayerLP(2)
+  end
+end
 function SummonJD()
   return UseFieldNuke(-1) and not HasID(AIMon(),57774843,true) 
   or #OppField()==0 and Duel.GetCurrentPhase()==PHASE_MAIN1 and GlobalBPAllowed
@@ -553,8 +662,124 @@ end
 function SummonDweller()
   return false--MP2Check() and CardsMatchingFilter(AIMon(),DwellerFilter)>0 and OppGetStrongestAttDef()<2200
 end
+function PleiadesFilter(c)
+  return Targetable(c,TYPE_MONSTER)
+  and Affected(c,TYPE_MONSTER,5)
+end
+function PleiadesFilter2(c)
+  return PleiadesFilter(c) and not ToHandBlacklist(c.id) 
+  and PriorityTarget(c)
+end
+function PleiadesRemovalFilter(c)
+  return not ((c:IsType(TYPE_FUSION+TYPE_SYNCHRO+TYPE_RITUAL+TYPE_XYZ) 
+  or c:IsHasEffect(EFFECT_SPSUMMON_CONDITION))
+  or ToHandBlacklist(c:GetCode()))
+  and not c:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET)
+end
+function ChainPleiades(c)
+  local targets = CardsMatchingFilter(OppMon(),PleiadesFilter)
+  local targets2 = CardsMatchingFilter(OppMon(),PleiadesFilter2)
+  if RemovalCheck(73964868) then
+    if (Duel.GetOperationInfo(Duel.GetCurrentChain(),CATEGORY_TOHAND) 
+    or Duel.GetOperationInfo(Duel.GetCurrentChain(),CATEGORY_TODECK))
+    and targets>0 or targets2>0
+    then
+      return true
+    else
+      GlobalCardMode = 2
+      GlobalTargetSet(FindID(73964868,AIMon()),AIMon())
+      return true
+    end
+  end
+  if not UnchainableCheck(73964868) then
+    return false
+  end
+  if targets2 and targets2 > 0 and (AIGetStrongestAttack()<=c.attack 
+  or TurnEndCheck() or Duel.GetTurnPlayer()==1-player_ai)
+  then
+    return true
+  end
+  if targets and targets == 1 and #OppMon()==1 and BattlePhaseCheck()
+  and Duel.GetTurnPlayer()==player_ai
+  and ExpectedDamage(2)>=AI.GetPlayerLP(2) then
+    return true
+  end
+  cg = RemovalCheck()
+  if cg and not Duel.GetOperationInfo(Duel.GetCurrentChain(),CATEGORY_TOHAND) then
+		if cg:IsExists(function(c) return c:IsControler(player_ai) end, 1, nil) then
+      local g=cg:Filter(PleiadesRemovalFilter,nil,player_ai):GetMaxGroup(Card.GetAttack)
+      if g then
+        GlobalCardMode = 2
+        GlobalTargetSet(g:GetFirst(),AIField())
+        return true
+      end
+    end	
+  end
+  cg = NegateCheck()
+  if cg and Duel.GetCurrentChain()>1 then
+		if cg:IsExists(function(c) return c:IsControler(player_ai) end, 1, nil) then
+      local g=cg:Filter(PleiadesRemovalFilter,nil,player_ai):GetMaxGroup(Card.GetAttack)
+      if g then
+        GlobalCardMode = 2
+        GlobalTargetSet(g:GetFirst(),AIField())
+        return true
+      end
+    end	
+  end
+  if Duel.GetCurrentPhase()==PHASE_BATTLE and Duel.GetTurnPlayer()~=player_ai and targets>0 then
+    local source=Duel.GetAttacker()
+    local target=Duel.GetAttackTarget()
+    if source and target 
+    and (WinsBattle(source,target) or source:GetCode()==68535320 or source:GetCode()==95929069)
+    and target:IsControler(player_ai) and Targetable(source,TYPE_MONSTER) and Affected(source,TYPE_MONSTER,5)
+    then
+      GlobalCardMode = 2
+      GlobalTargetSet(source,OppMon())
+      return true
+    end
+  end
+  if (Duel.GetCurrentPhase()==PHASE_END and Duel.GetTurnPlayer()~=player_ai 
+  or (Duel.GetCurrentPhase()==PHASE_MAIN1 or Duel.GetCurrentPhase()==PHASE_MAIN2) 
+  and Duel.GetTurnPlayer()==player_ai) and Duel.GetCurrentChain()==0
+  then
+    if HasID(AIST(),57103969,true,nil,nil,POS_FACEUP) 
+    and CardsMatchingFilter(AIDeck(),FilterRace,RACE_BEASTWARRIOR)>0 
+    and NeedsCard(70908596,AIDeck(),AIHand(),true)
+    and OPTCheck(57103969) and not HasID(AIHand(),57103969,true)
+    then
+      GlobalCardMode = 2
+      GlobalTargetSet(FindID(57103969,AIST(),nil,FilterPosition,POS_FACEUP),AIST())
+      return true
+    end
+    if HasID(AIST(),05851097,true,nil,nil,POS_FACEUP) 
+    and OppHasStrongestMonster()
+    then
+      GlobalCardMode = 2
+      GlobalTargetSet(FindID(05851097,AIST(),nil,FilterPosition,POS_FACEUP),AIST())
+      return true
+    end
+    if HasID(AIST(),50078509,true,nil,nil,POS_FACEUP) 
+    then
+      GlobalCardMode = 2
+      GlobalTargetSet(FindID(50078509,AIST(),nil,FilterPosition,POS_FACEUP),AIST())
+      return true
+    end
+    if HasID(AIST(),57103969,true,nil,nil,POS_FACEUP) 
+    and CardsMatchingFilter(AIDeck(),FilterRace,RACE_BEASTWARRIOR)>0 
+    and OPTCheck(57103969) and not HasID(AIHand(),57103969,true)
+    then
+      GlobalCardMode = 2
+      GlobalTargetSet(FindID(57103969,AIST(),nil,FilterPosition,POS_FACEUP),AIST())
+      return true
+    end
+  end
+  return false
+end
 function SummonPleiades()
-  return HasID(AIExtra(),73964868,true)
+  return HasID(AIExtra(),73964868,true) and (MP2Check()
+  or HasPriorityTarget(OppField()) or #OppMon()==1
+  and CardsMatchingFilter(OppMon(),PleiadesFilter)==1
+  and AI.GetPlayerLP(2)<=2500 and BattlePhaseCheck())
 end
 function SummonGiantHand()
   return MP2Check() and OppGetStrongestAttDef()<2000
@@ -689,6 +914,119 @@ end
 function UseGiantGrinder(c)
   return Duel.GetCurrentPhase()==PHASE_MAIN1
   and CardsMatchingFilter(OppMon(),GiantGrinderFilter,c)>0
+end
+function PtolemyFilter(c)
+  return FilterType(c,TYPE_XYZ) and ConstellarMonsterFilter(c,38495396) 
+  and c.xyz_material_count==0
+end
+function SummonPtolemy(c)
+  return (NotNegated(c) 
+  and (FieldCheck(6)>1 and MP2Check()
+  or CardsMatchingFilter(AIMon(),PtolemyFilter)>0))
+  or OppHasStrongestMonster() and OppGetStrongestAttack()<c.attack
+end
+function UsePtolemy()
+  return true
+end
+function SummonHeartlanddracoFinish()
+  return GlobalBPAllowed 
+  and Duel.GetCurrentPhase() == PHASE_MAIN1 
+  and AI.GetPlayerLP(2)<=2000
+end
+function UseHeartlanddraco()
+  return GlobalBPAllowed and Duel.GetCurrentPhase() == PHASE_MAIN1
+end
+function LightningFinishFilter(c,source)
+  return FilterPosition(c,POS_FACEUP_ATTACK) and AttackBlacklistCheck(c,source) 
+  and BattleDamageCheck(c,source) and AI.GetPlayerLP(2)<=5000-c.attack
+end
+function SummonUtopiaLightningFinish(c,mode)
+  --if true then return true end
+  if GlobalBPAllowed 
+  and Duel.GetCurrentPhase() == PHASE_MAIN1 
+  then
+    if mode == 1 then 
+      c = FindID(00005509,AIExtra()) 
+      if HasID(AIExtra(),00005509,true)
+      and HasID(AIExtra(),84013237,true)
+      and CardsMatchingFilter(OppMon(),LightningFinishFilter,c)>0 
+      then
+        return true
+      end
+    else
+      if HasID(AIExtra(),00005509,true)
+      and HasID(AIMon(),84013237,true)
+      and CardsMatchingFilter(OppMon(),LightningFinishFilter,c)>0 
+      then
+        return true
+      end
+    end
+  end
+  return false
+end
+function GaiaFilter(c)
+  return (FilterRank(c,5) or FilterRank(c,6))
+  and c.attack<2600 and c.xyz_material_count==0
+end
+function SummonGaiaDragon(c)
+  return CardsMatchingFilter(AIMon(),GaiaFilter)>0
+end
+function SummonGaiaDragonFinish(source)
+  local result = false
+  if not (BattlePhaseCheck() and HasID(AIExtra(),91949988,true)) then return false end
+  for i=1,#OppMon() do
+    for j=1,#AIMon() do
+    local target = OppMon()[i]
+    local c = AIMon()[j]
+      if BattleDamage(target,source,nil,nil,nil,true) >= AI.GetPlayerLP(2) then
+        result = true
+      end
+      if BattleDamage(c,source,nil,nil,nil,true) > AI.GetPlayerLP(2) then
+        result = false
+      end
+    end
+  end
+  return result
+end
+function ChainOmega(source)
+  local cards = RemovalCheckList(AIMon(),nil,TYPE_SPELL+TYPE_TRAP,nil,ConstellarMonsterFilter)
+  if cards and #cards>0 then
+    return true
+  end
+  return false
+end
+function SummonOmega(c)
+  return NotNegated(c) and (not OppHasStrongestMonster() or OppGetStrongestAttDef()<c.attack)
+  and CardsMatchingFilter(OppST(),FilterPosition,POS_FACEDOWN)>2
+  or Negated(c) and OppHasStrongestMonster() and OppGetStrongestAttDef()<c.attack
+end
+function InstantFusionFilter(c)
+  return bit32.band(c.attribute,ATTRIBUTE_LIGHT)>0 and c.level==5
+  or c.id==70908596 and NotNegated(c)
+end
+function NodenFilter(c)
+  return c.level==4 and c.id~=17412721
+end
+function UseInstantFusion(mode)
+  if not (WindaCheck() and DualityCheck) then return false end
+  if mode == 1 and CardsMatchingFilter(AIGrave(),NodenFilter)>0 and (FieldCheck(4)==1 
+  and OverExtendCheck() or #AIMon()==0 and #OppMon()>0) and HasIDNotNegated(AIExtra(),17412721,true)
+  then
+    GlobalCardMode = nil
+    return true
+  elseif mode == 2 and CardsMatchingFilter(AIMon(),InstantFusionFilter)==1 
+  and HasID(AIExtra(),73964868,true)
+  then
+    GlobalCardMode = 1
+    return true
+  elseif mode == 3 and HasPriorityTarget(OppField(),true)
+  and HasID(AIExtra(),73964868,true) and TurnEndCheck()
+  and MacroCheck()
+  then
+    GlobalCardMode = 1
+    return true
+  end
+  return false
 end
 ----
 
@@ -846,26 +1184,40 @@ function ChainBTS(card)
   end
   return false
 end
+GlobalFiendish={}
+function FiendishSet(target,source)
+  GlobalFiendish[target.cardid]=source.cardid
+  return
+end
+function FiendishCheck(target)
+  if target == nil then return true end
+  local source = GlobalFiendish[target.cardid]
+  if source == nil then return true end
+  source = FindCard(source,Field())
+  if source == nil then return true end
+  if target and source and FilterLocation(target,LOCATION_ONFIELD) 
+  and FilterLocation(source,LOCATION_ONFIELD)
+  and NotNegated(source) and Negated(target)
+  and FilterAffected(target,EFFECT_CANNOT_ATTACK)
+  then
+    return false
+  end
+  return true
+end
 function ChainFiendish(card)
   local c = ChainCardNegation(card,true,false,FilterType,TYPE_MONSTER)
   if c then
     GlobalTargetSet(c,OppMon())
     return true
   end
-  if Duel.GetCurrentPhase() == PHASE_BATTLE then
+  if Duel.GetCurrentPhase() == PHASE_BATTLE and Duel.GetTurnPlayer()~=player_ai then
 		local source = Duel.GetAttacker()
 		local target = Duel.GetAttackTarget()
-    if source and target then
-      if target:IsControler(player_ai)
-      and (source:GetAttack() >= target:GetAttack()  and source:IsPosition(POS_FACEUP_ATTACK) 
-      or   source:GetAttack() >= target:GetDefence() and source:IsPosition(POS_FACEUP_DEFENCE))
-      and target:IsPosition(POS_FACEUP_ATTACK)
-      and source:IsType(TYPE_EFFECT) and not source:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET) 
-      and not target:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE) and not source:IsHasEffect(EFFECT_IMMUNE_EFFECT) 
-      then
-        GlobalTargetSet(source,OppMon())
-        return true
-      end
+    if source and target and WinsBattle(source,target) 
+    and Targetable(source,TYPE_TRAP) and Affected(source,TYPE_TRAP)
+    then
+      GlobalTargetSet(source,OppMon())
+      return true
     end
   end
 end
@@ -952,6 +1304,14 @@ function ChainZombiestein(card)
     return true
   end
   return false
+end
+function ChainUtopiaLightning(c)
+  local aimon,oppmon=GetBattlingMons() 
+  if AttackBoostCheck(5000-c.attack) 
+  or CanFinishGame(aimon,oppmon,5000)
+  then
+    return true
+  end
 end
 function PriorityChain(cards) -- chain these before anything else
   if HasIDNotNegated(cards,58120309) and ChainNegation(cards[CurrentIndex]) then -- Starlight Road
@@ -1050,7 +1410,13 @@ function PriorityChain(cards) -- chain these before anything else
   if HasIDNotNegated(cards,10406322) and UseAlsei(cards[CurrentIndex]) then
     return {1,CurrentIndex}
   end
-
+  if HasIDNotNegated(cards,00005509) and ChainUtopiaLightning(cards[CurrentIndex]) then
+    return {1,CurrentIndex}
+  end
+  if HasIDNotNegated(cards,26329679) and ChainOmega(cards[CurrentIndex]) then
+    return {1,CurrentIndex}
+  end
+  
   return nil
 end
 
@@ -1098,6 +1464,16 @@ function GiantGrinderTarget(cards,c)
   end
   return BestTargets(cards,1,TARGET_DESTROY,GiantGrinderFilter,c,true,c)
 end
+function InstantFusionTarget(cards)
+  if GlobalCardMode == 1 then
+    GlobalCardMode = nil
+    result = FindID(72959823,cards,true)
+  else
+    result = FindID(17412721,cards,true)
+  end
+  if result==nil then result={math.random(#cards)} end
+  return result
+end
 function GenericCard(cards,min,max,id,c)
   if c then
     id = c.id
@@ -1120,6 +1496,9 @@ function GenericCard(cards,min,max,id,c)
   if id == 88120966 then
     return GiantGrinderTarget(cards,c)
   end
+  if id == 01845204 then
+    return InstantFusionTarget(cards)
+  end
   return nil
 end
 
@@ -1132,6 +1511,9 @@ function GenericEffectYesNo(id,card)
     result = 1
   end
   if id == 10406322 and UseAlsei(card) then
+    result = 1
+  end
+  if id == 00005509 and ChainUtopiaLightning(card) then
     result = 1
   end
   return result

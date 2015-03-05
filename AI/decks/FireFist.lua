@@ -278,7 +278,9 @@ function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(Summonable,43748308) and (UseFFDragon() or CanXYZ(4)) then              
     return {COMMAND_SUMMON,IndexByID(Summonable,43748308)}           --Dragon 
   end
-  if HasID(Summonable,06353603) and (UseBear() or CanXYZ(4)) then 
+  if HasID(Summonable,06353603) and (UseBear() or CanXYZ(4)) 
+  and not DeckCheck(DECK_CONSTELLAR)
+  then 
     return {COMMAND_SUMMON,IndexByID(Summonable,06353603)}           --Bear
   end
   if HasID(Summonable,70355994) and (UseGorilla() or CanXYZ(4)) then 
@@ -308,7 +310,7 @@ function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(Summonable,43748308) then --Dragon              
     return {COMMAND_SUMMON,CurrentIndex}
   end
-  if HasID(Summonable,06353603) then --Bear
+  if HasID(Summonable,06353603) and not DeckCheck(DECK_CONSTELLAR) then --Bear
     return {COMMAND_SUMMON,CurrentIndex}           
   end
   if HasID(Summonable,70355994) then --Gorilla
@@ -364,6 +366,9 @@ end
 function TenkiTarget(cards)
   local result = nil
   local AICards=UseLists({AIHand(),AIMon()})
+  if not (DeckCheck(DECK_BUJIN) or DeckCheck(DECK_FIREFIST)) then
+    return Add(cards)
+  end
   if NeedsCard(43748308,cards,AIcards) then
     result={CurrentIndex} --get Dragon 
   end

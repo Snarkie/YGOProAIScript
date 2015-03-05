@@ -232,7 +232,7 @@ function UseLeviairDW()
 end
 function SummonTourGuideDW(mode)
   return DualityCheck() and not SkillDrainCheck()
-  and MidrashCheck() and Duel.GetLocationCount(player_ai,LOCATION_MZONE)>1
+  and WindaCheck() and Duel.GetLocationCount(player_ai,LOCATION_MZONE)>1
   and (mode == 1 and LeviairDWCheck(true) 
   or mode == 2 and SummonGraphaCheck(true)
   or mode == 3 and CardsMatchingFilter(UseLists({AIDeck(),AIHand()}),TourguideFilter)>1)
@@ -256,10 +256,11 @@ function UseTrance(mode)
 end
 function SummonDW(level)
   return SummonGraphaCheck(true) 
-  and CardsMatchingFilter(AIMon(),DarkWorldMonsterFilter,34230233) ==0
+  and CardsMatchingFilter(AIMon(),DarkWorldMonsterFilter,34230233)==0
   and not (HasID(AIHand(),33731070,true) and DiscardOutlets()>0)
   or level and level>0 and FieldCheck(level) == 1 and OverExtendCheck(3)
-  or level and level == 0 and #AIMon()==0
+  or level and level == 0 and #AIMon()==0 
+  and CardsMatchingFilter(AIHand(),DarkWorldMonsterFilter,34230233)>0
 end
 function UseAllureDW()
   return DeckCheck(DECK_DARKWORLD) 
@@ -527,7 +528,7 @@ function EEVFilter(c)
 end
 function ChainEEV(card)
   local c = nil
-  local targets = RemovalCheckList(AIMon(),nil,nil,EEVFilter)
+  local targets = RemovalCheckList(AIMon(),nil,nil,nil,EEVFilter)
   if targets and #targets == 1 then
     GlobalTargetSet(targets[1],AIMon())
     GlobalCardMode = 1
@@ -621,11 +622,11 @@ function CheckSSFilter(c,source,targeted,filter,opt)
   and (not targeted or Targetable(c,source.type))
   and Affected(c,source.type,source.level)
   and NotNegated(source)
-  and CheckSSList(c)
+  --and CheckSSList(c)
   and (filter == nil or opt == nil 
   and filter(c) or filter(c,opt))
 end
-function CheckSS(source,cards,targeted,filter,opt)
+function CheckSS(source,cards,targeted,loc,filter,opt)
 -- for disrupting cards that Special Summon themselves by their own effects
   for i=1,Duel.GetCurrentChain() do
     if CheckNegated(i) then
@@ -636,7 +637,10 @@ function CheckSS(source,cards,targeted,filter,opt)
         end
         local p=e:GetOwnerPlayer()
         local c = e:GetHandler()
-        if p and p == 1-player_ai then
+        if p and p == 1-player_ai 
+        and Duel.GetOperationInfo(i, CATEGORY_SPECIAL_SUMMON) 
+        and (not loc or e:GetActivateLocation()==loc)
+        then
           if c and CheckSSFilter(c,source,targeted,filter,opt) then
             c=GetCardFromScript(c,cards)
             if ListHasCard(cards,c) then
@@ -673,7 +677,7 @@ function ChainDarkSmog(card)
     GlobalTargetSet(c)
     return true
   end
-  local c=CheckSS(card,OppGrave(),true,FilterType,TYPE_MONSTER)
+  local c=CheckSS(card,OppGrave(),true,LOCATION_GRAVE,FilterType,TYPE_MONSTER)
   if c and PriorityCheck(AIHand(),PRIO_DISCARD,1,FilterRace,RACE_FIEND)>4 then
     GlobalCardMode=1
     GlobalTargetSet(c)
@@ -681,6 +685,7 @@ function ChainDarkSmog(card)
   end
   if HasPriorityTarget(OppField(),true) 
   and HasID(AIHand(),34230233,true)
+  and Duel.GetTurnPlayer() == 1-player_ai
   then
     return true
   end

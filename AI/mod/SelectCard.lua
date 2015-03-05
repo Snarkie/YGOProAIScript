@@ -96,7 +96,7 @@ end
   BujinOnSelectCard,MermailOnSelectCard,ShadollOnSelectCard,
   SatellarknightOnSelectCard,ChaosDragonOnSelectCard,HATCard,
   QliphortCard,NobleCard,NekrozCard,BACard,DarkWorldCard,
-  GenericCard,
+  GenericCard,ConstellarCard,
   }
   local result = nil
   for i=1,#SelectCardFunctions do
@@ -120,7 +120,7 @@ end
   and Duel.GetCurrentChain()==0
   and not triggeringCard
   then 
-    local c = FindCard(GlobalCurrentAttacker)
+    local c = FindCard(GlobalCurrentAttacker,Field())
     result = AttackTargetSelection(cards,c,GlobalCurrentATK)
     GlobalAIIsAttacking = nil
     return result
@@ -294,56 +294,6 @@ end
        return getRandomSTIndex(cards, 2)
       end
    end
-
-  
-  
-  --------------------------------------------     
-  -- Check, if there are boss monsters in the
-  -- grave to return to the hand, otherwise 
-  -- bounce the strongest enemy
-  -- (currently just checks the banish blacklist
-  -- which includes the bosses)
-  --------------------------------------------   
-  if triggeringID == 38495396 then    -- Constellar Ptolemy M7
-    if GlobalCardMode == 1 then
-        GlobalCardMode = nil
-    else
-      if Card_Count_From_List(BanishBlacklist,AIGrave(),"==") > 0 then
-        for i = 1,#cards do
-          if cards[i] and BanishBlacklist(cards[i].id) > 0 and 
-           cards[i].owner == 1 and cards[i].location == LOCATION_GRAVE then 
-              result[1] = i
-              GlobalActivatedCardID = nil
-              return result
-          end
-        end
-      else
-        GlobalActivatedCardID = nil
-        return Index_By_Loc(cards,2,"Highest",TYPE_MONSTER,nil,"==",LOCATION_MZONE)
-      end
-    end
-    return {math.random(#cards)}
-  end
-  
-  --------------------------------------------     
-  -- Constellar Ptolemy M7.
-  --------------------------------------------   
-  if GlobalSSCardID == 38495396 then -- Constellar Ptolemy M7
-   if PtolemySSMode == 2 then  
-	PtolemySSMode = nil
-	for i=1,#cards do
-      if cards[i] ~= false then 
-        if bit32.band(cards[i].type,TYPE_XYZ)> 0 and cards[i].setcode == 83 and cards[i].xyz_material_count == 0 then 
-		 result[1] = i
-          GlobalSSCardID = nil
-          return Index
-          end
-		end
-	  end
-    end
-  end
-
-  
   
   --------------------------------------------     
   -- Select AI's weakest monster by attack points in hand.
@@ -415,109 +365,7 @@ end
     end
   end
    
-  --------------------------------------------     
-  -- Select Players random Spell or Trap card
-  --------------------------------------------   
-  if GlobalActivatedCardID == 70908596 then -- Constellar Kaust
-   local HighestLVL = 0
-	for i=1,#cards do
-      if cards[i] ~= false then 
-	   if GlobalKaustActivated == nil or Get_Card_Count_ID(AIMon(), 70908596, nil) > 1 or
-	      Card_Count_Specified(AIMon(),nil, nil, nil, "==", 6, nil, 83, nil, nil) > 0 then
-		if bit32.band(cards[i].type,TYPE_MONSTER) > 0 and cards[i].level < 6 and cards[i].setcode == 83 and
-		cards[i].level >= HighestLVL and cards[i].position ==(POS_FACEUP_ATTACK or POS_FACEUP_DEFENCE) and cards[i].owner == 1 then
-		 GlobalKaustActivated = 1
-		 HighestLVL = cards[i].level
-		 result = i
-		  end
-        end
-      end	
-    end
-   for i=1,#cards do
-     if cards[i] ~= false then 
-	  if Card_Count_Specified(AIMon(), nil, nil, nil, "==", 4, nil, 83, nil, nil) > 0 then
-	   if bit32.band(cards[i].type,TYPE_MONSTER) > 0 and cards[i].level < 5 and cards[i].setcode == 83 and
-		  cards[i].level >= HighestLVL and cards[i].position ==(POS_FACEUP_ATTACK or POS_FACEUP_DEFENCE) and cards[i].owner == 1 then
-		 GlobalKaustActivated = 1
-		 HighestLVL = cards[i].level
-		 result = i
-          end
-        end
-      end	
-    end
-   return {result}
- end	
-  
-  --------------------------------------------     
-  -- Select Players random Spell or Trap card
-  --------------------------------------------   
-  if GlobalActivatedCardID == 44635489 then -- Constellar Siat
-   for i=1,#cards do
-      if cards[i] ~= false then 
-		if Card_Count_Specified(AIMon(), nil, nil, nil, "==", 6, nil, 83, nil, nil) > 0 then
-		  if cards[i].level == 6 then
-		  result[1] = i
-		   GlobalActivatedCardID = nil
-		  return result
-        end
-      end
-    end	
-  end
-  for i=1,#cards do
-      if cards[i] ~= false then 
-		if Card_Count_Specified(AIMon(), nil, nil, nil, "==", 5, nil, 83, nil, nil) > 0 then
-		  if cards[i].level == 5 then
-		  result[1] = i
-		  GlobalActivatedCardID = nil
-		  return result
-          end
-        end
-      end	
-    end
-  for i=1,#cards do
-      if cards[i] ~= false then 
-		if Card_Count_Specified(AIMon(), nil, nil, nil, "==", 4, nil, 83, nil, nil) > 0 then
-		  if cards[i].level == 4 then
-		  result[1] = i
-		  GlobalActivatedCardID = nil
-		  return result
-          end
-        end
-      end	
-    end
-  end 
-  
-   
-  --------------------------------------------     
-  -- Select one of the following cards
-  --------------------------------------------   
-  if GlobalActivatedCardID == 78486968 then -- Constellar Sheratan
-	for i=1,#cards do
-      if cards[i] ~= false then 
-        if cards[i].id == 70908596 or cards[i].id == 78364470 or 
-		   cards[i].id == 41269771 then 
-		  GlobalActivatedCardID = nil 
-		  result[1] = i
-		  return result
-        end
-      end
-    end	
-  end
-  
-  --------------------------------------------     
-  -- Select one of the following cards
-  --------------------------------------------   
-  if GlobalActivatedCardID == 41269771 then -- Constellar Algiedi
-	GlobalActivatedCardID = nil
-	for i=1,#cards do
-      if cards[i] ~= false then 
-        if cards[i].id == 70908596 or cards[i].id == 78364470 or cards[i].id ~= 41269771 then 
-		  result[1] = i
-		  return result
-        end
-      end
-    end	
-  end
+
   
   --------------------------------------------     
   -- Select monster not of a BanishBlacklist
@@ -855,16 +703,6 @@ end
      GlobalActivatedCardID = nil
      return Get_Card_Index(cards, 2, "Highest", TYPE_MONSTER, POS_FACEUP)
     end
-
-  --------------------------------------------
-  -- Make sure Ai uses power up cards only on his own monsters,
-  -- select Ai's normal type monster with strongest attack (for now)
-  --------------------------------------------   
-  if GlobalActivatedCardID == 50078509 then -- Fiendish Chain   
-     GlobalActivatedCardID = nil
-     return Get_Card_Index(cards, 1, "Highest", TYPE_MONSTER + TYPE_EFFECT, POS_FACEUP)
-    end
-	
   
   --------------------------------------------
   -- Make sure Ai uses equip cards with negative effects
@@ -1232,6 +1070,17 @@ end
   GlobalAIIsAttacking = false
   GlobalSSCardID = nil
   GlobalSSCardSetcode = nil
+  
+  
+  if triggeringID == 0 and not triggeringCard
+  and Duel.GetTurnPlayer()==player_ai
+  and Duel.GetCurrentPhase()==PHASE_END 
+  and minTargets==maxTargets and minTargets == #AIHand()-6
+  and LocCheck(cards,LOCATION_HAND,true)
+  then
+    --probably end phase discard
+    return Add(cards,PRIO_TOGRAVE,minTargets)
+  end
   
   -- Example implementation: always choose the mimimum amount of targets and select the index of the first available targets
   for i=1,minTargets do

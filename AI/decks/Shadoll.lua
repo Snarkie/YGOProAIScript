@@ -43,20 +43,20 @@ function BeastCond(loc)
   end
   return true
 end
-function NephilimFilter(c)
+function ConstructFilter(c)
   return bit32.band(c.summon_type,SUMMON_TYPE_SPECIAL)>0
   and c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0 
   and Affected(c,TYPE_MONSTER,8)
 end
-function NephilimCond(loc)
+function ConstructCond(loc)
   if loc == PRIO_TOFIELD then
     return OppGetStrongestAttack() < 2800 or HasID(AIMon(),94977269,true)
-    or CardsMatchingFilter(OppMon(),NephilimFilter)>0
+    or CardsMatchingFilter(OppMon(),ConstructFilter)>0
     and not HasID(AIMon(),20366274,true)
   end
   return true
 end
-function MidrashCond(loc)
+function WindaCond(loc)
   if loc == PRIO_TOFIELD then
     return OppGetStrongestAttack() < 2200 or HasID(AIMon(),20366274,true)
     and ShadollPriorityCheck(UseLists({AIHand(),AIMon()}),PRIO_TOGRAVE,2,ShadollFilter)>2
@@ -139,8 +139,8 @@ function ShadollAdd(cards,loc,count,filter)
   end
   return result
 end
-function MidrashCheck()
-  -- returns true, if there is no Midrash on the field
+function WindaCheck()
+  -- returns true, if there is no Winda on the field
   return not HasIDNotNegated(UseLists({AIMon(),OppMon()}),94977269,true)
 end
 function FalconFilter(c)
@@ -194,46 +194,29 @@ function UseShadollFusion()
   or CardsMatchingFilter(OppMon(),ShadollFusionFilter)>0)
 end
 function UseRoots()
-  return HasID(AIHand(),44394295,true) and MidrashCheck()
+  return HasID(AIHand(),44394295,true) and WindaCheck()
   and not Duel.IsExistingMatchingCard(ShadollFusionFilter,1-player_ai,LOCATION_MZONE,0,1,nil)
 end
 function DruFilter(c)
   return bit32.band(c.attribute,ATTRIBUTE_DARK)>0 and c.level==4 and (c.attack==0 or c.defense==0)
 end
 function SummonDru()
-  return CardsMatchingFilter(AIGrave(),DruFilter)>0 and MidrashCheck() 
+  return CardsMatchingFilter(AIGrave(),DruFilter)>0 and WindaCheck() 
   and (SummonSkyblaster() or SummonEmeral())
 end
 function SetArtifacts()
   return (Duel.GetTurnCount()==1 or Duel.GetCurrentPhase()==PHASE_MAIN2)
   and #AIST()<4
 end
-function InstantFusionFilter(c)
-  return bit32.band(c.attribute,ATTRIBUTE_LIGHT)>0 and c.level==5
-end
-function UseInstantFusion()
-  return MidrashCheck() and CardsMatchingFilter(AIMon(),InstantFusionFilter)==1 and HasID(AIExtra(),73964868,true)
-end
-function VolcasaurusFilter(c,lp)
-  return c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
-  and c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0
-  and bit32.band(c.position,POS_FACEUP)>0
-  and (lp==nil or c.text_attack and c.text_attack>=AI.GetPlayerLP(2))
-end
-function SummonVolcasaurus()
-  return (MidrashCheck() or FieldCheck(5)>2) and HasID(AIExtra(),29669359,true)
-  and CardsMatchingFilter(OppMon(),VolcasaurusFilter)>0 and MP2Check()
-end
-function SummonVolcasaurusFinish()
-  return HasID(AIExtra(),29669359,true) and CardsMatchingFilter(OppMon(),VolcasaurusFilter,true)>0
-end
+
+
 function MoonlightRoseFilter(c)
   return bit.band(c:GetSummonType(),SUMMON_TYPE_SPECIAL)==SUMMON_TYPE_SPECIAL 
   and not c:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET)
   and not c:IsHasEffect(EFFECT_INDESTRUCTABLE_EFFECT)
 end
 function SummonMoonlightRose()
-  return (MidrashCheck() or FieldCheck(5)>1)and HasID(AIExtra(),33698022,true)
+  return (WindaCheck() or FieldCheck(5)>1)and HasID(AIExtra(),33698022,true)
   and Duel.IsExistingMatchingCard(MoonlightRoseFilter,1-player_ai,LOCATION_MZONE,0,1,nil) 
 end
 
@@ -270,7 +253,7 @@ function SummonFalcon()
   return (SummonMichael(FindID(04779823,AIExtra())) and CardsMatchingFilter(AIMon(),FalconFilter2)>0 
   or SummonArcanite() and CardsMatchingFilter(AIMon(),FalconFilter3)>0 
   or SummonArmades() and FieldCheck(3)>0)
-  and (MidrashCheck() or not SpecialSummonCheck(player_ai))
+  and (WindaCheck() or not SpecialSummonCheck(player_ai))
 end
 function SetFalcon()
   return (Duel.GetTurnCount()==1 or Duel.GetCurrentPhase()==PHASE_MAIN2) 
@@ -330,9 +313,6 @@ function ShadollOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Activatable,00581014,false,9296225) then
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
-  if HasID(Activatable,01845204) and UseInstantFusion() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Activatable,44394295) and UseShadollFusion() then
@@ -471,14 +451,14 @@ function ShadollFusionTarget(cards)
   OPTSet(cards[1].id)
   return result
 end
-function NephilimTarget(cards,inGrave)
+function ConstructTarget(cards,inGrave)
   if inGrave then
     return ShadollAdd(cards)
   else
     return ShadollAdd(cards,PRIO_TOGRAVE)
   end
 end
-function MidrashTarget(cards)
+function WindaTarget(cards)
   return ShadollAdd(cards)
 end
 function RootsTarget(cards)
@@ -517,16 +497,6 @@ function EmeralTarget(cards,count)
 end
 function SkyblasterTarget(cards,count)
   return BestTargets(cards,count)
-end
-function InstantFusionTarget(cards)
-  local result = nil
-  for i=1,#cards do
-    if cards[i].id == 72959823 then
-      result = {i}
-    end
-  end
-  if result==nil then result={math.random(#cards)} end
-  return result
 end
 function VolcasaurusTarget(cards)
   return BestTargets(cards,1,true)
@@ -662,10 +632,10 @@ function ShadollOnSelectCard(cards, minTargets, maxTargets,triggeringID,triggeri
     return ShadollFusionTarget(cards)
   end
   if ID == 20366274 then
-    return NephilimTarget(cards,bit32.band(triggeringCard.location,LOCATION_GRAVE)>0)
+    return ConstructTarget(cards,bit32.band(triggeringCard.location,LOCATION_GRAVE)>0)
   end
   if ID == 20366274 then
-    return MidrashTarget(cards)
+    return WindaTarget(cards)
   end
   if ID == 04904633 then
     return RootsTarget(cards)
@@ -678,9 +648,6 @@ function ShadollOnSelectCard(cards, minTargets, maxTargets,triggeringID,triggeri
   end
   if ID == 82633039 then
     return SkyblasterTarget(cards,minTargets)
-  end
-  if ID == 01845204 then
-    return InstantFusionTarget(cards)
   end
   if ID == 29669359 then
     return VolcasaurusTarget(cards)
@@ -717,7 +684,7 @@ function SanctumFilter(c)
   return PriorityTarget(c,true,nil,FilterPosition,POS_FACEUP)
 end
 function ChainSanctum()
-  if RemovalCheck(12444060) and (HasID(AIDeck(),85103922,true) or HasID(AIDeck(),12697630,true) and HasID(AIST(),85103922,true) and MidrashCheck())then
+  if RemovalCheck(12444060) and (HasID(AIDeck(),85103922,true) or HasID(AIDeck(),12697630,true) and HasID(AIST(),85103922,true) and WindaCheck())then
     GlobalCardMode = 1
     return true
   end
@@ -727,7 +694,7 @@ function ChainSanctum()
   local targets = CardsMatchingFilter(UseLists({OppMon(),OppST()}),SanctumFilter)
   local targets2=CardsMatchingFilter(UseLists({OppMon(),OppST()}),MoralltachFilter)
   local check = HasID(AIDeck(),85103922,true) or HasID(AIDeck(),12697630,true) 
-  and HasID(AIST(),85103922,true) and MidrashCheck()
+  and HasID(AIST(),85103922,true) and WindaCheck()
   if Duel.GetTurnPlayer()==1-player_ai and targets>0 and check
   then
     GlobalCardMode = 1
@@ -747,7 +714,7 @@ function ChainSanctum()
     end
   end
   local check = HasID(AIDeck(),20292186,true) or HasID(AIDeck(),12697630,true) 
-  and HasID(AIST(),20292186,true) and MidrashCheck()
+  and HasID(AIST(),20292186,true) and WindaCheck()
   if ScytheCheck() and check then
     GlobalCardMode = 1
     return true
@@ -854,10 +821,10 @@ function ArtifactCheck(sanctum,scythe)
   local MoralltachCheck = HasID(AIST(),85103922,true) and Duel.GetTurnPlayer()==1-player_ai
   local BeagalltachCheck = HasID(AIST(),12697630,true) and (HasID(AIST(),85103922,true) 
   or sanctum and HasID(AIDeck(),85103922,true))
-  and MidrashCheck() and Duel.GetTurnPlayer()==1-player_ai
+  and WindaCheck() and Duel.GetTurnPlayer()==1-player_ai
   local BeagalltachCheckScythe = HasID(AIST(),12697630,true) and (HasID(AIST(),20292186,true) 
   or sanctum and HasID(AIDeck(),20292186,true))
-  and MidrashCheck() and Duel.GetTurnPlayer()==1-player_ai
+  and WindaCheck() and Duel.GetTurnPlayer()==1-player_ai
   local CheckScythe = HasID(AIST(),20292186,true) and Duel.GetTurnPlayer()==1-player_ai
   if scythe then
     if BeagalltachCheckScythe then
@@ -1053,6 +1020,9 @@ function ChainIgnition(c)
   end
   return false
 end
+function ChainPanzerDragon(c)
+  return DestroyCheck(OppField())>0
+end
 function ShadollOnSelectChain(cards,only_chains_by_player)
   if HasID(cards,05318639) and ChainMST() then
     return {1,CurrentIndex}
@@ -1139,6 +1109,9 @@ function ShadollOnSelectChain(cards,only_chains_by_player)
   if HasID(cards,73176465,false,nil,LOCATION_GRAVE) then -- Felis
     return {1,CurrentIndex}
   end
+  if HasID(cards,72959823,false,nil,nil,nil,ChainPanzerDragon) then
+    return {1,CurrentIndex}
+  end
   return nil
 end
 function SanctumYesNo()
@@ -1206,10 +1179,13 @@ function ShadollOnSelectEffectYesNo(id,triggeringCard)
   if id == 73176465 and grave then
     result = 1
   end
+  if id == 72959823 and ChainPanzerDragon(triggeringCard) then
+    result = 1
+  end
   return result
 end
 ShadollAtt={
-  85103922,94977269,48424886 -- Moralltach,Midrash,Egrystal
+  85103922,94977269,48424886 -- Moralltach,Winda,Egrystal
 }
 ShadollDef={
   12697630,31924889,04904633, -- Beagalltach,Arcanite Magician,Shadoll Roots

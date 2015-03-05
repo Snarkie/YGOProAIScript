@@ -16,6 +16,7 @@ DECK_NEKROZ       = 12
 DECK_BA           = 13
 DECK_EXODIA       = 14
 DECK_DARKWORLD    = 15
+DECK_CONSTELLAR   = 16
 
 DeckIdent={ --card that identifies the deck
 [1]   = 99365553, -- Lightpulsar Dragon
@@ -33,6 +34,7 @@ DeckIdent={ --card that identifies the deck
 [13]  = 36006208, -- Fire Lake of the Burning Abyss
 [14]  = 33396948, -- Exodia the Forbidden One
 [15]  = 34230233, -- DW Grapha
+[16]  = 78358521, -- Constellar Sombre
 }
 Deck = nil
 DeckName={
@@ -52,6 +54,7 @@ DeckName={
 [13]  = "Burning Abyss",
 [14]  = "Exodia",
 [15]  = "Dark World",
+[16]  = "Constellar",
 }
 function DeckCheck(opt)
   if Deck == nil then
@@ -93,6 +96,7 @@ PRIO_BANISH = 9
 function PrioritySetup()
 
   DarkWorldPriority()
+  ConstellarPriority()
   
 AddPriority({
 -- test
@@ -251,7 +255,6 @@ AddPriority({
 [34086406] = {0,0,0,0,5,3,0,0,8,0,ChainCond},         -- Lavalval Chain
 [48739166] = {0,0,0,0,5,3,0,0,8,0,SharkCond},         -- SHArk
 [15561463] = {0,0,0,0,4,2,0,0,8,0,GauntletCond},      -- Gauntlet Launcher
-[38495396] = {0,0,0,0,4,2,0,0,8,0,PtolemyCond},       -- Constellar Ptolemy M7
 [07391448] = {0,0,0,0,2,0,0,0,8,0,nil},               -- Goyo Guardian
 [04779823] = {0,0,8,0,2,0,0,0,5,0,nil},               -- Michael, Lightsworn Ark
 [44508094] = {0,0,8,0,2,0,0,0,5,0,nil},               -- Stardust Dragon
@@ -273,7 +276,7 @@ AddPriority({
 [74311226] = {7,5,2,1,8,4,6,4,1,1,nil},               -- Atlantean Dragoons
 [26400609] = {6,3,4,2,6,4,5,4,0,0,TidalCond},         -- Tidal
 [78868119] = {5,3,2,2,2,1,1,1,2,2,DivaCond},          -- Deep Sea Diva
-[04904812] = {7,2,2,2,2,1,5,1,3,3,UndineCond},        -- Genex Undine
+[04904812] = {4,2,2,2,2,1,5,1,3,3,UndineCond},        -- Genex Undine
 [68505803] = {2,1,2,2,3,1,4,1,5,5,ControllerCond},    -- Genex Controller
 
 [60202749] = {3,3,1,1,1,1,1,1,1,1,nil},               -- Abyss-sphere
@@ -312,13 +315,12 @@ AddPriority({
 [04904633] = {4,2,1,1,9,1,9,1,1,1,RootsCond},         -- Shadoll Roots
 
 
-[20366274] = {1,1,6,4,2,1,2,1,1,1,NephilimCond},      -- El-Shadoll Nephilim/Construct
-[94977269] = {1,1,7,3,2,1,2,1,1,1,MidrashCond},       -- El-Shadoll Midrash/Winda
+[20366274] = {1,1,6,4,2,1,2,1,1,1,ConstructCond},     -- El-Shadoll Construct
+[94977269] = {1,1,7,3,2,1,2,1,1,1,WindaCond},         -- El-Shadoll Winda
 [74822425] = {1,1,1,1,1,1,1,1,1,1,ShekinagaCond},     -- El-Shadoll Shekinaga
 [48424886] = {1,1,1,1,1,1,1,1,1,1,EgrystalCond},      -- El-Shadoll Egrystal
 [82044279] = {1,1,1,1,1,1,1,1,1,1,ClearWingCond},     -- Clear Wing Synchro Dragon
 [72959823] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Panzer Dragon
-[73964868] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Constellar Pleiades
 [29669359] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Number 61: Volcasaurus
 [82633039] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Skyblaster Castel
 [00581014] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Daigusto Emeral

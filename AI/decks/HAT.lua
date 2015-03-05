@@ -34,13 +34,13 @@ function DionaeaCond(loc,c)
   return true
 end
 function FireHandCond(loc,c)
-  if loc == LOCATION_TOHAND then
+  if loc == PRIO_TOHAND then
     return HandCount(AICards())==0 and HasID(AIDeck(),95929069,true)
   end
   return true
 end
 function IceHandCond(loc,c)
-  if loc == LOCATION_TOHAND then
+  if loc == PRIO_TOHAND then
     return HandCount(AICards())==0 and HasID(AIDeck(),68535320,true)
   end
   return true
@@ -70,7 +70,7 @@ function BeagalltachCond(loc)
     return HasID(card,29223325,true) and HasID(AIDeck(),85103922,true)
   end
   if loc == PRIO_TOFIELD then 
-    return MidrashCheck() and (HasID(AIST(),85103922,true) and MoralltachCond(PRIO_TOFIELD)
+    return WindaCheck() and (HasID(AIST(),85103922,true) and MoralltachCond(PRIO_TOFIELD)
     or HasID(AIST(),20292186,true) and ScytheCond(PRIO_TOFIELD))
     and Duel.GetTurnPlayer()==1-player_ai
   end
@@ -89,7 +89,7 @@ function ScytheCond(loc)
   return true
 end
 function SanctumCond(loc,c)
-  if loc == LOCATION_TOHAND then
+  if loc == PRIO_TOHAND then
     local cards = UseLists({AIHand(),AIST()})
     return (HasID(AIDeck(),85103922,true)
     or HasID(AIDeck(),20292186,true)    
@@ -101,7 +101,7 @@ function SanctumCond(loc,c)
   return true
 end
 function IgnitionCond(loc,c)
-  if loc == LOCATION_TOHAND then
+  if loc == PRIO_TOHAND then
     local cards = UseLists({AIHand(),AIST()})
     return (HasID(cards,85103922,true) 
     or HasID(cards,20292186,true) 
@@ -113,7 +113,7 @@ function IgnitionCond(loc,c)
   return true
 end
 function SoulChargeCond()
-  if loc == LOCATION_TOHAND then
+  if loc == PRIO_TOHAND then
     return CardsMatchingFilter(AIGrave(),CotHFilter)>2 and AI.GetPlayerLP(1)>2000
   end
   return true
@@ -191,12 +191,12 @@ function UseCotH()
     if Duel.GetCurrentPhase() == PHASE_MAIN1 and GlobalBPAllowed and OverExtendCheck() then
       if HasID(AIGrave(),68535320,true) and FireHandCheck() then
         GlobalCardMode = 1
-        GlobalTargetSet(FindCard(68535320,AIGrave()))
+        GlobalTargetSet(FindID(68535320,AIGrave()))
         return true
       end
       if HasID(AIGrave(),95929069,true) and FireHandCheck() then
         GlobalCardMode = 1
-        GlobalTargetSet(FindCard(95929069,AIGrave()))
+        GlobalTargetSet(FindID(95929069,AIGrave()))
         return true
       end
     end
@@ -406,7 +406,7 @@ end
 function ArtifactCheckGrave(sanctum)
   local MoralltachCheck = HasID(AIGrave(),85103922,true) and Duel.GetTurnPlayer()==1-player_ai
   local BeagalltachCheck = HasID(AIGrave(),12697630,true) and HasID(AIST(),85103922,true) 
-  and Duel.GetTurnPlayer()==1-player_ai and MidrashCheck()
+  and Duel.GetTurnPlayer()==1-player_ai and WindaCheck()
   if BeagalltachCheck then
     GlobalTargetSet(FindID(12697630),AIGrave())
     return true
@@ -630,77 +630,8 @@ function ChainTrapHole()
   end
   return true
 end
-function PleiadesFilter(c)
-  return c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
-end
-function PleiadesFilter2(c)
-  return PleiadesFilter(c) and not ToHandBlacklist(c.id) 
-  and (c.level>4 or bit32.band(c.type,TYPE_FUSION+TYPE_SYNCHRO+TYPE_RITUAL+TYPE_XYZ)>0)
-end
-function PleiadesRemovalFilter(c)
-  return not ((c:IsType(TYPE_FUSION+TYPE_SYNCHRO+TYPE_RITUAL+TYPE_XYZ) 
-  or c:IsHasEffect(EFFECT_SPSUMMON_CONDITION))
-  or ToHandBlacklist(c:GetCode()))
-  and not c:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET)
-end
-function ChainPleiades()
-  local targets = CardsMatchingFilter(OppMon(),PleiadesFilter)
-  local targets2 = CardsMatchingFilter(OppMon(),PleiadesFilter2)
-  if RemovalCheck(73964868) then
-    if (Duel.GetOperationInfo(Duel.GetCurrentChain(),CATEGORY_TOHAND) 
-    or Duel.GetOperationInfo(Duel.GetCurrentChain(),CATEGORY_TODECK))
-    and targets>0 or targets2>0
-    then
-      return true
-    else
-      GlobalCardMode = 2
-      GlobalTargetSet(FindID(73964868,AIMon()),AIMon())
-      return true
-    end
-  end
-  if not UnchainableCheck(73964868) then
-    return false
-  end
-  if targets2 > 0 then
-    return true
-  end
-  cg = RemovalCheck()
-  if cg and not Duel.GetOperationInfo(Duel.GetCurrentChain(),CATEGORY_TOHAND) then
-		if cg:IsExists(function(c) return c:IsControler(player_ai) end, 1, nil) then
-      local g=cg:Filter(MoonFilter2,nil,player_ai):GetMaxGroup(Card.GetAttack)
-      if g then
-        GlobalCardMode = 2
-        GlobalTargetSet(g:GetFirst(),AIMon())
-        return true
-      end
-    end	
-  end
-  cg = NegateCheck()
-  if cg and Duel.GetCurrentChain()>1 then
-		if cg:IsExists(function(c) return c:IsControler(player_ai) end, 1, nil) then
-      local g=cg:Filter(MoonFilter2,nil,player_ai):GetMaxGroup(Card.GetAttack)
-      if g then
-        GlobalCardMode = 2
-        GlobalTargetSet(g:GetFirst(),AIMon())
-        return true
-      end
-    end	
-  end
-  if Duel.GetCurrentPhase()==PHASE_BATTLE and targets>0 then
-    local source=Duel.GetAttacker()
-    local target=Duel.GetAttackTarget()
-    if source and target and (WinsBattle(source,target) or source:GetCode()==68535320 or source:GetCode()==95929069)
-    and target:IsControler(player_ai)
-    then
-      GlobalCardMode = 2
-      GlobalTargetSet(source,OppMon())
-      return true
-    end
-  end
-  return false
-end
 function HATChain(cards)
-  if HasIDNotNegated(cards,73964868) and ChainPleiades() then
+  if HasIDNotNegated(cards,73964868,nil,nil,nil,nil,ChainPleiades) then
     return {1,CurrentIndex}
   end
   if HasID(cards,91812341) then -- Traptrix Myrmeleo

@@ -181,12 +181,6 @@ function GauntletCond(loc,c)
   end
   return true
 end
-function PtolemyCond(loc,c)
-  if loc == PRIO_TOGRAVE then
-    return c.xyz_material_count==0
-  end
-  return true
-end
 function ScarmCond(loc,c)
   return true
 end
@@ -268,12 +262,6 @@ function SummonGauntletLauncher()
 end
 function UseGauntletLauncher()
   return DestroyCheck(OppMon())>0 
-end
-function SummonPtolemy()
-  return MP2Check()
-end
-function UsePtolemy()
-  return true
 end
 function SummonScrapDragon()
   return DestroyCheck(OppField())>0 and (HasID(AIMon(),34408491,true) 
@@ -666,8 +654,7 @@ function GauntletLauncherTarget(cards)
   end
 end
 function PtolemyTarget(cards)
-  if GlobalCardMode == 1 then
-    GlobalCardMode = nil
+  if LocCheck(cards,LOCATION_OVERLAY) then
     return Add(cards,PRIO_TOGRAVE)
   else
     return Add(cards,PRIO_TOHAND)

@@ -223,11 +223,6 @@ function SummonTigerKingBujin()
   return DeckCheck(DECK_BUJIN) and not HasID(UseLists({AIMon(),AIHand()}),32339440) 
   and HasID(AIDeck(),32339440) and HasID(AIDeck(),57103969) and MP2Check()
 end
-function SummonOmegaBujin()
-  local cards=OppST()
-  return DeckCheck(DECK_BUJIN) and Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack")<2400 
-  and Duel.GetCurrentPhase() == PHASE_MAIN1 and Chance((#cards-2)*33) 
-end
 function SharkKnightFilterBujin(c)
   return bit32.band(c.position,POS_FACEUP_ATTACK)>0 
   and bit32.band(c.type,TYPE_TOKEN)==0
@@ -279,6 +274,7 @@ function BujinOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Activatable,57103969) then -- Tenki
+    OPTSet(57103969)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Activatable,69723159) and UseQuilin() then
@@ -374,9 +370,6 @@ if DeckCheck(DECK_BUJIN) then
   end
   if HasID(SpSummonable,48739166) and BujinXYZCheck() and SummonSharkKnight() then
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,48739166)}
-  end
-  if HasID(SpSummonable,26329679) and BujinXYZCheck() and SummonOmegaBujin() then
-    return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,26329679)}
   end
   if HasID(SpSummonable,12014404) and BujinXYZCheck() and SummonCowboyAtt() then
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,12014404)}
@@ -724,27 +717,6 @@ end
 function ChainHirume()
   return BujinPriorityCheck(AIHand(),LOCATION_GRAVE)>4
 end
-function OmegaFilter(card)
-	return card:IsControler(player_ai) and card:IsType(TYPE_MONSTER) 
-  and card:IsLocation(LOCATION_MZONE) and card:IsPosition(POS_FACEUP)
-  and not card:IsHasEffect(EFFECT_IMMUNE_EFFECT) and card:IsSetCard(0x53)
-end
-function ChainOmega()
-  local cc=Duel.GetCurrentChain()
-  local cardtype = Duel.GetChainInfo(cc, CHAININFO_EXTTYPE)
-  local ex,cg = Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_DESTROY)
-  local tg = Duel.GetChainInfo(cc, CHAININFO_TARGET_CARDS)
-  local e = Duel.GetChainInfo(cc, CHAININFO_TRIGGERING_EFFECT)
-  local p = Duel.GetChainInfo(cc, CHAININFO_TRIGGERING_PLAYER)
-  if ex then
-    local g = cg:Filter(OmegaFilter, nil)
-    return bit32.band(cardtype, TYPE_SPELL+TYPE_TRAP) ~= 0 and g
-  elseif tg then
-    local g = tg:Filter(OmegaFilter, nil)
-    return bit32.band(cardtype, TYPE_SPELL+TYPE_TRAP) ~= 0 and g and p~=player_ai
-  end
-  return false
-end
 function BujinOnSelectChain(cards,only_chains_by_player)
   if HasID(cards,30338466,false,485415456) and UseRegaliaGrave() then
     return {1,CurrentIndex}
@@ -783,9 +755,6 @@ function BujinOnSelectChain(cards,only_chains_by_player)
   end
   if HasIDNotNegated(cards,32339440) then -- Yamato
     GlobalCardMode = 1
-    return {1,CurrentIndex}
-  end
-  if HasIDNotNegated(cards,26329679) and ChainOmega() then
     return {1,CurrentIndex}
   end
   return nil

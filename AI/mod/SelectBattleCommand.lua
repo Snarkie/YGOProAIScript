@@ -47,8 +47,8 @@ function AttackTargetSelection(cards,attacker,atk)
     end
     
     -- Shaddoll Construct
-    if id == 20366274 and CardsMatchingFilter(cards,NephilimFilter)>0 then       
-      return BestTargets(cards,1,TARGET_DESTROY,NephilimFilter,nil,true,attacker)
+    if id == 20366274 and CardsMatchingFilter(cards,ConstructFilter)>0 then       
+      return BestTargets(cards,1,TARGET_DESTROY,ConstructFilter,nil,true,attacker)
     end
     
     -- Lightpulsar Dragon
@@ -240,7 +240,7 @@ function OnSelectBattleCommand(cards,activatable)
   end
   
   -- Shaddoll Construct
-  if HasID(cards,20366274) and CardsMatchingFilter(OppMon(),NephilimFilter)>0 then 
+  if HasID(cards,20366274) and CardsMatchingFilter(OppMon(),ConstructFilter)>0 then 
     return Attack(CurrentIndex)
   end
   

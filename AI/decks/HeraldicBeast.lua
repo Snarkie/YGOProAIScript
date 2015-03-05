@@ -170,7 +170,7 @@ function HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     GlobalPlainCoat = 2
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(SpSummonable,65367484) then -- Photon Thrasher
+  if HasID(SpSummonable,65367484) and not DeckCheck(DECK_CONSTELLAR) then -- Photon Thrasher
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(Activatable,60316373) and UseAberconway() then   -- Aberconway
@@ -398,10 +398,11 @@ function HeraldicToHand(cards)
 end
 function LavalvalChainTarget(cards)
     local result = nil
-    if DeckCheck(DECK_TELLARKNIGHT) 
-    or DeckCheck(DECK_NEKROZ)
-    or DeckCheck(DECK_DARKWORLD)
+    if DeckCheck(DECK_HERALDIC) 
+    or DeckCheck(DECK_GADGET)
     then
+      result = HeraldicToGrave(cards,1)
+    else
       if GlobalCardMode == 2 then
         GlobalCardMode = 1
         result = Add(cards,PRIO_TOGRAVE)
@@ -411,8 +412,6 @@ function LavalvalChainTarget(cards)
       else
         result = Add(cards,PRIO_TOGRAVE)
       end
-    else
-      result = HeraldicToGrave(cards,1)
     end
     if result then return result end
     return {math.random(#cards)}
@@ -785,44 +784,31 @@ function ChainPlainCoat(c)
     end
   end
 end
-function SafeZoneFilter(card)
-  return card:IsControler(player_ai) and card:IsType(TYPE_MONSTER) 
-  and not card:IsCode(23649496) and card:GetCode()~=82293134 and card:IsPosition(POS_FACEUP_ATTACK) 
-  and not card:IsHasEffect(EFFECT_INDESTRUCTABLE_EFFECT) 
-  and not card:IsHasEffect(EFFECT_IMMUNE_EFFECT) 
+function SafeZoneFilter(c)
+  return CurrentOwner(c) == 1 and FilterType(c,TYPE_MONSTER)
+  and c.id~=23649496 and c.id~=82293134
+  and FilterPosition(c,POS_FACEUP_ATTACK) and DestroyFilter(c)
+  and Affected(c,TYPE_TRAP) and Targetable(c,TYPE_TRAP)
 end
-function SafeZoneFilterEnemy(card)
-  return card:IsControler(1-player_ai) and card:IsType(TYPE_MONSTER) and card:IsPosition(POS_FACEUP_ATTACK) and not card:IsHasEffect(EFFECT_INDESTRUCTABLE_EFFECT)
+function SafeZoneFilterEnemy(c)
+  return CurrentOwner(c) == 2 and FilterType(c,TYPE_MONSTER)
+  and FilterPosition(c,POS_FACEUP_ATTACK) and DestroyFilter(c)
+  and Affected(c,TYPE_TRAP) and Targetable(c,TYPE_TRAP)
 end
 
-function ChainSafeZone()
-  if RemovalCheck(38296564) then
-    local g=Duel.GetMatchingGroup(SafeZoneFilterEnemy,1-player_ai,LOCATION_MZONE,0,nil)
-    if g and g:GetCount()>0 then
-      GlobalCardMode=1
-      return true
-    end
+function ChainSafeZone(c)
+  if RemovalCheckCard(c) and CardsMatchingFilter(OppMon(),SafeZoneFilterEnemy)>0 then
+    GlobalCardMode=1
+    return true
   end	
-  local ex,cg = Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_DESTROY)
-  local tg = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TARGET_CARDS)
-  local e = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
-  if e and e:GetHandler():GetCode()==38296564 then
+  if not UnchainableCheck(38296564) then
     return false
   end
-  if ex then
-    if tg then
-      local g = tg:GetMaxGroup(Card.GetAttack)
-      if g then
-        GlobalTargetSet(g:GetFirst(),AIMon())
-      end
-      return tg:IsExists(SafeZoneFilter, 1, nil) and Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_PLAYER)~=player_ai
-    else
-      local g = cg:Filter(SafeZoneFilter, nil):GetMaxGroup(Card.GetAttack)
-      if g then
-        GlobalTargetSet(g:GetFirst(),AIMon())
-      end
-    return cg:IsExists(SafeZoneFilter, 1, nil) and Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_PLAYER)~=player_ai
-    end
+  local targets=RemovalCheckList(AIMon(),CATEGORY_DESTROY,nil,nil,SafeZoneFilter)
+  if targets and #targets > 0 then
+    BestTargets(targets,1,TARGET_PROTECT)
+    GlobalTargetSet(targets[1],targets)
+    return true
   end
   if Duel.GetCurrentPhase() == PHASE_BATTLE then
 		local source = Duel.GetAttacker()
@@ -914,7 +900,7 @@ function HeraldicOnSelectChain(cards,only_chains_by_player)
   if HasIDNotNegated(cards,23649496) and ChainPlainCoat(cards[CurrentIndex]) then
     return {1,CurrentIndex}
   end
-  if HasID(cards,38296564) and ChainSafeZone() then
+  if HasIDNotNegated(cards,38296564,nil,nil,nil,nil,ChainSafeZone) then
     return {1,CurrentIndex}
   end
   if HasID(cards,27243130) and ChainLance() then
