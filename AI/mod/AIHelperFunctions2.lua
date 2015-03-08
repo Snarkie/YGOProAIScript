@@ -132,12 +132,12 @@ function AIGetStrongestAttack(skipbonus)
   end
   return result
 end
-function OppGetStrongestAttack(filter)
+function OppGetStrongestAttack(filter,opt)
   local cards=OppMon()
   local result=0
   ApplyATKBoosts(cards)
   for i=1,#cards do
-    if cards[i] and (filter==nil or filter(cards[i])) 
+    if cards[i] and (filter==nil or (opt==nil and filter(cards[i]) or filter(cards[i],opt))) 
     and cards[i].attack>result 
     then
       result=cards[i].attack-cards[i].bonus
@@ -145,12 +145,12 @@ function OppGetStrongestAttack(filter)
   end
   return result
 end
-function OppGetStrongestAttDef(filter,loop)
+function OppGetStrongestAttDef(filter,opt,loop)
   local cards=OppMon()
   local result=0
   if not loop then ApplyATKBoosts(cards) end
   for i=1,#cards do
-    if cards[i] and (filter==nil or filter(cards[i])) then
+    if cards[i] and (filter==nil or (opt==nil and filter(cards[i]) or filter(cards[i],opt))) then
       if bit32.band(cards[i].position,POS_ATTACK)>0 and cards[i].attack>result then
         result=cards[i].attack
         if cards[i].bonus then 
@@ -228,10 +228,10 @@ end
 -- check how many monsters of a specific level are on the field. optional filter
 function FieldCheck(level,filter,opt)
   local result=0
-  local cards=AIMon()
-  for i=1,#cards do
-    if cards[i].level==level and bit32.band(cards[i].position,POS_FACEUP)>0 
-    and (filter == nil or filter(cards[i]) and opt == nil or filter(cards[i],opt))
+  for i=1,#AIMon() do
+    local c=AIMon()[i]
+    if c.level==level and FilterPosition(c,POS_FACEUP) 
+    and (filter == nil or (opt == nil and filter(c) or filter(c,opt)))
     then
       result = result + 1
     end
@@ -271,7 +271,7 @@ function ExtraDeckCheck(type,level)
 end
 -- returns the cards in the list that match the filter
 function SubGroup(cards,filter,opt)
-  result = {}
+  local result = {}
   if cards then
     if filter == nil then return cards end
     for i=1,#cards do
@@ -307,6 +307,7 @@ function OverExtendCheck(limit)
 end
 -- checks, if a card the AI controls is about to be removed in the current chain
 function RemovalCheck(id,category)
+  if Duel.GetCurrentChain() == 0 then return false end
   local cat={CATEGORY_DESTROY,CATEGORY_REMOVE,CATEGORY_TOGRAVE,CATEGORY_TOHAND,CATEGORY_TODECK}
   if category then cat={category} end
   for i=1,#cat do
@@ -325,6 +326,7 @@ function RemovalCheck(id,category)
   return false
 end
 function RemovalCheckCard(target,category,type,chainlink,filter,opt)
+  if Duel.GetCurrentChain() == 0 then return false end
   local cat={CATEGORY_DESTROY,CATEGORY_REMOVE,
   CATEGORY_TOGRAVE,CATEGORY_TOHAND,
   CATEGORY_TODECK,CATEGORY_CONTROL}
@@ -365,6 +367,7 @@ function RemovalCheckCard(target,category,type,chainlink,filter,opt)
   return false
 end
 function RemovalCheckList(cards,category,type,chainlink,filter,opt)
+  if Duel.GetCurrentChain() == 0 then return false end
   local result = {}
   for i=1,#cards do
     local c = RemovalCheckCard(cards[i],category,type,chainlink,filter,opt)
@@ -376,13 +379,56 @@ function RemovalCheckList(cards,category,type,chainlink,filter,opt)
   return false
 end
 function NegateCheckCard(target,type,chainlink,filter,opt)
-  return RemovalCheckCard(target,CATEGORY_DISABLE,type,chainlink,filter,opt)
+  if Duel.GetCurrentChain() == 0 then return false end
+  if card and filter and (opt and not filter(card,opt)
+  or opt==nil and not filter(card))
+  then
+    return false
+  end
+  local a=1
+  local b=Duel.GetCurrentChain()
+  if chainlink then
+    a=chainlink
+    b=chainlink
+  end
+  for i=a,b do
+    local e = Duel.GetChainInfo(i,CHAININFO_TRIGGERING_EFFECT)
+    local g = Duel.GetChainInfo(i,CHAININFO_TARGET_CARDS)
+    if e and e:IsHasCategory(CATEGORY_DISABLE) 
+    and CheckNegated(i) and (type==nil
+    or e:GetHandler():IsType(type))
+    then
+      if target==nil then 
+        return g
+      end
+      if g and target then
+        local card=false
+        g:ForEach(function(c) 
+          local c=GetCardFromScript(c,Field())
+          if CardsEqual(c,target) then
+            card=c
+          end 
+        end) 
+        return card
+      end
+    end
+  end
+  return false
 end
 function NegateCheckCardList(cards,type,chainlink,filter,opt)
-  return RemovalCheckCardList(cards,CATEGORY_DISABLE,type,chainlink,filter,opt)
+  if Duel.GetCurrentChain() == 0 then return false end
+  local result = {}
+  for i=1,#cards do
+    local c = NegateCheckCard(cards[i],type,chainlink,filter,opt)
+    if c then result[#result+1]=c end
+  end
+  if #result>0 then
+    return result
+  end
 end
 -- checks, if a card the AI controls is about to be negated in the current chain
 function NegateCheck(id)
+  if Duel.GetCurrentChain() == 0 then return false end
   local ex,cg = Duel.GetOperationInfo(Duel.GetCurrentChain(),CATEGORY_DISABLE)
   if ex then 
     if id==nil then 
@@ -439,7 +485,7 @@ function BestTargets(cards,count,target,filter,opt,immuneCheck,source)
     target=TARGET_DESTROY 
   end
   if target == TARGET_BATTLE then 
-    return BestAttackTarget(cards,source,filter,opt) 
+    return BestAttackTarget(cards,source,false,filter,opt) 
   end
   if count == nil then count = 1 end
   ApplyATKBoosts(AIMon)
@@ -830,7 +876,7 @@ function HasEquips(c,opt)
   or opt and c.equip_count==opt
 end
 function FilterPendulum(c)
-  return not FilterType(c,TYPE_PENDULUM) 
+  return not FilterType(c,TYPE_PENDULUM+TYPE_TOKEN) 
 end
 --[[function ScaleCheck(p)
   local cards=AIST()
@@ -1048,7 +1094,7 @@ end
 PriorityTargetList=
 {
   82732705,30241314,81674782,47084486,  -- Skill Drain, Macro Cosmos, Dimensional Fissure, Vanity's Fiend
-  72634965,59509952,58481572, -- Vanity's Ruler, Archlord Kristya, Dark Law
+  72634965,59509952,58481572,45986603,  -- Vanity's Ruler, Archlord Kristya, Dark Law, Snatch Steal
 }
 PriorityGraveTargetList=
 {
@@ -1060,8 +1106,7 @@ function PriorityTarget(c,destroycheck,loc,filter,opt) -- preferred target for r
   if loc == LOCATION_ONFIELD then
     if FilterType(c,TYPE_MONSTER) and (bit32.band(c.type,TYPE_FUSION+TYPE_RITUAL+TYPE_XYZ+TYPE_SYNCHRO)>0 
     or c.level>4 and c.attack>2000)
-    and (not FiendishCheck(c) or AIGetStrongestAttack()<=c.attack)
-    and (not destroycheck or DestroyCheck(c))
+    and not (not FiendishCheck(c) and AIGetStrongestAttack()>c.attack)
     then
       result = true
     end
@@ -1156,7 +1201,7 @@ DestRep={
 }
 -- function to determine, if a card has to be destroyed multiple times
 -- true = can be destroyed properly
-function DestroyCountCheck(c)
+function DestroyCountCheck(c,type,battle)
   local id
   local mats
   local negated
@@ -1166,6 +1211,10 @@ function DestroyCountCheck(c)
   else
     id = c.id
     mats = c.xyz_material_count
+  end
+  if id == 81105204 then
+    return Negated(c) or bit32.band(type,TYPE_SPELL+TYPE_TRAP)==0
+    or battle or c:is_affected_by(EFFECT_INDESTRUCTABLE_COUNT)==0
   end
   if Negated(c) then
     return c:is_affected_by(EFFECT_INDESTRUCTABLE_COUNT)==0
@@ -1209,7 +1258,7 @@ end
 function BattleTargetCheck(c,source)
   return c:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE)==0
   and c:is_affected_by(EFFECT_CANNOT_BE_BATTLE_TARGET)==0
-  and DestroyCountCheck(c)
+  and DestroyCountCheck(c,TYPE_MONSTER,true)
   and AttackBlacklistCheck(c,source)
 end
 
@@ -1221,7 +1270,7 @@ function BattleDamageCheck(c,source)
 end
 
 function BattleDamage(c,source,atk,oppatk,oppdef,pierce)
-  if atk == nil then
+  if atk == nil  then
     atk = source.attack
   end
   if oppatk == nil then
@@ -1231,7 +1280,11 @@ function BattleDamage(c,source,atk,oppatk,oppdef,pierce)
     oppdef = c.defense
   end
   if c == nil then
-    return atk
+    if FilterAffected(source,EFFECT_CANNOT_DIRECT_ATTACK) then
+      return 0
+    else
+      return atk
+    end
   end
   if pierce == nil then
     pierce = FilterAffected(source,EFFECT_PIERCE) and NotNegated(source)
@@ -1275,7 +1328,7 @@ function CrashCheck(c)
   if FilterAffected(c,EFFECT_INDESTRUCTABLE_BATTLE)then
     return true
   end
-  if not DestroyCountCheck(c) then
+  if not DestroyCountCheck(c,TYPE_MONSTER,true) then
     return true
   end
   if FilterType(c,TYPE_PENDULUM) and ScaleCheck(1)==true then
@@ -1328,8 +1381,8 @@ function CanWinBattle(c,targets,tograve,ignorebonus,filter,opt)
   for i=1,#sub do
     local oppatk = sub[i].attack
     local oppdef = sub[i].defense
-    if ignorebonus and sub[i].bonus and sub[i].bonus > 0 then
-      oppatk = math.max(0,oppatk - sub[i].bonus)
+    if ignorebonus and sub[i].bonus and sub[i].bonus < 0 then
+      oppatk = oppatk - sub[i].bonus
     end
     if FilterPosition(sub[i],POS_FACEDOWN_DEFENCE) and not FilterPublic(sub[i]) then
       oppdef = 1500
@@ -1411,8 +1464,9 @@ function CanFinishGame(c,target,atk)
   return false
 end
 
--- convert a card script card to an AI script card, as well as possible
-function GetCardFromScript(c,cards)
+-- old, inaccurate way to convert card script cards 
+-- to AI script. Still used for cards not on the field
+function GetCardFromScriptOld(c,cards)
   local id = c:GetCode()
   local id2 = c:GetOriginalCode()
   local pos = c:GetPosition()
@@ -1454,6 +1508,51 @@ function GetCardFromScript(c,cards)
   end
   return nil
 end
+-- accurate function to convert card script cards 
+-- to AI script, only 100% accurate for cards on the field
+function GetCardFromScript(c,cards)
+  if c==nil then 
+    print("Warning: Requesting null card conversion")
+    return nil 
+  end
+  local seq = c:GetSequence()+1
+  if c:IsLocation(LOCATION_MZONE) then
+    if c:IsControler(player_ai) then
+      cards = AI.GetAIMonsterZones()
+    else
+      cards = AI.GetOppMonsterZones()
+    end
+  elseif c:IsLocation(LOCATION_SZONE) then
+    if c:IsControler(player_ai) then
+      cards = AI.GetAISpellTrapZones()
+    else
+      cards = AI.GetOppSpellTrapZones()
+    end
+  else
+    return GetCardFromScriptOld(c,cards)
+  end
+  return cards[seq]
+end
+-- the other way around, get a card script object
+-- from an AI script card.
+function GetScriptFromCard(c)
+  local seq = Sequence(c)
+  local type = c.type
+  local p
+  if CurrentOwner(c) == 1 then
+    p = player_ai
+  else
+    p = 1-player_ai
+  end
+  local g = GetMatchingGroup(nil,nil,LOCATION_ONFIELD,LOCATION_ONFIELD,0,nil)
+  local result = nil
+  g:ForEach(function(c) 
+    if c:GetSequence()==seq and c:IsType(type) and c:IsControler(p) then
+      result = c
+    end
+  end)
+  return result
+end
 function Surrender()
   AI.Chat("I give up!")
   Duel.Win(1-player_ai,REASON_RULE)
@@ -1481,23 +1580,42 @@ function CopyTable(cards)
 end
 
 function GetBattlingMons()
-  local oppmon = Duel.GetAttacker()
-  local aimon = Duel.GetAttackTarget()
-  if oppmon and aimon 
-  and oppmon:IsLocation(LOCATION_MZONE) 
-  and aimon:IsLocation(LOCATION_MZONE)
-  then
+  local source = Duel.GetAttacker()
+  local target = Duel.GetAttackTarget()
+  local oppmon = nil
+  local aimon = nil
+  if source and source:IsLocation(LOCATION_MZONE) then
     if Duel.GetTurnPlayer()==player_ai then
-      aimon = Duel.GetAttacker()
-      oppmon = Duel.GetAttackTarget()
+      aimon = source
+    else
+      oppmon = source
     end
-    return aimon,oppmon
   end
-  return nil,nil
+  if target and target:IsLocation(LOCATION_MZONE) then
+    if Duel.GetTurnPlayer()==player_ai then
+      oppmon = target
+    else
+      aimon = target
+    end
+  end
+  return aimon,oppmon
 end
 function TurnEndCheck()
-  return Duel.GetCurrentPhase()==PHASE_MAIN2 or not GlobalBPAllowed
+  return Duel.GetCurrentPhase()==PHASE_MAIN2 or not (GlobalBPAllowed 
+  or Duel.GetCurrentPhase()==PHASE_DRAW or Duel.GetCurrentPhase()==PHASE_STANDBY)
 end
 function BattlePhaseCheck()
   return Duel.GetCurrentPhase()==PHASE_MAIN1 and GlobalBPAllowed
+end
+-- returns the zone a card occupies
+function Sequence(c)
+  local cards = {AI.GetAIMonsterZones(),AI.GetOppMonsterZones(),
+  AI.GetAISpellTrapZones(),AI.GetOppSpellTrapZones(),}
+  for i=1,#cards do
+    for j=1,#cards[i] do
+      if CardsEqual(c,cards[i][j]) then
+        return j-1
+      end
+    end
+  end
 end

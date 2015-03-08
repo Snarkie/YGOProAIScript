@@ -209,17 +209,6 @@ function SetArtifacts()
   and #AIST()<4
 end
 
-
-function MoonlightRoseFilter(c)
-  return bit.band(c:GetSummonType(),SUMMON_TYPE_SPECIAL)==SUMMON_TYPE_SPECIAL 
-  and not c:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET)
-  and not c:IsHasEffect(EFFECT_INDESTRUCTABLE_EFFECT)
-end
-function SummonMoonlightRose()
-  return (WindaCheck() or FieldCheck(5)>1)and HasID(AIExtra(),33698022,true)
-  and Duel.IsExistingMatchingCard(MoonlightRoseFilter,1-player_ai,LOCATION_MZONE,0,1,nil) 
-end
-
 function MichaelFilter(c)
   return c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
 end
@@ -877,13 +866,13 @@ end
 function MSTEndPhaseFilter(c)
   return MSTFilter(c) and bit32.band(c.status,STATUS_SET_TURN)>0
 end
-function ChainMST()
+function ChainMST(c)
   local targets=CardsMatchingFilter(OppST(),MSTFilter)
   local targets2=CardsMatchingFilter(UseLists({OppMon(),OppST()}),MoralltachFilter)
   local targets3=CardsMatchingFilter(UseLists({OppMon(),OppST()}),SanctumFilter)
   local targets4=CardsMatchingFilter(OppST(),MSTEndPhaseFilter)
   local e = Duel.GetChainInfo(Duel.GetCurrentChain(),CHAININFO_TRIGGERING_EFFECT)
-  if RemovalCheck(05318639) then
+  if RemovalCheckCard(c) then
     if e and e:GetHandler():IsCode(12697630) then
       return false
     end
@@ -1024,7 +1013,7 @@ function ChainPanzerDragon(c)
   return DestroyCheck(OppField())>0
 end
 function ShadollOnSelectChain(cards,only_chains_by_player)
-  if HasID(cards,05318639) and ChainMST() then
+  if HasID(cards,05318639,false,nil,nil,nil,ChainMST) then
     return {1,CurrentIndex}
   end
   if HasID(cards,94192409) and ChainCompulse() then

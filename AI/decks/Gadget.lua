@@ -484,7 +484,14 @@ function CotHTargetGadget(cards)
   table.sort(cards,compare)
   result=cards[1].index
   if result == nil then result = math.random(#cards) end
-  if cards[1].prio then TargetSet(cards[1]) else TargetSet(cards[result]) end
+  if cards[1].prio 
+  then 
+    TargetSet(cards[1]) 
+    CothSet(cards[1],c)
+  else 
+    TargetSet(cards[result]) 
+    CothSet(cards[result],c)
+  end
   return {result}
 end
 function GearframeTarget(cards)
@@ -536,7 +543,7 @@ function GadgetOnSelectCard(cards, minTargets, maxTargets,ID,triggeringCard)
     return GearframeTarget(cards)
   end
   if ID == 97077563 and DeckCheck(DECK_GADGET) then
-    return CotHTargetGadget(cards)
+    return CotHTargetGadget(cards,c)
   end
   if ID == 50078509 then
     return FiendishChainTarget(cards,triggeringCard)

@@ -17,6 +17,7 @@ function OnSelectEffectYesNo(id,triggeringCard)
   ChaosDragonOnSelectEffectYesNo,HATEffectYesNo,QliphortEffectYesNo,
   NobleEffectYesNo,NekrozEffectYesNo,BAEffectYesNo,DarkWorldEffectYesNo,
   BujinOnSelectEffectYesNo,GenericEffectYesNo,ConstellarEffectYesNo,
+  BlackwingEffectYesNo,
   }
   local result = nil
   for i=1,#YesNoFunctions do

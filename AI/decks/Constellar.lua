@@ -211,7 +211,7 @@ end
 function SummonChainConstellar(mode)
   if not (DeckCheck(DECK_CONSTELLAR) and HasID(AIExtra(),34086406,true)) then return false end
   if mode == 1 and HasID(AIHand(),78358521,true) and not HasAccess(70908596) 
-  and HasID(AIDeck(),70908596,true) 
+  and HasID(AIDeck(),70908596,true) and (not OppHasStrongestMonster() or OppGetStrongestAttDef()<1800)
   then
     return true
   end
@@ -223,10 +223,13 @@ function SummonChainConstellar(mode)
   end
   if mode == 2 and (HasID(AIHand(),78364470,true) 
   or HasID(AIHand(),41269771,true)) and MP2Check()
+  and (not OppHasStrongestMonster() or OppGetStrongestAttDef()<1800)
   then
     return true
   end
-  if mode == 3 and MP2Check() then
+  if mode == 3 and MP2Check() 
+  and (not OppHasStrongestMonster() or OppGetStrongestAttDef()<1800)
+  then
     return true
   end
   return false

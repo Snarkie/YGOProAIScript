@@ -559,7 +559,7 @@ function AHATarget(cards)
     if HasID(cards,47387961) and SummonGenomHeritage() then
       result=IndexByID(cards,47387961)
     end
-    if HasID(cards,46772449) and SummonBelzebuth() then
+    if HasID(cards,46772449) and DeckCheck(DECK_HERALDIC) and SummonBelzebuth() then
       result=IndexByID(cards,46772449)
     end  
     if HasID(cards,12014404) and SummonCowboyDef() then

@@ -515,9 +515,6 @@ function DarkWorldCard(cards,min,max,id,c)
   if id == 34230233 then --Grapha 
     return BestTargets(cards,1,TARGET_DESTROY)
   end
-  if id == 41142615 then 
-    return Add(cards,PRIO_DISCARD,3)
-  end
   if id == 54974237 then
     return EEVTarget(cards)
   end

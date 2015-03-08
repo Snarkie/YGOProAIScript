@@ -333,7 +333,7 @@ if DeckCheck(DECK_TELLARKNIGHT) then
   if HasID(SpSummonable,94380860) and SummonRagnaZero() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasID(SpSummonable,46772449) and SummonBelzebuth() then
+  if HasID(SpSummonable,46772449) and DeckCheck(DECK_TELLARKNIGHT) and SummonBelzebuth() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSummonable,48739166) and SummonSharkKnight1() then

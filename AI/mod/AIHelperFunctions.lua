@@ -753,7 +753,7 @@ function CurrentSTOwner(CardsID)
 end
 function CurrentOwner(c,cards)
   if cards == nil then
-    cards = AIField()
+    cards = AICards()
   end
   local result = 2
   for i=1,#cards do
@@ -1651,7 +1651,7 @@ function ApplyATKBoosts(Cards)
     end
     if check then
       for i=1,#Cards do
-        if Cards[i].race==RACE_BEASTWARRIOR and Cards[i].owner == 1 then
+        if Cards[i].race==RACE_BEASTWARRIOR and CurrentOwner(Cards[i])==1 then
           Cards[i].attack = Cards[i].attack + 1000
           Cards[i].bonus = 1000
         end
@@ -1675,7 +1675,7 @@ function ApplyATKBoosts(Cards)
     end
     if check then
       for i=1,#Cards do
-        if Cards[i].owner==2
+        if CurrentOwner(Cards[i])==2 
         and Cards[i]:is_affected_by(EFFECT_IMMUNE_EFFECT)==0
         and Cards[i]:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
         then
@@ -1702,7 +1702,7 @@ function ApplyATKBoosts(Cards)
     end
     if check then
       for i=1,#Cards do
-        if Cards[i].owner==1 
+        if CurrentOwner(Cards[i])==1  
         and (Cards[i]:is_affected_by(EFFECT_IMMUNE_EFFECT)==0
         or QliphortFilter(Cards[i],27279764))
         and Cards[i]:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
@@ -1722,14 +1722,14 @@ function ApplyATKBoosts(Cards)
     local check = false
     for i=1,#ST do
       if ST[i].id == 82732705 and bit32.band(ST[i].status,STATUS_SET_TURN)==0 
-      and AI.GetPlayerLP(1)>1000 and not SkillDrainCheck
+      and AI.GetPlayerLP(1)>1000 and not SkillDrainCheck()
       then
         check = true
       end
     end
     if check then
       for i=1,#Cards do
-        if Cards[i].owner==1 
+        if CurrentOwner(Cards[i])==1 
         and (Cards[i]:is_affected_by(EFFECT_IMMUNE_EFFECT)==0
         or QliphortFilter(Cards[i],27279764))
         and NotNegated(Cards[i])
@@ -1766,7 +1766,7 @@ function ApplyATKBoosts(Cards)
   ------------------------------------------
   for i=1,#Cards do
     if HasID(AIGrave(),56574543,true) and bit32.band(Cards[i].setcode,0x88)>0
-    and bit32.band(Cards[i].race,RACE_BEASTWARRIOR)>0 and Cards[i].owner==1 
+    and bit32.band(Cards[i].race,RACE_BEASTWARRIOR)>0 and CurrentOwner(Cards[i])==1
     then
       local OppAtt = Get_Card_Att_Def(OppMon(),"attack",">",nil,"attack")
       Cards[i].attack = Cards[i].attack + OppAtt
@@ -1778,7 +1778,7 @@ function ApplyATKBoosts(Cards)
   -- Apply Honest's Attack Bonus
   ------------------------------------------
   for i=1,#Cards do
-    if HasID(AIHand(),37742478,true) and Cards[i].owner==1
+    if HasID(AIHand(),37742478,true) and CurrentOwner(Cards[i])==1
     and bit32.band(Cards[i].attribute,ATTRIBUTE_LIGHT)>0 
     then
       local OppAtt = Get_Card_Att_Def(OppMon(),"attack",">",nil,"attack")
@@ -1790,7 +1790,7 @@ function ApplyATKBoosts(Cards)
   -- Nekroz Decisive Armor
   for i=1,#Cards do
     if HasID(AIHand(),88240999,true) and NekrozMonsterFilter(Cards[i])
-    and Cards[i].owner==1 and not FilterAffected(Cards[i],EFFECT_CANNOT_BE_EFFECT_TARGET)
+    and CurrentOwner(Cards[i])==1 and not FilterAffected(Cards[i],EFFECT_CANNOT_BE_EFFECT_TARGET)
     then
       Cards[i].bonus = Cards[i].bonus + 1000
       Cards[i].attack = Cards[i].attack + 1000
@@ -1817,6 +1817,23 @@ function ApplyATKBoosts(Cards)
     and #OppMon()>0
     then
       c.attack = 5000
+    end
+  end
+  
+  -- Kalut
+  for i=1,CardsMatchingFilter(AIHand(),FilterID,85215458) do
+    for j=1,#Cards do
+      local c = Cards[j]
+      if BlackwingFilter(c) 
+      and CurrentOwner(c)==1
+      and MacroCheck()
+      then
+        c.attack=c.attack+1400
+        if c.bonus==nil then
+          c.bonus=0
+        end
+        c.bonus=c.bonus+1400
+      end
     end
   end
   

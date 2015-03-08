@@ -687,8 +687,8 @@ end
 function HighSallyFilter(c)
   return c:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE)==0
   and c:is_affected_by(EFFECT_CANNOT_BE_BATTLE_TARGET)==0
-  and c:is_affected_by(EFFECT_INDESTRUCTABLE_COUNT)==0
-  and bit32.band(c.type,TYPE_PENDULUM)==0
+  and DestroyCountCheck(c,TYPE_MONSTER,true)
+  and FilterPendulum(c)
   and not ((c.id == 48739166 or c.id == 78156759
   or c.id == 10002346) and c.xyz_material_count>0)
 end
@@ -1587,7 +1587,7 @@ function HasGwen(c)
 end
 function GwenFilter(c,atk) -- for attack boosts
   return Affected(c,TYPE_SPELL) and DestroyFilter(c)
-  and DestroyCountCheck(c) or atk>c.attack
+  and DestroyCountCheck(c,TYPE_SPELL,false) or atk>c.attack
 end
 function ChainGwen()
   local source = Duel.GetAttacker()

@@ -356,7 +356,9 @@ function UseSquall()
   if RemovalCheck(34707034) then
     return true
   end
-  if Duel.GetTurnPlayer()==player_ai then
+  if Duel.GetTurnPlayer()==player_ai and Duel.GetCurrentChain()==0 
+  and Duel.GetCurrentPhase()==PHASE_MAIN1
+  then
     if OverExtendCheck() then
       return true
     elseif HasID(AIMon(),70583986,true) then
@@ -635,13 +637,11 @@ function DivaTarget(cards)
   return MermailAdd(cards,PRIO_TOFIELD)
 end
 function MechquippedTarget(cards)
-  local result = nil
-  if GlobalCardMode==nil then
-    result = GlobalTargetGet(cards,true)
+  if LocCheck(cards,LOCATION_OVERLAY) then
+    return Add(cards,PRIO_TOGRAVE)
+  else
+    return GlobalTargetGet(cards,true)
   end
-  GlobalCardMode=nil
-  if result == nil then result = {math.random(#cards)} end
-  return result
 end
 function UndineTarget(cards)
   return MermailAdd(cards,PRIO_TOGRAVE)
@@ -726,8 +726,8 @@ function UseSphereBP()
     return true
   end
 end
-function ChainSphere()
-  if RemovalCheck(60202749) then
+function ChainSphere(c)
+  if RemovalCheckCard(c) then
     return true
   end
   local effect = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
@@ -755,9 +755,9 @@ function ChainSphere()
   end
   return false
 end
-function ChainReckless()
+function ChainReckless(c)
   local cards = AIMon()
-  if RemovalCheck(37576645) then
+  if RemovalCheckCard(c) then
     return true
   end
   if Duel.GetCurrentPhase() == PHASE_END and Duel.GetTurnPlayer() == 1-player_ai
@@ -767,67 +767,43 @@ function ChainReckless()
   end
   return false
 end
-function MechquippedFilter(card,id)
-  return card:IsControler(player_ai) 
-  and card:IsType(TYPE_MONSTER)
-  and card:IsPosition(POS_FACEUP_ATTACK) 
-  and not card:IsHasEffect(EFFECT_INDESTRUCTABLE_EFFECT) 
-  and not card:IsHasEffect(EFFECT_IMMUNE_EFFECT) 
-  and not card:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET) 
-  and (id == nil or card:GetCode()~=id)
+function MechquippedFilter(c,id)
+  return CurrentOwner(c)==1
+  and FilterType(c,TYPE_MONSTER)
+  and FilterPosition(c,POS_FACEUP_ATTACK) 
+  and c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0
+  and c:is_affected_by(EFFECT_IMMUNE_EFFECT)==0
+  and c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
+  and (id == nil or c.id~=id)
 end
-function ChainMechquipped()
-  local ex,cg = Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_DESTROY)
-  local tg = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TARGET_CARDS)
-  local e = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
-  if ex then
-    if tg then
-      local g = tg:Filter(MechquippedFilter, nil):GetMaxGroup(Card.GetAttack)
-      if g then
-        GlobalTargetSet(g:GetFirst(),AIMon())
-      end
-      return tg:IsExists(MechquippedFilter, 1, nil)
-    else
-      local g = cg:Filter(MechquippedFilter, nil):GetMaxGroup(Card.GetAttack)
-      if g then
-        GlobalTargetSet(g:GetFirst(),AIMon())
-      end
-      return cg:IsExists(MechquippedFilter, 1, nil)
+function ChainMechquipped(c)
+  local targets = RemovalCheckList(AIMon(),CATEGORY_DESTROY,nil,nil,MechquippedFilter)
+  if targets then
+    for i=1,#targets do
     end
+    BestTargets(targets,1,TARGET_PROTECT)
+    GlobalTargetSet(targets[1],AIMon())
+    return true
   end
   if Duel.GetCurrentPhase() == PHASE_BATTLE then
-		local source = Duel.GetAttacker()
-		local target = Duel.GetAttackTarget()
-    if source and target then
-      if source:IsControler(player_ai) then
-        target = Duel.GetAttacker()
-        source = Duel.GetAttackTarget()
-      end
-      if source:GetAttack() >= target:GetAttack() and target:IsControler(player_ai) 
-      and target:IsPosition(POS_FACEUP_ATTACK)
-      and not target:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE)
-      then
-        GlobalTargetSet(target,AIMon())
-        return true
-      end
+    local aimon,oppmon = GetBattlingMons()
+    if WinsBattle(oppmon,aimon) 
+    and not aimon.id == 23899727 
+    then
+      GlobalTargetSet(aimon,AIMon())
     end
   end
-  if RemovalCheck(15914410) then
-    local g=Duel.GetMatchingGroup(MechquippedFilter,player_ai,LOCATION_ONFIELD,0,nil,15914410):GetMaxGroup(Card.GetAttack)
-    if g then
-      GlobalTargetSet(g:GetFirst(),AIMon())
-      return true
-    end
+  targets = SubGroup(AIMon(),MechquippedFilter,15914410)
+  if RemovalCheckCard(c) then
+    BestTargets(targets,1,TARGET_PROTECT)
+    GlobalTargetSet(targets[1],AIMon())
+    return true
   end
-  cg = NegateCheck()
-  if cg then
-		if cg:IsExists(function(c) return c:IsControler(player_ai) and c:IsCode(15914410) end, 1, nil) then
-      local g=Duel.GetMatchingGroup(MechquippedFilter,player_ai,LOCATION_ONFIELD,0,nil):GetMaxGroup(Card.GetAttack)
-      if g then
-        GlobalTargetSet(g:GetFirst(),AIMon())
-        return true
-      end
-    end	
+  targets = SubGroup(AIMon(),MechquippedFilter)
+  if NegateCheckCard(c) then
+    BestTargets(targets,1,TARGET_PROTECT)
+    GlobalTargetSet(targets[1],AIMon())
+    return true
   end
   return false
 end
@@ -879,7 +855,7 @@ function ChainDweller()
 end
 function MermailOnSelectChain(cards,only_chains_by_player)
   MermailTargets = {}
-  if HasID(cards,37576645) and ChainReckless() then
+  if HasID(cards,37576645,nil,nil,nil,nil,ChainReckless) then
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,58471134) and UsePike() then
@@ -892,7 +868,7 @@ function MermailOnSelectChain(cards,only_chains_by_player)
     GlobalCardMode = 1
     return {1,CurrentIndex}
   end
-  if HasID(cards,60202749) and ChainSphere() then
+  if HasID(cards,60202749,nil,nil,nil,nil,ChainSphere) then
     GlobalSummonNegated=true
     return {1,CurrentIndex}
   end
@@ -922,7 +898,7 @@ function MermailOnSelectChain(cards,only_chains_by_player)
   if HasIDNotNegated(cards,04904812) then
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,15914410) and ChainMechquipped() then
+  if HasIDNotNegated(cards,15914410,nil,nil,nil,nil,ChainMechquipped) then
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,50789693) and ChainKappa() then

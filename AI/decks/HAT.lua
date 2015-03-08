@@ -326,7 +326,28 @@ function DionaeaTarget(cards)
     return Add(cards,PRIO_TOHAND)
   end
 end
-function CotHTarget(cards)
+GlobalCoth={}
+function CothSet(target,source)
+  GlobalCoth[target.cardid]=source.cardid
+  return
+end
+function CothCheck(target)
+  if target == nil then return true end
+  local source = GlobalCoth[target.cardid]
+  if source == nil then return true end
+  source = FindCard(source,Field())
+  if source == nil then return true end
+  if target and source and FilterLocation(target,LOCATION_ONFIELD) 
+  and FilterLocation(source,LOCATION_ONFIELD)
+  and NotNegated(source) 
+  and FilterPreviousLocation(target,LOCATION_GRAVE)
+  and FilterSummon(target,SUMMON_TYPE_SPECIAL)
+  then
+    return false
+  end
+  return true
+end
+function CotHTarget(cards,c)
   local result = nil
   if GlobalCardMode and GlobalCardMode>2 then
     local level = GlobalCardMode
@@ -340,7 +361,13 @@ function CotHTarget(cards)
   else
     result = Add(cards,PRIO_TOFIELD,1,TargetCheck)
   end
-  if cards[1].prio then TargetSet(cards[1]) else TargetSet(cards[result[1]]) end
+  if cards[1].prio then 
+    TargetSet(cards[1]) 
+    CothSet(cards[1],c)
+  else 
+    TargetSet(cards[result[1]]) 
+    CothSet(cards[result[1]],c)
+  end
   return result
 end
 function BoMTarget(cards)
@@ -381,7 +408,7 @@ function HATCard(cards,min,max,id,c)
     return DionaeaTarget(cards)
   end
   if id == 97077563 then
-    return CotHTarget(cards)
+    return CotHTarget(cards,c)
   end
   if id == 98645731 then -- Duality
     return Add(cards)
@@ -426,7 +453,7 @@ function UseCotHBP()
     return true
   end
 end
-function ChainCotH()
+function ChainCotH(card)
   local targets=CardsMatchingFilter(OppST(),DestroyFilter)
   local targets2=CardsMatchingFilter(OppField(),MoralltachFilter)
   local targets3=CardsMatchingFilter(OppField(),SanctumFilter)
@@ -438,7 +465,7 @@ function ChainCotH()
   end
   local MyrmeleoCheck = DestroyCheck(OppST())>0 and HasID(AIGrave(),91812341,true) 
   --local DionaeaCheck = CardsMatchingFilter(AIGrave(),TrapHoleFilter)>0 and Duel.GetCurrentChain()==0
-  if RemovalCheck(97077563) and not c:IsCode(12697630) then
+  if RemovalCheckCard(card) and not c:IsCode(12697630) then
     if targets2 > 0 and ArtifactCheckGrave()
     then
       return true
@@ -665,7 +692,7 @@ function HATChain(cards)
     return {1,CurrentIndex}
   end
 
-  if HasID(cards,97077563) and ChainCotH() then
+  if HasID(cards,97077563,nil,nil,nil,nil,ChainCotH) then
     return {1,CurrentIndex}
   end
   if HasID(cards,14087893) and ChainBoM() then

@@ -347,7 +347,7 @@ if DeckCheck(DECK_BUJIN) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
 
-  if HasID(SpSummonable,46772449) and SummonBelzebuth() then
+  if HasID(SpSummonable,46772449) and DeckCheck(DECK_BUJIN) and SummonBelzebuth() then
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,46772449)}
   end
   if HasID(SpSummonable,01855932) and SummonKagutsuchi() then
@@ -671,7 +671,7 @@ function ChainHonest()
       and not target:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE) 
       --and not target:IsHasEffect(EFFECT_IMMUNE_EFFECT) 
       then
-        return UnchainableCheck(37742748)
+        return UnchainableCheck(37742478)
       end
     end
   end

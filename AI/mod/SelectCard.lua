@@ -84,7 +84,15 @@ if DeckCheck(DECK_EXODIA) then
       result[i]=i
     end
   end
-  
+  if triggeringID == 0 and not triggeringCard
+  and Duel.GetTurnPlayer()==player_ai
+  and Duel.GetCurrentPhase()==PHASE_END 
+  and minTargets==maxTargets and minTargets == #AIHand()-6
+  and LocCheck(cards,LOCATION_HAND,true)
+  then
+    --probably end phase discard
+    return Add(cards,PRIO_TOGRAVE,minTargets)
+  end
   return result
 end
 
@@ -96,7 +104,7 @@ end
   BujinOnSelectCard,MermailOnSelectCard,ShadollOnSelectCard,
   SatellarknightOnSelectCard,ChaosDragonOnSelectCard,HATCard,
   QliphortCard,NobleCard,NekrozCard,BACard,DarkWorldCard,
-  GenericCard,ConstellarCard,
+  GenericCard,ConstellarCard,BlackwingCard,
   }
   local result = nil
   for i=1,#SelectCardFunctions do
@@ -121,7 +129,7 @@ end
   and not triggeringCard
   then 
     local c = FindCard(GlobalCurrentAttacker,Field())
-    result = AttackTargetSelection(cards,c,GlobalCurrentATK)
+    result = AttackTargetSelection(cards,c)
     GlobalAIIsAttacking = nil
     return result
   end
@@ -864,17 +872,17 @@ end
   --------------------------------------------
   -- Discard all possible monster type cards
   --------------------------------------------   
-  if GlobalActivatedCardID == 41142615 then -- The Cheerful Coffin 
-	local DiscardCount= 1
-	for i=1,#cards do
-      if bit32.band(cards[i].type,TYPE_MONSTER) == TYPE_MONSTER and cards[i].setcode == 6 then
-      result[DiscardCount]= i;
-	  GlobalActivatedCardID = nil
-	   if (DiscardCount<maxTargets) then DiscardCount=DiscardCount+1 else break end
+  if triggeringID == 41142615 then -- The Cheerful Coffin 
+    local result = {}
+    for i=1,#cards do
+      local c = cards[i]
+      if DarkWorldMonsterFilter(c) and #result<maxTargets then
+        result[#result+1]=i
       end
-   end
-  return result
-end
+    end
+    if #result==0 then result = Add(cards,PRIO_DISCARD) end
+    return result
+  end
   
   
   --------------------------------------------

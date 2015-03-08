@@ -306,7 +306,9 @@ NSBL={
 62957424,52738610,30312361,41386308, -- BA Libic, Necroz Dance Princess, Phantom of Chaos, Mathematician
 34230233,60228941,33731070,79126789, -- DW Grapha, Snoww, Beiige, Broww
 94283662,20292186,70908596,78364470, -- Trance Archfiend, Artifact Scythe, Constellar Kaus, Pollux
-41269771,78358521, -- Constellar Algiedi, Sombre
+41269771,78358521,81105204,58820853, -- Constellar Algiedi, Sombre, BW Kris, Shura
+49003716,14785765,85215458,02009101, -- BW Bora, Zephyros, Kalut, Gale
+55610595,28190303,22835145,73652465, -- BW Pinaka, Gladius, Blizzard, Oroshi
 }
 function NormalSummonBlacklist(CardId) 
   for i=1,#NSBL do
@@ -401,6 +403,10 @@ SSBL={
 01639384,10406322,66547759, -- Felgrand, Sylvan Alsei, Lancelot
 88120966,78156759,31386180, -- Giant Grinder, Zenmaines, Tiras
 84013237,00005509,31437713, -- Utopia, Utopia Lightning, Heartlanddraco
+81983656,69031175,95040215, -- BW Hawk Joe, Armor Master, Nothung
+73347079,81105204,49003716, -- Force Strix, BW Kris, Bora
+02009101,28190303,73652465, -- BW Gale, Gladius, Oroshi
+73580471, -- Black Rose
 }
 
 
@@ -599,8 +605,9 @@ Unchainable={
 78474168,50078509,29616929,19748583, -- Breakthrough Skill, Fiendish Chain, TTHN, Gwen
 25789292,36006208,71587526,63356631, -- Forbidden Chalice, Fire Lake, Karma Cut, PWWB
 25857246,74122412,99185129,56574543, -- Nekroz Valkyrus, Nekroz Gungnir, Nekroz Clausolas, Bujingi Sinyou
-59251766,37742748,41930553,20292186, -- Bujingi Hare, Honest, Dark Smog, Artifact Scythe
-38296564, -- Safe Zone
+59251766,37742478,41930553,20292186, -- Bujingi Hare, Honest, Dark Smog, Artifact Scythe
+38296564,53567095,72930878,81983656, -- Safe Zone, Icarus, Black Sonic, BW Hawk Joe
+85215458, -- BW Kalut
 }
 function isUnchainableTogether(CardId)
   for i=1,#Unchainable do
@@ -785,7 +792,11 @@ ScriptedCards ={
 74294676,42752141,71068247,50323155,  -- Laggia, Dolkka, Totem Bird, Black Horn
 02956282,82044279,99188141,41269771,  -- Naturia Barkion, Clear Wing Synchro Dragon, THRIO, Constellar Algiedi
 78358521,35544402,31386180,00005509,  -- Constellar Sombre, Twinkle, Tiras, Utopia Lightning
-31437713,57103969, -- Heartlanddraco, Tenki
+31437713,57103969,72959823,53567095, -- Heartlanddraco, Tenki, Panzer Dragon, Icarus
+81105204,58820853,49003716,14785765, -- BW Kris, Shura, Bora, Zephyros
+85215458,02009101,55610595,28190303, -- BW Kalut, Gale, Pinaka, Gladius
+22835145,73652465,81983656,69031175, -- BW Blizzard, Oroshi, Hawk Joe, Armor Master
+95040215,73347079,91351370,72930878, -- Nothung, Force Strix, Black Whirlwind, Black Sonic
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do

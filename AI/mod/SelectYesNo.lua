@@ -34,7 +34,6 @@ function OnSelectYesNo(description_id)
     ApplyATKBoosts(cards)
     if CanWinBattle(attacker,cards) then 
       GlobalCurrentAttacker = attacker.cardid
-      GlobalCurrentATK = attack
       GlobalAIIsAttacking = true
       return 1
     else

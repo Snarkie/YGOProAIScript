@@ -12,18 +12,29 @@
 -- index = index of the card to attack with
 
 -- function to select attack targets. Redirected from SelectCard.lua
-function AttackTargetSelection(cards,attacker,atk)
+function AttackTargetSelection(cards,attacker)
   local id = attacker.id
-  local result ={}
+  local result ={attacker}
+  ApplyATKBoosts(result)
+  result = {}
   ApplyATKBoosts(cards)
-  attacker.attack=atk
-  print("attack target selection")
-  print("specific attacker")
+  --print("attack target selection")
+  --print("specific attacker")
   if NotNegated(attacker) then
     
     -- High Laundsallyn
     if id == 83519853 and CanWinBattle(attacker,cards,true) then                 
-      return BestAttackTarget(cards,attacker,FilterPendulum)
+      return BestAttackTarget(cards,attacker,false,FilterPendulum)
+    end
+    
+    -- Shura
+    if id == 58820853 and CanWinBattle(attacker,cards,true,true) then                 
+      return BestAttackTarget(cards,attacker,true,FilterPendulum)
+    end
+    
+    -- Shura with Kalut
+    if id == 58820853 and CanWinBattle(attacker,cards,true) then                 
+      return BestAttackTarget(cards,attacker,false,FilterPendulum)
     end
     
     -- FF Gorilla
@@ -33,7 +44,7 @@ function AttackTargetSelection(cards,attacker,atk)
     
     -- FF Bear
     if id == 06353603 and CanDealBattleDamage(attacker,cards) then              
-      return BestAttackTarget(cards,attacker,BattleDamageFilter,attacker)
+      return BestAttackTarget(cards,attacker,false,BattleDamageFilter,attacker)
     end
     
     -- BLS
@@ -53,22 +64,22 @@ function AttackTargetSelection(cards,attacker,atk)
     
     -- Lightpulsar Dragon
     if id == 99365553 and LightpulsarCheck() then                                 
-      return BestAttackTarget(cards,attacker,HandFilter,atk)
+      return BestAttackTarget(cards,attacker,false,HandFilter,atk)
     end
     
     -- Mermail Abysslinde
     if id == 23899727 and LindeCheck() then                                       
-      return BestAttackTarget(cards,attacker,HandFilter,atk)
+      return BestAttackTarget(cards,attacker,false,HandFilter,atk)
     end
     
     -- Fire Hand
     if id == 68535320 and FireHandCheck() then
-      return BestAttackTarget(cards,attacker,HandFilter,atk)
+      return BestAttackTarget(cards,attacker,false,HandFilter,atk)
     end
     
     -- Ice Hand
     if id == 95929069 and IceHandCheck() then
-      return BestAttackTarget(cards,attacker,HandFilter,atk)
+      return BestAttackTarget(cards,attacker,false,HandFilter,atk)
     end
     
     -- Gwen
@@ -78,15 +89,18 @@ function AttackTargetSelection(cards,attacker,atk)
     
     -- Zenmaines
     if id == 78156759 and ZenmainesCheck(attacker,cards) then
-      return BestAttackTarget(cards,attacker,ZenmainesFilter,attacker)
+      return BestAttackTarget(cards,attacker,false,ZenmainesFilter,attacker)
     end
   end
-  print("generic attacker")
+  --print("generic attacker")
   return BestAttackTarget(cards,attacker)
 end
-function BestAttackTarget(cards,source,filter,opt)
-  print("best attack target")
+function BestAttackTarget(cards,source,ignorebonus,filter,opt)
+  --print("best attack target")
   local atk = source.attack
+  if ignorebonus and source.bonus and source.bonus > 0 then
+    atk = math.max(0,atk - source.bonus)
+  end
   local result = nil
   for i=1,#cards do
     local c = cards[i]
@@ -139,17 +153,17 @@ function BestAttackTarget(cards,source,filter,opt)
     end
   end  
   table.sort(cards,function(a,b) return a.prio > b.prio end)
-  print("table:")
-  print("attacker: "..source.id..", atk: "..atk)
+  --print("table:")
+  --print("attacker: "..source.id..", atk: "..atk)
   for i=1,#cards do
-    print(i..") id: "..cards[i].id.." index: "..cards[i].index.." prio: "..cards[i].prio)
+    --print(i..") id: "..cards[i].id.." index: "..cards[i].index.." prio: "..cards[i].prio)
   end
   result={cards[1].index}
   return result
 end
 
 function OnSelectBattleCommand(cards,activatable)
-  print("battle command selection")
+  --print("battle command selection")
   -- shortcut function that returns the proper attack index and sets some globals 
   -- needed for attack target selection
   local function Attack(index,direct)
@@ -158,7 +172,6 @@ function OnSelectBattleCommand(cards,activatable)
       GlobalAIIsAttacking = nil
     else
       GlobalCurrentAttacker = cards[index].cardid
-      GlobalCurrentATK = cards[index].attack
       GlobalAIIsAttacking = true
     end
     return 1,i
@@ -203,9 +216,14 @@ function OnSelectBattleCommand(cards,activatable)
   ApplyATKBoosts(targets)
   
   -- First, attack with monsters, that get beneficial effects from destroying stuff
-  print("specific attackers")
+  --print("specific attackers")
   -- High Laundsallyn
   if HasIDNotNegated(cards,83519853) and CanWinBattle(cards[CurrentIndex],targets,true) then 
+    return Attack(CurrentIndex)
+  end
+  
+  -- Shura
+  if HasIDNotNegated(cards,58820853) and CanWinBattle(cards[CurrentIndex],targets,true) then 
     return Attack(CurrentIndex)
   end
   
@@ -276,8 +294,8 @@ function OnSelectBattleCommand(cards,activatable)
   end
   
   -- generic attacks
-  print("generic attackers")
-  print("for game")
+  --print("generic attackers")
+  --print("for game")
   -- can attack for game on a certain target
   SortByATK(cards)
   if #targets>0 and #cards>0 then
@@ -287,7 +305,7 @@ function OnSelectBattleCommand(cards,activatable)
       end
     end
   end
-  print("without boost")
+  --print("without boost")
   -- can destroy a monster without additional attack boosting cards
   SortByATK(cards,true)
   if #targets>0 and #cards>0 then
@@ -297,7 +315,7 @@ function OnSelectBattleCommand(cards,activatable)
       end
     end
   end
-  print("with boost")
+  --print("with boost")
   -- can destroy a monster with additional boost
   SortByATK(cards,true)
   if #targets>0 and #cards>0 then
@@ -307,7 +325,7 @@ function OnSelectBattleCommand(cards,activatable)
       end
     end
   end
-  print("face-down")
+  --print("face-down")
   -- can probably destroy an unknown face-down monster
   SortByATK(cards,true)
   if #targets>0 and #cards>0  then
@@ -321,7 +339,7 @@ function OnSelectBattleCommand(cards,activatable)
       end
     end
   end
-  print("battle damage")
+  --print("battle damage")
   -- can deal battle damage (against battle-immune targets etc)
   SortByATK(cards,true)
   if #targets>0 and #cards>0 then
@@ -331,13 +349,13 @@ function OnSelectBattleCommand(cards,activatable)
       end
     end
   end
-  print("direct")
+  --print("direct")
   -- direct attack
   SortByATK(cards,true)
   if #OppMon()==0 and #cards>0 then
     return Attack(1,true)
   end
-  print("forced")
+  --print("forced")
   -- forced to attack
   SortByATK(cards)
   for i=1,#cards do
@@ -345,7 +363,7 @@ function OnSelectBattleCommand(cards,activatable)
       return Attack(i)
     end
   end
-  print("not attack")
+  --print("not attack")
   
 ---
 -- activate cards 

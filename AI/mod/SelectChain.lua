@@ -92,7 +92,6 @@ function OnSelectChain(cards,only_chains_by_player,forced)
     OppCardType = OppCard.type
     OppCardOwner = OppCard.owner
   end
-
   
   ---------------------------------------------
   -- Don't activate anything if the AI controls
@@ -144,7 +143,7 @@ GadgetOnSelectChain,BujinOnSelectChain,MermailOnSelectChain,
 ShadollOnSelectChain,SatellarknightOnSelectChain,
 ChaosDragonOnSelectChain,HATChain,QliphortChain,
 NobleChain,NekrozChain,BAChain,DarkWorldChain,
-ConstellarChain,
+ConstellarChain,BlackwingChain,
 }
   
 for i=1,#SelectChainFunctions do
@@ -235,19 +234,6 @@ result = 0
           GlobalActivatedCardID = cards[i].id
           GlobalCardMode = 1
 		  return 1,i
-        end
-      end
-    end
-
-  ----------------------------------
-  -- Activate Icarus Attack only if
-  -- the opponent controls 2+ cards.
-  ----------------------------------
-    for i=1,#cards do
-      if cards[i].id == 53567095 then
-        if Get_Card_Count(AI.GetOppMonsterZones()) + Get_Card_Count(OppST()) >= 2 then
-          GlobalActivatedCardID = cards[i].id
-          return 1,i
         end
       end
     end

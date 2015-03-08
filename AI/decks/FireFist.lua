@@ -156,8 +156,9 @@ end
 function VulcanFilter(c)
   return (bit32.band(c.type,TYPE_XYZ+TYPE_SYNCHRO+TYPE_FUSION+TYPE_RITUAL)>0 or c.level>4) and bit32.band(c.position,POS_FACEUP)>0
 end
-function SummonVulcan()
-  return HasID(AIST(),57103969,true) and CardsMatchingFilter(OppMon(),VulcanFilter)>0 and Chance(50)
+function SummonVulcanFF()
+  return DeckCheck(DECK_FIREFIST) and HasID(AIST(),57103969,true)
+  and CardsMatchingFilter(OppMon(),VulcanFilter)>0 and Chance(50)
 end
 
 
@@ -326,7 +327,7 @@ function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
 
-  if HasID(SpSummonable,98012938) and SummonVulcan() then
+  if HasID(SpSummonable,98012938) and SummonVulcanFF() then
     GlobalCardMode = 1
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,98012938)}
   end

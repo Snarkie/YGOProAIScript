@@ -187,6 +187,12 @@ function SummonExtraDeck(cards,prio)
   if HasIDNotNegated(SpSum,31924889) and SummonArcanite() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
+  if HasIDNotNegated(SpSum,33698022,nil,nil,nil,nil,SummonMoonlightRose) then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasIDNotNegated(SpSum,98012938,nil,nil,nil,nil,SummonVulcan) then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
   if HasID(SpSum,33198837) and SummonNaturiaBeast(SpSum[CurrentIndex]) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
@@ -198,13 +204,13 @@ function SummonExtraDeck(cards,prio)
 -- XYZ
 
 -- Rank 8
-  if HasID(SpSum,01639384) and SummonFelgrand(SpSum[CurrentIndex]) then
+  if HasIDNotNegated(SpSum,01639384) and SummonFelgrand(SpSum[CurrentIndex]) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasID(SpSum,88120966) and SummonGiantGrinder(SpSum[CurrentIndex]) then
+  if HasIDNotNegated(SpSum,88120966) and SummonGiantGrinder(SpSum[CurrentIndex]) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasID(SpSum,10406322) and SummonAlsei(SpSum[CurrentIndex]) then
+  if HasIDNotNegated(SpSum,10406322) and SummonAlsei(SpSum[CurrentIndex]) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSum,73445448) and SummonZombiestein(SpSum[CurrentIndex]) then
@@ -360,6 +366,12 @@ function UseFieldNuke(exclude)
   return (DestroyCheck(OppField())+exclude)-DestroyCheck(AIField())>0 
 end
 function SummonBelzebuth()
+  if DeckCheck(DECK_CONSTELLAR) and HasIDNotNegated(AIMon(),70908596,true)
+  and CardsMatchingFilter(AIMon(),ConstellarNonXYZFilter)>1
+  and (SummonVolcasaurusFinish() or SummonVolcaGaiaFinish(1))
+  then
+    return false
+  end
   local AICards=UseLists({AIHand(),AIField()})
   local OppCards=UseLists({OppHand(),OppField()})
   return #AICards<=#OppCards and UseFieldNuke(-1)
@@ -483,7 +495,8 @@ function SummonJeweledRDA(c)
 end
 
 function SummonClearWing(c)
-  return OppGetStrongestAttDef() < c.attack -- and MP2Check() or CardsMatchingFilter(
+  return OppGetStrongestAttDef() < c.attack 
+  and MP2Check()
 end
 function UseBigEye()
   return true
@@ -537,7 +550,7 @@ function VolcasaurusFilter(c,lp)
   and Targetable(c,TYPE_MONSTER)
   and Affected(c,TYPE_MONSTER,5)
   and DestroyFilter(c)
-  and DestroyCountCheck(c)
+  and DestroyCountCheck(c,TYPE_MONSTER,false)
   and bit32.band(c.position,POS_FACEUP)>0
   and (lp==nil or c.text_attack and c.text_attack>=AI.GetPlayerLP(2))
 end
@@ -580,19 +593,17 @@ function SummonVolcaGaiaFinish(mode)
   then
     local result = 0
     local result2 = 0
-    for i=1,#cards do
-      if #cards == 0 then
-        result = 2600
-      else 
-        for i=1,#cards do
-          local dmg = BattleDamage(cards[i],FindID(91949988,AIExtra()),nil,nil,nil,true)
-          if dmg>result then
-            result = dmg
-          end
-          dmg = BattleDamage(cards[i],FindID(29669359,AIMon()))
-          if dmg>result2 then
-            result2 = dmg
-          end
+    if #cards == 0 then
+      result = 2600
+    else 
+      for i=1,#cards do
+        local dmg = BattleDamage(cards[i],FindID(91949988,AIExtra()),nil,nil,nil,true)
+        if dmg>result then
+          result = dmg
+        end
+        dmg = BattleDamage(cards[i],FindID(29669359,AIMon()))
+        if dmg>result2 then
+          result2 = dmg
         end
       end
     end
@@ -679,7 +690,7 @@ end
 function ChainPleiades(c)
   local targets = CardsMatchingFilter(OppMon(),PleiadesFilter)
   local targets2 = CardsMatchingFilter(OppMon(),PleiadesFilter2)
-  if RemovalCheck(73964868) then
+  if RemovalCheckCard(c) then
     if (Duel.GetOperationInfo(Duel.GetCurrentChain(),CATEGORY_TOHAND) 
     or Duel.GetOperationInfo(Duel.GetCurrentChain(),CATEGORY_TODECK))
     and targets>0 or targets2>0
@@ -694,7 +705,7 @@ function ChainPleiades(c)
   if not UnchainableCheck(73964868) then
     return false
   end
-  if targets2 and targets2 > 0 and (AIGetStrongestAttack()<=c.attack 
+  if targets2 and targets2 > 0 and (AIGetStrongestAttack()<=OppGetStrongestAttDef(PleiadesFilter2) 
   or TurnEndCheck() or Duel.GetTurnPlayer()==1-player_ai)
   then
     return true
@@ -885,7 +896,7 @@ function GiantGrinderFilter(c,source)
   and DestroyFilter(c)
   and Affected(c,TYPE_MONSTER,source.level)
   and Targetable(c,TYPE_MONSTER)
-  and DestroyCountCheck(c)
+  and DestroyCountCheck(c,TYPE_MONSTER,false)
 end
 function GiantGrinderFilter2(c,source)
   return GiantGrinderFilter(c,source)
@@ -1027,6 +1038,32 @@ function UseInstantFusion(mode)
     return true
   end
   return false
+end
+
+function MoonlightRoseFilter(c)
+  return FilterSummon(c,SUMMON_TYPE_SPECIAL)
+  and Affected(c,TYPE_MONSTER,7)
+  and Targetable(c,TYPE_MONSTER)
+  and not ToHandBlacklist(c.id)
+  and PriorityTarget(c)
+end
+function SummonMoonlightRose(c)
+  return (WindaCheck() or FieldCheck(5)>1 
+  or not DeckCheck(DECK_SHADDOLL))
+  and HasID(AIExtra(),33698022,true)
+  and CardsMatchingFilter(OppMon(),MoonlightRoseFilter)>0
+  and MP2Check()
+end
+function VulcanFilter(c)
+  return Affected(c,TYPE_MONSTER,6)
+  and Targetable(c,TYPE_MONSTER)
+  and not ToHandBlacklist(c.id)
+  and PriorityTarget(c)
+end
+function SummonVulcan(c)
+  return HasID(AIExtra(),98012938,true)
+  and CardsMatchingFilter(OppMon(),VulcanFilter)>0
+  and BounceTargets(AIField(),FilterPosition,POS_FACEUP)>0
 end
 ----
 
@@ -1215,6 +1252,7 @@ function ChainFiendish(card)
 		local target = Duel.GetAttackTarget()
     if source and target and WinsBattle(source,target) 
     and Targetable(source,TYPE_TRAP) and Affected(source,TYPE_TRAP)
+    and UnchainableCheck(50078509)
     then
       GlobalTargetSet(source,OppMon())
       return true
@@ -1498,6 +1536,9 @@ function GenericCard(cards,min,max,id,c)
   end
   if id == 01845204 then
     return InstantFusionTarget(cards)
+  end
+  if id == 33698022 then  -- Moonlight Rose
+    return BestTargets(cards,1,TARGET_TOHAND)
   end
   return nil
 end

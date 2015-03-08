@@ -17,6 +17,7 @@ DECK_BA           = 13
 DECK_EXODIA       = 14
 DECK_DARKWORLD    = 15
 DECK_CONSTELLAR   = 16
+DECK_BLACKWING    = 17
 
 DeckIdent={ --card that identifies the deck
 [1]   = 99365553, -- Lightpulsar Dragon
@@ -35,6 +36,7 @@ DeckIdent={ --card that identifies the deck
 [14]  = 33396948, -- Exodia the Forbidden One
 [15]  = 34230233, -- DW Grapha
 [16]  = 78358521, -- Constellar Sombre
+[17]  = 91351370, -- Black Whirlwind
 }
 Deck = nil
 DeckName={
@@ -55,6 +57,7 @@ DeckName={
 [14]  = "Exodia",
 [15]  = "Dark World",
 [16]  = "Constellar",
+[17]  = "Blackwing",
 }
 function DeckCheck(opt)
   if Deck == nil then
@@ -97,6 +100,7 @@ function PrioritySetup()
 
   DarkWorldPriority()
   ConstellarPriority()
+  BlackwingPriority()
   
 AddPriority({
 -- test
@@ -385,6 +389,13 @@ AddPriority({
 --for backwards compatibility
 [05361647] = {1,1,1,1,9,1,1,1,1,1,nil},               -- Battlin' Boxer Glassjaw
 [68144350] = {1,1,1,1,5,1,1,1,1,1,nil},               -- Battlin' Boxer Switchhitter
+
+[44519536] = {1,1,-1,-1,-1,-1,-1,-1,1,1,nil},
+[08124921] = {1,1,-1,-1,-1,-1,-1,-1,1,1,nil},
+[07902349] = {1,1,-1,-1,-1,-1,-1,-1,1,1,nil},         -- Exodia pieces
+[70903634] = {1,1,-1,-1,-1,-1,-1,-1,1,1,nil},
+[33396948] = {1,1,-1,-1,-1,-1,-1,-1,1,1,nil},
+
 })
 end
 

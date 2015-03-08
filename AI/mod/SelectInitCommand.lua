@@ -100,6 +100,7 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
   set_player_turn()
   GlobalBPAllowed = to_bp_allowed
   SurrenderCheck()
+  
   ---------------------------------------
   -- Don't do anything if the AI controls
   -- a face-up Light and Darkness Dragon.
@@ -210,6 +211,9 @@ if DeckCheck(DECK_EXODIA) then
   end
   local c = FindID(70791313,AIMon())
   if HasID(activate,75014062) and c and c:get_counter(0x3001)<2 then -- Spell Power Grasp
+    return COMMAND_ACTIVATE,CurrentIndex
+  end
+  if HasID(activate,55144522) then -- Pot of Greed
     return COMMAND_ACTIVATE,CurrentIndex
   end
   if HasID(activate,74029853) then -- Golden Bamboo Sword
@@ -364,6 +368,12 @@ if not ExtraCheck then
 end
 if not ExtraCheck then 
   DeckCommand = ConstellarInit(cards)
+  if DeckCommand ~= nil then
+    return DeckCommand[1],DeckCommand[2]
+  end
+end
+if not ExtraCheck then 
+  DeckCommand = BlackwingInit(cards)
   if DeckCommand ~= nil then
     return DeckCommand[1],DeckCommand[2]
   end
@@ -2176,4 +2186,4 @@ end
   -- there should be check here to see if the next phase is disallowed (like Karakuri having to attack)  I'm too lazy to make it right now, sorry. :*	
 	return COMMAND_TO_NEXT_PHASE,1
 end
-    
+
