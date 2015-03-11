@@ -1837,6 +1837,20 @@ function ApplyATKBoosts(Cards)
     end
   end
   
+  -- Shrink
+  if HasIDNotNegated(AICards(),55713623,true) then
+    for i=1,#Cards do
+      local c = Cards[i]
+      if Targetable(c,TYPE_SPELL) 
+      and Affected(c,TYPE_SPELL)
+      and CurrentOwner(c)==2
+      then
+        c.attack=c.attack-c.base_attack*.5
+        c.bonus=c.base_attack*-.5
+      end
+    end
+  end
+  
   -- fix cards with attack < 0 after attack boosts
   for i=1,#Cards do
     Cards[i].attack=math.max(Cards[i].attack,0)

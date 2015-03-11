@@ -433,13 +433,19 @@ function ChainApoqliphort()
   return (Duel.GetCurrentPhase()==PHASE_END or Duel.GetTurnPlayer()==PLAYER_AI) 
   and PriorityCheck(AIExtra(),PRIO_EXTRA,3,QliphortFilter)>2
 end
-function ChainVanity()
+function ChainVanity(c)
   for i=1,Duel.GetCurrentChain() do
     if Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_SPECIAL_SUMMON) 
     and  Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_PLAYER)~=player_ai 
     then
       return true
     end
+  end
+  if MKBCheck(c) and Duel.GetTurnPlayer()~=player_ai then
+    return true
+  end
+  if ScytheCheck() and not OppHasStrongestMonster() then
+    return true
   end
   return false
 end
@@ -453,7 +459,7 @@ function QliphortChain(cards)
   if HasID(cards,04450854) and ChainApoqliphort() then
     return {1,CurrentIndex}
   end
-  if HasID(cards,05851097) and ChainVanity() then
+  if HasID(cards,05851097) and ChainVanity(cards[CurrentIndex]) then
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,64496451) then -- Disk

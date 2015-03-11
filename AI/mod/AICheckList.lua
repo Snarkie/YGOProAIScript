@@ -309,6 +309,7 @@ NSBL={
 41269771,78358521,81105204,58820853, -- Constellar Algiedi, Sombre, BW Kris, Shura
 49003716,14785765,85215458,02009101, -- BW Bora, Zephyros, Kalut, Gale
 55610595,28190303,22835145,73652465, -- BW Pinaka, Gladius, Blizzard, Oroshi
+75498415,72714392,24508238, -- BW Sirocco, Vayu, D.D. Crow
 }
 function NormalSummonBlacklist(CardId) 
   for i=1,#NSBL do
@@ -406,7 +407,10 @@ SSBL={
 81983656,69031175,95040215, -- BW Hawk Joe, Armor Master, Nothung
 73347079,81105204,49003716, -- Force Strix, BW Kris, Bora
 02009101,28190303,73652465, -- BW Gale, Gladius, Oroshi
-73580471, -- Black Rose
+73580471,76067258,52687916, -- Black Rose, Master Key Beetle, Synch Trishula
+27315304,33236860,09012916, -- Mist Wurm, BW Silverwing, Black Winged Dragon
+23693634,50321796,76913983, -- Colossal Fighter, Synch Brionac, BW Armed Wind
+90953320,26593852,44508094, -- Hyper Librarian, Catastor, Stardust
 }
 
 
@@ -431,7 +435,7 @@ SetBL={
   46008667,83438826,66970385, -- Excaliburn, Arfeudutyr, Chapter
   92512625,51124303,14735698, -- Advice, Nekroz Kaleidomirror, Exomirror
   96729612,97211663,45986603, -- Preparation of Rites, Nekroz Cycle, Snatch Steal
-  12580477, -- Raigeki
+  12580477,27174286, -- Raigeki, RftDD
 }
 
 
@@ -607,7 +611,7 @@ Unchainable={
 25857246,74122412,99185129,56574543, -- Nekroz Valkyrus, Nekroz Gungnir, Nekroz Clausolas, Bujingi Sinyou
 59251766,37742478,41930553,20292186, -- Bujingi Hare, Honest, Dark Smog, Artifact Scythe
 38296564,53567095,72930878,81983656, -- Safe Zone, Icarus, Black Sonic, BW Hawk Joe
-85215458, -- BW Kalut
+85215458,24508238,59616123, -- BW Kalut, D.D. Crow, Trap Stun
 }
 function isUnchainableTogether(CardId)
   for i=1,#Unchainable do
@@ -797,6 +801,9 @@ ScriptedCards ={
 85215458,02009101,55610595,28190303, -- BW Kalut, Gale, Pinaka, Gladius
 22835145,73652465,81983656,69031175, -- BW Blizzard, Oroshi, Hawk Joe, Armor Master
 95040215,73347079,91351370,72930878, -- Nothung, Force Strix, Black Whirlwind, Black Sonic
+76067258,75498415,72714392,24508238, -- Master Key Beetle,BW Sirocco, Vayu, D.D. Crow
+42703248,83764719,27174286,59616123, -- Trunade, Monster Reborn, RftDD, Trap Stun
+33236860,09012916,50321796,59839761, --Silverwing, Black-Winged Dragon, Synch Brionac, Delta Crow
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do

@@ -1,4 +1,4 @@
-Version = "0.26c"
+Version = "0.26d"
 Experimental = true
 
 --[[

@@ -1063,7 +1063,7 @@ function ArmorAtkFilter(c)
 end
 function ChainArmor()
   if Duel.GetCurrentPhase() == PHASE_DAMAGE then
-    if AttackBoostCheck(1000,player_ai,ArmorAtkFilter) then
+    if AttackBoostCheck(1000,0,player_ai,ArmorAtkFilter) then
       if Duel.GetTurnPlayer() == player_ai then
         GlobalTargetSet(Duel.GetAttacker(),AIMon())
       else

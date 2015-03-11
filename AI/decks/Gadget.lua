@@ -455,7 +455,7 @@ function RedoxTarget(cards)
   end
   return result
 end
-function CotHTargetGadget(cards) 
+function CotHTargetGadget(cards,c) 
   local result=nil
   local compare = function(a,b) if a.prio==b.prio then return a.attack>b.attack end return a.prio>b.prio end
   for i=1,#cards do
@@ -487,10 +487,10 @@ function CotHTargetGadget(cards)
   if cards[1].prio 
   then 
     TargetSet(cards[1]) 
-    CothSet(cards[1],c)
+    if c then CothSet(cards[1],c) end
   else 
     TargetSet(cards[result]) 
-    CothSet(cards[result],c)
+    if c then CothSet(cards[1],c) end
   end
   return {result}
 end

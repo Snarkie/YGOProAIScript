@@ -921,14 +921,15 @@ function ChainMST(c)
     and not c:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET)
     and not c:IsHasEffect(EFFECT_INDESTRUCTABLE_EFFECT)
     and not c:IsHasEffect(EFFECT_IMMUNE_EFFECT)
-    and (not DestroyBlacklist(c) or c:GetCode()==19337371 or c:GetCode()==05851097)
+    and (not DestroyBlacklist(c) or c:GetCode()==19337371 
+    or c:GetCode()==05851097 and Duel.GetCurrentChain()>1)
     then
       GlobalCardMode = 1
       GlobalTargetSet(c,OppST())
       return true
     end
   end
-  if HasPriorityTarget(OppST(),true) then
+  if HasPriorityTarget(OppST(),true) and Duel.GetCurrentChain()==0 then
     return true
   end
   if ScytheCheck() and ArtifactCheck(nil,true) then
@@ -993,7 +994,8 @@ function ChainIgnition(c)
     and not c:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET)
     and not c:IsHasEffect(EFFECT_INDESTRUCTABLE_EFFECT)
     and not c:IsHasEffect(EFFECT_IMMUNE_EFFECT)
-    and (not DestroyBlacklist(c) or c:GetCode()==19337371 or c:GetCode()==05851097)
+    and (not DestroyBlacklist(c) or c:GetCode()==19337371 
+    or c:GetCode()==05851097 and Duel.GetCurrentChain()>1)
     and Duel.GetLocationCount(player_ai,LOCATION_SZONE)>loc
     then
       GlobalTargetSet(c,OppST())
@@ -1001,7 +1003,10 @@ function ChainIgnition(c)
       return true
     end
   end
-  if HasPriorityTarget(OppST(),true) and Duel.GetLocationCount(player_ai,LOCATION_SZONE)>loc then
+  if HasPriorityTarget(OppST(),true) 
+  and Duel.GetLocationCount(player_ai,LOCATION_SZONE)>loc
+  and Duel.GetCurrentChain()
+  then
     return true
   end
   if ScytheCheck() and ArtifactCheck(true,true) then

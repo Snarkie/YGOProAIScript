@@ -43,7 +43,16 @@ function SummonExtraDeck(cards,prio)
   if HasIDNotNegated(Act,89882100) then  -- Night Beam
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  
+  if HasID(Act,05133471,nil,nil,LOCATION_GRAVE) 
+  and UseGalaxyCyclone(2) 
+  then  
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Act,05133471,nil,nil,LOCATION_HAND+LOCATION_ONFIELD) 
+  and UseGalaxyCyclone(1) 
+  then  
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
 ---- 
 -- summon certain monsters before anything else
 ----   
@@ -145,6 +154,9 @@ function SummonExtraDeck(cards,prio)
     GlobalCardMode = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+  if HasIDNotNegated(Act,50321796,UseBrionac) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   if HasIDNotNegated(Act,16195942) and UseRebellion() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -177,6 +189,12 @@ function SummonExtraDeck(cards,prio)
   if HasID(SpSum,83994433) and SummonStardustSpark(SpSum[CurrentIndex]) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
+  if HasID(SpSum,44508094,SummonStardust) then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(SpSum,23693634,SummonColossal) then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
   if HasID(SpSum,04779823) and SummonMichael(SpSum[CurrentIndex]) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
@@ -187,10 +205,13 @@ function SummonExtraDeck(cards,prio)
   if HasIDNotNegated(SpSum,31924889) and SummonArcanite() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasIDNotNegated(SpSum,33698022,nil,nil,nil,nil,SummonMoonlightRose) then
+  if HasIDNotNegated(SpSum,33698022,SummonMoonlightRose) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasIDNotNegated(SpSum,98012938,nil,nil,nil,nil,SummonVulcan) then
+  if HasIDNotNegated(SpSum,98012938,SummonVulcan) then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(SpSum,50321796,SummonBrionac) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSum,33198837) and SummonNaturiaBeast(SpSum[CurrentIndex]) then
@@ -199,7 +220,12 @@ function SummonExtraDeck(cards,prio)
   if HasID(SpSum,88033975) and SummonArmades(SpSum[CurrentIndex]) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-
+  if HasID(SpSum,90953320,SummonLibrarian) then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(SpSum,26593852,SummonCatastor) then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
 
 -- XYZ
 
@@ -353,6 +379,41 @@ function SummonExtraDeck(cards,prio)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   return nil
+end
+function SummonStardust(c)
+  return OppGetStrongestAttDef()<2500 and MP2Check()
+end
+function SummonColossal(c)
+  return BattlePhaseCheck() and (OppGetStrongestAttack()==c.attack
+  or Negated(c) and OppHasStrongestMonster() 
+  and OppGetStrongestAttDef()<=c.attack)
+end
+function BrionacFilter(c)
+  return PriorityTarget(c)
+  and not ToHandBlacklist(c.id)
+  and Affected(c,TYPE_MONSTER,6)
+  and Targetable(c,TYPE_MONSTER)
+end
+function UseBrionac(c)
+  return NotNegated(c) 
+  and CardsMatchingFilter(OppField(),BrionacFilter)>0
+  and PriorityCheck(AIHand(),PRIO_TOGRAVE)>2
+end
+function SummonBrionac(c)
+  return NotNegated(c) 
+  and CardsMatchingFilter(OppMon(),BrionacFilter)>0
+  and PriorityCheck(AIHand(),PRIO_TOGRAVE)>2
+end
+function SummonCatastor(c)
+  return NotNegated(c) and OppHasStrongestMonster()
+  and CardsMatchingFilter(OppMon(),CatastorFilter)>0
+  or Negated(c) and OppHasStrongestMonster() 
+  and OppGetStrongestAttDef()<=c.attack
+end
+function SummonLibrarian(c)
+  return NotNegated(c) and CardsMatchingFilter(AIMon(),FilterType,TYPE_TUNER)>1
+  or Negated(c) and OppHasStrongestMonster() 
+  and OppGetStrongestAttDef()<=c.attack
 end
 function SummonZombiestein(c)
   return MP2Check() and OppHasStrongestMonster() --and OppGetStrongestAttack()>2800
@@ -1063,7 +1124,13 @@ end
 function SummonVulcan(c)
   return HasID(AIExtra(),98012938,true)
   and CardsMatchingFilter(OppMon(),VulcanFilter)>0
-  and BounceTargets(AIField(),FilterPosition,POS_FACEUP)>0
+  and CardsMatchingFilter(AIST(),FilterPosition,POS_FACEUP)>0
+end
+function UseGalaxyCyclone(mode)
+  if mode == 1 then
+    return DestroyCheck(OppST(),false,FilterPosition,POS_FACEDOWN)
+  end
+  return DestroyCheck(OppST(),false,FilterPosition,POS_FACEUP)
 end
 ----
 
@@ -1150,7 +1217,7 @@ function ChainNegation(card)
   end
   return false
 end
-function ChainCardNegation(card,targeted,removalonly,filter,opt)
+function ChainCardNegation(card,targeted,removalonly,filter,opt,skipnegate)
 -- for negating cards on the field that activated
 -- an effect anywhere in the current chain
   for i=1,Duel.GetCurrentChain() do
@@ -1164,13 +1231,15 @@ function ChainCardNegation(card,targeted,removalonly,filter,opt)
         if CardNegateFilter(c,card,targeted,filter,opt) 
         and (not removalonly or RemovalCheckList(AIField(),nil,i))
         then
-          SetNegated(i)
-          return c
+          if not skipnegate then
+            SetNegated(i)
+          end
+          return c,i
         end
       end
     end
   end
-  return false
+  return false,nil
 end
 function ChainChalice(card)
   local c = ChainCardNegation(card,true,false,FilterType,TYPE_MONSTER)
@@ -1334,11 +1403,12 @@ function ChainFelgrand(card)
 end
 function ChainZombiestein(card)
   local targets=RemovalCheckCard(AIField())
-  local c = ChainCardNegation(card,true,true,FilterLocation,LOCATION_ONFIELD)
+  local c,cl = ChainCardNegation(card,true,true,FilterLocation,LOCATION_ONFIELD,true)
   if c and (PriorityCheck(AIHand(),PRIO_TOGRAVE)>2 
   or targets and #targets>1) 
   then
     GlobalTargetSet(c,OppField())
+    SetNegated(cl)
     return true
   end
   return false
@@ -1350,6 +1420,59 @@ function ChainUtopiaLightning(c)
   then
     return true
   end
+end
+function ChainShrink(c)
+  if RemovalCheckCard(c) 
+  and CardsMatchingFilter(OppMon(),Targetable,TYPE_SPELL)>0
+  then
+    return true
+  end
+  local aimon,oppmon=GetBattlingMons() 
+  if aimon and oppmon
+  and Duel.GetCurrentPhase()==PHASE_DAMAGE
+  and AttackBoostCheck(0,oppmon:GetBaseAttack()*0.5) 
+  and Targetable(oppmon,TYPE_SPELL)
+  and Affected(oppmon,TYPE_SPELL)
+  and UnchainableCheck(55713623)
+  then
+    GlobalCardMode=1
+    GlobalTargetSet(oppmon)
+    return true
+  end
+  return false
+end
+function TrapStunFilter(c)
+  return FilterLocation(c,LOCATION_SZONE)
+  and FilterType(c,TYPE_TRAP)
+end
+function TrapStunFilter2(c)
+  return FilterLocation(c,LOCATION_SZONE)
+  and (FilterType(c,TYPE_TRAP) and FilterPublic(c)
+  or FilterPrivate(c))
+end
+function ChainTrapStun(source)
+  if RemovalCheckCard(source)
+  and CardsMatchingFilter(AIST(),TrapStunFilter)<2 
+  then
+    return true
+  end
+  local c,cl = ChainCardNegation(source,false,false,TrapStunFilter,nil,true)
+  if c 
+  --and CardsMatchingFilter(AIST(),TrapStunFilter)<3 
+  and UnchainableCheck(59616123)
+  then
+    SetNegated(cl)
+    return true
+  end
+  if Duel.GetTurnPlayer()==player_ai 
+  and Duel.GetCurrentPhase()==PHASE_MAIN1
+  and Duel.GetCurrentChain()==0
+  and (HasIDNotNegated(Field(),05851097,nil,nil,POS_FACEUP)
+  or HasIDNotNegated(Field(),82732705,nil,nil,POS_FACEUP))
+  then
+    return true
+  end
+  return false
 end
 function PriorityChain(cards) -- chain these before anything else
   if HasIDNotNegated(cards,58120309) and ChainNegation(cards[CurrentIndex]) then -- Starlight Road
@@ -1445,17 +1568,25 @@ function PriorityChain(cards) -- chain these before anything else
     return {1,CurrentIndex}
   end
   
+  if HasIDNotNegated(cards,26329679) and ChainOmega(cards[CurrentIndex]) then
+    return {1,CurrentIndex}
+  end
+  if HasIDNotNegated(cards,59616123,ChainTrapStun) then
+    GlobalTrapStun = Duel.GetTurnCount()
+    return {1,CurrentIndex}
+  end
+  return nil
+end
+function GenericChain(cards)
   if HasIDNotNegated(cards,10406322) and UseAlsei(cards[CurrentIndex]) then
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,00005509) and ChainUtopiaLightning(cards[CurrentIndex]) then
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,26329679) and ChainOmega(cards[CurrentIndex]) then
+  if HasIDNotNegated(cards,55713623,ChainShrink) then
     return {1,CurrentIndex}
   end
-  
-  return nil
 end
 
 function FelgrandTarget(cards,c)
@@ -1512,9 +1643,44 @@ function InstantFusionTarget(cards)
   if result==nil then result={math.random(#cards)} end
   return result
 end
+function BrionacTarget(cards,c)
+  if LocCheck(cards,LOCATION_HAND) then
+    return Add(cards,PRIO_TOGRAVE)
+  end
+  return BestTargets(cards,1,PRIO_TOHAND)
+end
+function ShrinkTarget(cards)
+  if GlobalCardMode==1 then
+    return GlobalTargetGet(cards,true)
+  end
+  return BestTargets(cards,1,TARGET_OTHER)
+end
+function VulcanTarget(cards)
+  local result = nil
+  if CurrentOwner(cards[1])==1 then
+    if DeckCheck(DECK_FIREFIST) then
+      result=FireFormationCost(cards,1)
+    elseif BounceTargets(AIField())>0 then
+      result=BestTargets(cards,1,PRIO_TOHAND,BounceFilter)
+    end
+  end
+  if result == nil then 
+    result=BestTargets(cards,1,PRIO_TOHAND) 
+  end
+  return result
+end
 function GenericCard(cards,min,max,id,c)
   if c then
     id = c.id
+  end
+  if id == 98012938 then
+    return VulcanTarget(cards)
+  end 
+  if id == 55713623 then
+    return ShrinkTarget(cards,c)
+  end
+  if id == 50321796 then
+    return BrionacTarget(cards,c)
   end
   if id == 01639384 then
     return FelgrandTarget(cards,c)
@@ -1539,6 +1705,9 @@ function GenericCard(cards,min,max,id,c)
   end
   if id == 33698022 then  -- Moonlight Rose
     return BestTargets(cards,1,TARGET_TOHAND)
+  end
+  if id == 05133471 then -- Galaxy Cyclone
+    return BestTargets(cards)
   end
   return nil
 end

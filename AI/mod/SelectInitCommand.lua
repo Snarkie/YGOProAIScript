@@ -160,7 +160,7 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
   -- controls 2 more S/T cards than the AI.
   --------------------------------------------
   for i=1,#ActivatableCards do
-    if ActivatableCards[i].id == 19613556 and
+    if (ActivatableCards[i].id == 19613556 or ActivatableCards[i].id == 42703248) and
        Get_Card_Count(OppST()) >= Get_Card_Count(AIST()) + 2 then
       return COMMAND_ACTIVATE,i
     end
@@ -948,24 +948,6 @@ end
       end
     end
   end 
-
-  ---------------------------------------------
-  -- AI should activate: Shrink, 
-  -- only if AI's strongest monster's attack points are 
-  -- lower than players strongest attack pos monster's points
-  ---------------------------------------------
-  for i=1,#ActivatableCards do  
-   if ActivatableCards[i].id == 55713623 then -- Shrink
-    if Get_Card_Count_Pos(AIMon(), POS_FACEUP) > 0 then
-	 if Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") < Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") and 
-	    Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") > Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") / 2 and 
-	    Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") >= 1400 then
-        GlobalActivatedCardID = ActivatableCards[i].id
-       return COMMAND_ACTIVATE,i
-      end
-    end
-  end
-end
   
   ---------------------------------------------
   -- AI should activate: Megamorph, 

@@ -143,7 +143,7 @@ GadgetOnSelectChain,BujinOnSelectChain,MermailOnSelectChain,
 ShadollOnSelectChain,SatellarknightOnSelectChain,
 ChaosDragonOnSelectChain,HATChain,QliphortChain,
 NobleChain,NekrozChain,BAChain,DarkWorldChain,
-ConstellarChain,BlackwingChain,
+ConstellarChain,BlackwingChain,GenericChain,
 }
   
 for i=1,#SelectChainFunctions do
@@ -199,7 +199,7 @@ result = 0
   -- "Trap Stun" first.
   ------------------------------------------
     for i=1,#cards do
-      if cards[i].id == 51452091 or cards[i].id == 59616123 then
+      if cards[i].id == 51452091 then
         if Get_Card_Count_ID(AIST(),51452091, POS_FACEUP) == 0 and Get_Card_Count_ID(AIST(),59616123, POS_FACEUP) == 0 then
 		if OppCard ~= nil and OppCardOwner == 2 then
           if bit32.band(OppCard.type,TYPE_TRAP) > 0 and OppCard.position == POS_FACEUP then
@@ -434,23 +434,6 @@ end
     end
   end]]
   
-  ---------------------------------------------
-  -- AI should activate: Shrink, 
-  -- only if AI's strongest monster's attack points are 
-  -- lower than players strongest attack pos monster's points
-  ---------------------------------------------
-  for i=1,#cards do  
-   if cards[i].id == 55713623 then -- Shrink
-     if Get_Card_Count_Pos(AIMon(), POS_FACEUP) > 0 then
-	 if Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") < Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") and 
-	    Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") > Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") / 2 and
-	    Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") >= 1400 then
-	    GlobalActivatedCardID = cards[i].id
-       return 1,i
-       end
-     end
-   end
- end
 	          
   ---------------------------------------------
   -- AI should activate: Amazoness Archers, 

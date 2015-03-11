@@ -584,13 +584,6 @@ end
      return Get_Card_Index(cards, 2, "Highest", TYPE_MONSTER, POS_FACEUP)
     end
 
-  --------------------------------------------     
-  -- Select Players strongest monster by attack points on the field.
-  --------------------------------------------   
-  if GlobalActivatedCardID == 55713623 then -- Shrink 
-     GlobalActivatedCardID = nil
-     return Get_Card_Index(cards, 2, "Highest", TYPE_MONSTER, POS_FACEUP)
-    end
 	
   --------------------------------------------     
   -- Select Players strongest monster by attack points on the field.

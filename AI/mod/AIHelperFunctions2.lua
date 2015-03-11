@@ -41,6 +41,29 @@ function Chance(chance)
 end
 -- returns true, if it finds the passed id in a list of cards + optional parameters)
 function HasID(cards,id,skipglobal,desc,loc,pos,filter,opt)
+  if type(skipglobal) == "function" then
+    filter = skipglobal
+    opt = desc
+    skipglobal = nil
+    desc = nil
+  end
+  if type(desc) == "function" then
+    filter = desc
+    opt = loc
+    desc = nil
+    loc = nil
+  end
+  if type(loc) == "function" then
+    filter = loc
+    opt = pos
+    loc = nil
+    pos = nil
+  end  
+  if type(pos) == "function" then
+    opt = filter
+    filter = pos
+    pos = nil
+  end
   local result = false;
   if cards then 
     for i=1,#cards do
@@ -59,6 +82,29 @@ function HasID(cards,id,skipglobal,desc,loc,pos,filter,opt)
 end
 -- same, but only returns true, if the card is not negated
 function HasIDNotNegated(cards,id,skipglobal,desc,loc,pos,filter,opt)
+  if type(skipglobal) == "function" then
+    filter = skipglobal
+    opt = desc
+    skipglobal = nil
+    desc = nil
+  end
+  if type(desc) == "function" then
+    filter = desc
+    opt = loc
+    desc = nil
+    loc = nil
+  end
+  if type(loc) == "function" then
+    filter = loc
+    opt = pos
+    loc = nil
+    pos = nil
+  end  
+  if type(pos) == "function" then
+    opt = filter
+    filter = pos
+    pos = nil
+  end
   local result = false
   if cards ~= nil then 
     for i=1,#cards do
@@ -201,7 +247,7 @@ function OppHasMonsterInMP2()
 end
 -- returns count of cards matching a filter in a card list
 function CardsMatchingFilter(cards,filter,opt)
-  result = 0
+  local result = 0
   for i=1,#cards do
     if opt and filter(cards[i],opt) or opt==nil and filter(cards[i]) then
       result = result + 1
@@ -535,7 +581,8 @@ function BestTargets(cards,count,target,filter,opt,immuneCheck,source)
       c.prio = c.prio+1
     end
     if (bit32.band(c.position, POS_FACEUP)>0 or bit32.band(c.status,STATUS_IS_PUBLIC)>0)
-    and (target == TARGET_TOHAND and ToHandBlacklist(c.id)   
+    and (target == TARGET_TOHAND and (ToHandBlacklist(c.id)  
+    or FilterType(c,TYPE_SPELL+TYPE_TRAP) and FilterPosition(c,POS_FACEUP))
     or target == TARGET_DESTROY and DestroyBlacklist(c)
     or target == TARGET_FACEDOWN and bit32.band(c.type,TYPE_FLIP)>0)
     then
@@ -544,17 +591,17 @@ function BestTargets(cards,count,target,filter,opt,immuneCheck,source)
     if FilterType(c,TYPE_PENDULUM) and HasIDNotNegated(OppST(),05851097,true,nil,nil,POS_FACEUP) then
       c.prio = -1
     end
-    if filter and (opt == nil and not filter(c) or opt and not filter(c,opt)) then
-      c.prio = -1
-    end
     if immuneCheck and source and not Affected(c,source.type,source.level) then
       c.prio = -1
     end
-    if c.owner == 1 then 
+    if CurrentOwner(c) == 1 then 
       c.prio = -1 * c.prio
     end
     if target == TARGET_PROTECT then 
       c.prio = -1 * c.prio
+    end
+    if filter and (opt == nil and not filter(c) or opt and not filter(c,opt)) then
+      c.prio = -9999
     end
   end
   table.sort(cards,function(a,b) return a.prio > b.prio end)
@@ -724,18 +771,19 @@ function NotNegated(c)
   if not GlobalNegatedLoop then
     GlobalNegatedLoop = true
     if FilterType(c,TYPE_SPELL) 
-    and (HasIDNotNegated(Field(),84636823,true) -- Spell Canceller
-    or HasIDNotNegated(Field(),61740673,true)   -- Imperial Order
-    or HasIDNotNegated(OppMon(),33198837,true)  -- Naturia Beast
-    or HasIDNotNegated(OppMon(),99916754,true)) -- Naturia Exterio
+    and (HasIDNotNegated(Field(),84636823,true,nil,nil,POS_FACEUP) -- Spell Canceller
+    or HasIDNotNegated(Field(),61740673,true,nil,nil,POS_FACEUP)   -- Imperial Order
+    or HasIDNotNegated(OppMon(),33198837,true,nil,nil,POS_FACEUP)  -- Naturia Beast
+    or HasIDNotNegated(OppMon(),99916754,true,nil,nil,POS_FACEUP)) -- Naturia Exterio
     then
       return false
     end
     if FilterType(c,TYPE_TRAP) 
-    and (HasIDNotNegated(Field(),77585513,true) -- Jinzo
-    or HasIDNotNegated(Field(),51452091,true)  -- Royal Decree
-    or HasIDNotNegated(OppMon(),02956282,true) and #OppGrave()>1 -- Naturia Barkion
-    or HasIDNotNegated(OppMon(),99916754,true)) -- Naturia Exterio
+    and (HasIDNotNegated(Field(),77585513,true,nil,nil,POS_FACEUP) -- Jinzo
+    or HasIDNotNegated(Field(),51452091,true,nil,nil,POS_FACEUP)  -- Royal Decree
+    or HasIDNotNegated(OppMon(),02956282,true,nil,nil,POS_FACEUP) and #OppGrave()>1 -- Naturia Barkion
+    or HasIDNotNegated(OppMon(),99916754,true,nil,nil,POS_FACEUP)) -- Naturia Exterio
+    or GlobalTrapStun == Duel.GetTurnCount()
     then
       return false
     end
@@ -744,14 +792,20 @@ function NotNegated(c)
       if SkillDrainCheck() then
         return false
       end
-      if HasIDNotNegated(Field(),33746252,true) then -- Majesty's Fiend
+      if HasIDNotNegated(Field(),33746252,true,nil,nil,POS_FACEUP) then -- Majesty's Fiend
         return false
       end
-      if HasIDNotNegated(Field(),56784842,true) then -- Angel 07
+      if HasIDNotNegated(Field(),56784842,true,nil,nil,POS_FACEUP) then -- Angel 07
         return false
+      end
+      if HasIDNotNegated(Field(),53341729,true,nil,nil,POS_FACEUP) then -- Light-Imprisoning Mirror
+        return not FilterAttribute(c,ATTRIBUTE_LIGHT)
+      end
+      if HasIDNotNegated(Field(),99735427,true,nil,nil,POS_FACEUP) then -- Shadow-Imprisoning Mirror
+        return not FilterAttribute(c,ATTRIBUTE_DARK)
       end
       if FilterLocation(c,LOCATION_EXTRA) 
-      and HasIDNotNegated(Field(),89463537,true) -- Necroz Unicore
+      and HasIDNotNegated(Field(),89463537,true,nil,nil,POS_FACEUP) -- Necroz Unicore
       then 
         return false
       end
@@ -781,7 +835,11 @@ function DestroyCheck(cards,nontarget,filter,opt)
   end)
 end
 function FilterAttribute(c,att)
-  return bit32.band(c.type,TYPE_MONSTER)>0 and bit32.band(c.attribute,att)>0
+  if c.GetCode then
+    return FilterType(c,TYPE_MONSTER) and c:IsAttribute(att)
+  else
+    return FilterType(c,TYPE_MONSTER) and bit32.band(c.attribute,att)>0
+  end
 end
 function FilterRace(c,race)
   return bit32.band(c.type,TYPE_MONSTER)>0 and bit32.band(c.race,race)>0
@@ -962,9 +1020,11 @@ function FindID(id,cards,index,filter,opt)
 end
 
 
-function AttackBoostCheck(bonus,player,filter,cond)
+function AttackBoostCheck(bonus,malus,player,filter,cond)
   local source = Duel.GetAttacker()
   local target = Duel.GetAttackTarget()
+  if bonus == nil then bonus = 0 end
+  if malus == nil then malus = 0 end
   if player == nil then player = player_ai end
   if source and target 
   and source:IsLocation(LOCATION_MZONE) 
@@ -977,7 +1037,7 @@ function AttackBoostCheck(bonus,player,filter,cond)
     if target:IsPosition(POS_FACEUP_ATTACK) 
     and (source:IsPosition(POS_FACEUP_ATTACK) 
     and source:GetAttack() >= target:GetAttack() 
-    and source:GetAttack() <= target:GetAttack()+bonus
+    and source:GetAttack()-malus <= target:GetAttack()+bonus
     or source:IsPosition(POS_FACEUP_DEFENCE) 
     and source:GetDefence() >= target:GetAttack() 
     and source:GetDefence() <= target:GetAttack()+bonus)
@@ -1131,7 +1191,7 @@ function PriorityTarget(c,destroycheck,loc,filter,opt) -- preferred target for r
   return false
 end
 function HasPriorityTarget(cards,destroycheck,loc,filter,opt)
-  if HasID(cards,05851097,true,nil,POS_FACEUP,nil,FilterPublic) then -- Vanity's Emptiness
+  if HasIDNotNegated(cards,05851097,true,nil,nil,POS_FACEUP,FilterPublic) then -- Vanity's Emptiness
     return true
   end
   local count = 0
@@ -1152,22 +1212,22 @@ function DualityCheck(player)
   if player == 1 and Duel.GetTurnCount()==GlobalDuality then
     return false -- Pot of Duality
   end
-  if HasIDNotNegated(cards,05851097,true,nil,POS_FACEUP) then 
+  if HasIDNotNegated(cards,05851097,true,nil,nil,POS_FACEUP) then 
     return false -- Vanity's Emptiness
   end
-  if HasIDNotNegated(cards,59509952,true,nil,POS_FACEUP) then 
+  if HasIDNotNegated(cards,59509952,true,nil,nil,POS_FACEUP) then 
     return false -- Archlord Kristya
   end
-  if HasIDNotNegated(cards,42009836,true,nil,POS_FACEUP) then 
+  if HasIDNotNegated(cards,42009836,true,nil,nil,POS_FACEUP) then 
     return false -- Fossil Dyna Pachycephalo
   end
-  if HasIDNotNegated(cards,41855169,true,nil,POS_FACEUP) then 
+  if HasIDNotNegated(cards,41855169,true,nil,nil,POS_FACEUP) then 
     return false -- Jowgen the Spiritualist
   end
-  if HasIDNotNegated(cards,47084486,true,nil,POS_FACEUP) then 
+  if HasIDNotNegated(cards,47084486,true,nil,nil,POS_FACEUP) then 
     return false -- Vanity's Fiend
   end
-  if player == 1 and HasIDNotNegated(OppMon(),72634965,true,nil,POS_FACEUP) then 
+  if player == 1 and HasIDNotNegated(OppMon(),72634965,true,nil,nil,POS_FACEUP) then 
     return false -- Vanity's Ruler
   end
   return true
@@ -1179,16 +1239,16 @@ end
 function MacroCheck(player)
   local cards = UseLists(AIField(),OppField())
   if player == nil then player = 1 end
-  if HasIDNotNegated(cards,30459350,true,nil,POS_FACEUP) then 
+  if HasIDNotNegated(cards,30459350,true,nil,nil,POS_FACEUP) then 
     return true -- Imperial Iron Wall, cancels everything below
   end
-  if HasIDNotNegated(cards,30241314,true,nil,POS_FACEUP) then 
+  if HasIDNotNegated(cards,30241314,true,nil,nil,POS_FACEUP) then 
     return false -- Macro Cosmos
   end
-  if HasIDNotNegated(cards,81674782,true,nil,POS_FACEUP) then 
+  if HasIDNotNegated(cards,81674782,true,nil,nil,POS_FACEUP) then 
     return false -- Dimensional Fissure
   end
-  if player == 1 and HasIDNotNegated(OppMon(),58481572,true,nil,POS_FACEUP) then
+  if player == 1 and HasIDNotNegated(OppMon(),58481572,true,nil,nil,POS_FACEUP) then
     return false -- Dark Law
   end
   return true

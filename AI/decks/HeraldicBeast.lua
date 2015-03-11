@@ -827,6 +827,10 @@ function ChainSafeZone(c)
       end
     end
   end
+  if MKBCheck(c) then
+    GlobalTargetSet(MKBCheck(c),AIMon())
+    return true
+  end
   return false
 end
 

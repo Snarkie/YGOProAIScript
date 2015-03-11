@@ -596,9 +596,8 @@ function CheckTarget(source,cards,targeted,filter,opt)
   end
   return false
 end
-SSByOwnEffect={
-53804307,26400609,89399912,90411554, -- the 4 Dragon Rulers
-12538374, -- Treeborn
+SSIgnore={
+20758643,80744121, -- BA Graff, DH- Fear Monger
 }
 function CheckSSList(c)
   local id
@@ -607,19 +606,19 @@ function CheckSSList(c)
   else
     id = c.id
   end
-  for i=1,#SSByOwnEffect do
-    if SSByOwnEffect[i]==id then
-      return true
+  for i=1,#SSIgnore do
+    if SSIgnore[i]==id then
+      return false
     end
   end
-  return false
+  return true
 end
 function CheckSSFilter(c,source,targeted,filter,opt)
   return c and source 
   and (not targeted or Targetable(c,source.type))
   and Affected(c,source.type,source.level)
   and NotNegated(source)
-  --and CheckSSList(c)
+  and CheckSSList(c)
   and (filter == nil or opt == nil 
   and filter(c) or filter(c,opt))
 end

@@ -604,20 +604,7 @@ function FFDragonTarget(cards)
   if result == nil then result = {math.random(#cards)} end
   return result
 end
-function VulcanTarget(cards)
-  local result = nil
-  local c=Duel.GetFirstTarget()
-  if c then
-    result = Index_By_Loc(cards,2,"Highest",TYPE_MONSTER,nil,"==",LOCATION_MZONE)
-  else
-    result=FireFormationCost(cards,1)
-    if result == nil then 
-      result = getRandomSTIndex(cards,1) 
-    end
-  end
-  if result == nil then result = {math.random[#cards]} end
-  return result
-end
+
 function SharkKnightTarget(cards,targets)
   local result = {}
   for i=1,#cards do
@@ -712,9 +699,6 @@ function FireFistCard(cards, minTargets, maxTargets, triggeringID, triggeringCar
   or triggeringID == 93294869 then  -- Hawk, Raven, Wolf
     return FireFormationSearch(cards)
   end
-  if triggeringID == 98012938 then -- Vulcan
-    return VulcanTarget(cards)
-  end 
   if triggeringID == 44920699 or triggeringID == 21350571 -- Tensen, Horn of Phantom Beast
   or triggeringID == 97268402 or triggeringID == 78474168 -- Effect Veiler, Breakthrough Skill
   or triggeringID == 70329348

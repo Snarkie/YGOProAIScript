@@ -20,6 +20,7 @@ function AttackTargetSelection(cards,attacker)
   ApplyATKBoosts(cards)
   --print("attack target selection")
   --print("specific attacker")
+  local atk = attacker.attack
   if NotNegated(attacker) then
     
     -- High Laundsallyn
@@ -91,6 +92,12 @@ function AttackTargetSelection(cards,attacker)
     if id == 78156759 and ZenmainesCheck(attacker,cards) then
       return BestAttackTarget(cards,attacker,false,ZenmainesFilter,attacker)
     end
+    
+    -- Armed Wing
+    if id == 76913983 and ArmedWingCheck(attacker,cards) then
+      return BestAttackTarget(cards,attacker,false,ArmedWingFilter,attacker)
+    end
+ 
   end
   --print("generic attacker")
   return BestAttackTarget(cards,attacker)
@@ -150,6 +157,9 @@ function BestAttackTarget(cards,source,ignorebonus,filter,opt)
       if c.level>4 then
         c.prio = c.prio + 1
       end
+    end
+    if CurrentOwner(c)==1 then
+      c.prio = -1*c.prio
     end
   end  
   table.sort(cards,function(a,b) return a.prio > b.prio end)
@@ -293,6 +303,10 @@ function OnSelectBattleCommand(cards,activatable)
     return Attack(CurrentIndex)
   end
   
+  -- Armed Wing
+  if HasID(cards,76913983,ArmedWingCheck,targets) then 
+    return Attack(CurrentIndex)
+  end
   -- generic attacks
   --print("generic attackers")
   --print("for game")

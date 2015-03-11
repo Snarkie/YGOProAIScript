@@ -225,8 +225,8 @@ AddPriority({
 [79816536] = {9,4,1,1,1,1,1,1,1,1,SummonersCond},     -- Summoners Art
 [17639150] = {8,2,1,1,1,1,1,1,1,1,SacrificeCond},     -- Qliphort Sacrifice
 [04450854] = {5,2,1,1,1,1,1,1,1,1,ApoCond},           -- Apoqliphort
-[05851097] = {2,1,1,1,1,1,1,1,1,1,nil},               -- Vanitys Emptiness
-[82732705] = {2,1,1,1,1,1,1,1,1,1,nil},               -- Skill Drain
+[05851097] = {2,1,1,1,0,0,1,1,1,1,nil},               -- Vanitys Emptiness
+[82732705] = {2,1,1,1,0,0,1,1,1,1,nil},               -- Skill Drain
 })
 
 AddPriority({
@@ -326,7 +326,7 @@ AddPriority({
 [82044279] = {1,1,1,1,1,1,1,1,1,1,ClearWingCond},     -- Clear Wing Synchro Dragon
 [72959823] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Panzer Dragon
 [29669359] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Number 61: Volcasaurus
-[82633039] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Skyblaster Castel
+[82633039] = {1,1,1,1,6,1,1,1,1,1,CastelCond},        -- Skyblaster Castel
 [00581014] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Daigusto Emeral
 [33698022] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Moonlight Rose Dragon
 [31924889] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Arcanite Magician
@@ -396,6 +396,7 @@ AddPriority({
 [70903634] = {1,1,-1,-1,-1,-1,-1,-1,1,1,nil},
 [33396948] = {1,1,-1,-1,-1,-1,-1,-1,1,1,nil},
 
+[05133471] = {1,1,1,1,4,1,1,1,1,1,nil},               -- Galaxy Cyclone
 })
 end
 
