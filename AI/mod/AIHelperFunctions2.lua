@@ -67,7 +67,8 @@ function HasID(cards,id,skipglobal,desc,loc,pos,filter,opt)
   local result = false;
   if cards then 
     for i=1,#cards do
-      if cards[i].id == id 
+      if (cards[i].id == id 
+      or cards[i].id == 76812113 and cards[i].original_id == id )
       and (desc == nil or cards[i].description == desc) 
       and (loc == nil or bit32.band(cards[i].location,loc)>0)
       and (pos == nil or bit32.band(cards[i].position,pos)>0)
@@ -108,7 +109,8 @@ function HasIDNotNegated(cards,id,skipglobal,desc,loc,pos,filter,opt)
   local result = false
   if cards ~= nil then 
     for i=1,#cards do
-      if cards[i].id == id 
+      if (cards[i].id == id 
+      or cards[i].id == 76812113 and cards[i].original_id == id )
       and (desc == nil or cards[i].description == desc) 
       and (loc == nil or bit32.band(cards[i].location,loc)>0)
       and (pos == nil or bit32.band(cards[i].position,pos)>0)
@@ -249,7 +251,7 @@ end
 function CardsMatchingFilter(cards,filter,opt)
   local result = 0
   for i=1,#cards do
-    if opt and filter(cards[i],opt) or opt==nil and filter(cards[i]) then
+    if FilterCheck(cards[i],filter,opt) then
       result = result + 1
     end
   end
@@ -617,6 +619,10 @@ function GlobalTargetSet(c,cards)
   if cards == nil then
     cards = All()
   end
+  if c == nil then
+    print("Warning: null card for Global Target")
+    return nil
+  end
   if c.GetCode then
     c = GetCardFromScript(c,cards)
   end
@@ -917,7 +923,11 @@ function FilterPrivate(c)
   return not FilterPublic(c)
 end
 function FilterSet(c,code)
-  return IsSetCode(c.setcode,code)
+  if c.GetCode then 
+    return c:IsSetCard(code)
+  else
+    return IsSetCode(c.setcode,code)
+  end
 end
 function FilterOPT(c,hard)
   if hard then 
@@ -1135,19 +1145,35 @@ function Affected(c,type,level)
   local id
   local immune = false
   local atkdiff
+  local lvl
   if c.GetCode then
     id = c:GetCode()
     immune = c:IsHasEffect(EFFECT_IMMUNE_EFFECT) 
     atkdiff = c:GetBaseAttack() - c:GetAttack()
+    lvl = c:GetLevel()
   else
     id = c.id
     immune = c:is_affected_by(EFFECT_IMMUNE_EFFECT)>0
     atkdiff = c.base_attack - c.attack
+    lvl = c.level
   end
   if immune and atkdiff == 800 
   and bit32.band(type,TYPE_SPELL+TYPE_TRAP)==0
   then
     return true -- probably forbidden lance
+  end
+  if immune and FilterSet(c,0xaa) -- Qliphort
+  then
+    return not FilterSummon(c,SUMMON_TYPE_NORMAL)
+    or lvl<=level or (type~=TYPE_MONSTER
+    and id ~=27279764 and id ~=40061558) -- Towers, Skybase
+  end
+  if immune and FilterSet(c,0x108a) -- Traptrix
+  then
+    return true
+  end
+  if immune and id == 10817524 then -- First of the Dragons
+    return type~=TYPE_MONSTER
   end
   return not immune
 end
@@ -1678,4 +1704,29 @@ function Sequence(c)
       end
     end
   end
+end
+
+function FilterCheck(c,filter,opt)
+  return c and (filter==nil or opt==nil 
+  and filter(c) or filter(c,opt))
+end
+
+function EPAddedCards()
+  local result = 0
+  if CardsMatchingFilter(AIGrave(),SignGraveFilter)>0
+  and OPTCheck(19337371)
+  then
+    result = result+3
+  end  
+  if CardsMatchingFilter(AIGrave(),ScarmGraveFilter)>0
+  and OPTCheck(84764038)
+  then
+    result = result+1
+  end
+  if CardsMatchingFilter(AIGrave(),HarpistGraveFilter)>0
+  and OPTCheck(56585883)
+  then
+    result = result+1
+  end
+  return result
 end

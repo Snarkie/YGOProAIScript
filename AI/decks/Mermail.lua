@@ -833,7 +833,7 @@ local effect = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EF
     card=effect:GetHandler()
     player=player_ai
     if card and card:IsControler(1-player) and card:IsLocation(LOCATION_MZONE) 
-    and NegateBlacklist(card:GetCode())==0 and card:GetAttack()<gaios:GetAttack()
+    and not NegateBlacklist(card:GetCode()) and card:GetAttack()<gaios:GetAttack()
     then
       return true
     end

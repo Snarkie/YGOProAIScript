@@ -379,6 +379,12 @@ if not ExtraCheck then
   end
 end
 if not ExtraCheck then 
+  DeckCommand = HarpieInit(cards)
+  if DeckCommand ~= nil then
+    return DeckCommand[1],DeckCommand[2]
+  end
+end
+if not ExtraCheck then 
   DeckCommand = SummonExtraDeck(cards)
   if DeckCommand ~= nil then
     return DeckCommand[1],DeckCommand[2]
@@ -975,7 +981,6 @@ end
   if ActivatableCards[i].id == 98045062 then -- Enemy Controller
 	if Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") < Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") and 
 	   Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") > Get_Card_Att_Def(OppMon(), "attack", ">", POS_FACEUP_ATTACK, "defense") then
-	   GlobalActivatedCardID = ActivatableCards[i].id
       return COMMAND_ACTIVATE,i
      end
    end
@@ -2156,7 +2161,7 @@ end
   end
   
   if (Duel.GetCurrentPhase() == PHASE_MAIN2 or not GlobalBPAllowed)
-  and #AIHand()>6 and #cards.st_setable_cards > 0 
+  and #AIHand()+EPAddedCards()>6 and #cards.st_setable_cards > 0 
   then
     return COMMAND_SET_ST,1
   end

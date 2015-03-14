@@ -18,6 +18,7 @@ DECK_EXODIA       = 14
 DECK_DARKWORLD    = 15
 DECK_CONSTELLAR   = 16
 DECK_BLACKWING    = 17
+DECK_HARPIE       = 18
 
 DeckIdent={ --card that identifies the deck
 [1]   = 99365553, -- Lightpulsar Dragon
@@ -37,6 +38,7 @@ DeckIdent={ --card that identifies the deck
 [15]  = 34230233, -- DW Grapha
 [16]  = 78358521, -- Constellar Sombre
 [17]  = 91351370, -- Black Whirlwind
+[18]  = 19337371, -- Hysteric Sign
 }
 Deck = nil
 DeckName={
@@ -58,6 +60,7 @@ DeckName={
 [15]  = "Dark World",
 [16]  = "Constellar",
 [17]  = "Blackwing",
+[18]  = "Harpie",
 }
 function DeckCheck(opt)
   if Deck == nil then
@@ -101,6 +104,7 @@ function PrioritySetup()
   DarkWorldPriority()
   ConstellarPriority()
   BlackwingPriority()
+  HarpiePriority()
   
 AddPriority({
 -- test
@@ -152,8 +156,8 @@ AddPriority({
 [52068432] = {7,2,6,1,3,1,1,1,5,1,TrishCond},         -- The Nekroz of Trishula
 [88240999] = {5,2,5,1,1,1,1,1,3,1,ArmorCond},         -- The Nekroz of Decisive Armor
 [08903700] = {3,1,1,1,9,2,1,1,1,1,ReleaserCond},      -- Djinn Releaser of Rituals
-[95492061] = {4,1,1,1,5,1,1,1,1,1,nil},               -- Manju of the Ten Thousand Hands
-[23401839] = {4,1,1,1,6,1,1,1,1,1,nil},               -- Senju of the Thousand Hands
+[95492061] = {10,1,1,1,5,1,1,1,1,1,ManjuCond},        -- Manju of the Ten Thousand Hands
+[23401839] = {9,1,1,1,6,1,1,1,1,1,SenjuCond},         -- Senju of the Thousand Hands
 [13974207] = {3,1,1,1,6,1,1,1,1,1,SekkaCond},         -- Denkou Sekka
 [30312361] = {2,1,1,1,7,1,1,1,1,1,nil},               -- Phantom of Chaos
 
@@ -408,7 +412,10 @@ function AddPriority(list)
   end
 end
 function GetPriority(card,loc)
-  local id=card.id
+  local id=card.id      
+  if id == 76812113 then
+    id=card.original_id
+  end
   local checklist = nil
   local result = 0
   if loc == nil then
@@ -436,16 +443,8 @@ function AssignPriority(cards,loc,filter,opt)
   for i=1,#cards do
     cards[i].index=i
     cards[i].prio=GetPriority(cards[i],loc)
-    if filter then
-      if opt then
-        if not filter(cards[i],opt) then 
-          cards[i].prio=-1
-        end
-      else
-        if not filter(cards[i]) then 
-          cards[i].prio=-1
-        end
-      end
+    if not FilterCheck(cards[i],filter,opt) then
+      cards[i].prio=-1
     end
     if loc==PRIO_TOFIELD and cards[i].location==LOCATION_DECK then
       cards[i].prio=cards[i].prio+2
@@ -464,7 +463,9 @@ function AssignPriority(cards,loc,filter,opt)
     then
       cards[i].prio=10
     end
-    if loc==PRIO_TOHAND and bit32.band(cards[i].location,LOCATION_ONFIELD)>0 then
+    if loc==PRIO_TOHAND and bit32.band(cards[i].location,LOCATION_ONFIELD)>0 
+    and not DeckCheck(DECK_HARPIE) -- temp
+    then
       cards[i].prio=-1
     end
     if cards[i].owner==2 then
@@ -473,7 +474,7 @@ function AssignPriority(cards,loc,filter,opt)
     if not TargetCheck(cards[i]) then
       cards[i].prio=-1
     end
-    SetMultiple(cards[i].id)
+    SetMultiple(cards[i].original_id)
   end
 end
 function PriorityCheck(cards,loc,count,filter,opt)
@@ -493,7 +494,7 @@ function Add(cards,loc,count,filter,opt)
   table.sort(cards,compare)
   --print("priority list:")
   for i=1,#cards do
-    --print(cards[i].id..", prio:"..cards[i].prio)
+    --print(cards[i].original_id..", prio:"..cards[i].prio)
   end
   for i=1,count do
     result[i]=cards[i].index

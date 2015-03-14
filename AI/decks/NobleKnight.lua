@@ -1476,7 +1476,8 @@ function ChainAmaterasu()
 end
 function MerlinFilter(c)
   return c:IsSetCard(0x107a) and c:IsType(TYPE_MONSTER) 
-  and c:IsPosition(POS_FACEUP) and (FieldCheck(c:GetLevel(),NobleMonsterFilter)>0
+  and c:IsPosition(POS_FACEUP) and FilterLocation(c,LOCATION_MZONE)
+  and c:IsControler(player_ai) and (FieldCheck(c:GetLevel(),NobleMonsterFilter)>0
   or c:GetLevel()==4 and HasID(AIMon(),10736540,true,nil,nil,POS_FACEUP))
 end
 function UseMerlinBP()

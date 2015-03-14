@@ -94,7 +94,7 @@ function OnSelectPosition(id, available)
   SatellarknightOnSelectPosition,ChaosDragonOnSelectPosition,HATPosition,
   QliphortPosition,NoblePosition,NekrozPosition,BAPosition,
   DarkWorldPosition,ConstellarPosition,BlackwingPosition,
-  GenericPosition,
+  GenericPosition,HarpiePosition,
   }
   for i=1,#positionfunctions do
     local func = positionfunctions[i]

@@ -309,7 +309,9 @@ NSBL={
 41269771,78358521,81105204,58820853, -- Constellar Algiedi, Sombre, BW Kris, Shura
 49003716,14785765,85215458,02009101, -- BW Bora, Zephyros, Kalut, Gale
 55610595,28190303,22835145,73652465, -- BW Pinaka, Gladius, Blizzard, Oroshi
-75498415,72714392,24508238, -- BW Sirocco, Vayu, D.D. Crow
+75498415,72714392,24508238,76812113, -- BW Sirocco, Vayu, D.D. Crow, Harpie Lady
+75064463,80316585,56585883,90238142, -- Harpie Queen, Cyber, Harpist, Channeler
+91932350,68815132,89399912,52040216, -- Harpie Lady #1, Dancer, Tempest, Pet Dragon
 }
 function NormalSummonBlacklist(CardId) 
   for i=1,#NSBL do
@@ -411,6 +413,7 @@ SSBL={
 27315304,33236860,09012916, -- Mist Wurm, BW Silverwing, Black Winged Dragon
 23693634,50321796,76913983, -- Colossal Fighter, Synch Brionac, BW Armed Wind
 90953320,26593852,44508094, -- Hyper Librarian, Catastor, Stardust
+85909450,86848580, -- HPPD, Zerofyne
 }
 
 
@@ -435,7 +438,7 @@ SetBL={
   46008667,83438826,66970385, -- Excaliburn, Arfeudutyr, Chapter
   92512625,51124303,14735698, -- Advice, Nekroz Kaleidomirror, Exomirror
   96729612,97211663,45986603, -- Preparation of Rites, Nekroz Cycle, Snatch Steal
-  12580477,27174286, -- Raigeki, RftDD
+  12580477,27174286,19337371, -- Raigeki, RftDD, Hysteric Sign
 }
 
 
@@ -464,14 +467,14 @@ NegBL={
 function NegateBlacklist(id)
   for i=1,#NegBL do
     if NegBL[i]==id then
-      return 1
+      return true
     end
   end
   if id == 00423585 -- negate Summoner Monk only, when he tries to special summon something
   and not Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_SPECIAL_SUMMON) then
-    return 1
+    return true
   end
-  return 0
+  return false
 end
 
 -- for cards like Solemn Warning
@@ -647,7 +650,7 @@ function CardIsASearchCard(CardId)
      CardId == 96363153 or --CardId == 57103969 or   -- Tuning, FF Tenki
      CardId == 74968065 or CardId == 12171659 or   -- Hecatrice, Zeradias
      CardId == 17393207 or CardId == 51435705 or   -- Commandant, Skull
-     CardId == 75064463 or CardId == 48675364 or   -- Harpie Q, ArchF Gen
+     --[[CardId == 75064463 or]] CardId == 48675364 or   -- Harpie Q, ArchF Gen
      CardId == 03431737 or CardId == 43797906 or   -- Assault B, Atlantis
      CardId == 89739383 or CardId == 89997728 then -- Secrets, Toon Table
     Result = 1
@@ -804,6 +807,10 @@ ScriptedCards ={
 76067258,75498415,72714392,24508238, -- Master Key Beetle,BW Sirocco, Vayu, D.D. Crow
 42703248,83764719,27174286,59616123, -- Trunade, Monster Reborn, RftDD, Trap Stun
 33236860,09012916,50321796,59839761, --Silverwing, Black-Winged Dragon, Synch Brionac, Delta Crow
+75064463,56585883,90238142,68815132, -- Harpie Queen, Harpist, Channeler, Dancer
+90219263,19337371,15854426,75782277, -- Elegant Egotist, Hysteric Sign, Divine Wind of Mist Valley, Harpie's Hunting Ground
+77778835,85909450,86848580,89399912, -- Hysteric Party, HPPD, Zerofyne, Tempest
+52040216,94145683,76812113, -- Harpie Lady -- Pet Dragon, Swallow's, Harpie Lady
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do

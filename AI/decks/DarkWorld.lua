@@ -190,6 +190,12 @@ function DiscardOutlets()
   if HasID(cards,16435215,true) and DraggedCheck() then
     result = result + 1
   end
+  if HasIDNotNegated(cards,77778835,true) then -- Hysteric Party
+    result = result + 1
+  end
+  if HasIDNotNegated(cards,63356631,true) then -- PWWB
+    result = result + 1
+  end
   if HasIDNotNegated(AIST(),41930553,true,nil,nil,nil,FilterOPT) 
   and CardsMatchingFilter(OppGrave(),FilterType,TYPE_MONSTER)>0
   then

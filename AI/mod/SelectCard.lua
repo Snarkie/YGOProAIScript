@@ -104,7 +104,7 @@ end
   BujinOnSelectCard,MermailOnSelectCard,ShadollOnSelectCard,
   SatellarknightOnSelectCard,ChaosDragonOnSelectCard,HATCard,
   QliphortCard,NobleCard,NekrozCard,BACard,DarkWorldCard,
-  GenericCard,ConstellarCard,BlackwingCard,
+  GenericCard,ConstellarCard,BlackwingCard,HarpieCard,
   }
   local result = nil
   for i=1,#SelectCardFunctions do
@@ -588,8 +588,7 @@ end
   --------------------------------------------     
   -- Select Players strongest monster by attack points on the field.
   --------------------------------------------   
-  if GlobalActivatedCardID == 98045062 then -- Enemy Controller 
-     GlobalActivatedCardID = nil
+  if triggeringID == 98045062 then -- Enemy Controller 
      return Get_Card_Index(cards, 2, "Highest", TYPE_MONSTER, POS_FACEUP)
     end
 

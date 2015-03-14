@@ -144,6 +144,7 @@ ShadollOnSelectChain,SatellarknightOnSelectChain,
 ChaosDragonOnSelectChain,HATChain,QliphortChain,
 NobleChain,NekrozChain,BAChain,DarkWorldChain,
 ConstellarChain,BlackwingChain,GenericChain,
+HarpieChain,
 }
   
 for i=1,#SelectChainFunctions do
@@ -389,7 +390,6 @@ end
    if cards[i].id == 98045062 then -- Enemy Controller
 	if Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") < Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") and 
 	   Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") > Get_Card_Att_Def(OppMon(), "attack", ">", POS_FACEUP_ATTACK, "defense") then
-	   GlobalActivatedCardID = cards[i].id
       return 1,i
      end
    end

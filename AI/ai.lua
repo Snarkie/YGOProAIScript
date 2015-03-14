@@ -1,4 +1,4 @@
-Version = "0.26d"
+Version = "0.26e"
 Experimental = true
 
 --[[
@@ -55,6 +55,7 @@ require("ai.decks.BurningAbyss")
 require("ai.decks.DarkWorld")
 require("ai.decks.Constellar")
 require("ai.decks.Blackwing")
+require("ai.decks.Harpie")
 
 math.randomseed( require("os").time() )
 

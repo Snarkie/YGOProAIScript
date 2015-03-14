@@ -301,6 +301,7 @@ function SummonPinaka(mode)
   return false
 end
 function SummonZephyros(mode)
+  if DeckCheck(DECK_HARPIE) then return false end
   if mode == 1 and (OverExtendCheck(3) or HasWhirlwind()) then
     return true
   elseif mode == 2 and BounceTargets(AIField())>0 

@@ -676,7 +676,8 @@ function SummonJD()
   or #OppField()==0 and Duel.GetCurrentPhase()==PHASE_MAIN1 and GlobalBPAllowed
 end
 function LeviairFilter(c)
-  return bit32.band(c.type,TYPE_MONSTER)>0 and c.level<5 and c:is_affected_by(EFFECT_SPSUMMON_CONDITION)==0
+  return bit32.band(c.type,TYPE_MONSTER)>0 and c.level<5 
+  and c:is_affected_by(EFFECT_SPSUMMON_CONDITION)==0
 end
 function SummonLeviair()
   if DeckCheck(DECK_DARKWORLD) then
@@ -1179,11 +1180,11 @@ function CardNegateFilter(c,card,targeted,filter,opt)
   return c and card and c:IsControler(1-player_ai) 
   and c:IsLocation(LOCATION_ONFIELD) 
   and c:IsPosition(POS_FACEUP)
-  and NegateBlacklist(c:GetCode())==0 
+  and not NegateBlacklist(c:GetCode()) 
   and (not targeted or Targetable(c,card.type))
   and Affected(c,card.type,card.level)
-  and NotNegated(c) and (filter==nil or opt==nil 
-  and filter(c) or filter(c,opt))
+  and NotNegated(c) 
+  and FilterCheck(c,filter,opt)
 end
 
 GlobalNegatedChainLinks = {}

@@ -197,6 +197,13 @@ function ExoCond(loc,c)
   end
   return true
 end
+function ManjuCond(loc,c)
+  if loc == PRIO_TOHAND then
+    return not (HasID(AIHand(),95492061,true) 
+    or HasID(AIHand(),23401839,true))
+  end
+  return true
+end
 function UnicoreCheck()
   return HasID(AIHand(),89463537,true) and HasID(UseLists(AIHand(),AIST()),51124303,true) 
   and HasID(AIExtra(),79606837,true) and OPTCheck(51124303) and DualityCheck()
