@@ -666,6 +666,12 @@ function ChainPWWB()
   if targets2>0 then
     return discard
   end
+  if targets>0 and SignCheck(AIHand()) 
+  and Duel.GetCurrentPhase()==PHASE_END
+  and Duel.GetTurnPlayer()==1-player_ai
+  then
+    return true
+  end
   return false
 end
 function ChainFarfa()

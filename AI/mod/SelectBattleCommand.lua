@@ -392,7 +392,10 @@ function OnSelectBattleCommand(cards,activatable)
   if HasID(activatable,03580032) and UseMerlinBP() then
     return 2,CurrentIndex
   end
-
+  if HasID(activatable,77778835,ChainParty) then
+    return 2,CurrentIndex
+  end
+  
   -------------------------------------
   -- If it gets this far, don't attack.
   -------------------------------------

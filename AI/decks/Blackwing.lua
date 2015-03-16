@@ -105,16 +105,9 @@ function SynchroCheck(level,nontunercount)
   end
 end
 
-function CothTargetFilter(target,source)
-  if not CothCheck(target) or target.id == 81105204 then
-    return true
-  end
-  return false
-end
 function BounceFilter(c)
   return c.id == 50078509 and FilterPosition(c,POS_FACEUP)
-  or c.id == 97077563 and FilterPosition(c,POS_FACEUP) 
-  and CardsMatchingFilter(AIMon(),CothTargetFilter,c)==0
+  or c.id == 97077563 and CothCheck(c)
 end
 -- favourable targets to return to the hand 
 -- for Zephyros and Vulcan

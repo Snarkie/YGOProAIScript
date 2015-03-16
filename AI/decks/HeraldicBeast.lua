@@ -520,6 +520,25 @@ function ChidoriCheck(cards)
   end
   return result>=2
 end
+function SummonChidoriHeraldic()
+  if not DeckCheck(DECK_HERALDIC) then return false end
+  local cards = UseLists({OppMon(),OppST()})
+  local result={0,0}
+  for i=1,#cards do
+    if bit32.band(cards[i].position,POS_FACEUP)>0 
+    and cards[i]:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0 
+    then 
+      result[1]=1 
+    end
+    if bit32.band(cards[i].position,POS_FACEDOWN)>0 
+    and cards[i]:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0 
+    then 
+      result[2]=1
+    end
+  end
+  return result[1]+result[2]>=2 
+  or OppGetStrongestAttDef() >= 2300 and MP2Check()
+end
 function AHATarget(cards)
   local result = nil
   if GlobalCardMode == 2 then
@@ -547,7 +566,7 @@ function AHATarget(cards)
     if HasID(cards,48739166) and SummonSharkKnight() then 
       result=IndexByID(cards,48739166)
     end
-    if HasID(cards,22653490) and SummonChidori() then
+    if HasID(cards,22653490) and SummonChidoriHeraldic() then
       result=IndexByID(cards,22653490)
     end
     if HasID(cards,94380860) and SummonRagnaZero(cards[CurrentIndex]) then
@@ -611,7 +630,7 @@ function UnicornTarget(cards)
   end
   return {math.random(#cards)}
 end
-function ChidoriTarget(cards)
+function ChidoriTargetHeraldic(cards)
   local result = nil
   if GlobalCardMode == 2 then
     GlobalCardMode = 1
@@ -702,8 +721,8 @@ function HeraldicOnSelectCard(cards, minTargets, maxTargets, triggeringID, trigg
   if triggeringID == 11398059 then -- King of the Feral Imps
     return ImpKingTarget(cards)
   end
-  if triggeringID == 22653490 then -- Chidori
-    return ChidoriTarget(cards)
+  if triggeringID == 22653490 and DeckCheck(DECK_HERALDIC) then -- Chidori
+    return ChidoriTargetHeraldic(cards)
   end
   if triggeringID == 94380860 then -- Ragna Zero
     return RagnaZeroTarget(cards)
@@ -842,9 +861,9 @@ end
 function ChainLance()
 	local ex,cg = Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_DESTROY)
 	if ex then
-		if cg:IsExists(function(c) return c:IsControler(player_ai) and c:IsCode(27243130) end, 1, nil) then
+		--if cg:IsExists(function(c) return c:IsControler(player_ai) and c:IsCode(27243130) end, 1, nil) then
       --return true
-    end	
+    --end	
   end
   local cc=Duel.GetCurrentChain()
   local cardtype = Duel.GetChainInfo(cc, CHAININFO_EXTTYPE)
@@ -864,12 +883,14 @@ function ChainLance()
     end
   end
   local g
-  if ex then
+  if ex and cg then
     g = cg:Filter(LanceFilter, nil):GetMaxGroup(Card.GetAttack)
   elseif tg then
     g = tg:Filter(LanceFilter, nil):GetMaxGroup(Card.GetAttack)
   end
-  if g and bit32.band(cardtype, TYPE_SPELL+TYPE_TRAP)>0 and p ~= player_ai then
+  if g and bit32.band(cardtype, TYPE_SPELL+TYPE_TRAP)>0 
+  and p ~= player_ai and UnchainableCheck(27243130)
+  then
     if source and target and target:IsCode(g:GetFirst():GetCode())
     and source:IsPosition(POS_FACEUP_ATTACK) and target:IsPosition(POS_FACEUP_ATTACK)
     and source:GetAttack()>target:GetAttack()-800
@@ -882,7 +903,8 @@ function ChainLance()
   if Duel.GetCurrentPhase() == PHASE_DAMAGE and source and target then
     if source:GetAttack() >= target:GetAttack() and math.max(source:GetAttack()-800,0) <= target:GetAttack() 
     and source:IsPosition(POS_FACEUP_ATTACK) and target:IsPosition(POS_FACEUP_ATTACK) and target:IsControler(player_ai)
-    and not source:IsHasEffect(EFFECT_IMMUNE_EFFECT) 
+    and not source:IsHasEffect(EFFECT_IMMUNE_EFFECT)
+    and UnchainableCheck(27243130)
     then
       GlobalTargetSet(source,OppMon())
       return true

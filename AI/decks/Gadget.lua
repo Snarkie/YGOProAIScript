@@ -487,10 +487,8 @@ function CotHTargetGadget(cards,c)
   if cards[1].prio 
   then 
     TargetSet(cards[1]) 
-    if c then CothSet(cards[1],c) end
   else 
     TargetSet(cards[result]) 
-    if c then CothSet(cards[1],c) end
   end
   return {result}
 end
@@ -510,7 +508,6 @@ function GearframeTarget(cards)
 end
 function FiendishChainTarget(cards,source)
   result = GlobalTargetGet(cards,true)
-  FiendishSet(cards[result[1]],source)
   if result == nil then result = {math.random(#cards)} end
   return result
 end

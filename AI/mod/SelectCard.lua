@@ -134,7 +134,11 @@ end
     return result
   end
  
-  
+  if triggeringCard==nil and GlobalMaterial==true
+  then  
+    GlobalMaterial = nil
+    return OnSelectMaterial(cards,minTargets,maxTargets)
+  end
   --------------------------------------------
   -- Select minimum number of valid XYZ material monsters,   
   -- with lowest attack as tributes.

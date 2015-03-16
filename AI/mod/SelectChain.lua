@@ -22,10 +22,8 @@ function OnSelectChain(cards,only_chains_by_player,forced)
   local result = 0
   local index = 1
   local ChainAllowed = 0
-  
   SurrenderCheck()
   
-
  
   ------------------------------------------
   -- The first time around, it sets the AI's
@@ -71,7 +69,8 @@ function OnSelectChain(cards,only_chains_by_player,forced)
 	  end
     end
   end
-  	 
+  SaveCards() 
+
   ---------------------------------------------------------
   -- Compare the current field's state with the previously
   -- saved field state, and get the card  that the opponent

@@ -85,15 +85,16 @@ end
 function EgrystalCond(loc,c)
   return true
 end
-function ShadollGetPriority(id,loc)
+function ShadollGetPriority(c,loc)
   local checklist = nil
   local result = 0
+  local id = c.id
   if loc == nil then
     loc = PRIO_TOHAND
   end
   checklist = Prio[id]
   if checklist then
-    if checklist[11] and not(checklist[11](loc)) then
+    if checklist[11] and not(checklist[11](loc,c)) then
       loc = loc + 1
     end
     result = checklist[loc]
@@ -105,14 +106,14 @@ function ShadollAssignPriority(cards,loc,filter)
   Multiple = nil
   for i=1,#cards do
     cards[i].index=i
-    cards[i].prio=ShadollGetPriority(cards[i].id,loc)
+    cards[i].prio=ShadollGetPriority(cards[i],loc)
     if filter and not filter(cards[i]) then
       cards[i].prio=-1
     end
-    if loc==PRIO_GRAVE and cards[i].location==LOCATION_DECK then
+    if loc==PRIO_GRAVE and FilterLocation(cards[i],LOCATION_DECK) then
       cards[i].prio=cards[i].prio+2
     end
-     if loc==PRIO_GRAVE and cards[i].location==LOCATION_ONFIELD then
+     if loc==PRIO_GRAVE and FilterLocation(cards[i],LOCATION_ONFIELD) then
       cards[i].prio=cards[i].prio-1
     end
     SetMultiple(cards[i].id)
@@ -133,6 +134,10 @@ function ShadollAdd(cards,loc,count,filter)
   local compare = function(a,b) return a.prio>b.prio end
   ShadollAssignPriority(cards,loc,filter)
   table.sort(cards,compare)
+  --print("priority list:")
+  for i=1,#cards do
+    --print(cards[i].original_id..", prio:"..cards[i].prio)
+  end
   for i=1,count do
     result[i]=cards[i].index
     --ShadollTargets[#ShadollTargets+1]=cards[i].cardid
@@ -478,11 +483,13 @@ function FacingTheShadowsTarget(cards,min,max)
   return result
 end
 function EmeralTarget(cards,count)
-  local result = {}
-  for i=1,#cards do cards[i].index = i end
-  Shuffle(cards)
-  for i=1,count do result[i] = cards[i].index end
-  return result
+  if LocCheck(cards,LOCATION_OVERLAY) then
+    return Add(cards,PRIO_TOGRAVE)
+  end
+  if count>0 then
+    return Add(cards,PRIO_EXTRA,count)
+  end
+  return Add(cards,PRIO_TOFIELD)
 end
 function SkyblasterTarget(cards,count)
   return BestTargets(cards,count)
@@ -876,6 +883,11 @@ function ChainMST(c)
     if e and e:GetHandler():IsCode(12697630) then
       return false
     end
+    if SignCheck(AIST()) and not RemovalCheck(19337371) then
+      GlobalCardMode = 1
+      GlobalTargetSet(FindID(19337371,AIST()))
+      return true
+    end
     if targets2 > 0 and ArtifactCheck()
     then
       return true
@@ -898,6 +910,13 @@ function ChainMST(c)
         return true
       end
     end
+  end
+  if Duel.GetCurrentPhase()==PHASE_END and Duel.GetTurnPlayer()==1-player_ai 
+  and #AIST()>0 and SignCheck(AIST()) and LadyCount(AIHand())<2 
+  then
+    GlobalCardMode = 1
+    GlobalTargetSet(FindID(19337371,AIST()))
+    return true
   end
   if Duel.GetCurrentPhase()==PHASE_END then
     if targets2 > 0 and ArtifactCheck() then

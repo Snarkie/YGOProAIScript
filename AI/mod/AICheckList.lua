@@ -444,7 +444,7 @@ SetBL={
 
 function RepositionBlacklist(id)
   for i=1,#RepoBL do
-    if RepoBL[i]==CardId then
+    if RepoBL[i]==id then
       return 1
     end
   end
@@ -454,7 +454,7 @@ RepoBL={
   37445295,04939890,30328508, -- Shadoll Falcon,Hedgehog,Lizard
   77723643,03717252,21502796, -- Shadoll Dragon, Beast,Ryko
   23899727,88241506,15914410, -- Mermail Abysslinde, Blue-Eyes Maiden, Mechquipped Angineer
-  23232295, -- Lead Yoke
+  23232295,85909450, -- Lead Yoke, HPPD
 }
 ---------------------------------------------------------
 -- Checks if the specified card ID is in this "blacklist"
@@ -538,10 +538,44 @@ function DestroyBlacklist(c) -- cards to not destroy in your opponent's possessi
 end
 
 DestroyBL={
-  07452945,14745409,23562407,83438826, --  Noble Arms of Destiny, Gallatin, Caliburn, Arfeudutyr
-  19337371,29223325,12444060,17639150, -- Hysteric Sign, Artifact Ignition, Sanctum, Qliphort Sacrifice
+  19337371,29223325,12444060, -- Hysteric Sign, Artifact Ignition, Sanctum,
 }
 
+function IgnoreList(c) -- cards to ignore with removal effects
+  local id = nil      -- until other targets have been dealt with 
+  local faceup = FilterPosition(c,POS_FACEUP)
+  if c.GetCode then
+    id = c:GetCode()   
+  else 
+    id = c.id
+  end
+  if FilterSet(c,0x7c)  -- Fire Formation
+  and faceup
+  then
+    return true
+  end
+  if FilterSet(c,0x207a) -- Noble Arms
+  and id~=46008667      -- except Excaliburn
+  and faceup
+  then 
+    return true
+  end
+  if (id == 97077563 -- CotH
+  or id == 50078509) -- Fiendish Chain
+  and FilterPosition(c,POS_FACEUP)
+  and CardTargetCheck(c)==0 then
+    return true
+  end
+  for i=1,#Ignore do
+    if Ignore[i]==id then
+      return true
+    end
+  end
+  return false
+end
+
+Ignore={
+}
 -----------------------------------------------------
 -- Checks if the card's ID is in a list of spell/trap
 -- cards that work well when multiple copies are
@@ -614,7 +648,7 @@ Unchainable={
 25857246,74122412,99185129,56574543, -- Nekroz Valkyrus, Nekroz Gungnir, Nekroz Clausolas, Bujingi Sinyou
 59251766,37742478,41930553,20292186, -- Bujingi Hare, Honest, Dark Smog, Artifact Scythe
 38296564,53567095,72930878,81983656, -- Safe Zone, Icarus, Black Sonic, BW Hawk Joe
-85215458,24508238,59616123, -- BW Kalut, D.D. Crow, Trap Stun
+85215458,24508238,59616123,27243130, -- BW Kalut, D.D. Crow, Trap Stun, Forbidden lance
 }
 function isUnchainableTogether(CardId)
   for i=1,#Unchainable do

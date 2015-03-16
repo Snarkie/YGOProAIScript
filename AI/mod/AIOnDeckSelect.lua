@@ -40,7 +40,7 @@ DeckIdent={ --card that identifies the deck
 [17]  = 91351370, -- Black Whirlwind
 [18]  = 19337371, -- Hysteric Sign
 }
-Deck = nil
+GlobalDeck = nil
 DeckName={
 [0]   = "Something else",
 [1]   = "Chaos Dragon",
@@ -63,13 +63,13 @@ DeckName={
 [18]  = "Harpie",
 }
 function DeckCheck(opt)
-  if Deck == nil then
+  if GlobalDeck == nil then
     PrioritySetup()
     for i=1,#DeckIdent do
-      if HasID(UseLists({AIDeck(),AIHand()}),DeckIdent[i],true) then
-        Deck = i
+      if HasID(AIAll(),DeckIdent[i],true) then
+        GlobalDeck = i
         print("AI deck is "..DeckName[i])
-        if GlobalDebug or Deck == DECK_EXODIA then
+        if GlobalDebug or GlobalDeck == DECK_EXODIA then
           local e1=Effect.GlobalEffect()
           e1:SetType(EFFECT_TYPE_FIELD)
           e1:SetCode(EFFECT_PUBLIC)
@@ -83,13 +83,13 @@ function DeckCheck(opt)
       end
     end
   end
-  if Deck == nil then
-    Deck = DECK_SOMETHING
+  if GlobalDeck == nil then
+    GlobalDeck = DECK_SOMETHING
   end
   if opt then
-    return Deck==opt
+    return GlobalDeck==opt
   else
-    return Deck
+    return GlobalDeck
   end
 end
 
@@ -441,40 +441,57 @@ function AssignPriority(cards,loc,filter,opt)
   local index = 0
   Multiple = nil
   for i=1,#cards do
-    cards[i].index=i
-    cards[i].prio=GetPriority(cards[i],loc)
-    if not FilterCheck(cards[i],filter,opt) then
-      cards[i].prio=-1
+    local c = cards[i]
+    c.index=i
+    c.prio=GetPriority(c,loc)
+    if not FilterCheck(c,filter,opt) then
+      c.prio=-1
     end
-    if loc==PRIO_TOFIELD and cards[i].location==LOCATION_DECK then
-      cards[i].prio=cards[i].prio+2
+    if loc==PRIO_TOFIELD and c.location==LOCATION_DECK then
+      c.prio=c.prio+2
     end
-    if loc==PRIO_TOGRAVE and cards[i].location==LOCATION_DECK then
-      cards[i].prio=cards[i].prio+2
+    if loc==PRIO_TOGRAVE and c.location==LOCATION_DECK then
+      c.prio=c.prio+2
     end
-    if loc==PRIO_TOFIELD and cards[i].location==LOCATION_GRAVE then
-      cards[i].prio=cards[i].prio+1
+    if loc==PRIO_TOFIELD and c.location==LOCATION_GRAVE then
+      c.prio=c.prio+1
     end
-    if loc==PRIO_TOFIELD and cards[i].location==LOCATION_EXTRA then
-      cards[i].prio=cards[i].prio+5
+    if loc==PRIO_TOFIELD and c.location==LOCATION_EXTRA then
+      c.prio=c.prio+5
     end
-    if loc==PRIO_TOGRAVE and bit32.band(cards[i].location,LOCATION_ONFIELD)>0
-    and cards[i].equip_count and cards[i].equip_count>0 and HasID(cards[i]:get_equipped_cards(),17639150,true) 
+    if loc==PRIO_TOGRAVE and bit32.band(c.location,LOCATION_ONFIELD)>0
+    and c.equip_count and c.equip_count>0 and HasID(c:get_equipped_cards(),17639150,true) 
     then
-      cards[i].prio=10
+      c.prio=10
     end
-    if loc==PRIO_TOHAND and bit32.band(cards[i].location,LOCATION_ONFIELD)>0 
+    if loc==PRIO_TOGRAVE and FilterLocation(c,LOCATION_ONFIELD)
+    then
+      if Negated(c) then 
+        c.prio=c.prio+3
+      end
+      if FilterPosition(c,POS_DEFENCE)
+      and (FilterStatus(c,STATUS_SUMMON_TURN)
+      or FilterStatus(c,STATUS_JUST_POS))
+      and c.attack>c.defense
+      then
+        c.prio=c.prio+2
+      end
+    end
+    if loc==PRIO_TOHAND and bit32.band(c.location,LOCATION_ONFIELD)>0 
     and not DeckCheck(DECK_HARPIE) -- temp
     then
-      cards[i].prio=-1
+      c.prio=-1
     end
-    if cards[i].owner==2 then
-      cards[i].prio=-1*cards[i].prio
+    if c.owner==2 then
+      c.prio=-1*c.prio
     end
-    if not TargetCheck(cards[i]) then
-      cards[i].prio=-1
+    if not TargetCheck(c) then
+      c.prio=-1
     end
-    SetMultiple(cards[i].original_id)
+    if loc==PRIO_TOGRAVE and not MacroCheck() then
+      c.prio=-1*c.prio
+    end
+    SetMultiple(c.original_id)
   end
 end
 function PriorityCheck(cards,loc,count,filter,opt)

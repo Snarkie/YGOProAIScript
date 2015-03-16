@@ -47,6 +47,9 @@ function OnSelectYesNo(description_id)
       return 0
     end
   end
+  if description_id == 1101042113 then -- Harpie Dancer
+    return DancerYesNo()
+  end
 	return -1
 end
 

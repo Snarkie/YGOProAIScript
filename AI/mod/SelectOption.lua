@@ -11,7 +11,8 @@ function OnSelectOption(options)
   local result = 0
   local optionfunctions={
   HeraldicOnSelectOption,QliphortOption,
-  NekrozOption,DarkWorldOption,ConstellarOption
+  NekrozOption,DarkWorldOption,ConstellarOption,
+  HarpieOption
   }
   for i=1,#optionfunctions do
     local func = optionfunctions[i]

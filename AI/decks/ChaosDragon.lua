@@ -378,7 +378,7 @@ function UseLumina()
   return OverExtendCheck() or PriorityCheck(AIHand(),PRIO_TOGRAVE)>1
 end
 function SummonLyla()
-  return CardsMatchingFilter(OppST(),DestroyFilter)>0 and OverExtendCheck()
+  return CardsMatchingFilter(OppST(),DestroyFilterIgnore)>0 and OverExtendCheck()
 end
 function UseLyla()
   return CardsMatchingFilter(OppST(),DestroyFilter)>0 

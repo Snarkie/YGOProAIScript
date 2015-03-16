@@ -45,8 +45,10 @@ function OnSelectTribute(cards,minTributes, maxTributes)
   end
   return result
 end
-
-
+--from OnSelectCard
+function OnSelectMaterial(cards,min,max)
+  return Add(cards,PRIO_TOGRAVE,min)
+end
 
 
 

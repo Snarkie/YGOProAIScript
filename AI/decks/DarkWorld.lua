@@ -31,7 +31,7 @@ function GraphaCond(loc,c)
     if FilterLocation(c,LOCATION_REMOVED) then
       return 10
     end
-    return (CardsMatchingFilter(OppField(),DestroyFilter)>0 
+    return (CardsMatchingFilter(OppField(),DestroyFilterIgnore)>0 
     or not HasAccess(34230233)) 
     and DiscardOutlets()>0
     and not HasID(AIHand(),34230233,true)
@@ -43,7 +43,7 @@ function GraphaCond(loc,c)
     then
       return true
     end
-    return CardsMatchingFilter(OppField(),DestroyFilter)>0
+    return CardsMatchingFilter(OppField(),DestroyFilterIgnore)>0
     or GlobalDragged
     or CardsMatchingFilter(AIMon(),DarkWorldMonsterFilter,34230233)>0
     or ((CardsMatchingFilter(AIHand(),DarkWorldMonsterFilter,34230233)>0
@@ -553,7 +553,7 @@ function ChainEEV(card)
   for i=1,#OppST() do
     local c = OppST()[i]
     if not FilterStatus(c,STATUS_LEAVE_CONFIRMED) 
-    and DestroyFilter(c)
+    and DestroyFilterIgnore(c)
     and (FilterPosition(c,POS_FACEUP)
     or FilterPublic(c))
     then

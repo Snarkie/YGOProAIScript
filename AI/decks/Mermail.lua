@@ -504,7 +504,7 @@ function MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     GlobalCardMode = 2
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  local check = MermailPriorityCheck(AIHand(),PRIO_DISCARD)>1 and MermailOpenFieldCheck()
+  local check = DeckCheck(DECK_MERMAIL) and MermailPriorityCheck(AIHand(),PRIO_DISCARD)>1 and MermailOpenFieldCheck()
   if HasID(Activatable,22446869) and check then
     GlobalCardMode=1
     return {COMMAND_ACTIVATE,IndexByID(Activatable,22446869)}

@@ -1,7 +1,13 @@
 -----
 -- Staple cards, or cards used in multiple AI Extra Decks
 -----
-
+function XYZSummon(index)
+  if index == nil then
+    index = CurrentIndex
+  end
+  GlobalMaterial = true
+  return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+end
 function SummonExtraDeck(cards,prio)
   local Act = cards.activatable_cards
   local Sum = cards.summonable_cards
@@ -13,7 +19,7 @@ function SummonExtraDeck(cards,prio)
 -- use certain effects before doing anything else
 ---- 
  if prio then 
-   if HasIDNotNegated(Act,72892473) then 
+   if HasIDNotNegated(Act,00691925) then 
     --return {COMMAND_ACTIVATE,CurrentIndex}                                -- test
   end
   if HasIDNotNegated(Act,12014404,false,nil,nil,POS_DEFENCE) and UseCowboyDef() then 
@@ -57,22 +63,22 @@ function SummonExtraDeck(cards,prio)
 -- summon certain monsters before anything else
 ----   
   if HasIDNotNegated(SpSum,12014404) and SummonCowboyDef() then          
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasIDNotNegated(SpSum,29669359) and SummonVolcasaurusFinish() then  
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasIDNotNegated(SpSum,29669359) and SummonVolcaGaiaFinish(1) then  
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasIDNotNegated(SpSum,91949988) and SummonVolcaGaiaFinish(2) then  
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasIDNotNegated(SpSum,88120966) and SummonGiantGrinderFinish(SpSum[CurrentIndex]) then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasIDNotNegated(SpSum,46772449) and SummonBelzebuth() then          
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasID(SpSum,57774843) and SummonJD() then                 
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
@@ -81,22 +87,25 @@ function SummonExtraDeck(cards,prio)
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasIDNotNegated(SpSum,16195942) and SummonRebellionFinish() then 
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasIDNotNegated(SpSum,31320433) and SummonNightmareSharkFinish() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasIDNotNegated(SpSum,66547759) and SummonLancelotFinish() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
+  end
+  if HasIDNotNegated(SpSum,85909450,SummonHPPDFinish) then
+    return XYZSummon()
   end
   if HasIDNotNegated(SpSum,31437713) and SummonHeartlanddracoFinish() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasIDNotNegated(SpSum,00005509) and SummonUtopiaLightningFinish(SpSum[CurrentIndex],2) then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasIDNotNegated(SpSum,84013237) and SummonUtopiaLightningFinish(SpSum[CurrentIndex],1) then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
 ---- 
 -- activate removal effects before progressing
@@ -171,7 +180,7 @@ function SummonExtraDeck(cards,prio)
  
  -- summon Gaia Dragon after removal effects
    if HasIDNotNegated(SpSum,91949988) and SummonGaiaDragonFinish(SpSum[CurrentIndex]) then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   
 ---- 
@@ -231,16 +240,16 @@ function SummonExtraDeck(cards,prio)
 
 -- Rank 8
   if HasIDNotNegated(SpSum,01639384) and SummonFelgrand(SpSum[CurrentIndex]) then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasIDNotNegated(SpSum,88120966) and SummonGiantGrinder(SpSum[CurrentIndex]) then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasIDNotNegated(SpSum,10406322) and SummonAlsei(SpSum[CurrentIndex]) then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasID(SpSum,73445448) and SummonZombiestein(SpSum[CurrentIndex]) then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   
 -- Rank 7
@@ -254,86 +263,88 @@ function SummonExtraDeck(cards,prio)
   
 -- Rank 6
   if HasID(SpSum,38495396) and SummonPtolemy(SpSum[CurrentIndex]) then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasIDNotNegated(SpSum,15561463) and SummonGauntletLauncher() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasID(SpSum,91949988) and SummonGaiaDragon(SpSum[CurrentIndex]) then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
 
 -- Rank 5
   if HasID(SpSum,73964868) and SummonPleiades(SpSum[CurrentIndex]) then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasID(SpSum,29669359) and SummonVolcasaurus(SpSum[CurrentIndex]) then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
 
 -- Rank 4
   if HasID(SpSum,94380860) and SummonRagnaZero(SpSum[CurrentIndex]) then            -- Ragna Zero
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end  
-  if HasIDNotNegated(SpSum,22653490) and SummonChidori() then              -- Chidori
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  if HasIDNotNegated(SpSum,22653490,SummonChidori,1) then              -- Chidori
+    return XYZSummon()
   end
   if HasIDNotNegated(SpSum,48739166) and SummonSharkKnight() then          -- SHArk Knight
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasIDNotNegated(SpSum,82633039) and SummonSkyblaster() then           -- Skyblaster
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasID(SpSum,26329679) and SummonOmega(SpSum[CurrentIndex]) then 
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasID(SpSum,16195942) and SummonRebellion(SpSum[CurrentIndex]) then 
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasIDNotNegated(SpSum,61344030) and SummonPaladynamo() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
+  end
+  if HasIDNotNegated(SpSum,22653490,SummonChidori,2) then              -- Chidori
+    return XYZSummon()
   end
   if HasIDNotNegated(SpSum,63746411) and SummonGiantHand() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasIDNotNegated(SpSum,91499077) and SummonGagagaSamurai() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasIDNotNegated(Act,91499077) and UseGagagaSamurai() then
     Global1PTGunman = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(SpSum,34086406) and SummonLavalvalChain() then -- Lavalval Chain
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasIDNotNegated(Act,34086406,false,545382497) and UseLavalvalChain() then   
-    GlobalCardMode = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(SpSum,11398059) and SummonImpKing(SpSum[CurrentIndex]) then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasIDNotNegated(Act,11398059) then
     GlobalCardMode = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(SpSum,21044178) and SummonDweller() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasIDNotNegated(SpSum,00581014) and SummonEmeral() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasIDNotNegated(Act,00581014,false,9296225) and UseEmeral() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(SpSum,21501505) and SummonCairngorgon(SpSum[CurrentIndex]) then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasIDNotNegated(SpSum,93568288) and SummonRhapsody() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasIDNotNegated(SpSum,12014404) and SummonCowboyAtt() then -- Cowboy
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasIDNotNegated(Act,12014404) and UseCowboyAtt() then
     Global1PTGunman = 1
@@ -343,16 +354,16 @@ function SummonExtraDeck(cards,prio)
 -- Rank 3
   if HasIDNotNegated(SpSum,78156759) and SummonZenmaines(SpSum[CurrentIndex]) then
     GlobalDWSS=2
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasID(Rep,78156759) and RepoZenmaines(Rep[CurrentIndex]) then
     return {COMMAND_CHANGE_POS,CurrentIndex}
   end
   if HasIDNotNegated(SpSum,15914410) and SummonMechquipped() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasIDNotNegated(SpSum,95992081) and SummonLeviair() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasIDNotNegated(Act,95992081) and UseLeviair() then
     GlobalCardMode = 1
@@ -456,7 +467,7 @@ end
 function SummonLavalvalChain()
   if DeckCheck(DECK_HAT) or DeckCheck(DECK_HERALDIC) 
   or DeckCheck(DECK_QLIPHORT) or DeckCheck(DECK_DARKWORLD)
-  or DeckCheck(DECK_CONSTELLAR)
+  or DeckCheck(DECK_CONSTELLAR) or DeckCheck(DECK_HARPIE)
   then
     return false
   else
@@ -465,25 +476,26 @@ function SummonLavalvalChain()
 end
 function UseLavalvalChain()
   return not (DeckCheck(DECK_NEKROZ) or DeckCheck(DECK_DARKWORLD)
-  or DeckCheck(DECK_CONSTELLAR))
+  or DeckCheck(DECK_CONSTELLAR) or DeckCheck(DECK_HARPIE))
 end
-function SummonChidori()
-  local cards = UseLists({OppMon(),OppST()})
-  local result={0,0}
-  for i=1,#cards do
-    if bit32.band(cards[i].position,POS_FACEUP)>0 
-    and cards[i]:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0 
-    then 
-      result[1]=1 
-    end
-    if bit32.band(cards[i].position,POS_FACEDOWN)>0 
-    and cards[i]:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0 
-    then 
-      result[2]=1
-    end
+function ChidoriFilter(c,pos)
+  return Targetable(c,TYPE_MONSTER)
+  and Affected(c,TYPE_MONSTER,4)
+  and (pos == nil or FilterPosition(c,pos))
+end
+function SummonChidori(c,mode)
+  if mode == 1 
+  and CardsMatchingFilter(OppField(),ChidoriFilter,POS_FACEUP)>0
+  and CardsMatchingFilter(OppField(),ChidoriFilter,POS_FACEDOWN)>0
+  then
+    return true
   end
-  return result[1]+result[2]>=2 
-  or OppGetStrongestAttDef() >= 2300 and MP2Check()
+  if mode == 2 
+  and HasPriorityTarget(OppField(),ChidoriFilter,POS_FACEUP)
+  then
+    return true
+  end
+  return false
 end
 function SummonRagnaZero(card)
   local cards = OppMon()
@@ -597,7 +609,9 @@ function EmeralFilter(c)
 end
 function SummonEmeral()
   return HasID(AIExtra(),00581014,true) and MP2Check() 
-  and CardsMatchingFilter(AIGrave(),EmeralFilter)>10 and OppGetStrongestAttDef()<1800
+  and CardsMatchingFilter(AIGrave(),EmeralFilter)>10 
+  and (OppGetStrongestAttDef()<1800 
+  or not OppHasStrongestMonster())
 end
 function UseCowboyDef()
   return AI.GetPlayerLP(2) < 1600
@@ -900,7 +914,7 @@ function UseRebellion()
   return CardsMatchingFilter(OppMon(),RebellionFilter)>0
 end
 function ZenmainesFilter(c,source)
-  return (c.attack>source.attack and DestroyFilter(c) 
+  return (c.attack>source.attack and DestroyFilterIgnore(c) 
   and AI.GetPlayerLP(1)>(c.attack-source.attack)+800
   or c.attack==source.attack and DestroyCheck(OppField())>1)
   and AttackBlacklistCheck(c)
@@ -1001,13 +1015,16 @@ end
 function UsePtolemy()
   return true
 end
+function SummonHPPDFinish()
+  return BattlePhaseCheck()
+  and AI.GetPlayerLP(2)<=2000
+end
 function SummonHeartlanddracoFinish()
-  return GlobalBPAllowed 
-  and Duel.GetCurrentPhase() == PHASE_MAIN1 
+  return BattlePhaseCheck()
   and AI.GetPlayerLP(2)<=2000
 end
 function UseHeartlanddraco()
-  return GlobalBPAllowed and Duel.GetCurrentPhase() == PHASE_MAIN1
+  return BattlePhaseCheck()
 end
 function LightningFinishFilter(c,source)
   return FilterPosition(c,POS_FACEUP_ATTACK) and AttackBlacklistCheck(c,source) 
@@ -1082,8 +1099,12 @@ function NodenFilter(c)
 end
 function UseInstantFusion(mode)
   if not (WindaCheck() and DualityCheck) then return false end
-  if mode == 1 and CardsMatchingFilter(AIGrave(),NodenFilter)>0 and (FieldCheck(4)==1 
-  and OverExtendCheck() or #AIMon()==0 and #OppMon()>0) and HasIDNotNegated(AIExtra(),17412721,true)
+  if mode == 1 
+  and CardsMatchingFilter(AIGrave(),NodenFilter)>0 
+  and HasIDNotNegated(AIExtra(),17412721,true)
+  and (FieldCheck(4)==1 and OverExtendCheck() 
+  or #AIMon()==0 and #OppMon()>0
+  or DeckCheck(DECK_TELLARKNIGHT) and FieldCheck(1) and DestroyCheck(OppField())>0) 
   then
     GlobalCardMode = nil
     return true
@@ -1129,9 +1150,9 @@ function SummonVulcan(c)
 end
 function UseGalaxyCyclone(mode)
   if mode == 1 then
-    return DestroyCheck(OppST(),false,FilterPosition,POS_FACEDOWN)
+    return DestroyCheck(OppST(),false,false,FilterPosition,POS_FACEDOWN)
   end
-  return DestroyCheck(OppST(),false,FilterPosition,POS_FACEUP)
+  return DestroyCheck(OppST(),false,false,FilterPosition,POS_FACEUP)
 end
 ----
 
@@ -1291,26 +1312,6 @@ function ChainBTS(card)
   end
   return false
 end
-GlobalFiendish={}
-function FiendishSet(target,source)
-  GlobalFiendish[target.cardid]=source.cardid
-  return
-end
-function FiendishCheck(target)
-  if target == nil then return true end
-  local source = GlobalFiendish[target.cardid]
-  if source == nil then return true end
-  source = FindCard(source,Field())
-  if source == nil then return true end
-  if target and source and FilterLocation(target,LOCATION_ONFIELD) 
-  and FilterLocation(source,LOCATION_ONFIELD)
-  and NotNegated(source) and Negated(target)
-  and FilterAffected(target,EFFECT_CANNOT_ATTACK)
-  then
-    return false
-  end
-  return true
-end
 function ChainFiendish(card)
   local c = ChainCardNegation(card,true,false,FilterType,TYPE_MONSTER)
   if c then
@@ -1323,11 +1324,23 @@ function ChainFiendish(card)
     if source and target and WinsBattle(source,target) 
     and Targetable(source,TYPE_TRAP) and Affected(source,TYPE_TRAP)
     and UnchainableCheck(50078509)
+    and not FilterAffected(source,EFFECT_DISABLE)
+    and not FilterType(source,TYPE_NORMAL)
     then
-      GlobalTargetSet(source,OppMon())
+      GlobalTargetSet(source)
+      return true
+    end
+    if source and CanFinishGame(source) and #AIMon()==0 
+    and Targetable(source,TYPE_TRAP) and Affected(source,TYPE_TRAP)
+    and UnchainableCheck(50078509)
+    and not FilterAffected(source,EFFECT_DISABLE)
+    and not FilterType(source,TYPE_NORMAL)
+    then
+      GlobalTargetSet(source)
       return true
     end
   end
+  return false
 end
 function ChainSkillDrain(card)
   local c = ChainCardNegation(card,false,false,FilterType,TYPE_MONSTER)
@@ -1476,100 +1489,105 @@ function ChainTrapStun(source)
   return false
 end
 function PriorityChain(cards) -- chain these before anything else
-  if HasIDNotNegated(cards,58120309) and ChainNegation(cards[CurrentIndex]) then -- Starlight Road
+  if HasIDNotNegated(cards,58120309,ChainNegation) then -- Starlight Road
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,02956282) and ChainNegation(cards[CurrentIndex]) then -- Naturia Barkion
+  if HasIDNotNegated(cards,02956282,ChainNegation) then -- Naturia Barkion
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,33198837) and ChainNegation(cards[CurrentIndex]) then -- Naturia Beast
+  if HasIDNotNegated(cards,33198837,ChainNegation) then -- Naturia Beast
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,99916754) and ChainNegation(cards[CurrentIndex]) then -- Naturia Exterio
+  if HasIDNotNegated(cards,99916754,ChainNegation) then -- Naturia Exterio
     return {1,CurrentIndex}
   end
-  if HasID(cards,44508094,false,nil,LOCATION_MZONE) and ChainNegation(cards[CurrentIndex]) then -- Stardust
+  if HasID(cards,44508094,false,nil,LOCATION_MZONE,ChainNegation) then -- Stardust
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,82044279) and ChainNegation(cards[CurrentIndex]) then -- Clear Wing Synchro Dragon
+  if HasIDNotNegated(cards,82044279,ChainNegation) then -- Clear Wing Synchro Dragon
     return {1,CurrentIndex}
   end
-  if HasID(cards,61257789,false,nil,LOCATION_MZONE) and ChainNegation(cards[CurrentIndex]) then -- Stardust AM
+  if HasID(cards,61257789,false,nil,LOCATION_MZONE,ChainNegation) then -- Stardust AM
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,35952884,false,nil,LOCATION_MZONE) and ChainNegation(cards[CurrentIndex]) then -- Quasar
+  if HasIDNotNegated(cards,35952884,false,nil,LOCATION_MZONE,ChainNegation) then -- Quasar
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,24696097) and ChainNegation(cards[CurrentIndex]) then -- Shooting Star
+  if HasIDNotNegated(cards,24696097,ChainNegation) then -- Shooting Star
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,99188141) and ChainNegation(cards[CurrentIndex]) then -- THRIO
+  if HasIDNotNegated(cards,99188141,ChainNegation) then -- THRIO
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,29616929) and ChainNegation(cards[CurrentIndex]) then -- Traptrix Trap Hole Nighmare
+  if HasIDNotNegated(cards,29616929,ChainNegation) then -- Traptrix Trap Hole Nighmare
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,74294676) and ChainNegation(cards[CurrentIndex]) then -- Laggia
+  if HasIDNotNegated(cards,74294676,ChainNegation) then -- Laggia
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,42752141) and ChainNegation(cards[CurrentIndex]) then -- Dolkka
+  if HasIDNotNegated(cards,42752141,ChainNegation) then -- Dolkka
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,71068247) and ChainNegation(cards[CurrentIndex]) then -- Totem Bird
+  if HasIDNotNegated(cards,71068247,ChainNegation) then -- Totem Bird
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,41510920) and ChainNegation(cards[CurrentIndex]) then -- Stellarnova Alpha
+  if HasIDNotNegated(cards,41510920,ChainNegation) then -- Stellarnova Alpha
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,34507039) and ChainNegation(cards[CurrentIndex]) then -- Wiretap
+  if HasIDNotNegated(cards,34507039,ChainNegation) then -- Wiretap
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,03819470) and ChainNegation(cards[CurrentIndex]) then -- Seven Tools
+  if HasIDNotNegated(cards,03819470,ChainNegation) then -- Seven Tools
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,77538567) and ChainNegation(cards[CurrentIndex]) then -- Dark Bribe
+  if HasIDNotNegated(cards,49010598,ChainNegation) then -- Divine Wrath
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,93016201) and ChainNegation(cards[CurrentIndex]) then -- Royal Oppression
+  if HasIDNotNegated(cards,77414722,ChainNegation) then -- Magic Jammer
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,50323155) and ChainNegation(cards[CurrentIndex]) then -- Black Horn of Heaven
+  if HasIDNotNegated(cards,77538567,ChainNegation) then -- Dark Bribe
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,84749824) and ChainNegation(cards[CurrentIndex]) then -- Solemn Warning
+  if HasIDNotNegated(cards,93016201,ChainNegation) then -- Royal Oppression
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,41420027) and ChainNegation(cards[CurrentIndex]) then -- Solemn Judgment
+  if HasIDNotNegated(cards,50323155,ChainNegation) then -- Black Horn of Heaven
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,92512625) and ChainNegation(cards[CurrentIndex]) then -- Solemn Advice
+  if HasIDNotNegated(cards,84749824,ChainNegation) then -- Solemn Warning
     return {1,CurrentIndex}
   end
-  
+  if HasIDNotNegated(cards,41420027,ChainNegation) then -- Solemn Judgment
+    return {1,CurrentIndex}
+  end
+  if HasIDNotNegated(cards,92512625,ChainNegation) then -- Solemn Advice
+    return {1,CurrentIndex}
+  end
 
-  if HasIDNotNegated(cards,78474168) and ChainBTS(cards[CurrentIndex]) then
+  if HasIDNotNegated(cards,78474168,ChainBTS) then
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,50078509) and ChainFiendish(cards[CurrentIndex]) then
+  if HasIDNotNegated(cards,50078509,ChainFiendish) then
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,63746411) and ChainGiantHand(cards[CurrentIndex]) then
+  if HasIDNotNegated(cards,63746411,ChainGiantHand) then
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,01639384) and ChainFelgrand(cards[CurrentIndex]) then
+  if HasIDNotNegated(cards,01639384,ChainFelgrand) then
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,25789292) and ChainChalice(cards[CurrentIndex]) then
+  if HasIDNotNegated(cards,25789292,ChainChalice) then
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,73445448) and ChainZombiestein(cards[CurrentIndex]) then
+  if HasIDNotNegated(cards,73445448,ChainZombiestein) then
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,97268402) and ChainVeiler(cards[CurrentIndex]) then
+  if HasIDNotNegated(cards,97268402,ChainVeiler) then
     return {1,CurrentIndex}
   end
   
-  if HasIDNotNegated(cards,26329679) and ChainOmega(cards[CurrentIndex]) then
+  if HasIDNotNegated(cards,26329679,ChainOmega) then
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,59616123,ChainTrapStun) then
@@ -1579,15 +1597,16 @@ function PriorityChain(cards) -- chain these before anything else
   return nil
 end
 function GenericChain(cards)
-  if HasIDNotNegated(cards,10406322) and UseAlsei(cards[CurrentIndex]) then
+  if HasIDNotNegated(cards,10406322,UseAlsei) then
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,00005509) and ChainUtopiaLightning(cards[CurrentIndex]) then
+  if HasIDNotNegated(cards,00005509,ChainUtopiaLightning) then
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,55713623,ChainShrink) then
     return {1,CurrentIndex}
   end
+  return nil
 end
 
 function FelgrandTarget(cards,c)
@@ -1670,10 +1689,19 @@ function VulcanTarget(cards)
   end
   return result
 end
+function ChidoriTarget(cards)
+  if LocCheck(cards,LOCATION_OVERLAY) then
+    return Add(cards,PRIO_TOGRAVE)
+  end
+  return BestTargets(cards,1,TARGET_TODECK)
+end
 function GenericCard(cards,min,max,id,c)
   if c then
     id = c.id
-  end
+  end 
+  if id == 22653490 then
+    return ChidoriTarget(cards)
+  end 
   if id == 98012938 then
     return VulcanTarget(cards)
   end 

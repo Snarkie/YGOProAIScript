@@ -2,8 +2,10 @@ player_ai = nil
 GlobalTargetID = nil
 GlobalCheating = false
 -- Sets up some variables for using card script functions
-function set_player_turn()
-	if player_ai == nil then
+function set_player_turn(init)
+	if init and player_ai~=Duel.GetTurnPlayer()
+  or player_ai == nil 
+  then
 		player_ai = Duel.GetTurnPlayer()
     SaveState()
     if GlobalCheating then
@@ -67,12 +69,13 @@ function HasID(cards,id,skipglobal,desc,loc,pos,filter,opt)
   local result = false;
   if cards then 
     for i=1,#cards do
-      if (cards[i].id == id 
-      or cards[i].id == 76812113 and cards[i].original_id == id )
-      and (desc == nil or cards[i].description == desc) 
-      and (loc == nil or bit32.band(cards[i].location,loc)>0)
-      and (pos == nil or bit32.band(cards[i].position,pos)>0)
-      and (filter == nil or (opt==nil and filter(cards[i]) or filter(cards[i],opt)))
+      local c = cards[i]
+      if (c.id == id 
+      or c.id == 76812113 and c.original_id == id )
+      and (desc == nil or c.description == desc) 
+      and (loc == nil or bit32.band(c.location,loc)>0)
+      and (pos == nil or bit32.band(c.position,pos)>0)
+      and FilterCheck(c,filter,opt)
       then
         if not skipglobal then CurrentIndex = i end
         result = true      
@@ -109,27 +112,28 @@ function HasIDNotNegated(cards,id,skipglobal,desc,loc,pos,filter,opt)
   local result = false
   if cards ~= nil then 
     for i=1,#cards do
-      if (cards[i].id == id 
-      or cards[i].id == 76812113 and cards[i].original_id == id )
-      and (desc == nil or cards[i].description == desc) 
-      and (loc == nil or bit32.band(cards[i].location,loc)>0)
-      and (pos == nil or bit32.band(cards[i].position,pos)>0)
-      and (filter == nil or (opt==nil and filter(cards[i]) or filter(cards[i],opt)))
+      local c = cards[i]
+      if (c.id == id 
+      or c.id == 76812113 and c.original_id == id )
+      and (desc == nil or c.description == desc) 
+      and (loc == nil or bit32.band(c.location,loc)>0)
+      and (pos == nil or bit32.band(c.position,pos)>0)
+      and FilterCheck(c,filter,opt)
       then
-        if bit32.band(cards[i].type,TYPE_MONSTER)>0 
-        and NotNegated(cards[i])
+        if bit32.band(c.type,TYPE_MONSTER)>0 
+        and NotNegated(c)
         then
           if not skipglobal then CurrentIndex = i end
           result = true  
         end
-        if (FilterType(cards[i],TYPE_SPELL) 
-        and not FilterType(cards[i],TYPE_QUICKPLAY)
-        or FilterType(cards[i],TYPE_SPELL) 
-        and FilterType(cards[i],TYPE_QUICKPLAY)
-        and not FilterStatus(cards[i],STATUS_SET_TURN)
-        or FilterType(cards[i],TYPE_TRAP)
-        and not FilterStatus(cards[i],STATUS_SET_TURN))      
-        and NotNegated(cards[i])
+        if (FilterType(c,TYPE_SPELL) 
+        and not FilterType(c,TYPE_QUICKPLAY)
+        or FilterType(c,TYPE_SPELL) 
+        and FilterType(c,TYPE_QUICKPLAY)
+        and not FilterStatus(c,STATUS_SET_TURN)
+        or FilterType(c,TYPE_TRAP)
+        and not FilterStatus(c,STATUS_SET_TURN))      
+        and NotNegated(c)
         then
           if not skipglobal then CurrentIndex = i end
           result = true 
@@ -166,15 +170,23 @@ function OppHasMonster()
   local cards=OppMon()
   return #cards>0
 end
+
 function AIGetStrongestAttack(skipbonus)
   local cards=AIMon()
   local result=0
   ApplyATKBoosts(cards)
   for i=1,#cards do
-    if cards[i] and cards[i]:is_affected_by(EFFECT_CANNOT_ATTACK)==0 and cards[i].attack>result then
-      result=cards[i].attack
+    local c=cards[i]
+    if c
+    and c:is_affected_by(EFFECT_CANNOT_ATTACK)==0 
+    and c.attack>result 
+    and not (FilterPosition(c,POS_DEFENCE) 
+    and (FilterStatus(c,STATUS_SUMMON_TURN)
+    or FilterStatus(c,STATUS_JUST_POS)))
+    then
+      result=c.attack
       if skipbonus then
-        result = result-cards[i].bonus
+        result = result-c.bonus
       end
     end
   end
@@ -185,10 +197,12 @@ function OppGetStrongestAttack(filter,opt)
   local result=0
   ApplyATKBoosts(cards)
   for i=1,#cards do
-    if cards[i] and (filter==nil or (opt==nil and filter(cards[i]) or filter(cards[i],opt))) 
-    and cards[i].attack>result 
+    local c=cards[i]
+    if c and c.attack>result 
+    and FilterCheck(c,filter,opt)
+    and FilterPosition(c,POS_FACEUP_ATTACK)
     then
-      result=cards[i].attack-cards[i].bonus
+      result=c.attack-c.bonus
     end
   end
   return result
@@ -347,11 +361,15 @@ function HasBackrow(Setable)
 end
 -- check, if the AI is already controlling the field, 
 -- so it doesn't overcommit as much
-function OverExtendCheck(limit)
+function OverExtendCheck(limit,handlimit)
   if limit == nil then limit = 2 end
+  if handlimit == nil then handlimit = 4 end
   local cards = AIMon()
   local hand = AIHand()
-  return OppHasStrongestMonster() or #cards < limit or #hand > 4 or AI.GetPlayerLP(2)<=800 and HasID(AIExtra(),12014404,true) -- Cowboy
+  return OppHasStrongestMonster() 
+  or #cards < limit 
+  or #hand > handlimit 
+  or AI.GetPlayerLP(2)<=800 and HasID(AIExtra(),12014404,true) -- Cowboy
 end
 -- checks, if a card the AI controls is about to be removed in the current chain
 function RemovalCheck(id,category)
@@ -602,16 +620,31 @@ function BestTargets(cards,count,target,filter,opt,immuneCheck,source)
     if target == TARGET_PROTECT then 
       c.prio = -1 * c.prio
     end
+    if IgnoreList(c) then
+      c.prio = 0
+    end
     if filter and (opt == nil and not filter(c) or opt and not filter(c,opt)) then
       c.prio = -9999
     end
   end
   table.sort(cards,function(a,b) return a.prio > b.prio end)
+  local temp={}
+  local prio=cards[1].prio
   for i=1,#cards do
     --print("id: "..cards[i].id..", prio: "..cards[i].prio)
   end
-  for i=1,count do
-    result[i]=cards[i].index
+  if count == 1 then
+    for i=1,#cards do
+      if cards[i].prio==prio then
+        temp[#temp+1]=cards[i].index
+      end
+    end
+    Shuffle(temp)
+    result={temp[1]}
+  else
+    for i=1,count do
+      result[i]=cards[i].index
+    end
   end
   return result
 end
@@ -640,6 +673,7 @@ function GlobalTargetGet(cards,index)
     c = FindCard(cardid,All(),index)
   end
   if c == nil then
+    print("Warning: Null GlobalTargetGet")
   end
   return c
 end
@@ -830,14 +864,18 @@ function DestroyFilter(c,nontarget)
   and not (DestroyBlacklist(c)
   and (bit32.band(c.position, POS_FACEUP)>0 
   or bit32.band(c.status,STATUS_IS_PUBLIC)>0))
-  and (filter == nil or (opt == nil and filter(c) or filter(c,opt)))
+end
+function DestroyFilterIgnore(c,nontarget)
+  return DestroyFilter(c)
+  and not IgnoreList(c)
 end
 -- returns the amount of cards that can be safely destroyed in a list of cards
-function DestroyCheck(cards,nontarget,filter,opt)
+function DestroyCheck(cards,nontarget,skipignore,filter,opt)
   return CardsMatchingFilter(cards,
   function(c) 
-    return DestroyFilter(c,nontarget) and filter == nil 
-    or filter and (opt == nil and filter(c) or opt and filter(c,opt))
+    return DestroyFilter(c,nontarget) 
+    and (skipignore or not IgnoreList(c))
+    and FilterCheck(c,filter,opt)
   end)
 end
 function FilterAttribute(c,att)
@@ -881,6 +919,9 @@ function FilterDefenseMax(c,defense)
 end
 function FilterID(c,id)
   return c.id==id
+end
+function FilterOriginalID(c,id)
+  return c.original_id==id
 end
 function FilterPosition(c,pos)
   if c.GetCode then
@@ -1192,7 +1233,7 @@ function PriorityTarget(c,destroycheck,loc,filter,opt) -- preferred target for r
   if loc == LOCATION_ONFIELD then
     if FilterType(c,TYPE_MONSTER) and (bit32.band(c.type,TYPE_FUSION+TYPE_RITUAL+TYPE_XYZ+TYPE_SYNCHRO)>0 
     or c.level>4 and c.attack>2000)
-    and not (not FiendishCheck(c) and AIGetStrongestAttack()>c.attack)
+    and not (FiendishCheck(c) and AIGetStrongestAttack()>c.attack)
     then
       result = true
     end
@@ -1517,18 +1558,31 @@ function CanFinishGame(c,target,atk)
   if c == nil then
     return false
   end
-  if atk == nil then 
-    if c.GetCode then
+  local p
+  if c.GetCode then
+    if atk == nil then 
       atk = c:GetAttack()
+    end
+    if c:IsControler(player_ai) then
+      p=2
     else
+      p=1
+    end
+  else
+    if atk == nil then 
       atk = c.attack
     end
-  end  
+    if CurrentOwner(c) == 1 then
+      p = 2
+    else
+      p = 1 
+    end
+  end 
   if target == nil or FilterAffected(c,EFFECT_DIRECT_ATTACK) then
-    return AI.GetPlayerLP(2)<=atk
+    return AI.GetPlayerLP(p)<=atk
   end
   local oppatk, oppdef
-  if c.GetCode then
+  if target.GetCode then
     oppatk = target:GetAttack()
     oppdef = target:GetDefence()
   else
@@ -1537,13 +1591,13 @@ function CanFinishGame(c,target,atk)
   end
   if AttackBlacklistCheck(target,c) and BattleDamageCheck(target,c) then
     if FilterPosition(target,POS_FACEUP_ATTACK) then
-      return AI.GetPlayerLP(2)<=atk-oppatk
+      return AI.GetPlayerLP(p)<=atk-oppatk
     end
     if FilterPosition(target,POS_DEFENCE) and FilterAffected(c,EFFECT_PIERCE) then
       if FilterPublic(target) then
-        return AI.GetPlayerLP(2)<=atk-oppatk
+        return AI.GetPlayerLP(p)<=atk-oppatk
       else
-        return AI.GetPlayerLP(2)<=atk-1500
+        return AI.GetPlayerLP(p)<=atk-1500
       end
     end
   end
@@ -1624,16 +1678,21 @@ end
 function GetScriptFromCard(c)
   local seq = Sequence(c)
   local type = c.type
+  local loc = c.location
   local p
   if CurrentOwner(c) == 1 then
     p = player_ai
   else
     p = 1-player_ai
   end
-  local g = GetMatchingGroup(nil,nil,LOCATION_ONFIELD,LOCATION_ONFIELD,0,nil)
+  local g = Duel.GetMatchingGroup(nil,p,LOCATION_ONFIELD,LOCATION_ONFIELD,nil)
   local result = nil
   g:ForEach(function(c) 
-    if c:GetSequence()==seq and c:IsType(type) and c:IsControler(p) then
+    if c:GetSequence()==seq 
+    and c:IsType(type) 
+    and c:IsControler(p) 
+    and c:IsLocation(loc)
+    then
       result = c
     end
   end)
@@ -1711,8 +1770,8 @@ function FilterCheck(c,filter,opt)
   and filter(c) or filter(c,opt))
 end
 
-function EPAddedCards()
-  local result = 0
+function EPAddedCards()  -- checks, how many cards the AI is expected
+  local result = 0       -- to search during end phase
   if CardsMatchingFilter(AIGrave(),SignGraveFilter)>0
   and OPTCheck(19337371)
   then
@@ -1727,6 +1786,77 @@ function EPAddedCards()
   and OPTCheck(56585883)
   then
     result = result+1
+  end
+  return result
+end
+
+function CardTargetFilter(c,rc)
+	return rc:IsHasCardTarget(c)
+end
+-- checks, if cards like CotH still have a target.
+function CardTargetCheck(c,target)
+  if c==nil then return nil end
+  if c.id then
+    c=GetCard(c)
+  end
+  if c==nil then return nil end
+  local result = 0
+  if not c:IsPosition(POS_FACEUP) then return nil end
+  if target then
+    if target.id then
+      target=GetCard(target)
+    end
+    return c:IsHasCardTarget(target)
+  end
+  for i=1,#Field() do
+    local tc=GetCard(Field()[i])
+    if tc and c:IsHasCardTarget(tc) then
+      result = result +1
+    end
+  end
+  return result
+end
+function FiendishCheck(target)
+  for i=1,#Field() do
+    local c = Field()[i]
+    if c.id==50078509 and FilterPosition(c,POS_FACEUP)
+    and CardTargetCheck(target,c)
+    then
+      return true
+    end
+  end
+  return false
+end
+function FiendishChainCheck(c)
+  return c.id==50078509 and FilterPosition(c,POS_FACEUP)
+  and CardTargetCheck(c)==0
+end
+
+-- stores all card script cards for later usage
+SavedCards={}
+function SaveCards()
+  if #Field()==0 then return end
+  if player_ai==nil then player_ai=1 end
+  for i=1,#Field() do
+    local c=Field()[i]
+    if SavedCards[c.cardid]==nil then
+      SavedCards[c.cardid]=GetScriptFromCard(c)
+    end
+  end
+  return
+end
+-- gets stored cardscript card from AI card
+function GetCard(c)
+  return SavedCards[c.cardid]
+end
+
+--returns the total ATK of all cards in a list, limeted by a max count.
+function TotalATK(cards,limit,filter,opt)
+  local result = 0
+  cards = SubGroup(cards,filter,opt)
+  table.sort(cards,function(a,b)return a.attack>b.attack end)
+  for i=1,math.min(#cards,limit) do
+    result=result+cards[i].attack
   end
   return result
 end

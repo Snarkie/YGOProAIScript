@@ -180,7 +180,7 @@ function EquipFilter(c)
   or c.id == 47120245 and ArmsCount(AIDeck())>2
   or c.id == 13391185 and UseChad()
   or c.id == 53550467 and OPTCheck(53550467)
-  and DestroyCheck(OppField(),false,FilterPosition,POS_FACEUP)>0
+  and DestroyCheck(OppField(),false,false,FilterPosition,POS_FACEUP)>0
   or c.id == 73359475)
   and not EquipCheck(c) then
     return true
@@ -681,7 +681,7 @@ function SummonMerlin()
 end
 function SummonDrystan()
   return ArmsAvailable()>0 and OPTCheck(53550467) 
-  and DestroyCheck(OppField(),false,FilterPosition,POS_FACEUP)>0
+  and DestroyCheck(OppField(),false,false,FilterPosition,POS_FACEUP)>0
   and not UseMedraut()
 end
 function HighSallyFilter(c)
@@ -1144,7 +1144,7 @@ function EquipTargetCheck(cards,skipmultiple)
   if result then return result end
   result = EquipTargetCheckFunc(cards,13391185,UseChad,true,false,skipmultiple) 
   if result then return result end
-  result = EquipTargetCheckFunc(cards,53550467,function() return DestroyCheck(OppField(),false,FilterPosition,POS_FACEUP)>0 and OPTCheck(53550467) end,nil,true,skipmultiple) 
+  result = EquipTargetCheckFunc(cards,53550467,function() return DestroyCheck(OppField(),false,false,FilterPosition,POS_FACEUP)>0 and OPTCheck(53550467) end,nil,true,skipmultiple) 
   if result then return result end
   result = EquipTargetCheckFunc(cards,73359475,function() return true end,nil,false,skipmultiple) 
   if result then return result end
@@ -1492,7 +1492,14 @@ function ChainMerlin()
     if tg and tg:GetCount()>0 then
       GlobalMerlinID ={}
       for i=1,tg:GetCount() do
-        local c=tg:Filter(MerlinFilter,nil):GetMaxGroup(Card.GetAttack):GetFirst()
+        tg=tg:Filter(MerlinFilter,nil)
+        if tg then
+          tg=tg:GetMaxGroup(Card.GetAttack)
+        end
+        local c=nil
+        if tg then
+          c=tg:GetFirst()
+        end
         if c then
           GlobalMerlinID[i]=c:GetCode()
           tg:RemoveCard(c)

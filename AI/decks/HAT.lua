@@ -326,27 +326,11 @@ function DionaeaTarget(cards)
     return Add(cards,PRIO_TOHAND)
   end
 end
-GlobalCoth={}
-function CothSet(target,source)
-  GlobalCoth[target.cardid]=source.cardid
-  return
+function CothCheck(c)
+  return c.id==97077563 and FilterPosition(c,POS_FACEUP)
+  and CardTargetCheck(c)==0
 end
-function CothCheck(target)
-  if target == nil then return true end
-  local source = GlobalCoth[target.cardid]
-  if source == nil then return true end
-  source = FindCard(source,Field())
-  if source == nil then return true end
-  if target and source and FilterLocation(target,LOCATION_ONFIELD) 
-  and FilterLocation(source,LOCATION_ONFIELD)
-  and NotNegated(source) 
-  and FilterPreviousLocation(target,LOCATION_GRAVE)
-  and FilterSummon(target,SUMMON_TYPE_SPECIAL)
-  then
-    return false
-  end
-  return true
-end
+
 function CotHTarget(cards,c)
   local result = nil
   if GlobalCardMode and GlobalCardMode>2 then
@@ -363,10 +347,8 @@ function CotHTarget(cards,c)
   end
   if cards[1].prio then 
     TargetSet(cards[1]) 
-    CothSet(cards[1],c)
   else 
     TargetSet(cards[result[1]]) 
-    CothSet(cards[result[1]],c)
   end
   return result
 end
@@ -494,6 +476,11 @@ function ChainCotH(card)
         return true
       end
     end
+    if source and source:IsControler(1-player_ai) 
+    and CanFinishGame(source) and #AIMon()==0
+    then
+      return true
+    end
   end
   if Duel.GetCurrentPhase()==PHASE_END and Duel.CheckTiming(TIMING_END_PHASE) and Duel.GetTurnPlayer() == 1-player_ai then
     if targets2 > 0 and ArtifactCheckGrave() then
@@ -595,6 +582,14 @@ function ChainBoM()
       GlobalTargetSet(source,OppMon())
       return true
     end
+    if CanFinishGame(source) and #AIMon()==0 
+    and Targetable(source,TYPE_TRAP) and Affected(source,TYPE_TRAP)
+    and UnchainableCheck(50078509)
+    then
+      GlobalCardMode = 1
+      GlobalTargetSet(source)
+      return true
+    end
   end
   if e and e:GetHandler():GetCode() == 44394295 
   and e:GetHandler():IsControler(1-player_ai)
@@ -624,6 +619,13 @@ function ChainMirrorForce()
   then
     return true
   end
+  if CanFinishGame(source) and #AIMon()==0 
+  and Targetable(source,TYPE_TRAP) and Affected(source,TYPE_TRAP)
+  and UnchainableCheck(50078509)
+  then
+    return true
+  end
+  return false
 end
 function ChainDPrison()
   if not UnchainableCheck(70342110) then

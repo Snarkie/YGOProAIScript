@@ -85,6 +85,7 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
   -- The first time around, it sets the AI's
   -- turn (only if the AI is playing first).
   ------------------------------------------
+  set_player_turn(true)
   if GlobalAIPlaysFirst == nil then
     if Duel.GetTurnCount() == 1 then
       DeckCheck()
@@ -92,15 +93,12 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
       GlobalAIPlaysFirst = 1
       GlobalAIIsAttacking = nil
       Globals()
-	  ResetOncePerTurnGlobals()
-    
-	 end
-    end
-
-  set_player_turn()
+	    ResetOncePerTurnGlobals()
+	  end
+  end
   GlobalBPAllowed = to_bp_allowed
+  SaveCards()
   SurrenderCheck()
-  
   ---------------------------------------
   -- Don't do anything if the AI controls
   -- a face-up Light and Darkness Dragon.
@@ -121,7 +119,7 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
   end
   
   ---------------------------------------
-  -- Don't do anything if if the AI controls
+  -- Don't do anything if the AI controls
   -- a face-up C106: Giant Hand Red with
   -- a "Number" monster as XYZ material,
   -- that didn't use its effect this turn
@@ -276,7 +274,6 @@ if DeckCheck(DECK_EXODIA) then
   --go to end phase
   return COMMAND_TO_END_PHASE,1
 end
-  
 local DeckCommand = nil
 DeckCommand = SummonExtraDeck(cards,true)
 if DeckCommand ~= nil then
@@ -390,7 +387,6 @@ if not ExtraCheck then
     return DeckCommand[1],DeckCommand[2]
   end
 end
-
 
 
 
