@@ -1198,6 +1198,12 @@ function Affected(c,type,level)
     atkdiff = c.base_attack - c.attack
     lvl = c.level
   end
+  if type == nil then
+    type = TYPE_SPELL
+  end
+  if level == nil then
+    level = 0
+  end
   if immune and atkdiff == 800 
   and bit32.band(type,TYPE_SPELL+TYPE_TRAP)==0
   then
@@ -1206,8 +1212,9 @@ function Affected(c,type,level)
   if immune and FilterSet(c,0xaa) -- Qliphort
   then
     return not FilterSummon(c,SUMMON_TYPE_NORMAL)
-    or lvl<=level or (type~=TYPE_MONSTER
+    or ((bit32.band(type,TYPE_MONSTER)==0 
     and id ~=27279764 and id ~=40061558) -- Towers, Skybase
+    or lvl<=level ) 
   end
   if immune and FilterSet(c,0x108a) -- Traptrix
   then

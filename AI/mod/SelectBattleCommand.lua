@@ -284,7 +284,7 @@ function OnSelectBattleCommand(cards,activatable)
   
   -- Gwen
   for i=1,#cards do
-    if HasGwen(cards[i]) and CardsMatchingFilter(OppMon(),GwenFilter,atk)>0 then
+    if HasGwen(cards[i]) and CardsMatchingFilter(OppMon(),GwenFilter,cards[i].atk)>0 then
       return Attack(i)
     end
   end
@@ -309,6 +309,17 @@ function OnSelectBattleCommand(cards,activatable)
   end
   -- generic attacks
   --print("generic attackers")
+
+  --print("direct")
+  -- can attack directly
+  SortByATK(cards,true)
+  if #cards>0 then
+    for i=1,#cards do
+      if FilterAffected(cards[i],EFFECT_DIRECT_ATTACK) then
+        return Attack(i)
+      end
+    end
+  end
   --print("for game")
   -- can attack for game on a certain target
   SortByATK(cards)

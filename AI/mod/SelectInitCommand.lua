@@ -1544,20 +1544,7 @@ end
 		return COMMAND_SPECIAL_SUMMON,i
       end
    end
-  
-  -------------------------------------------------------  
-  -- Gaia Dragon, the Thunder Charger
-  -------------------------------------------------------
-  for i=1,#SpSummonableCards do   
-    if SpSummonableCards[i].id == 91949988 then -- Gaia Dragon, the Thunder Charger
-      if AIXyzMonsterMatCount(5,0) > 0 or AIXyzMonsterMatCount(6,0) > 0 
-      or HasID(AIMon(),44505297,true,nil,nil,nil,HasEquips,0)
-      then
-        GlobalActivatedCardID = id
-        return COMMAND_SPECIAL_SUMMON,i
-      end
-    end
-  end
+ 
   
   --------------------------------------------------
   -- Special summon Dark Grepher only, if there

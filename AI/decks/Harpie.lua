@@ -11,11 +11,11 @@ AddPriority({
 [68815132] = {6,1,7,1,2,2,2,2,1,1,DancerCond},  -- Harpie Dancer
 
 [90219263] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Elegant Egotist
-[19337371] = {1,1,1,1,9,1,1,1,1,1,SignCond},    -- Hysteric Sign
+[19337371] = {12,6,1,1,9,1,1,1,1,1,SignCond},    -- Hysteric Sign
 [15854426] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Divine Wind of Mist Valley
 [75782277] = {5,1,1,1,3,1,1,1,1,1,nil},         -- Harpie's Hunting Ground
 
-[77778835] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Hysteric Party
+[77778835] = {13,1,1,1,1,1,1,1,1,1,nil},         -- Hysteric Party
 
 [22653490] = {1,1,1,1,1,1,3,1,1,1,nil},         -- Chidori
 [85909450] = {1,1,1,1,1,1,3,1,1,1,nil},         -- HPPD
@@ -114,6 +114,7 @@ function DancerCond(loc,c)
     if HasIDNotNegated(AICards(),15854426,true,OPTCheck)
     and not HasID(AIMon(),c.original_id,true)
     and OPTCheck(68815132)
+    and GetMultiple(c.original_id)==0
     then
       return 10
     end
@@ -150,17 +151,27 @@ function HarpistCond(loc,c)
   if loc == PRIO_TOFIELD then
     return GetMultiple(c.original_id)==0
   end
+  if loc == PRIO_TOHAND then
+    if FilterLocation(c,LOCATION_ONFIELD)
+    and UseHarpist(c)
+    and not HasID(AIHand(),56585883,true)
+    then
+      return 11
+    end
+  end
   return true
 end
 function ChannelerCond(loc,c)
   if loc == PRIO_TOHAND then
     return not HasID(AIHand(),c.original_id,true)
+    or FilterLocation(c,LOCATION_ONFIELD)
   end
   if loc == PRIO_TOFIELD then
     return not HasID(AIMon(),c.original_id,true)
     and OPTCheck(c.original_id)
     and GetMultiple(c.original_id)==0
     and UseChanneler(c)
+    and FieldCheck(4)==0
   end
   if loc == PRIO_EXTRA then
     if FilterLocation(c,LOCATION_HAND) then
@@ -181,6 +192,9 @@ function SignCheck(cards)
   and CardsMatchingFilter(AIGrave(),SignGraveFilter)==0
 end
 function SignCond(loc,c)
+  if loc==PRIO_TOHAND then
+    return FilterLocation(c,LOCATION_ONFIELD) or DiscardOutlets()>0
+  end
   if loc==PRIO_TOGRAVE then
     return FilterLocation(c,LOCATION_ONFIELD+LOCATION_HAND)
     and SignCheck()
@@ -195,7 +209,8 @@ end
 function UseHHG(c,cards)
   return (DestroyCheck(OppST(),false,true)>0 
   or SignCheck(AIST()))
-  and CardsMatchingFilter(cards,LadyFilter,SkillDrainCheck())>0
+  and (CardsMatchingFilter(cards,LadyFilter,SkillDrainCheck())>0
+  or HasIDNotNegated(AIMon(),90238142,true,UseChanneler))
   and not (HasID(AIST(),75782277,true) or HasID(AIST(),15854426,true))
 end
 function DancerYesNo()
@@ -204,12 +219,12 @@ function DancerYesNo()
   and DualityCheck())
   or FieldCheck(4)==0
   and (HasIDNotNegated(AIST(),15854426,true,OPTCheck)
-  or HasIDNotNegated(AICards(),90219263,true))
+  or HasIDNotNegated(AICards(),90219263,true)
+  or HasIDNotNegated(AIHand(),90238142,true,UseChanneler))
   and DualityCheck()
   or HasIDNotNegated(AIST(),75782277,true) 
   and DestroyCheck(OppST())>0
-  or HasIDNotNegated(AIHand(),56585883,true)
-  and UseHarpist()
+  or HasIDNotNegated(AIHand(),56585883,true,UseHarpist)
   then 
     return 1
   end
@@ -224,6 +239,7 @@ function UseDancer(c,mode)
   and LadyCount(AIHand())>0
   or HasID(AIHand(),90238142,true)
   and FieldCheck(4)==1)
+  or HasID(AICards(),56585883,true,UseHarpist)
   then
     return true
   end
@@ -245,12 +261,23 @@ function UseDancer(c,mode)
   end
   return false
 end
-function SummonDancer(c)
-  return (HasIDNotNegated(AIST(),75782277,true)
+function SummonDancer(c,mode)
+  if mode == 1 and (HasIDNotNegated(AIST(),75782277,true)
   and DestroyCheck(OppST(),false,true)>0
   or HasIDNotNegated(AIST(),15854426,true,OPTCheck)
   and DualityCheck())
   and OPTCheck(68815132)
+  then
+    return true
+  end
+  if mode == 2 
+  and HasID(AIMon(),00581014,true,SummonEmeralHarpie)
+  and (LadyCount(AIHand())>1 or FieldCheck(4)>0)
+  and OPTCheck(68815132)
+  then
+    return true
+  end
+  return false
 end
 function UseQueen(c,cards)
   return not HasID(AICards(),75782277,true)
@@ -259,8 +286,9 @@ end
 function UseChanneler(c)
   return OPTCheck(90238142) 
   and DualityCheck()
-  and (OverExtendCheck(2,6) 
-  or FilterLocation(c,LOCATION_MZONE) and FieldCheck(4)==1)
+  and (FieldCheck(4)==2 and SummonHPPD()
+  or FilterLocation(c,LOCATION_MZONE) and FieldCheck(4)==1
+  or FieldCheck(4)==0 and OverExtendCheck(2,5))
 end
 function SummonChanneler(c)
   if UseChanneler(c)
@@ -271,10 +299,11 @@ function SummonChanneler(c)
   return false
 end
 function HarpistFilter(c)
-   return PriorityTarget(c) 
-   or c.attack>AIGetStrongestAttack()
+   return (PriorityTarget(c) 
+   or c.attack>AIGetStrongestAttack())
    and Affected(c,TYPE_MONSTER,4)
    and Targetable(c,TYPE_MONSTER)
+   and FilterPosition(c,POS_FACEUP)
 end
 function SummonHarpist(c)
   if UseHarpist(c)
@@ -350,9 +379,14 @@ function UseEgotist(c)
 end
 function SetSign(c,cards)
   return (HasID(AIHand(),75782277,true)
-  and LadyCount(cards)>0
+  and (LadyCount(cards)>0
+  or HasID(AIMon(),90238142,true,UseChanneler))
   or HasID(AIHand(),75064463,true)
-  and LadyCount(cards)>1)
+  and (LadyCount(cards)>1
+  or HasID(AIMon(),90238142,true,UseChanneler)))
+  and not (DestroyCheck(OppST())==0
+  and HasID(cards,90238142,true,SummonChanneler)
+  and CardsMatchingFilter(AIHand(),HarpieFilter)>2)
   and SignCheck()
   and not HasID(AIST(),19337371,true)
 end
@@ -462,6 +496,9 @@ function HarpieInit(cards)
   local Rep = cards.repositionable_cards
   local SetMon = cards.monster_setable_cards
   local SetST = cards.st_setable_cards
+  if HasIDNotNegated(SpSum,07409792) then 
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}      --test                          -- test
+  end
   if HasID(SetST,19337371,SetSign,Sum) then
     return {COMMAND_SET_ST,CurrentIndex}
   end
@@ -475,6 +512,9 @@ function HarpieInit(cards)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Act,77778835,UseParty,1) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Act,00581014) and DeckCheck(DECK_HARPIE) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Act,68815132,UseDancer,3) then
@@ -491,7 +531,10 @@ function HarpieInit(cards)
   if HasIDNotNegated(Act,34086406,false,545382497,UseChainHarpie,1) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasIDNotNegated(Sum,68815132,SummonDancer) then
+  if HasIDNotNegated(Sum,68815132,SummonDancer,1) then
+    return {COMMAND_SUMMON,CurrentIndex}
+  end
+  if HasIDNotNegated(Sum,68815132,SummonDancer,2) then
     return {COMMAND_SUMMON,CurrentIndex}
   end
   if HasIDNotNegated(Sum,90238142,SummonChanneler) then
@@ -504,7 +547,7 @@ function HarpieInit(cards)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(SpSum,34086406,SummonChainHarpie) then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    return XYZSummon()
   end
   if HasIDNotNegated(Act,86848580) then -- Zerofyne
     return {COMMAND_ACTIVATE,CurrentIndex}
@@ -523,9 +566,6 @@ function HarpieInit(cards)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Act,77778835,UseParty,2) then
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
-  if HasIDNotNegated(Act,00581014) and DeckCheck(DECK_HARPIE) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(SpSum,00581014,SummonEmeralHarpie) then
@@ -681,11 +721,13 @@ function ChainParty(c)
   if Duel.GetCurrentPhase()==PHASE_END
   and Duel.GetTurnPlayer()~=player_ai
   and SignCheck(AIHand())
+  and UnchainableCheck(77778835)
   then
     return true
   end
   if Duel.GetCurrentPhase()==PHASE_BATTLE
   and Duel.GetTurnPlayer()~=player_ai
+  and UnchainableCheck(77778835)
   then
     local aimon,oppmon=GetBattlingMons()
     if CanFinishGame(oppmon) 
@@ -696,6 +738,7 @@ function ChainParty(c)
   end
   if Duel.GetCurrentPhase()==PHASE_BATTLE
   and Duel.GetTurnPlayer()==player_ai
+  and UnchainableCheck(77778835)
   then
     local loccount=Duel.GetLocationCount(player_ai,LOCATION_MZONE)
     local atk = TotalATK(AIGrave(),loccount,LadyFilter)

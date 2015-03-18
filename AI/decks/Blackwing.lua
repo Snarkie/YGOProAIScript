@@ -247,7 +247,7 @@ function SummonGale(mode)
     return true
   end
   if mode == 4 and OppHasStrongestMonster() 
-  and CardsMatchingFilter(OppMon(),GaleFilter,min(AIGetStrongestAttack(),1300))>0
+  and CardsMatchingFilter(OppMon(),GaleFilter,math.min(AIGetStrongestAttack(),1300))>0
   then
     return true
   end
@@ -708,7 +708,9 @@ function MKBTarget(cards,source)
       return result
     end
   end
-  return Add(cards,PRIO_TOGRAVE)
+  return Add(cards,PRIO_TOGRAVE,1,function(c) 
+    return c.id~=05851097 and c.id~=38296564 
+  end)
 end
 function DDCrowTarget(cards)
   if GlobalCardMode==1 then

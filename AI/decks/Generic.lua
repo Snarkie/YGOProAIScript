@@ -19,8 +19,8 @@ function SummonExtraDeck(cards,prio)
 -- use certain effects before doing anything else
 ---- 
  if prio then 
-   if HasIDNotNegated(Act,00691925) then 
-    --return {COMMAND_ACTIVATE,CurrentIndex}                                -- test
+   if HasIDNotNegated(SpSum,07409792) then 
+    --return {COMMAND_SPECIAL_SUMMON,CurrentIndex}                                -- test
   end
   if HasIDNotNegated(Act,12014404,false,nil,nil,POS_DEFENCE) and UseCowboyDef() then 
     return {COMMAND_ACTIVATE,CurrentIndex}                                -- Gagaga Cowboy finish
@@ -1102,7 +1102,7 @@ function UseInstantFusion(mode)
   if mode == 1 
   and CardsMatchingFilter(AIGrave(),NodenFilter)>0 
   and HasIDNotNegated(AIExtra(),17412721,true)
-  and (FieldCheck(4)==1 and OverExtendCheck() 
+  and (FieldCheck(4)==1 and OverExtendCheck(2,6) 
   or #AIMon()==0 and #OppMon()>0
   or DeckCheck(DECK_TELLARKNIGHT) and FieldCheck(1) and DestroyCheck(OppField())>0) 
   then

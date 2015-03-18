@@ -476,6 +476,11 @@ function AssignPriority(cards,loc,filter,opt)
       then
         c.prio=c.prio+2
       end
+      if FilterType(c,TYPE_XYZ)
+      and c.xyz_material_count==0 
+      then
+        c.prio=c.prio+2
+      end
     end
     if loc==PRIO_TOHAND and bit32.band(c.location,LOCATION_ONFIELD)>0 
     and not DeckCheck(DECK_HARPIE) -- temp

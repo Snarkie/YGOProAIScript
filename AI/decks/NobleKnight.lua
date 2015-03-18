@@ -81,13 +81,17 @@ function NobleATKBoost(mode)
   local caliburn = false
   local destiny = false
   if mode then
-    if mode == 1 then
+    if mode == 1 or mode == 3 then
       -- for High Sally
-      if HasID(AIDeck(),14745409,true) then
+      local cards2 = AIDeck()
+      if mode == 3 then
+        cards2 = AIGrave() --for Chapter
+      end
+      if HasID(cards2,14745409,true) then
         result = result + 1000
-      elseif HasID(AIDeck(),23562407,true) then
+      elseif HasID(cards2,23562407,true) then
         result = result + 500
-      elseif HasID(AIDeck(),07452945,true) then
+      elseif HasID(cards2,07452945,true) then
         result = result + 1
       end
       if HasID(cards,07452945,true) and result ~= 1 then
@@ -387,6 +391,7 @@ function BlackSallyCond(loc,c)
     or HasID(AIHand(),19680539,true) and NobleSSCheck()))
     or ArmsAvailable()==0 and HasID(AIMon(),59057152,true) 
     and ArmsCount(AIST(),false,false,true)==1 and not ArmsRequip()
+    and ArmsCount(AIGrave(),false,true,true)<2
     and not (HasID(AIHand(),19680539,true) or #AIMon()>1)
     or Duel.GetCurrentPhase()==PHASE_END
   end
@@ -692,13 +697,14 @@ function HighSallyFilter(c)
   and not ((c.id == 48739166 or c.id == 78156759
   or c.id == 10002346) and c.xyz_material_count>0)
 end
-function HighSallySummonFilter(c)
-  return HighSallyFilter(c) and c.attack<2100+NobleATKBoost(1)
+function HighSallySummonFilter(c,mode)
+  return HighSallyFilter(c) and c.attack<2100+NobleATKBoost(mode)
 end
-function UseHighSally()
+function UseHighSally(mode)
+  if mode == nil then mode = 1 end
   ApplyATKBoosts(OppMon())
   return Duel.GetCurrentPhase()== PHASE_MAIN1 and GlobalBPAllowed 
-  and CardsMatchingFilter(OppMon(),HighSallySummonFilter,true)>0
+  and CardsMatchingFilter(OppMon(),HighSallySummonFilter,mode)>0
 end
 function SummonHighSally()
   return DualityCheck() and HasID(AIExtra(),83519853,true) and UseHighSally()
@@ -1332,7 +1338,7 @@ function BlackSallyTarget(cards,c)
 end
 function ChapterTarget(cards)
   if NobleMonsterFilter(cards[1]) then
-    if HasID(cards,83519853,true) then
+    if HasID(cards,83519853,true) and UseHighSally() then
       return {IndexByID(cards,83519853)}
     end
     if HasID(cards,59057152,true) and UseMedraut(true,true) then

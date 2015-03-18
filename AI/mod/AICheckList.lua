@@ -649,6 +649,7 @@ Unchainable={
 59251766,37742478,41930553,20292186, -- Bujingi Hare, Honest, Dark Smog, Artifact Scythe
 38296564,53567095,72930878,81983656, -- Safe Zone, Icarus, Black Sonic, BW Hawk Joe
 85215458,24508238,59616123,27243130, -- BW Kalut, D.D. Crow, Trap Stun, Forbidden lance
+77778835, -- Hysteric Party
 }
 function isUnchainableTogether(CardId)
   for i=1,#Unchainable do
