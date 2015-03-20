@@ -531,9 +531,6 @@ function DestroyBlacklist(c) -- cards to not destroy in your opponent's possessi
   if id == 95929069 and #AIST()>0 then -- Ice Hand
     return true
   end
-  if id == 05851097 and #OppField()>1 and faceup then
-    return true
-  end
   return false
 end
 
@@ -575,6 +572,7 @@ function IgnoreList(c) -- cards to ignore with removal effects
 end
 
 Ignore={
+  05851097, -- Vanity's Emptiness
 }
 -----------------------------------------------------
 -- Checks if the card's ID is in a list of spell/trap
@@ -717,7 +715,9 @@ Mandatory={
 }
 function MandatoryCheck(c)
   if Duel.GetCurrentPhase()==PHASE_END and c 
-  and IsSetCode(c.setcode,0x38) then --Lightsworn monsters
+  and IsSetCode(c.setcode,0x38) 
+  and FilterLocation(c,LOCATION_MZONE) 
+  then --Lightsworn monsters
     return true
   end
   for i=1,#Mandatory do

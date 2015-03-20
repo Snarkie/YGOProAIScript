@@ -393,47 +393,7 @@ end
      end
    end
  end
-  
-  ---------------------------------------------------
-  -- Use these cards only on opponents cards.
-  -- TODO: Expand card list
-  ---------------------------------------------------
-  --[[for i=1,#cards do
-	  if cards[i].id == 41420027 or cards[i].id == 84749824 
-    or cards[i].id == 03819470 or cards[i].id == 77538567 
-    or cards[i].id == 92512625
-    then     
-      local p = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_PLAYER)
-      if p and p ~= player_ai then
-        GlobalActivatedCardID = cards[i].id 
-        return 1,i
-      end
-      local oppmon=OppMon()
-      for j=1,#oppmon do
-        if bit32.band(oppmon[j].status,STATUS_SUMMONING)>0 then
-          return 1,i
-        end
-      end
-    end
-  end
-   
-  ---------------------------------------------------------
-  -- Activate Stardust Dragon/etc's effect, 
-  -- or Starlight Road only if the
-  -- opponent activated something.
-  ---------------------------------------------------------
-  for i=1,#cards do
-    if cards[i].id == 44508094 or cards[i].id == 58120309 or   -- SD, SR
-       cards[i].id == 61257789 or cards[i].id == 35952884 or   -- SDAM, SQD
-       cards[i].id == 24696097 or cards[i].id == 99188141 then -- SSD,THRIO
-       local p = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_PLAYER)
-       if p ~= player_ai then
-        return 1,i
-       end
-    end
-  end]]
-  
-	          
+
   ---------------------------------------------
   -- AI should activate: Amazoness Archers, 
   -- only if AI's monster can become stronger than
@@ -474,6 +434,19 @@ end
      end
    end
    
+  -- always activate Dragon Ruler's on banish effects
+  if HasID(cards,53804307,FilterLocation,LOCATION_REMOVED) then
+    return 1,CurrentIndex
+  end
+  if HasID(cards,26400609,FilterLocation,LOCATION_REMOVED) then
+    return 1,CurrentIndex
+  end
+  if HasID(cards,89399912,FilterLocation,LOCATION_REMOVED) then
+    return 1,CurrentIndex
+  end
+  if HasID(cards,90411554,FilterLocation,LOCATION_REMOVED) then
+    return 1,CurrentIndex
+  end  
   ---------------------------------------------
   -- Mandatory effects the AI could potentially 
   -- skip, if not handled here

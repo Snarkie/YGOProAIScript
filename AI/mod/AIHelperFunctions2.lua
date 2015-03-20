@@ -1694,15 +1694,17 @@ function GetScriptFromCard(c)
   end
   local g = Duel.GetMatchingGroup(nil,p,LOCATION_ONFIELD,LOCATION_ONFIELD,nil)
   local result = nil
-  g:ForEach(function(c) 
-    if c:GetSequence()==seq 
-    and c:IsType(type) 
-    and c:IsControler(p) 
-    and c:IsLocation(loc)
-    then
-      result = c
-    end
-  end)
+  if g then
+    g:ForEach(function(c) 
+      if c:GetSequence()==seq 
+      and c:IsType(type) 
+      and c:IsControler(p) 
+      and c:IsLocation(loc)
+      then
+        result = c
+      end
+    end)
+  end
   return result
 end
 function Surrender()

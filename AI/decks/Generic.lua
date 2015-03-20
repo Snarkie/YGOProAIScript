@@ -982,6 +982,7 @@ function SummonGiantGrinder(c)
   return UseGiantGrinder(c)
   and HasPriorityTarget(OppMon(),true,nil,GiantGrinderFilter,c)
   and CardsMatchingFilter(OppMon(),GiantGrinderFilter,c)>1
+  and OppHasStrongestMonster()
 end
 function SummonGiantGrinderFinish(source)
   local cards = SubGroup(OppMon(),GiantGrinderFilter2,source)

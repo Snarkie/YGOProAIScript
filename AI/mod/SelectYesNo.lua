@@ -31,6 +31,9 @@ function OnSelectYesNo(description_id)
     if #cards == 0 then
       --return 1
     end
+    if FilterAffected(attacker,EFFECT_DIRECT_ATTACK) then
+      return 1
+    end
     ApplyATKBoosts(cards)
     if CanWinBattle(attacker,cards) then 
       GlobalCurrentAttacker = attacker.cardid

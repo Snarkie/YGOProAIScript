@@ -493,12 +493,13 @@ function DarkWorldCard(cards,min,max,id,c)
   if GlobalDWSS then
     if not c then
       if GlobalDWSS == 1 then
+        GlobalDWSS = nil
         return Add(cards,PRIO_TOHAND,min)
       else
+        GlobalDWSS = nil
         return Add(cards,PRIO_TOGRAVE,min)
       end
     end
-    GlobalDWSS = nil
   end
   if id == 94283662 then 
     return TranceTarget(cards)

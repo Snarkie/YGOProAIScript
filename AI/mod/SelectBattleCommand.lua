@@ -181,6 +181,7 @@ function OnSelectBattleCommand(cards,activatable)
     if direct then
       GlobalAIIsAttacking = nil
     else
+      --print("attack: "..cards[index].id)
       GlobalCurrentAttacker = cards[index].cardid
       GlobalAIIsAttacking = true
     end
@@ -284,7 +285,7 @@ function OnSelectBattleCommand(cards,activatable)
   
   -- Gwen
   for i=1,#cards do
-    if HasGwen(cards[i]) and CardsMatchingFilter(OppMon(),GwenFilter,cards[i].atk)>0 then
+    if HasGwen(cards[i]) and CardsMatchingFilter(OppMon(),GwenFilter,cards[i].attack)>0 then
       return Attack(i)
     end
   end
@@ -316,7 +317,7 @@ function OnSelectBattleCommand(cards,activatable)
   if #cards>0 then
     for i=1,#cards do
       if FilterAffected(cards[i],EFFECT_DIRECT_ATTACK) then
-        return Attack(i)
+        return Attack(i,true)
       end
     end
   end

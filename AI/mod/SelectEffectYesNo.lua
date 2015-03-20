@@ -67,6 +67,20 @@ function OnSelectEffectYesNo(id,triggeringCard)
     end
     return 0
   end
+  
+  -- always activate Dragon Ruler's on banish effects
+  if id==53804307 and FilterLocation(triggeringCard,LOCATION_REMOVED) then
+    return 1,CurrentIndex
+  end
+  if id==26400609 and FilterLocation(triggeringCard,LOCATION_REMOVED) then
+    return 1,CurrentIndex
+  end
+  if id==89399912 and FilterLocation(triggeringCard,LOCATION_REMOVED) then
+    return 1,CurrentIndex
+  end
+  if id==90411554 and FilterLocation(triggeringCard,LOCATION_REMOVED) then
+    return 1,CurrentIndex
+  end
   if result==1 then
     GlobalActivatedEffectID = id
   end

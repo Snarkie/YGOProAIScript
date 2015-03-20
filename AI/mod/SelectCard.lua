@@ -22,6 +22,19 @@ function OnSelectCard(cards, minTargets, maxTargets, triggeringID,triggeringCard
 -- **********************************************
 -------------------------------------------------
 
+  -- AI attack target selection
+  -- redirected to SelectBattleComand.lua
+  if Duel.GetCurrentPhase()==PHASE_BATTLE 
+  and GlobalAIIsAttacking 
+  and Duel.GetCurrentChain()==0
+  and not triggeringCard
+  then 
+    local c = FindCard(GlobalCurrentAttacker,Field())
+    result = AttackTargetSelection(cards,c)
+    GlobalAIIsAttacking = nil
+    return result
+  end
+
 -- ExodiaLib
 if DeckCheck(DECK_EXODIA) then
   local id = triggeringID
@@ -121,18 +134,7 @@ end
   result = {}
 
 
-  -- AI attack target selection
-  -- redirected to SelectBattleComand.lua
-  if Duel.GetCurrentPhase()==PHASE_BATTLE 
-  and GlobalAIIsAttacking 
-  and Duel.GetCurrentChain()==0
-  and not triggeringCard
-  then 
-    local c = FindCard(GlobalCurrentAttacker,Field())
-    result = AttackTargetSelection(cards,c)
-    GlobalAIIsAttacking = nil
-    return result
-  end
+
  
   if triggeringCard==nil and GlobalMaterial==true
   then  

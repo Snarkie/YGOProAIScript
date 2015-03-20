@@ -369,9 +369,9 @@ function UseSign(c,cards)
   and SignCheck()
   and ((FieldCheck(4,LadyFilter)==1
   or LadyCount(cards)>0)
-  and OppHasStrongestMonster())
+  and OppHasStrongestMonster()
   or CardsMatchingFilter(AIHand(),FilterID,19337371)>1
-  or HasID(AICards(),05318639,true)
+  or HasID(AICards(),05318639,true))
   --or TurnEndCheck() and DiscardOutlets()==0
 end
 function UseEgotist(c)
@@ -385,6 +385,7 @@ function SetSign(c,cards)
   and (LadyCount(cards)>1
   or HasID(AIMon(),90238142,true,UseChanneler)))
   and not (DestroyCheck(OppST())==0
+  and not HasPriorityTarget(OppST(),DestroyFilter)
   and HasID(cards,90238142,true,SummonChanneler)
   and CardsMatchingFilter(AIHand(),HarpieFilter)>2)
   and SignCheck()
@@ -546,6 +547,9 @@ function HarpieInit(cards)
   if HasID(Act,14785765,SummonZephyrosHarpie,1) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+  if HasIDNotNegated(SpSum,85909450,SummonHPPD) then
+    return XYZSummon()
+  end
   if HasIDNotNegated(SpSum,34086406,SummonChainHarpie) then
     return XYZSummon()
   end
@@ -634,7 +638,9 @@ function PartyTarget(cards,min)
   return Add(cards,PRIO_TOFIELD,min)
 end
 function HHGTarget(cards)
-  if HasID(cards,19337371) and SignCheck() then
+  if HasID(cards,19337371) and SignCheck() 
+  and not HasPriorityTarget(cards,DestroyFilter)
+  then
     return {CurrentIndex}
   end
   if HasID(cards,75782277) and DestroyCheck(OppST(),false,true)==0 then

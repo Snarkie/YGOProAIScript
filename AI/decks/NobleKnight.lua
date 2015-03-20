@@ -1601,7 +1601,8 @@ function HasGwen(c)
 end
 function GwenFilter(c,atk) -- for attack boosts
   return Affected(c,TYPE_SPELL) and DestroyFilter(c)
-  and DestroyCountCheck(c,TYPE_SPELL,false) or atk>c.attack
+  and DestroyCountCheck(c,TYPE_SPELL,false) 
+  and atk<c.attack
 end
 function ChainGwen()
   local source = Duel.GetAttacker()
