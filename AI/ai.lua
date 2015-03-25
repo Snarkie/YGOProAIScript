@@ -1,5 +1,5 @@
-Version = "0.26h"
-Experimental = true
+Version = "0.27"
+Experimental = false
 
 --[[
   AI Script for YGOPro Percy:
