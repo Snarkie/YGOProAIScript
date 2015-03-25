@@ -37,7 +37,13 @@ RACE_CREATORGOD		=0x400000	--
 --
 -- Return: a number containing the selected types
 function OnDeclareMonsterType(count, choices)
-	local result = 0
+  local result = nil
+  local d = DeckCheck()
+  if d and d.MonsterType then
+    result = d.MonsterType(count,choices)
+  end
+  if result~=nil then return result end
+	result = 0
 	local returnCount = 0
 	
 	-- Example implementation: Just return the first valid type(s) you come across

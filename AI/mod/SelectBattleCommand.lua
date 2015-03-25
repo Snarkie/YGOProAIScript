@@ -16,10 +16,16 @@ function AttackTargetSelection(cards,attacker)
   local id = attacker.id
   local result ={attacker}
   ApplyATKBoosts(result)
-  result = {}
   ApplyATKBoosts(cards)
+  result = nil
+  local d = DeckCheck()
+  if d and d.AttackTarget then
+    result = d.AttackTarget(cards,attacker)
+  end
+  if result~=nil then return result end
   --print("attack target selection")
   --print("specific attacker")
+  result = {}
   local atk = attacker.attack
   if NotNegated(attacker) then
     
@@ -226,6 +232,14 @@ function OnSelectBattleCommand(cards,activatable)
   end
   ApplyATKBoosts(targets)
   
+  local result,result2 = nil,nil
+  local d = DeckCheck()
+  if d and d.BattleCommand then
+    result,result2 = d.BattleCommand(cards,targets,activatable) 
+  end
+  if result~=nil then
+    return result,result2
+  end
   -- First, attack with monsters, that get beneficial effects from destroying stuff
   --print("specific attackers")
   -- High Laundsallyn
@@ -407,7 +421,9 @@ function OnSelectBattleCommand(cards,activatable)
   if HasID(activatable,77778835,ChainParty) then
     return 2,CurrentIndex
   end
-  
+  if HasID(activatable,83555666,ChainRoD) then -- Ring of Destruction
+    return 2,CurrentIndex
+  end
   -------------------------------------
   -- If it gets this far, don't attack.
   -------------------------------------

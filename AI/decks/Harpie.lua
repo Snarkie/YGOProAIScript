@@ -461,6 +461,7 @@ function SummonChainHarpie(c)
   and MP2Check()
 end
 function UseChainHarpie(c,mode)
+  if not DeckCheck(DECK_HARPIE) then return false end
   if mode ==1 then
     if HasID(AIDeck(),14785765,true) 
     then

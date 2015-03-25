@@ -8,8 +8,13 @@
 --
 -- Return: id of the selected card
 function OnDeclareCard()
- local result = 85138716	
- 
+  local result = nil
+  local d = DeckCheck()
+  if d and d.DeclareCard then
+    result = d.DeclareCard()
+  end
+  if result~=nil then return result end
+  result = 85138716	
   if GlobalActivatedCardID == 10406322 then --Sylvan Alsei
     GlobalActivatedCardID = nil
     return 14141448 --return ID of Great Moth, to get his 2nd effect

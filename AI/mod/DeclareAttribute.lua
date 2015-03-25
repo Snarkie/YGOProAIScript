@@ -21,7 +21,13 @@ ATTRIBUTE_DEVINE	=0x40
 --
 -- Return: a number containing the selected attributes
 function OnDeclareAttribute(count, choices)
-	local result = 0
+  local result = nil
+  local d = DeckCheck()
+  if d and d.Attribute then
+    result = d.Attribute(count,choices)
+  end
+  if result~=nil then return result end
+  result = 0
 	local returnCount = 0
 	
 	--print("OnDeclareAttribute count: "..count)	

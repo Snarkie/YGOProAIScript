@@ -136,20 +136,37 @@ function OnSelectChain(cards,only_chains_by_player,forced)
     end
   end
   
+  local result,result2 = nil,nil
+  local d = DeckCheck()
+  if d and d.Chain then
+    result = d.Chain(cards,only_chains_by_player)
+  end
+  if result ~= nil then
+    if type(result)=="table" then
+      return result[1],result[2]
+    else
+      return result,result2
+    end
+  end
+  
+local backup = CopyTable(cards)
+local d = DeckCheck()
 local SelectChainFunctions = {
 PriorityChain,FireFistOnChain,HeraldicOnSelectChain,
 GadgetOnSelectChain,BujinOnSelectChain,MermailOnSelectChain,
 ShadollOnSelectChain,SatellarknightOnSelectChain,
 ChaosDragonOnSelectChain,HATChain,QliphortChain,
 NobleChain,NekrozChain,BAChain,DarkWorldChain,
-ConstellarChain,BlackwingChain,GenericChain,
-HarpieChain,
+ConstellarChain,BlackwingChain,HarpieChain,
+HEROChain,GenericChain,
 }
   
 for i=1,#SelectChainFunctions do
   local func = SelectChainFunctions[i]
-  local result = func(cards,only_chains_by_player)
-  if result ~= nil then
+  result = func(cards,only_chains_by_player)
+  if result ~= nil and (d == 0 
+  or BlacklistCheckChain(result[1],result[2],d,backup))
+  then
     return result[1],result[2]
   end
 end
@@ -198,7 +215,7 @@ result = 0
   -- the AI should chain "Royal Decree" and 
   -- "Trap Stun" first.
   ------------------------------------------
-    for i=1,#cards do
+   --[[ for i=1,#cards do
       if cards[i].id == 51452091 then
         if Get_Card_Count_ID(AIST(),51452091, POS_FACEUP) == 0 and Get_Card_Count_ID(AIST(),59616123, POS_FACEUP) == 0 then
 		if OppCard ~= nil and OppCardOwner == 2 then
@@ -209,7 +226,7 @@ result = 0
          end
        end
      end
-   end
+   end]]--
     
 
   -------------------------------------------------

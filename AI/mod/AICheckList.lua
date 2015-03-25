@@ -312,6 +312,8 @@ NSBL={
 75498415,72714392,24508238,76812113, -- BW Sirocco, Vayu, D.D. Crow, Harpie Lady
 75064463,80316585,56585883,90238142, -- Harpie Queen, Cyber, Harpist, Channeler
 91932350,68815132,89399912,52040216, -- Harpie Lady #1, Dancer, Tempest, Pet Dragon
+69884162,25259669,63060238,50720316, -- Neos Alius, Goblindbergh, Blazeman,Shadow Mist
+79979666 -- Bubbleman
 }
 function NormalSummonBlacklist(CardId) 
   for i=1,#NSBL do
@@ -413,7 +415,7 @@ SSBL={
 27315304,33236860,09012916, -- Mist Wurm, BW Silverwing, Black Winged Dragon
 23693634,50321796,76913983, -- Colossal Fighter, Synch Brionac, BW Armed Wind
 90953320,26593852,44508094, -- Hyper Librarian, Catastor, Stardust
-85909450,86848580, -- HPPD, Zerofyne
+85909450,86848580,79979666, -- HPPD, Zerofyne, Bubbleman
 }
 
 
@@ -557,6 +559,11 @@ function IgnoreList(c) -- cards to ignore with removal effects
   then 
     return true
   end
+  if id==05851097 -- Vanity's Emptiness
+  and faceup  -- hit other cards first to trigger selfdestruct
+  then 
+    return true
+  end
   if (id == 97077563 -- CotH
   or id == 50078509) -- Fiendish Chain
   and FilterPosition(c,POS_FACEUP)
@@ -572,7 +579,6 @@ function IgnoreList(c) -- cards to ignore with removal effects
 end
 
 Ignore={
-  05851097, -- Vanity's Emptiness
 }
 -----------------------------------------------------
 -- Checks if the card's ID is in a list of spell/trap
@@ -647,7 +653,8 @@ Unchainable={
 59251766,37742478,41930553,20292186, -- Bujingi Hare, Honest, Dark Smog, Artifact Scythe
 38296564,53567095,72930878,81983656, -- Safe Zone, Icarus, Black Sonic, BW Hawk Joe
 85215458,24508238,59616123,27243130, -- BW Kalut, D.D. Crow, Trap Stun, Forbidden lance
-77778835, -- Hysteric Party
+77778835,21143940,84536654,57728570, -- Hysteric Party, Mask Change, Form Change, CCV
+83555666, --  Ring of Destruction
 }
 function isUnchainableTogether(CardId)
   for i=1,#Unchainable do
@@ -845,7 +852,15 @@ ScriptedCards ={
 75064463,56585883,90238142,68815132, -- Harpie Queen, Harpist, Channeler, Dancer
 90219263,19337371,15854426,75782277, -- Elegant Egotist, Hysteric Sign, Divine Wind of Mist Valley, Harpie's Hunting Ground
 77778835,85909450,86848580,89399912, -- Hysteric Party, HPPD, Zerofyne, Tempest
-52040216,94145683,76812113, -- Harpie Lady -- Pet Dragon, Swallow's, Harpie Lady
+52040216,94145683,76812113,69884162, -- Harpie Lady -- Pet Dragon, Swallow's, Harpie Lady, Neos Alius
+25259669,63060238,50720316,18063928, -- Goblindbergh, Blazeman, Shadow Mist, Tin Goldfish
+79979666,00213326,08949584,18511384, -- Bubbleman, E-Call, AHL, Fusion Recovery
+24094653,45906428,55428811,21143940, -- Polymerization, Miracle Fusion, Fifth Hope, Mask Change
+84536654,57728570,83555666,95486586, -- Form Change, CCV, Ring of Destruction, Core
+03642509,22093873,01945387,22061412, -- Great Tornado, Divine Wind, Nova Master, The Shining
+29095552,33574806,40854197,50608164, -- Acid, Escuridao, Absolute Zero, Koga
+58481572,16304628,38992735,33904024, -- Dark Law, Gaia, Wave-Motion Cannon, Shard of Greed
+72345736, -- Six Sams United
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do
@@ -855,4 +870,97 @@ function CardIsScripted(CardId)
   end
   return 0
 end
+function UpdateList(list,addlist)
+  if list then
+    if type(list)=="table" then
+      for i=1,#list do
+        addlist[#addlist+1]=list[i]
+      end
+    else
+      print("warning: invalid Blacklist for "..DeckCheck().Name)
+      list=nil
+    end
+  end
+end
+function BlacklistSetup(deck)
+  UpdateList(deck.ActivateBlacklist,ScriptedCards)
+  UpdateList(deck.SummonBlacklist,NSBL)
+  UpdateList(deck.SummonBlacklist,SSBL)
+  UpdateList(deck.SetBlacklist,SetBL)
+  UpdateList(deck.RepositionBlacklist,RepoBL)
+  UpdateList(deck.Unchainable,Unchainable)
+end
+function ListHasNumber(list,number)
+  for i=1,#list do
+    if number == list[i] then
+      return true
+    end
+  end
+  return false
+end
+function BlacklistCheckInit(command,index,deck,cards)
+  if deck == nil then return true end
+  if command == COMMAND_ACTIVATE 
+  and deck.ActivateBlacklist 
+  then
+    local id = cards.activatable_cards[index].id
+    if ListHasNumber(deck.ActivateBlacklist,id) then
+      return false
+    end
+  end
+  if command == COMMAND_SUMMON
+  and deck.SummonBlacklist 
+  then
+    local id = cards.summonable_cards[index].id
+    if ListHasNumber(deck.SummonBlacklist,id) then
+      return false
+    end
+  end
+  if command == COMMAND_SPECIAL_SUMMON
+  and deck.SummonBlacklist 
+  then
+    local id = cards.spsummonable_cards[index].id
+    if ListHasNumber(deck.SummonBlacklist,id) then
+      return false
+    end
+  end
+  if command == COMMAND_SET_MONSTER
+  and deck.SummonBlacklist 
+  then
+    local id = cards.monster_setable_cards[index].id
+    if ListHasNumber(deck.SummonBlacklist,id) then
+      return false
+    end
+  end
+  if command == COMMAND_SET_ST
+  and deck.SummonBlacklist 
+  then
+    local id = cards.st_setable_cards[index].id
+    if ListHasNumber(deck.SetBlacklist,id) then
+      return false
+    end
+  end
+  if command == COMMAND_CHANGE_POS
+  and deck.RepositionBlacklist 
+  then
+    local id = cards.repositionable_cards[index].id
+    if ListHasNumber(deck.RepositionBlacklist,id) then
+      return false
+    end
+  end
+  return true
+end
+function BlacklistCheckChain(command,index,deck,cards)
+  if deck == nil then return true end
+  if command == 1
+  and deck.ActivateBlacklist 
+  then
+    local id = cards[index].id
+    if ListHasNumber(deck.ActivateBlacklist,id) then
+      return false
+    end
+  end
+  return true
+end
+
 

@@ -306,7 +306,7 @@ function SatellarknightOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasIDNotNegated(Activatable,38273745,false,612379921) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Activatable,32807846) and not DeckCheck(DECK_NOBLEKNIGHT) then
+  if HasID(Activatable,32807846) and UseRotA() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
 if DeckCheck(DECK_TELLARKNIGHT) then

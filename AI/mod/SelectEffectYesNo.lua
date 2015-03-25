@@ -10,6 +10,12 @@
 -- 0 = no
 
 function OnSelectEffectYesNo(id,triggeringCard)
+  local result = nil
+  local d = DeckCheck()
+  if d and d.EffectYesNo then
+    result = d.EffectYesNo(id,triggeringCard)
+  end
+  if result then return result end
   local YesNoFunctions = {
   FireFistOnSelectEffectYesNo,MermailOnSelectEffectYesNo,
   ShadollOnSelectEffectYesNo,GadgetOnSelectEffectYesNo,
@@ -17,9 +23,8 @@ function OnSelectEffectYesNo(id,triggeringCard)
   ChaosDragonOnSelectEffectYesNo,HATEffectYesNo,QliphortEffectYesNo,
   NobleEffectYesNo,NekrozEffectYesNo,BAEffectYesNo,DarkWorldEffectYesNo,
   BujinOnSelectEffectYesNo,GenericEffectYesNo,ConstellarEffectYesNo,
-  BlackwingEffectYesNo,HarpieEffectYesNo
+  BlackwingEffectYesNo,HarpieEffectYesNo,HEROEffectYesNo,
   }
-  local result = nil
   for i=1,#YesNoFunctions do
     local func = YesNoFunctions[i]
     if result == nil then

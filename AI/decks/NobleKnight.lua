@@ -852,16 +852,22 @@ function OTKCheck()
   and #OppField()==0 and HasID(cards,60645181,true) and HasID(cards,82944432,true)
 end
 function UseRotA()
-  local cards = UseLists({AIMon(),AIHand()})
-  return (not PlayCheck() or (OTKCheck() or SummonHighSally()) 
-  and not HasAccess(19680539)) 
-  and #AIMon()<2
-  and (HasID(AIHand(),19680539,true) 
-  or CardsMatchingFilter(cards,NormalCheck)>0 
-  or ArmsAvailable()>0)
-  or CardsMatchingFilter(AIHand(),NobleMonsterFilter)==0 
-  and not NormalSummonCheck(player_ai)
-  and not HasID(AIHand(),03580032,true)
+  if DeckCheck(DECK_NOBLEKNIGHT) then
+    local cards = UseLists({AIMon(),AIHand()})
+    return (not PlayCheck() or (OTKCheck() or SummonHighSally()) 
+    and not HasAccess(19680539)) 
+    and #AIMon()<2
+    and (HasID(AIHand(),19680539,true) 
+    or CardsMatchingFilter(cards,NormalCheck)>0 
+    or ArmsAvailable()>0)
+    or CardsMatchingFilter(AIHand(),NobleMonsterFilter)==0 
+    and not NormalSummonCheck(player_ai)
+    and not HasID(AIHand(),03580032,true)
+  end
+  if DeckCheck(DECK_HERO) then
+    return false
+  end
+  return true
 end
 function CastelNKFilter(c)
   return c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0 

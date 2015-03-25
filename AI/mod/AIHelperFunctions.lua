@@ -1851,6 +1851,11 @@ function ApplyATKBoosts(Cards)
     end
   end
   
+  local d = DeckCheck()
+  if d and d.AttackBoost then
+    d.AttackBoost(Cards)
+  end
+  
   -- fix cards with attack < 0 after attack boosts
   for i=1,#Cards do
     Cards[i].attack=math.max(Cards[i].attack,0)

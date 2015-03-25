@@ -94,14 +94,17 @@ function OnSelectPosition(id, available)
   SatellarknightOnSelectPosition,ChaosDragonOnSelectPosition,HATPosition,
   QliphortPosition,NoblePosition,NekrozPosition,BAPosition,
   DarkWorldPosition,ConstellarPosition,BlackwingPosition,
-  GenericPosition,HarpiePosition,
+  GenericPosition,HarpiePosition,HEROPosition,
   }
   for i=1,#positionfunctions do
     local func = positionfunctions[i]
     local Position = func(id,available)
     if Position then result=Position end
   end
-  
+  local d = DeckCheck()
+  if d and d.Position then
+    result = d.Position(id,available)
+  end
   if band(result,available) == 0 then
     if band(POS_FACEUP_ATTACK,available) > 0 then
       result = POS_FACEUP_ATTACK

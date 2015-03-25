@@ -781,7 +781,7 @@ function WinsBattle(source,target)
   and (target:IsPosition(POS_FACEUP_ATTACK) 
   and source:GetAttack() >= target:GetAttack()
   or target:IsPosition(POS_FACEUP_DEFENCE)
-  and source:GetAttack() >= target:GetDefence()) 
+  and source:GetAttack() > target:GetDefence()) 
   and source:IsPosition(POS_FACEUP_ATTACK)
   and not target:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE)
   and not source:IsHasEffect(EFFECT_CANNOT_ATTACK)
@@ -810,7 +810,7 @@ function NotNegated(c)
   end
   if not GlobalNegatedLoop then
     GlobalNegatedLoop = true
-    if FilterType(c,TYPE_SPELL) 
+    if FilterType(c,TYPE_SPELL) and id~=61740673
     and (HasIDNotNegated(Field(),84636823,true,nil,nil,POS_FACEUP) -- Spell Canceller
     or HasIDNotNegated(Field(),61740673,true,nil,nil,POS_FACEUP)   -- Imperial Order
     or HasIDNotNegated(OppMon(),33198837,true,nil,nil,POS_FACEUP)  -- Naturia Beast
@@ -818,7 +818,7 @@ function NotNegated(c)
     then
       return false
     end
-    if FilterType(c,TYPE_TRAP) 
+    if FilterType(c,TYPE_TRAP) and id~=51452091
     and (HasIDNotNegated(Field(),77585513,true,nil,nil,POS_FACEUP) -- Jinzo
     or HasIDNotNegated(Field(),51452091,true,nil,nil,POS_FACEUP)  -- Royal Decree
     or HasIDNotNegated(OppMon(),02956282,true,nil,nil,POS_FACEUP) and #OppGrave()>1 -- Naturia Barkion
@@ -858,12 +858,11 @@ function Negated(c)
   return not NotNegated(c)
 end
 function DestroyFilter(c,nontarget)
-  return c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0
-  and bit32.band(c.status,STATUS_LEAVE_CONFIRMED)==0
-  and (nontarget==true or c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0)
+  return not FilterAffected(c,EFFECT_INDESTRUCTABLE_EFFECT)
+  and not FilterStatus(c,STATUS_LEAVE_CONFIRMED)
+  and (nontarget==true or not FilterAffected(c,EFFECT_CANNOT_BE_EFFECT_TARGET))
   and not (DestroyBlacklist(c)
-  and (bit32.band(c.position, POS_FACEUP)>0 
-  or bit32.band(c.status,STATUS_IS_PUBLIC)>0))
+  and FilterPublic(c))
 end
 function DestroyFilterIgnore(c,nontarget)
   return DestroyFilter(c)
@@ -1732,7 +1731,13 @@ function CopyTable(cards)
   end
   return cards2
 end
-
+function CopyMatrix(cards)
+  local cards2 = {}
+  for k,v in pairs(cards) do
+    cards2[k] = CopyTable(v)
+  end
+  return cards2
+end
 function GetBattlingMons()
   local source = Duel.GetAttacker()
   local target = Duel.GetAttackTarget()

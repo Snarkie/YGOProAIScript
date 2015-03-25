@@ -522,7 +522,7 @@ function NekrozInit(cards)
     GlobalCardMode = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end 
-  if HasID(Act,32807846) and DeckCheck(DECK_NEKROZ) then  -- RotA
+  if HasID(Act,32807846) and UseRotA() then  -- RotA
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Act,08809344) then -- Nyarla

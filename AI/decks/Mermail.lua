@@ -694,10 +694,6 @@ function MermailOnSelectCard(cards, minTargets, maxTargets,triggeringID,triggeri
   if ID == 65749035 then
     return GungnirTarget(cards,minTargets,maxTargets)
   end
-  if ID == 15914410 then
-    GlobalCardMode=1
-    return MechquippedTarget(cards)
-  end
   if ID == 50789693 then
     return KappaTarget(cards)
   end
@@ -788,9 +784,10 @@ function ChainMechquipped(c)
   if Duel.GetCurrentPhase() == PHASE_BATTLE then
     local aimon,oppmon = GetBattlingMons()
     if WinsBattle(oppmon,aimon) 
-    and not aimon.id == 23899727 
+    and aimon.id ~= 23899727 
     then
-      GlobalTargetSet(aimon,AIMon())
+      GlobalTargetSet(aimon)
+      return true
     end
   end
   targets = SubGroup(AIMon(),MechquippedFilter,15914410)
@@ -898,7 +895,7 @@ function MermailOnSelectChain(cards,only_chains_by_player)
   if HasIDNotNegated(cards,04904812) then
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,15914410,nil,nil,nil,nil,ChainMechquipped) then
+  if HasIDNotNegated(cards,15914410,ChainMechquipped) then
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,50789693) and ChainKappa() then

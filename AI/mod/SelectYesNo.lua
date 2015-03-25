@@ -17,6 +17,12 @@ function GetAttacker()
 end
 
 function OnSelectYesNo(description_id)
+  local result = nil
+  local d = DeckCheck()
+  if d and d.YesNo then
+    result = d.YesNo(description_id)
+  end
+  if result~=nil then return result end
 	if description_id == 30 then
     local cards = nil
     local attacker = GetAttacker()

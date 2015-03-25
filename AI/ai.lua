@@ -1,5 +1,5 @@
-Version = "0.27"
-Experimental = false
+Version = "0.27a"
+Experimental = true
 
 --[[
   AI Script for YGOPro Percy:
@@ -18,7 +18,11 @@ Experimental = false
   
   for more information about the AI script, check the ai-template.lua
 ]]
-
+function requireoptional(module)
+  if not pcall(require,module) then
+    --print("file missing or syntax error: "..module)
+  end
+end
 require("ai.mod.AICheckList")
 require("ai.mod.AIHelperFunctions")
 require("ai.mod.AIHelperFunctions2")
@@ -56,6 +60,9 @@ require("ai.decks.DarkWorld")
 require("ai.decks.Constellar")
 require("ai.decks.Blackwing")
 require("ai.decks.Harpie")
+require("ai.decks.HERO")
+requireoptional("ai.decks.MyDeck")
+requireoptional("ai.decks.BlueEyes")
 
 math.randomseed( require("os").time() )
 

@@ -1,96 +1,102 @@
 -- Functions to check which deck the AI is playing
 
-DECK_SOMETHING    = 0
-DECK_CHAOSDRAGON  = 1
-DECK_FIREFIST     = 2
-DECK_HERALDIC     = 3
-DECK_GADGET       = 4
-DECK_BUJIN        = 5
-DECK_MERMAIL      = 6
-DECK_SHADOLL      = 7
-DECK_TELLARKNIGHT = 8
-DECK_HAT          = 9
-DECK_QLIPHORT     = 10
-DECK_NOBLEKNIGHT  = 11
-DECK_NEKROZ       = 12
-DECK_BA           = 13
-DECK_EXODIA       = 14
-DECK_DARKWORLD    = 15
-DECK_CONSTELLAR   = 16
-DECK_BLACKWING    = 17
-DECK_HARPIE       = 18
-
-DeckIdent={ --card that identifies the deck
-[1]   = 99365553, -- Lightpulsar Dragon
-[2]   = 01662004, -- Firefist Spirit
-[3]   = 82293134, -- Heraldic Beast Leo
-[4]   = 05556499, -- Machina Fortress
-[5]   = 32339440, -- Bujin Yamato
-[6]   = 21954587, -- Mermail Abyssmegalo
-[7]   = 44394295, -- Shaddoll Fusion
-[8]   = 75878039, -- Satellarknight Deneb
-[9]   = 45803070, -- Traptrix Dionaea
-[10]  = 65518099, -- Qliphort Tool
-[11]  = 59057152, -- Noble Knight Medraut
-[12]  = 14735698, -- Nekroz Exomirror
-[13]  = 36006208, -- Fire Lake of the Burning Abyss
-[14]  = 33396948, -- Exodia the Forbidden One
-[15]  = 34230233, -- DW Grapha
-[16]  = 78358521, -- Constellar Sombre
-[17]  = 91351370, -- Black Whirlwind
-[18]  = 19337371, -- Hysteric Sign
-}
 GlobalDeck = nil
-DeckName={
-[0]   = "Something else",
-[1]   = "Chaos Dragon",
-[2]   = "Fire Fist",
-[3]   = "Heraldic Beast", 
-[4]   = "Gadget",
-[5]   = "Bujin",
-[6]   = "Mermail",
-[7]   = "Shaddoll",
-[8]   = "Satellarknight",
-[9]   = "HAT",
-[10]  = "Qliphort",
-[11]  = "Noble Knight",
-[12]  = "Nekroz",
-[13]  = "Burning Abyss",
-[14]  = "Exodia",
-[15]  = "Dark World",
-[16]  = "Constellar",
-[17]  = "Blackwing",
-[18]  = "Harpie",
-}
-function DeckCheck(opt)
-  if GlobalDeck == nil then
-    PrioritySetup()
-    for i=1,#DeckIdent do
-      if HasID(AIAll(),DeckIdent[i],true) then
-        GlobalDeck = i
-        print("AI deck is "..DeckName[i])
-        if GlobalDebug or GlobalDeck == DECK_EXODIA then
-          local e1=Effect.GlobalEffect()
-          e1:SetType(EFFECT_TYPE_FIELD)
-          e1:SetCode(EFFECT_PUBLIC)
-          e1:SetRange(LOCATION_MZONE)
-          e1:SetTargetRange(LOCATION_HAND+LOCATION_MZONE+LOCATION_SZONE,LOCATION_HAND+LOCATION_MZONE+LOCATION_SZONE)
-          e1:SetTarget(function (e,c)
-              return c:GetControler()==player_ai
-            end)
-          --Duel.RegisterEffect(e1,0)
-        end
+Decks={}
+function NewDeck(name,identifier,startup)
+  local deck={}
+  deck.ID=#Decks+1
+  deck.Name=name
+  deck.Identifier=identifier 
+  deck.Startup=startup
+  Decks[deck.ID]=deck
+  return deck
+end
+
+DECK_SOMETHING    = 0
+DECK_CHAOSDRAGON  = NewDeck("Chaos Dragon"    ,99365553) -- Lightpulsar Dragon
+DECK_FIREFIST     = NewDeck("Fire Fist"       ,01662004) -- Firefist Spirit
+DECK_HERALDIC     = NewDeck("Heraldic Beast"  ,82293134) -- Heraldic Beast Leo
+DECK_GADGET       = NewDeck("Gadget"          ,05556499) -- Machina Fortress
+DECK_BUJIN        = NewDeck("Bujin"           ,32339440) -- Bujin Yamato
+DECK_MERMAIL      = NewDeck("Mermail"         ,21954587) -- Mermail Abyssmegalo
+DECK_SHADOLL      = NewDeck("Shaddoll"        ,44394295) -- Shaddoll Fusion
+DECK_TELLARKNIGHT = NewDeck("Satellarknight"  ,75878039) -- Satellarknight Deneb
+DECK_HAT          = NewDeck("HAT"             ,45803070) -- Traptrix Dionaea
+DECK_QLIPHORT     = NewDeck("Qliphort"        ,65518099) -- Qliphort Tool
+DECK_NOBLEKNIGHT  = NewDeck("Noble Knight"    ,59057152) -- Noble Knight Medraut
+DECK_NEKROZ       = NewDeck("Nekroz"          ,14735698) -- Nekroz Exomirror
+DECK_BA           = NewDeck("Burning Abyss"   ,36006208) -- Fire Lake of the Burning Abyss
+DECK_EXODIA       = NewDeck("Exodia"          ,33396948) -- Exodia the Forbidden One
+DECK_DARKWORLD    = NewDeck("Dark World"      ,34230233) -- DW Grapha
+DECK_CONSTELLAR   = NewDeck("Constellar"      ,78358521) -- Constellar Sombre
+DECK_BLACKWING    = NewDeck("Blackwing"       ,91351370) -- Black Whirlwind
+DECK_HARPIE       = NewDeck("Harpie"          ,19337371) -- Hysteric Sign
+DECK_HERO         = NewDeck("HERO"            ,45906428) -- Miracle Fusion
+
+function IdentifierCheck(deck)
+  if deck == nil or deck.Identifier == nil then return false end
+  local ident = deck.Identifier
+  if type(ident)=="table" then
+    result = 0
+    for i=1,#ident do
+      local id = ident[i]
+      if HasID(AIAll(),id,true) then
+        result = result+1
       end
     end
+    if result>=#ident then
+      return true
+    end
+  else
+    if HasID(AIAll(),ident,true) then
+      return true
+    end
   end
+  return false
+end
+function DeckCheck(opt)
   if GlobalDeck == nil then
-    GlobalDeck = DECK_SOMETHING
+    for i=1,#Decks do
+      local d = Decks[i]
+      if IdentifierCheck(d) then
+        GlobalDeck = i
+      end
+    end
+    if GlobalDeck == nil then
+      GlobalDeck = DECK_SOMETHING
+      --print("AI deck is something else")
+    else 
+      print("AI deck is "..Decks[GlobalDeck].Name)
+    end
+    DeckSetup()
   end
   if opt then
+    if type(opt) == "table" then
+      return GlobalDeck==opt.ID
+    end
     return GlobalDeck==opt
   else
-    return GlobalDeck
+    return GetDeck()
   end
+end
+
+
+function GetDeck()
+  if GlobalDeck == 0 then
+    return nil
+  end
+  return Decks[GlobalDeck]
+end
+
+function DeckSetup()
+  local deck = GetDeck()
+  if deck then
+    if deck.Startup then
+      deck.Startup(deck)
+    end
+    BlacklistSetup(deck)
+  end
+  PrioritySetup()
 end
 
 PRIO_TOHAND = 1
@@ -108,7 +114,7 @@ function PrioritySetup()
   
 AddPriority({
 -- test
---[65367484] = {0,0,0,0,0,0,0,0,0,0,function(a,b)return 5 end},
+[89631139] = {1,1,1,1,1,1,1,1,1,1,nil},         -- BEWD
 
 -- Burning Abyss
 [57143342] = {7,2,7,3,7,1,1,1,2,1,CirCond},      -- BA Cir
@@ -402,12 +408,18 @@ AddPriority({
 
 [05133471] = {1,1,1,1,4,1,1,1,1,1,nil},               -- Galaxy Cyclone
 })
+
+  local deck = GetDeck()
+  if deck and deck.PriorityList then
+    AddPriority(deck.PriorityList,true)
+  end
+  
 end
 
 Prio = {}
-function AddPriority(list)
+function AddPriority(list,override)
   for i,v in pairs(list) do
-    if Prio[i] then print("warning: duplicate priority entry for ID: "..i) end
+    if Prio[i] and not override then print("warning: duplicate priority entry for ID: "..i) end
     Prio[i]=v
   end
 end

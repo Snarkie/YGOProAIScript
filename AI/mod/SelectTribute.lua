@@ -21,7 +21,13 @@
 function OnSelectTribute(cards,minTributes, maxTributes) 
   local preferred = {}
   local valid = {}
-  local result = QliphortTribute(cards,minTributes, maxTributes)
+  local result = nil
+  local d = DeckCheck()
+  if d and d.Tribute then
+    result = d.Tribute(cards,minTributes,maxTributes) 
+  end
+  if result ~= nil then return result end
+  result = QliphortTribute(cards,minTributes, maxTributes)
   if result ~= nil then return result end
   if DeckCheck(DECK_CHAOSDRAGON) then
     return Add(cards,PRIO_TOGRAVE,minTributes)

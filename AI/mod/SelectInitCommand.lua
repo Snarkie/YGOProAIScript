@@ -274,116 +274,188 @@ if DeckCheck(DECK_EXODIA) then
   --go to end phase
   return COMMAND_TO_END_PHASE,1
 end
-local DeckCommand = nil
+local backup = CopyMatrix(cards)
+local DeckCommand,DeckCommand2 = nil,nil
+local d = DeckCheck()
 DeckCommand = SummonExtraDeck(cards,true)
-if DeckCommand ~= nil then
+if DeckCommand ~= nil and (d == 0 
+or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
+then
   return DeckCommand[1],DeckCommand[2]
+end
+
+if d and d.Init then
+  DeckCommand,DeckCommand2 = d.Init(cards,to_bp_allowed,to_ep_allowed)
+end
+if DeckCommand ~= nil then
+  if type(DeckCommand)=="table" then
+    return DeckCommand[1],DeckCommand[2]
+  else
+    return DeckCommand,DeckCommand2
+  end
 end
 if not ExtraCheck then 
   DeckCommand = ChaosDragonOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
-  if DeckCommand ~= nil then
+  if DeckCommand ~= nil and (d == 0 
+  or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
+  then
     return DeckCommand[1],DeckCommand[2]
   end
 end
 if not ExtraCheck then 
   DeckCommand = FireFistInit(cards, to_bp_allowed, to_ep_allowed)
-  if DeckCommand ~= nil then
+  if DeckCommand ~= nil and (d == 0 
+  or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
+  then
     return DeckCommand[1],DeckCommand[2]
   end
 end
 if not ExtraCheck then 
   DeckCommand = HeraldicOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
-  if DeckCommand ~= nil then
+  if DeckCommand ~= nil and (d == 0 
+  or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
+  then
     return DeckCommand[1],DeckCommand[2]
   end
 end
 if not ExtraCheck then 
   DeckCommand = GadgetOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
-  if DeckCommand ~= nil then
+  if DeckCommand ~= nil and (d == 0 
+  or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
+  then
     return DeckCommand[1],DeckCommand[2]
   end
 end
 if not DeckCheck(DECK_TELLARKNIGHT) then 
   DeckCommand = BujinOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
-  if DeckCommand ~= nil then
+  if DeckCommand ~= nil and (d == 0 
+  or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
+  then
     return DeckCommand[1],DeckCommand[2]
   end
 end
 if not ExtraCheck then 
   DeckCommand = MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
-  if DeckCommand ~= nil then
+  if DeckCommand ~= nil and (d == 0 
+  or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
+  then
     return DeckCommand[1],DeckCommand[2]
   end
 end
 if not DeckCheck(DECK_BUJIN) then 
-  DeckCommand = SatellarknightOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
-  if DeckCommand ~= nil then
+  --print("tellar")
+  DeckCommand = SatellarknightOnSelectInit(cards,to_bp_allowed,to_ep_allowed)
+  --[[print("list:")
+  for i=1,#cards.summonable_cards do
+    local c = cards.summonable_cards[i]
+    print(c.id)
+  end
+  print("backup:")
+  for i=1,#backup.summonable_cards do
+    local c = backup.summonable_cards[i]
+    print(c.id)
+  end
+  print(d)
+  print(DeckCommand)]]
+  if DeckCommand ~= nil and (d == 0 
+  or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
+  then
     return DeckCommand[1],DeckCommand[2]
   end
 end  
 if not ExtraCheck then 
   DeckCommand = ShadollOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
-  if DeckCommand ~= nil then
+  if DeckCommand ~= nil and (d == 0 
+  or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
+  then
     return DeckCommand[1],DeckCommand[2]
   end
 end
 if not ExtraCheck then 
   DeckCommand = HATInit(cards)
-  if DeckCommand ~= nil then
+  if DeckCommand ~= nil and (d == 0 
+  or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
+  then
     return DeckCommand[1],DeckCommand[2]
   end
 end
 if not ExtraCheck then 
   DeckCommand = QliphortInit(cards)
-  if DeckCommand ~= nil then
+  if DeckCommand ~= nil and (d == 0 
+  or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
+  then
     return DeckCommand[1],DeckCommand[2]
   end
 end
 if not (DeckCheck(DECK_BUJIN) or DeckCheck(DECK_TELLARKNIGHT) or DeckCheck(DECK_NEKROZ)) then 
   DeckCommand = NobleInit(cards)
-  if DeckCommand ~= nil then
+  if DeckCommand ~= nil and (d == 0 
+  or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
+  then
     return DeckCommand[1],DeckCommand[2]
   end
 end
 if not (DeckCheck(DECK_BUJIN) or DeckCheck(DECK_TELLARKNIGHT) or DeckCheck(DECK_NOBLEKNIGHT)) then 
   DeckCommand = NekrozInit(cards)
-  if DeckCommand ~= nil then
+  if DeckCommand ~= nil and (d == 0 
+  or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
+  then
     return DeckCommand[1],DeckCommand[2]
   end
 end
 if not ExtraCheck then 
   DeckCommand = BAInit(cards)
-  if DeckCommand ~= nil then
+  if DeckCommand ~= nil and (d == 0 
+  or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
+  then
     return DeckCommand[1],DeckCommand[2]
   end
 end
 if not ExtraCheck then 
   DeckCommand = DarkWorldInit(cards)
-  if DeckCommand ~= nil then
+  if DeckCommand ~= nil and (d == 0 
+  or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
+  then
     return DeckCommand[1],DeckCommand[2]
   end
 end
 if not ExtraCheck then 
   DeckCommand = ConstellarInit(cards)
-  if DeckCommand ~= nil then
+  if DeckCommand ~= nil and (d == 0 
+  or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
+  then
     return DeckCommand[1],DeckCommand[2]
   end
 end
 if not ExtraCheck then 
   DeckCommand = BlackwingInit(cards)
-  if DeckCommand ~= nil then
+  if DeckCommand ~= nil and (d == 0 
+  or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
+  then
     return DeckCommand[1],DeckCommand[2]
   end
 end
 if not ExtraCheck then 
   DeckCommand = HarpieInit(cards)
-  if DeckCommand ~= nil then
+  if DeckCommand ~= nil and (d == 0 
+  or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
+  then
+    return DeckCommand[1],DeckCommand[2]
+  end
+end
+if not ExtraCheck then 
+  DeckCommand = HEROInit(cards)
+  if DeckCommand ~= nil and (d == 0 
+  or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
+  then
     return DeckCommand[1],DeckCommand[2]
   end
 end
 if not ExtraCheck then 
   DeckCommand = SummonExtraDeck(cards)
-  if DeckCommand ~= nil then
+  if DeckCommand ~= nil and (d == 0 
+  or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
+  then
     return DeckCommand[1],DeckCommand[2]
   end
 end
@@ -473,9 +545,7 @@ end
 --            Spell card activation :D
 -- **********************************************
 -------------------------------------------------
-  
 
-    
   ----------------------------------
   -- Activate any search cards here.
   ----------------------------------
@@ -1371,7 +1441,9 @@ end
   ---------------------------------------------------------
   for i=1,#ActivatableCards do
     local c = ActivatableCards[i]
-    if Get_Card_Count_ID(AIST(),c.id, POS_FACEUP) == 0 
+    if (Get_Card_Count_ID(AIST(),c.id, POS_FACEUP) == 0 
+    or FilterLocation(c,LOCATION_SZONE)
+    and FilterPosition(c,POS_FACEUP))
     and NecrovalleyCheck(c)
     and not FilterType(c,TYPE_FIELD)           
     and CardIsScripted(c.id) == 0

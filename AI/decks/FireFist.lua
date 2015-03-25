@@ -88,7 +88,7 @@ end
 function FireFormationSearch(cards)
   --returns the preferred Fire Formation to be searched
   local AICards=UseLists({AIHand(),AIMon(),AIST()})
-  if SummonSpirit() and HasID(AIDeck(),01662004,true) and HasID(cards,57103969) then
+  if SummonSpirit() and NeedsCard(01662004,AIDeck(),AIHand(),true) and HasID(cards,57103969) then
     return {CurrentIndex}
   end
   if SummonSpirit() and HasID(AIHand(),01662004,true) and NeedsCard(10719350,cards,AICards,true) then

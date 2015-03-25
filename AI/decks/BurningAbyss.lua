@@ -31,6 +31,9 @@ function ScarmCond(loc,c)
     return not HasID(UseLists(AIHand(),AIMon()),84764038,true)
   end
   if loc == PRIO_TOFIELD then
+    if FilterLocation(c,LOCATION_REMOVED) then
+      return 1
+    end
     return OPTCheck(84764038) and CardsMatchingFilter(AIGrave(),ScarmGraveFilter)==0
     and CardsMatchingFilter(AIDeck(),ScarmDeckFilter)>0
   end
@@ -535,7 +538,13 @@ function AlucardTarget(cards)
   if LocCheck(cards,LOCATION_OVERLAY) then
     return Add(cards,PRIO_TOGRAVE)
   end
-  return BestTargets(cards,TARGET_DESTROY)
+  return BestTargets(cards,1,TARGET_DESTROY)
+end
+function TemtempoTarget(cards)
+  if LocCheck(cards,LOCATION_OVERLAY) then
+    return Add(cards,PRIO_TOGRAVE)
+  end
+  return BestTargets(cards,1,TARGET_OTHER)
 end
 function BACard(cards,min,max,id,c)
   if c then

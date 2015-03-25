@@ -1459,6 +1459,8 @@ end
 function TrapStunFilter(c)
   return FilterLocation(c,LOCATION_SZONE)
   and FilterType(c,TYPE_TRAP)
+  and c.id~=51452091
+  and c.id~=59616123
 end
 function TrapStunFilter2(c)
   return FilterLocation(c,LOCATION_SZONE)
@@ -1475,6 +1477,30 @@ function ChainTrapStun(source)
   if c 
   --and CardsMatchingFilter(AIST(),TrapStunFilter)<3 
   and UnchainableCheck(59616123)
+  then
+    SetNegated(cl)
+    return true
+  end
+  if Duel.GetTurnPlayer()==player_ai 
+  and Duel.GetCurrentPhase()==PHASE_MAIN1
+  and Duel.GetCurrentChain()==0
+  and (HasIDNotNegated(Field(),05851097,nil,nil,POS_FACEUP)
+  or HasIDNotNegated(Field(),82732705,nil,nil,POS_FACEUP))
+  then
+    return true
+  end
+  return false
+end
+function ChainDecree(source)
+  if RemovalCheckCard(source)
+  and CardsMatchingFilter(AIST(),TrapStunFilter)<2 
+  then
+    return true
+  end
+  local c,cl = ChainCardNegation(source,false,false,TrapStunFilter,nil,true)
+  if c 
+  --and CardsMatchingFilter(AIST(),TrapStunFilter)<3 
+  and UnchainableCheck(51452091)
   then
     SetNegated(cl)
     return true
@@ -1591,10 +1617,14 @@ function PriorityChain(cards) -- chain these before anything else
   if HasIDNotNegated(cards,26329679,ChainOmega) then
     return {1,CurrentIndex}
   end
+  if HasIDNotNegated(cards,51452091,ChainDecree) then
+    return {1,CurrentIndex}
+  end
   if HasIDNotNegated(cards,59616123,ChainTrapStun) then
     GlobalTrapStun = Duel.GetTurnCount()
     return {1,CurrentIndex}
   end
+
   return nil
 end
 function GenericChain(cards)

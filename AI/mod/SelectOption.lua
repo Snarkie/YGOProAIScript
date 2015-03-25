@@ -8,7 +8,12 @@
 --
 -- Return: index of the selected option
 function OnSelectOption(options)
-  local result = 0
+  local result = nil
+  local d = DeckCheck()
+  if d and d.Option then
+    result = d.Option(options)
+  end
+  if result~=nil then return result end
   local optionfunctions={
   HeraldicOnSelectOption,QliphortOption,
   NekrozOption,DarkWorldOption,ConstellarOption,

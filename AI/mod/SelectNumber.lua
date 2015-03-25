@@ -8,6 +8,12 @@
 --
 -- Return: index of the selected choice
 function OnSelectNumber(choices)
+  local result = nil
+  local d = DeckCheck()
+  if d and d.Number then
+    result = d.Number(id,available)
+  end
+  if result~=nil then return result end
   -------------------------------------------
   -- The AI should always try to mill as many
   -- cards as possible with Card Trooper.

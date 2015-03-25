@@ -111,15 +111,27 @@ end
 
 -- other decks 
 -- redirect to respective deck files
+  local result = nil
+  
+  local d = DeckCheck()
+  if d and d.Card then
+    result = d.Card(cards,minTargets,maxTargets,triggeringID,triggeringCard)
+  end
+  if result ~= nil then
+    if type(result) == "table" then
+      return result
+    else
+      print("WARNING: returning invalid card selection: "..triggeringID)
+    end
+  end
 
   local SelectCardFunctions={
   FireFistCard,HeraldicOnSelectCard,GadgetOnSelectCard,
   BujinOnSelectCard,MermailOnSelectCard,ShadollOnSelectCard,
   SatellarknightOnSelectCard,ChaosDragonOnSelectCard,HATCard,
   QliphortCard,NobleCard,NekrozCard,BACard,DarkWorldCard,
-  GenericCard,ConstellarCard,BlackwingCard,HarpieCard,
+  GenericCard,ConstellarCard,BlackwingCard,HarpieCard,HEROCard,
   }
-  local result = nil
   for i=1,#SelectCardFunctions do
     local func = SelectCardFunctions[i]
     result = func(cards,minTargets,maxTargets,triggeringID,triggeringCard)
