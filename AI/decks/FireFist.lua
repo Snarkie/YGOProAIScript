@@ -745,7 +745,9 @@ function ChainHornOfPhantomBeast()
   end
 end
 function TenkenFilter(card)
-	return card:IsControler(player_ai) and card:IsType(TYPE_MONSTER) and card:IsLocation(LOCATION_MZONE) and card:IsRace(RACE_BEASTWARRIOR) and card:IsPosition(POS_FACEUP)
+	return card:IsControler(player_ai) and card:IsType(TYPE_MONSTER) 
+  and card:IsLocation(LOCATION_MZONE) and card:IsRace(RACE_BEASTWARRIOR) 
+  and card:IsPosition(POS_FACEUP)
 end
 function ChainTenken()
 	local ex,cg = Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_DESTROY)
@@ -755,7 +757,10 @@ function ChainTenken()
   local ex,cg = Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_DESTROY)
   local tg = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TARGET_CARDS)
   if ex then
-    local g = cg:Filter(TenkenFilter, nil):GetMaxGroup(Card.GetAttack)
+    local g = nil
+    if cg then
+      g = cg:Filter(TenkenFilter, nil):GetMaxGroup(Card.GetAttack)
+    end
     if g and cg:IsExists(TenkenFilter, 1, nil) and Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_PLAYER)~=player_ai then
       GlobalTargetSet(g:GetFirst(),AIMon())
       return true

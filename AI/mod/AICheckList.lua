@@ -860,7 +860,7 @@ ScriptedCards ={
 03642509,22093873,01945387,22061412, -- Great Tornado, Divine Wind, Nova Master, The Shining
 29095552,33574806,40854197,50608164, -- Acid, Escuridao, Absolute Zero, Koga
 58481572,16304628,38992735,33904024, -- Dark Law, Gaia, Wave-Motion Cannon, Shard of Greed
-72345736, -- Six Sams United
+72345736,05133471, -- Six Sams United, Galaxy Cyclone
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do

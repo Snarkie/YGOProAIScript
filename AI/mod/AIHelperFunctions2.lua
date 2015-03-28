@@ -1,12 +1,14 @@
 player_ai = nil
 GlobalTargetID = nil
 GlobalCheating = false
+playersetupcomplete = false
 -- Sets up some variables for using card script functions
 function set_player_turn(init)
-	if init and player_ai~=Duel.GetTurnPlayer()
+	if init and not playersetupcomplete
   or player_ai == nil 
   then
 		player_ai = Duel.GetTurnPlayer()
+    playersetupcomplete = true
     SaveState()
     if GlobalCheating then
       EnableCheats()

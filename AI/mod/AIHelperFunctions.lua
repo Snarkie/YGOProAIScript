@@ -1856,6 +1856,17 @@ function ApplyATKBoosts(Cards)
     d.AttackBoost(Cards)
   end
   
+  -- unknown face-down monsters
+  for i=1,#Cards do
+    local c = Cards[i]
+    if FilterPosition(c,POS_FACEDOWN_DEFENCE)
+    and FilterPrivate(c)
+    and CurrentOwner(c)==2
+    then
+      c.defense=1499
+    end
+  end
+  
   -- fix cards with attack < 0 after attack boosts
   for i=1,#Cards do
     Cards[i].attack=math.max(Cards[i].attack,0)

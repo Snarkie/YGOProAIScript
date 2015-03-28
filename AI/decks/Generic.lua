@@ -22,6 +22,9 @@ function SummonExtraDeck(cards,prio)
    if HasIDNotNegated(SpSum,07409792) then 
     --return {COMMAND_SPECIAL_SUMMON,CurrentIndex}                                -- test
   end
+  if HasIDNotNegated(Rep,12014404,false,nil,nil,POS_FACEUP_ATTACK) and UseCowboyDef() then 
+    return {COMMAND_CHANGE_POS,CurrentIndex}                                -- Gagaga Cowboy finish
+  end
   if HasIDNotNegated(Act,12014404,false,nil,nil,POS_DEFENCE) and UseCowboyDef() then 
     return {COMMAND_ACTIVATE,CurrentIndex}                                -- Gagaga Cowboy finish
   end
@@ -312,7 +315,6 @@ function SummonExtraDeck(cards,prio)
     return XYZSummon()
   end
   if HasIDNotNegated(Act,91499077) and UseGagagaSamurai() then
-    Global1PTGunman = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(SpSum,34086406) and SummonLavalvalChain() then -- Lavalval Chain
@@ -346,9 +348,15 @@ function SummonExtraDeck(cards,prio)
   if HasIDNotNegated(SpSum,12014404) and SummonCowboyAtt() then -- Cowboy
     return XYZSummon()
   end
-  if HasIDNotNegated(Act,12014404) and UseCowboyAtt() then
+  if HasIDNotNegated(Rep,12014404,nil,nil,POS_DEFENCE,UseCowboyAtt) then
+    return {COMMAND_CHANGE_POS,CurrentIndex}
+  end
+  if HasIDNotNegated(Act,12014404,FilterPosition,POS_FACEUP_ATTACK) and UseCowboyAtt() then
     Global1PTGunman = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(SpSum,12014404) and SummonCowboyDef(2) then -- Cowboy
+    return XYZSummon()
   end
   
 -- Rank 3
@@ -448,8 +456,9 @@ function SummonBelzebuth()
   local OppCards=UseLists({OppHand(),OppField()})
   return #AICards<=#OppCards and UseFieldNuke(-1)
 end
-function SummonCowboyDef()
+function SummonCowboyDef(mode)
   return AI.GetPlayerLP(2)<=800 
+  or mode == 2 and MP2Check() and AI.GetPlayerLP(2)<=1600 
 end
 function SummonPaladynamo()
   local cards = OppMon()
@@ -720,12 +729,14 @@ function CowboyFilter(c)
   and c:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE)==0 
   and c:is_affected_by(EFFECT_CANNOT_BE_BATTLE_TARGET)==0)
 end
-function UseCowboyAtt()
+function UseCowboyAtt(c)
+  print("use cowboy att")
   return CardsMatchingFilter(OppMon(),CowboyFilter)>0 
   and Duel.GetCurrentPhase()==PHASE_MAIN1 and GlobalBPAllowed
+  and (c == nil or c.xyz_material_count>0)
 end
 function SummonCowboyAtt()
-  return OppHasStrongestMonster() and UseCowboyAtt() and MP2Check()
+  return OppHasStrongestMonster() and UseCowboyAtt() and BattlePhaseCheck()
 end
 function SkyblasterFilter(c)
   return bit32.band(c.position,POS_FACEUP)>0 and c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
@@ -1151,9 +1162,9 @@ function SummonVulcan(c)
 end
 function UseGalaxyCyclone(mode)
   if mode == 1 then
-    return DestroyCheck(OppST(),false,false,FilterPosition,POS_FACEDOWN)
+    return DestroyCheck(OppST(),false,false,FilterPosition,POS_FACEDOWN)>0
   end
-  return DestroyCheck(OppST(),false,false,FilterPosition,POS_FACEUP)
+  return DestroyCheck(OppST(),false,false,FilterPosition,POS_FACEUP)>0
 end
 ----
 
