@@ -500,7 +500,7 @@ function SummonChidori(c,mode)
     return true
   end
   if mode == 2 
-  and HasPriorityTarget(OppField(),ChidoriFilter,POS_FACEUP)
+  and HasPriorityTarget(OppField(),false,nil,ChidoriFilter,POS_FACEUP)
   then
     return true
   end
@@ -561,7 +561,9 @@ function UseJeweledRDA(card,mod)
   local AITargets=SubGroup(aimon,JeweledRDAFilter,card.cardid)
   local OppTargets=SubGroup(OppMon(),JeweledRDAFilter,card.cardid)
   local diff=(#OppTargets+mod)-#AITargets
-  if HasIDNotNegated(aimon,83994433,true) and GlobalStardustSparkActivation[aimon[CurrentIndex].cardid]~=Duel.GetTurnCount() then
+  if HasIDNotNegated(aimon,83994433,true,OPTCheck) 
+  --and GlobalStardustSparkActivation[aimon[CurrentIndex].cardid]~=Duel.GetTurnCount() 
+  then
     diff = diff+1
   end
   AITargets[#AITargets+1]=card
@@ -588,7 +590,9 @@ function UseDarkHole()
   local AITargets=DestroyCheck(AIMon(),true)
   local OppTargets=DestroyCheck(OppMon(),true)
   local diff=OppTargets-AITargets
-  if HasIDNotNegated(aimon,83994433,true) and GlobalStardustSparkActivation[aimon[CurrentIndex].cardid]~=Duel.GetTurnCount() then
+  if HasIDNotNegated(aimon,83994433,true,OPTCheck) 
+  --and GlobalStardustSparkActivation[aimon[CurrentIndex].cardid]~=Duel.GetTurnCount() 
+  then
     diff = diff+1
   end
   if HasIDNotNegated(AIST(),27243130,true) or HasID(AIHand(),27243130,true) then
@@ -730,7 +734,6 @@ function CowboyFilter(c)
   and c:is_affected_by(EFFECT_CANNOT_BE_BATTLE_TARGET)==0)
 end
 function UseCowboyAtt(c)
-  print("use cowboy att")
   return CardsMatchingFilter(OppMon(),CowboyFilter)>0 
   and Duel.GetCurrentPhase()==PHASE_MAIN1 and GlobalBPAllowed
   and (c == nil or c.xyz_material_count>0)
@@ -1603,6 +1606,9 @@ function PriorityChain(cards) -- chain these before anything else
     return {1,CurrentIndex}
   end
 
+  if HasIDNotNegated(cards,82732705,ChainSkillDrain) then
+    return {1,CurrentIndex}
+  end
   if HasIDNotNegated(cards,78474168,ChainBTS) then
     return {1,CurrentIndex}
   end

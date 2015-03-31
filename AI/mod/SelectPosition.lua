@@ -98,8 +98,10 @@ function OnSelectPosition(id, available)
   }
   for i=1,#positionfunctions do
     local func = positionfunctions[i]
-    local Position = func(id,available)
-    if Position then result=Position end
+    if func then
+      local Position = func(id,available)
+      if Position then result=Position end
+    end
   end
   local d = DeckCheck()
   if d and d.Position then

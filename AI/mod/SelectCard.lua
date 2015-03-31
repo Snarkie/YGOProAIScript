@@ -372,28 +372,6 @@ end
    end
      
   --------------------------------------------     
-  -- Select Players strongest monster, if he controls any
-  -- stronger monsters than AI or only monsters, 
-  -- if not select any spell or trap card player controls
-  --------------------------------------------   
-  if GlobalActivatedCardID == 09748752 then -- Caius the Shadow Monarch
-    for i=1,#cards do
-      if cards[i] ~= false then 
-        if Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") < Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack")  or Get_Card_Count(OppST())== 0 then 
-          result = Get_Card_Index(cards, 2, "Highest", TYPE_MONSTER, POS_FACEUP)
-          GlobalActivatedCardID = nil 
-        else
-          result = getRandomSTIndex(cards, 2)
-          GlobalActivatedCardID = nil
-        end
-        return result
-      end
-    end
-  end
-   
-
-  
-  --------------------------------------------     
   -- Select monster not of a BanishBlacklist
   --------------------------------------------   
   if GlobalActivatedCardID == 33347467 then -- Ghost Ship

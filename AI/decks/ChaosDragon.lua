@@ -1,11 +1,66 @@
 
+function ChaosDragonPriority()
+AddPriority({
+
+--Chaos Dragons
+[65192027] = {8,5,8,2,1,0,0,0,2,0,DADCond},           -- Dark Armed Dragon 
+[72989439] = {9,5,6,3,1,0,0,0,2,0,BLSCond},           -- BLS Envoy
+[88264978] = {9,5,7,0,2,0,0,0,0,0,REDMDCond},         -- REDMD
+[98777036] = {2,1,0,0,4,0,0,0,8,0,nil},               -- Tragoedia
+[09596126] = {8,4,6,3,1,0,0,0,3,0,SorcCond},          -- Chaos Sorcerer
+[44330098] = {2,1,0,0,4,0,0,0,8,0,nil},               -- Gorz
+[99365553] = {6,4,5,4,4,3,0,0,1,0,LightpulsarCond},   -- Lightpulsar Dragon
+[25460258] = {5,3,4,3,5,3,0,0,4,0,DarkflareCond},     -- Darkflare Dragon
+[61901281] = {6,3,6,2,6,2,0,0,8,3,CollapserpentCond}, -- Black Dragon Collapserpent
+[99234526] = {6,3,6,2,6,2,0,0,8,3,WyverbusterCond},   -- Light Dragon Wyverbuster
+[77558536] = {5,3,7,4,5,2,0,0,5,0,RaidenCond},        -- Lightsworn Raiden
+[22624373] = {3,2,4,2,6,3,0,0,8,0,LylaCond},          -- Lightsworn Lyla
+[95503687] = {4,3,8,3,4,3,0,0,7,0,LuminaCond},        -- Lightsworn Lumina
+[16404809] = {3,2,4,2,6,3,0,0,8,0,KuribanditCond},    -- Kuribandit
+[51858306] = {5,0,3,0,9,0,0,0,9,9,WyvernCond},        -- Eclipse Wyvern
+[33420078] = {2,1,6,2,6,0,0,0,3,1,PSZCond},           -- Plaguespreader Zombie
+[19665973] = {2,1,1,1,6,1,1,1,6,1,FaderCond},         -- Battle Fader
+[85087012] = {2,1,4,1,6,1,1,1,6,1,nil},               -- Card Trooper
+[09748752] = {5,1,4,1,2,1,1,1,6,1,CaiusCond},         -- Caius
+
+
+[00691925] = {8,3,0,0,3,0,0,0,0,0,nil},               -- Solar Recharge
+[94886282] = {7,2,0,0,1,0,0,0,0,0,nil},               -- Charge of the Light Brigade
+[01475311] = {5,3,0,0,4,0,0,0,0,0,nil},               -- Allure of Darkness
+[81439173] = {4,2,0,0,2,0,0,0,0,0,nil},               -- Foolish Burial
+
+--[83531441] = {0,0,0,0,5,2,0,0,8,0,DanteCond},         -- BA Dante
+[15914410] = {0,0,0,0,5,2,0,0,8,0,AngineerCond},      -- Mechquipped Angineer
+[95992081] = {0,0,0,0,5,2,0,0,8,0,LeviairCond},       -- Leviair the Sea Dragon
+[34086406] = {0,0,0,0,5,3,0,0,8,0,ChainCond},         -- Lavalval Chain
+[48739166] = {0,0,0,0,5,3,0,0,8,0,SharkCond},         -- SHArk
+[15561463] = {0,0,0,0,4,2,0,0,8,0,GauntletCond},      -- Gauntlet Launcher
+[07391448] = {0,0,0,0,2,0,0,0,8,0,nil},               -- Goyo Guardian
+[04779823] = {0,0,8,0,2,0,0,0,5,0,nil},               -- Michael, Lightsworn Ark
+[44508094] = {0,0,8,0,2,0,0,0,5,0,nil},               -- Stardust Dragon
+[76774528] = {0,0,7,0,2,0,0,0,5,0,nil},               -- Scrap Dragon
+[34408491] = {0,0,9,0,2,0,0,0,4,0,nil},               -- Beelze of the Diabolic Dragons
+})
+end
+
 function DarksInGrave()
   return CardsMatchingFilter(AIGrave(),FilterAttribute,ATTRIBUTE_DARK)
 end
 function LightsInGrave()
   return CardsMatchingFilter(AIGrave(),FilterAttribute,ATTRIBUTE_LIGHT)
 end
-
+function CaiusCond(loc,c)
+  if loc == PRIO_BANISH then
+    return FilterLocation(c,LOCATION_GRAVE)
+  end
+  return true
+end
+function FaderCond(loc,c)
+  if loc == PRIO_TOGRAVE then
+    return FilterLocation(c,LOCATION_MZONE)
+  end
+  return true
+end
 function DADCond(loc,c)
   if loc == PRIO_TOFIELD then
     return DestroyCheck(OppField())>1 
@@ -96,6 +151,9 @@ function MiniDragonCond(loc,c)
   return true
 end
 function RaidenCond(loc,c)
+  if loc == PRIO_TOHAND then
+    return not HasID(AICards(),77558536,true)
+  end
   if loc == PRIO_TOGRAVE and bit32.band(c.location,LOCATION_HAND) then
     return true
   end
@@ -269,7 +327,8 @@ function SummonScrapDragon()
 end
 function UseScrapDragon()
   return DestroyCheck(OppField())>0 and (HasID(AIMon(),34408491,true) 
-  or (PriorityCheck(AIField(),PRIO_TOGRAVE)>4 and MP2Check()) 
+  or (PriorityCheck(AIField(),PRIO_TOGRAVE)>4 
+  and (MP2Check() or HasPriorityTarget(OppField(),true))) 
   or (HasID(AIMon(),99365553,true) and LightpulsarCond(PRIO_TOFIELD)))
 end
 function SummonBLS()
@@ -357,6 +416,7 @@ function SummonMini()
   or HasID(AIHand(),99365553,true) and PriorityCheck(AIField(),PRIO_TOGRAVE)<4 and not NormalSummonCheck(player_ai) and OverExtendCheck() and #OppMon()>0
   or HasID(AIHand(),88264978,true) and UseREDMD() and OverExtendCheck()
   or HasID(AIMon(),76774528,true) and DestroyCheck(OppField())>0 
+  or HasID(AIHand(),09748752,true) and not NormalSummonCheck(player_ai) and UseCaius()
 end
 function SummonCollapserpent()
   return PriorityCheck(AIGrave(),PRIO_BANISH,1,FilterAttribute,ATTRIBUTE_LIGHT)>4 and SummonMini()
@@ -383,11 +443,16 @@ end
 function UseLyla()
   return CardsMatchingFilter(OppST(),DestroyFilter)>0 
   and (Duel.GetCurrentPhase()==PHASE_MAIN2 or FieldCheck(4)>1 
-  or HasID(AIMon(),33420078,true) or HasID(AIHand(),99365553,true) 
+  or HasID(AIMon(),33420078,true) 
+  or (HasID(AIHand(),99365553,true) 
+  or HasID(AIHand(),09748752,true) and UseCaius())
   and not NormalSummonCheck(player_ai))
 end
 function SummonRaiden()
   return OverExtendCheck()
+end
+function SummonTrooper()
+  return OverExtendCheck() and #AIDeck()>10
 end
 function UseRaiden()
   return #AIDeck()>10
@@ -414,8 +479,28 @@ end
 function UseDante()
   return true
 end
+function UseTrooper()
+  return true
+end
 function SummonBeelze()
   return true
+end
+function CaiusFilter(c)
+  return Targetable(c,TYPE_MONSTER)
+  and Affected(c,TYPE_MONSTER,6)
+end
+function UseCaius()
+   return CardsMatchingFilter(OppField(),CaiusFilter)>0
+   or AI.GetPlayerLP(2)<=1000
+end
+function SummonCaius(c,mode)
+  if mode == 1 then
+    return AI.GetPlayerLP(2)<=1000
+  elseif mode == 2 then
+    return PriorityCheck(AIMon(),PRIO_TOGRAVE)>4
+    and UseCaius()
+  end
+  return false
 end
 function ChaosDragonOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local Activatable = cards.activatable_cards
@@ -425,6 +510,9 @@ function ChaosDragonOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local SetableMon = cards.monster_setable_cards
   local SetableST = cards.st_setable_cards
   GlobalScepterOverride = 0
+  if HasID(Activatable,32807846) and DeckCheck(DECK_CHAOSDRAGON) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   if HasID(Activatable,94886282) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -433,6 +521,9 @@ function ChaosDragonOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   end
   if HasID(Activatable,01475311) and UseAllure() then
     return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Summonable,09748752,SummonCaius,1) then
+    return {COMMAND_SUMMON,CurrentIndex}
   end
   if HasID(SpSummonable,65192027) and SummonDAD() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
@@ -467,7 +558,10 @@ function ChaosDragonOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     GlobalActivatedCardID = 83531441
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
+  if HasIDNotNegated(Activatable,85087012 ) and UseTrooper() then
+    GlobalActivatedCardID = 85087012
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   --if HasIDNotNegated(Activatable,34086406) and UseLavalvalChain() then
   --  return {COMMAND_ACTIVATE,CurrentIndex}
   --end
@@ -537,7 +631,10 @@ function ChaosDragonOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     GlobalSSCardID = 99234526
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-
+  
+  if HasIDNotNegated(Summonable,09748752,SummonCaius,2) then
+    return {COMMAND_SUMMON,CurrentIndex}
+  end
   if HasID(Summonable,10802915) and SummonTourguide() and DeckCheck(DECK_CHAOSDRAGON) then
     return {COMMAND_SUMMON,CurrentIndex}
   end
@@ -547,7 +644,10 @@ function ChaosDragonOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(Summonable,77558536) and SummonRaiden() then
     return {COMMAND_SUMMON,CurrentIndex}
   end
-
+  if HasID(Summonable,85087012) and SummonTrooper() then
+    return {COMMAND_SUMMON,CurrentIndex}
+  end
+  
   if HasID(Summonable,99365553) and NSLightpulsar(Summonable[CurrentIndex]) then
     GlobalActivatedCardLevel=6
     GlobalActivatedCardAttack=2500
@@ -721,6 +821,12 @@ function ChaosSorcTarget(cards)
   end
   return Add(cards,PRIO_BANISH)
 end
+function CaiusTarget(cards)
+  if AI.GetPlayerLP(2)<=1000 then
+    return BestTargets(cards,1,PRIO_BANISH,FilterAttribute,ATTRIBUTE_DARK)
+  end
+  return BestTargets(cards,1,PRIO_BANISH)
+end
 function ChaosDragonOnSelectCard(cards, minTargets, maxTargets,triggeringID,triggeringCard)
   local ID 
   local result=nil
@@ -814,6 +920,9 @@ function ChaosDragonOnSelectCard(cards, minTargets, maxTargets,triggeringID,trig
   if ID == 16404809 then -- Kuribandit
     return Add(cards)
   end
+  if ID == 09748752 then 
+    return CaiusTarget(cards)
+  end
   return nil
 end
 function ChainGorz()
@@ -868,6 +977,9 @@ function ChaosDragonOnSelectChain(cards,only_chains_by_player)
   if HasIDNotNegated(cards,98777036) and ChainTrag() then
     return {1,CurrentIndex}
   end
+  if HasID(cards,09748752) then
+    return {1,CurrentIndex}
+  end
   return nil
 end
 function ChaosDragonOnSelectEffectYesNo(id,card)
@@ -888,6 +1000,9 @@ function ChaosDragonOnSelectEffectYesNo(id,card)
   if id == 98777036 and ChainTrag() then
     result = 1
   end
+  if id == 09748752 then
+    result = 1
+  end
   return result
 end
 ChaosDragonAtt={
@@ -895,7 +1010,8 @@ ChaosDragonAtt={
 }
 ChaosDragonDef={
   98777036,16404809,33420078,
-  10802915,84764038
+  10802915,84764038,19665973,
+  85087012,
 }
 function ChaosDragonOnSelectPosition(id, available)
   result = nil

@@ -760,7 +760,7 @@ function ExaBeetleTarget(cards)
     return BestTargets(cards)
   end
 end
-function GungnirTarget(cards)
+function NekrozGungnirTarget(cards)
   local result = {}
   if GlobalCardMode == 1 then
     result = GlobalTargetGet(cards,true)
@@ -934,7 +934,7 @@ function NekrozCard(cards,min,max,id,c)
     return ExaBeetleTarget(cards)
   end
   if id == 74122412 then
-    return GungnirTarget(cards)
+    return NekrozGungnirTarget(cards)
   end
   if id == 88240999 then
     return ArmorTarget(cards)

@@ -663,6 +663,7 @@ function GadgetOnSelectChain(cards,only_chains_by_player)
   end
   if HasID(cards,83994433) and ChainStardustSpark() then
     GlobalStardustSparkActivation[cards[CurrentIndex].cardid]=Duel.GetTurnCount()
+    OPTSet(cards[CurrentIndex])
     return {1,CurrentIndex}
   end
   if HasID(cards,51617185) and ChainMegaform() then

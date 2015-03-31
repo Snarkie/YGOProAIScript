@@ -343,20 +343,7 @@ if not ExtraCheck then
   end
 end
 if not DeckCheck(DECK_BUJIN) then 
-  --print("tellar")
   DeckCommand = SatellarknightOnSelectInit(cards,to_bp_allowed,to_ep_allowed)
-  --[[print("list:")
-  for i=1,#cards.summonable_cards do
-    local c = cards.summonable_cards[i]
-    print(c.id)
-  end
-  print("backup:")
-  for i=1,#backup.summonable_cards do
-    local c = backup.summonable_cards[i]
-    print(c.id)
-  end
-  print(d)
-  print(DeckCommand)]]
   if DeckCommand ~= nil and (d == 0 
   or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
   then
@@ -1822,24 +1809,6 @@ end
        end
      end
    end
-  
-  -------------------------------------------------------  
-  -- AI should summon Caius the Shadow Monarch only if
-  -- player controls any cards.
-  -------------------------------------------------------
-  for i=1,#SummonableCards do   
-    if SummonableCards[i].id == 09748752 then -- Caius the Shadow Monarch
-      if Get_Card_Count(AI.GetOppMonsterZones()) + Get_Card_Count(OppST()) > 0 and 
-         AIMonCountLowerLevelAndAttack(SummonableCards[i].level,SummonableCards[i].attack) +
-         GlobalAdditionalTributeCount >= AIMonGetTributeCountByLevel(SummonableCards[i].level) then
-         GlobalActivatedCardID = SummonableCards[i].id
-         GlobalActivatedCardAttack = SummonableCards[i].attack
-         GlobalActivatedCardLevel = SummonableCards[i].level
-         GlobalSummonedThisTurn = GlobalSummonedThisTurn+1
-		return COMMAND_SUMMON,i
-      end
-    end
-  end
   
   -------------------------------------------------------  
   -- AI should summon Lord of D. if he can use The Flute of Summoning Dragon

@@ -313,7 +313,7 @@ NSBL={
 75064463,80316585,56585883,90238142, -- Harpie Queen, Cyber, Harpist, Channeler
 91932350,68815132,89399912,52040216, -- Harpie Lady #1, Dancer, Tempest, Pet Dragon
 69884162,25259669,63060238,50720316, -- Neos Alius, Goblindbergh, Blazeman,Shadow Mist
-79979666 -- Bubbleman
+79979666,21565445,47826112, -- Bubbleman, Atlantean Neptabyss, Poseidra
 }
 function NormalSummonBlacklist(CardId) 
   for i=1,#NSBL do
@@ -416,6 +416,7 @@ SSBL={
 23693634,50321796,76913983, -- Colossal Fighter, Synch Brionac, BW Armed Wind
 90953320,26593852,44508094, -- Hyper Librarian, Catastor, Stardust
 85909450,86848580,79979666, -- HPPD, Zerofyne, Bubbleman
+13959634,55863245, -- Moulinglacia, Child Dragon
 }
 
 
@@ -860,7 +861,8 @@ ScriptedCards ={
 03642509,22093873,01945387,22061412, -- Great Tornado, Divine Wind, Nova Master, The Shining
 29095552,33574806,40854197,50608164, -- Acid, Escuridao, Absolute Zero, Koga
 58481572,16304628,38992735,33904024, -- Dark Law, Gaia, Wave-Motion Cannon, Shard of Greed
-72345736,05133471, -- Six Sams United, Galaxy Cyclone
+72345736,05133471,21565445,47826112, -- Six Sams United, Galaxy Cyclone, Atlantean Neptabyss, Poseidra
+13959634,72932673, -- Moulinglacia, Mizuchi
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do
