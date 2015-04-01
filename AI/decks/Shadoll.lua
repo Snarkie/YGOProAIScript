@@ -296,6 +296,7 @@ end
 function SummonMath()
   return true
 end
+
 function ShadollOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local Activatable = cards.activatable_cards
   local Summonable = cards.summonable_cards

@@ -1803,6 +1803,10 @@ function EPAddedCards()  -- checks, how many cards the AI is expected
   then
     result = result+1
   end
+  if HasIDNotNegated(AIST(),51194046,true)
+  then
+    result=result+TributeCount()
+  end
   return result
 end
 

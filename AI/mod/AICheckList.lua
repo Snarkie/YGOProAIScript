@@ -313,7 +313,8 @@ NSBL={
 75064463,80316585,56585883,90238142, -- Harpie Queen, Cyber, Harpist, Channeler
 91932350,68815132,89399912,52040216, -- Harpie Lady #1, Dancer, Tempest, Pet Dragon
 69884162,25259669,63060238,50720316, -- Neos Alius, Goblindbergh, Blazeman,Shadow Mist
-79979666,21565445,47826112, -- Bubbleman, Atlantean Neptabyss, Poseidra
+79979666,21565445,47826112,13073850, -- Bubbleman, Atlantean Neptabyss, Poseidra, Qli Stealth
+51194046, -- Qli Monolith
 }
 function NormalSummonBlacklist(CardId) 
   for i=1,#NSBL do
@@ -655,7 +656,7 @@ Unchainable={
 38296564,53567095,72930878,81983656, -- Safe Zone, Icarus, Black Sonic, BW Hawk Joe
 85215458,24508238,59616123,27243130, -- BW Kalut, D.D. Crow, Trap Stun, Forbidden lance
 77778835,21143940,84536654,57728570, -- Hysteric Party, Mask Change, Form Change, CCV
-83555666, --  Ring of Destruction
+83555666,88197162,24348807, --  Ring of Destruction, Soul Transition, Lose a turn
 }
 function isUnchainableTogether(CardId)
   for i=1,#Unchainable do
@@ -862,7 +863,8 @@ ScriptedCards ={
 29095552,33574806,40854197,50608164, -- Acid, Escuridao, Absolute Zero, Koga
 58481572,16304628,38992735,33904024, -- Dark Law, Gaia, Wave-Motion Cannon, Shard of Greed
 72345736,05133471,21565445,47826112, -- Six Sams United, Galaxy Cyclone, Atlantean Neptabyss, Poseidra
-13959634,72932673, -- Moulinglacia, Mizuchi
+13959634,72932673,13073850,88197162, -- Moulinglacia, Mizuchi, Qli Stealth, Soul Transition
+51194046,20426097,24348807,25067275, -- Qli Monolith, Re-qliate, Lose a Turn, Swords At Dawn
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do

@@ -62,6 +62,12 @@ function SummonExtraDeck(cards,prio)
   then  
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+  if HasID(Act,05318639,nil,nil,LOCATION_SZONE,UseMST) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasID(Act,05318639,UseMST) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
 ---- 
 -- summon certain monsters before anything else
 ----   
@@ -398,6 +404,21 @@ function SummonExtraDeck(cards,prio)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   return nil
+end
+function UseMST(c)
+  local filter = function(c) 
+    return FilterPosition(c,POS_FACEDOWN)
+    and FilterPrivate(c)
+    and DestroyFilter(c)
+  end
+  if (#AIField()==0 
+  or #AIField()==CardsMatchingFilter(AIField(),FilterID,05318639))
+  and CardsMatchingFilter(OppST(),filter)>0
+  and CardsMatchingFilter(OppST(),filter)<=CardsMatchingFilter(AICards(),FilterID,05318639)
+  then
+    return true
+  end
+  return false
 end
 function SummonStardust(c)
   return OppGetStrongestAttDef()<2500 and MP2Check()

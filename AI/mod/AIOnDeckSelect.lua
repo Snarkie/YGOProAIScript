@@ -113,6 +113,7 @@ function PrioritySetup()
   HarpiePriority()
   MermailPriority()
   ChaosDragonPriority()
+  QliphortPriority()
   
 AddPriority({
 -- test
@@ -223,23 +224,6 @@ AddPriority({
 [73289035] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Tsukuyomi
 })
 
-AddPriority({
---Qliphort:
-[65518099] = {9,4,1,1,5,1,7,5,1,1,ToolCond},          -- Qliphort Tool
-[27279764] = {7,2,1,1,1,1,1,1,1,1,KillerCond},        -- Apoqliphort Killer
-[90885155] = {6,2,4,2,2,1,3,1,1,1,ShellCond},         -- Qliphort Shell
-[64496451] = {7,2,4,2,2,1,4,1,1,1,DiskCond},          -- Qliphort Disk
-[37991342] = {5,3,7,4,8,4,1,1,1,1,GenomeCond},        -- Qliphort Genome
-[91907707] = {5,3,6,3,9,4,2,1,1,1,ArchiveCond},       -- Qliphort Archive
-[16178681] = {7,2,1,1,1,1,1,1,1,1,OddEyesCond},       -- Odd-Eyes Pendulum Dragon
-[43241495] = {5,1,1,1,1,1,1,1,1,1,LynxCond},          -- Performapal Trampolynx
-
-[79816536] = {9,4,1,1,1,1,1,1,1,1,SummonersCond},     -- Summoners Art
-[17639150] = {8,2,1,1,1,1,1,1,1,1,SacrificeCond},     -- Qliphort Sacrifice
-[04450854] = {5,2,1,1,1,1,1,1,1,1,ApoCond},           -- Apoqliphort
-[05851097] = {2,1,1,1,0,0,1,1,1,1,nil},               -- Vanitys Emptiness
-[82732705] = {2,1,1,1,0,0,1,1,1,1,nil},               -- Skill Drain
-})
 
 
 

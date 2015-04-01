@@ -1,3 +1,31 @@
+
+function QliphortPriority()
+AddPriority({
+--Qliphort:
+[65518099] = {9,4,1,1,5,1,7,5,1,1,ToolCond},          -- Qliphort Tool
+[51194046] = {8,3,1,1,5,1,7,5,1,1,MonolithCond},      -- Qliphort Monolith
+[27279764] = {7,2,1,1,1,1,1,1,1,1,KillerCond},        -- Apoqliphort Killer
+[90885155] = {5,2,5,2,2,1,3,1,1,1,ShellCond},         -- Qliphort Shell
+[64496451] = {6,2,5,2,2,1,4,1,1,1,DiskCond},          -- Qliphort Disk
+[13073850] = {7,2,4,2,2,1,5,1,1,1,StealthCond},       -- Qliphort Stealth
+[37991342] = {5,3,7,4,8,4,1,1,1,1,GenomeCond},        -- Qliphort Genome
+[91907707] = {5,3,6,3,9,4,2,1,1,1,ArchiveCond},       -- Qliphort Archive
+[16178681] = {7,2,1,1,1,1,1,1,1,1,OddEyesCond},       -- Odd-Eyes Pendulum Dragon
+[43241495] = {5,1,1,1,1,1,1,1,1,1,LynxCond},          -- Performapal Trampolynx
+
+[79816536] = {9,4,1,1,1,1,1,1,1,1,SummonersCond},     -- Summoners Art
+[17639150] = {8,2,1,1,1,1,1,1,1,1,SacrificeCond},     -- Qliphort Sacrifice
+[25067275] = {1,1,1,1,1,1,1,1,1,1,SADCond},           -- Swords At Dawn
+
+[04450854] = {5,2,1,1,1,1,1,1,1,1,ApoCond},           -- Apoqliphort
+[05851097] = {3,1,1,1,0,0,1,1,1,1,nil},               -- Vanitys Emptiness
+[82732705] = {3,1,1,1,0,0,1,1,1,1,nil},               -- Skill Drain
+[88197162] = {2,1,1,1,0,0,1,1,1,1,nil},               -- Soul Transition
+[20426097] = {2,1,1,1,0,0,1,1,1,1,nil},               -- Re-qliate
+[24348807] = {2,1,1,1,0,0,1,1,1,1,nil},               -- Lose A Turn
+
+})
+end
 function QliphortFilter(c,exclude)
   return IsSetCode(c.setcode,0xaa) and (exclude == nil or c.id~=exclude)
 end
@@ -36,6 +64,22 @@ function QliphortAttackBonus(id,level)
   end
   return 0
 end
+GlobalTribute={}
+function TributeCount(add)
+  local result = GlobalTribute[Duel.GetTurnCount()]
+  if add then
+    if result==nil then
+      result = 0
+    end
+    result = result + add
+    GlobalTribute[Duel.GetTurnCount()]=result
+    return
+  end
+  if result then
+    return result
+  end
+  return 0
+end
 function TributeCheck(amount)
   if HasID(AIST(),17639150,true,nil,nil,nil,FilterPosition,POS_FACEUP) then
     amount = math.max(amount-1,1)
@@ -58,6 +102,10 @@ function SummonersCond(loc,c)
   if loc == PRIO_TOHAND then
     return not HasID(UseLists({AIHand(),AIST()}),65518099,true) and HasID(AIDeck(),65518099,true)
   end
+  if loc == PRIO_TOGRAVE then
+    return FilterLocation(c,LOCATION_MZONE) 
+    and not HasID(AIHand(),13073850,true)
+  end
   return true
 end
 function KillerCond(loc,c)
@@ -75,9 +123,27 @@ function ShellCond(loc,c)
   end
   return true
 end
+function MonolithCond(loc,c)
+  if loc == PRIO_TOHAND then
+    if HasID(AICards(),65518099,true) then
+      return 5
+    end
+    return PendulumSummon(2) and not HasID(AIHand(),51194046,true)
+  end
+  return true
+end
 function DiskCond(loc,c)
   if loc == PRIO_TOHAND then
     return (TributeSummonDisk() or PendulumSummon(2))and not HasID(AIHand(),64496451,true)
+  end
+  if loc == PRIO_TOFIELD then
+    return SkillDrainCheck()
+  end
+  return true
+end
+function StealthCond(loc,c)
+  if loc == PRIO_TOHAND then
+    return (TributeSummonStealth(1) or PendulumSummon(2))and not HasID(AIHand(),13073850,true)
   end
   if loc == PRIO_TOFIELD then
     return SkillDrainCheck()
@@ -97,7 +163,9 @@ function GenomeCond(loc,c)
   end
 end
 function ArchiveFilter(c)
-  return c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0 and not ToHandBlacklist(c.id) 
+  return Targetable(c,TYPE_MONSTER)
+  and Affected(c,TYPE_MONSTER,6)
+  and not ToHandBlacklist(c.id) 
 end
 function ArchiveCond(loc,c)
   if loc == PRIO_TOHAND then
@@ -154,11 +222,24 @@ end
 function PendulumSummon(count)
   if count == nil then count = 1 end
   return CardsMatchingFilter(AIExtra(),QliphortFilter)>=count
+  and DualityCheck() and PendulumSummonCheck()
 end
 function TributeSummonShell()
   if TributeCheck(2) and (not SkillDrainCheck() 
   or TributeCheck(2)>5 and OppHasStrongestMonster())
   and not NormalSummonCheck(player_ai) 
+  then
+    return true
+  end
+  return false
+end
+function TributeSummonStealth(mode)
+  if TributeCheck(2) 
+  and not NormalSummonCheck(player_ai)
+  and (mode == 1 and (TributeCheck(1)>5 
+  and CardsMatchingFilter(OppST(),FilterPosition,POS_FACEDOWN)>0
+  or TributeCheck(3) and HasID(AIMon(),65518099,true))
+  or mode == 2 and TributeCheck(2)>5) 
   then
     return true
   end
@@ -194,6 +275,12 @@ function TributeSummonGenome()
   end
   return false
 end
+function TributeSummonMonolith()
+  if TributeCheck(1) and TributeCheck(1)>5 and OppHasStrongestMonster() then
+    return true
+  end
+  return false
+end
 function SummonArchive()
   if OverExtendCheck() then
     return true
@@ -218,6 +305,12 @@ function SummonDisk()
   end
   return false
 end
+function SummonStealth()
+  if OverExtendCheck() then
+    return true
+  end
+  return false
+end
 function UseGenome()
   return ScaleCheck() and ScaleCheck()<9 and PendulumSummon()
 end
@@ -227,10 +320,16 @@ end
 function UseDisk()
   return ScaleCheck()==9 and PendulumSummon() and not TributeSummonDisk()
 end
+function UseStealth()
+  return ScaleCheck()==9 and PendulumSummon() and not TributeSummonStealth(1)
+end
 function UseShell()
   return ScaleCheck() and ScaleCheck()<9 and PendulumSummon() and not TributeSummonShell()
 end
 function UseTrampolynx()
+  return ScaleCheck()==9 and PendulumSummon()
+end
+function UseMonolith()
   return ScaleCheck()==9 and PendulumSummon()
 end
 function UseOddEyes()
@@ -241,6 +340,14 @@ function UseOddEyes()
 end
 function UseDualityQliphort()
   return DeckCheck(DECK_QLIPHORT) and (ScaleCheck()==false or not PendulumSummon())
+end
+GlobalPendulum=0
+function PendulumSummonCheck()
+  return GlobalPendulum~=Duel.GetTurnCount()
+end
+function UseSAD(sum)
+  return UnchainableCheck(25067275) and CardsMatchingFilter(AIMon(),QliphortFilter)>0
+  and (CardsMatchingFilter(sum,FilterLevel,7)>0 or CardsMatchingFilter(sum,FilterLevel,8)>0)
 end
 function QliphortInit(cards)
   local Act = cards.activatable_cards
@@ -257,6 +364,7 @@ function QliphortInit(cards)
   for i=1,#SpSum do
     if PendulumCheck(SpSum[i]) and PendulumSummon() then
       GlobalPendulumSummoning = true
+      GlobalPendulum=Duel.GetTurnCount()
       return {COMMAND_SPECIAL_SUMMON,i}
     end
   end
@@ -266,12 +374,19 @@ function QliphortInit(cards)
   if HasID(Act,79816536) then -- Summoners Art
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+  if HasID(Act,25067275) and UseSAD(Sum) then 
+    GlobalDuality=Duel.GetTurnCount()
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   if HasID(Act,17639150) and UseSacrifice() then 
     GlobalCardMode = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Act,65518099,false,nil,nil,nil,FilterLocation,LOCATION_HAND) 
   and UseTool(Act[CurrentIndex]) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasID(Act,51194046) and UseMonolith() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Act,43241495) and UseTrampolynx() then
@@ -293,28 +408,51 @@ function QliphortInit(cards)
   if HasID(Act,64496451) and UseDisk() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+  if HasID(Act,13073850) and UseStealth() then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   if HasID(Act,90885155) and UseShell() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Sum,27279764) and TributeSummonKiller() then
+    TributeCount(3)
+    return {COMMAND_SUMMON,CurrentIndex}
+  end
+  if HasID(Sum,13073850) and TributeSummonStealth(1) then
+    TributeCount(2)
+    GlobalQliphortNormalSummon = 1
     return {COMMAND_SUMMON,CurrentIndex}
   end
   if HasID(Sum,64496451) and TributeSummonDisk() then
+    TributeCount(2)
     GlobalQliphortNormalSummon = 1
     return {COMMAND_SUMMON,CurrentIndex}
   end
   if HasID(Sum,90885155) and TributeSummonShell() then
+    TributeCount(2)
+    GlobalQliphortNormalSummon = 1
+    return {COMMAND_SUMMON,CurrentIndex}
+  end
+  if HasID(Sum,13073850) and TributeSummonStealth(2) then
+    TributeCount(2)
     GlobalQliphortNormalSummon = 1
     return {COMMAND_SUMMON,CurrentIndex}
   end
   if HasID(Act,98645731) and UseDualityQliphort() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+  if HasID(Sum,51194046) and TributeSummonMonolith() then
+    TributeCount(1)
+    GlobalQliphortNormalSummon = 1
+    return {COMMAND_SUMMON,CurrentIndex}
+  end
   if HasID(Sum,37991342) and TributeSummonGenome() then
+    TributeCount(1)
     GlobalQliphortNormalSummon = 1
     return {COMMAND_SUMMON,CurrentIndex}
   end
   if HasID(Sum,91907707) and TributeSummonArchive() then
+    TributeCount(1)
     GlobalQliphortNormalSummon = 1
     return {COMMAND_SUMMON,CurrentIndex}
   end
@@ -331,6 +469,10 @@ function QliphortInit(cards)
     return {COMMAND_SUMMON,CurrentIndex}
   end
   if HasID(Sum,64496451) and SummonDisk() then
+    GlobalQliphortNormalSummon = 2
+    return {COMMAND_SUMMON,CurrentIndex}
+  end
+  if HasID(Sum,13073850) and SummonStealth() then
     GlobalQliphortNormalSummon = 2
     return {COMMAND_SUMMON,CurrentIndex}
   end
@@ -377,6 +519,35 @@ function TrampolynxTarget(cards)
   end
   return {math.random(#cards)}
 end
+function FilterTool(c,loc)
+  return FilterID(c,65518099) and FilterLocation(c,loc)
+end
+function StealthTarget(cards)
+  if HasPriorityTarget(OppField(),false,nil,TargetCheck) then
+    return BestTargets(cards,1,TARGET_TOHAND,TargetCheck)
+  end
+  if HasID(AIMon(),65518099,true) then
+    return BestTargets(cards,1,TARGET_TOHAND,FilterTool,LOCATION_MZONE)
+  end
+  if HasID(AIST(),65518099,true) then
+    return BestTargets(cards,1,TARGET_TOHAND,FilterTool,LOCATION_SZONE)
+  end
+  return BestTargets(cards,1,TARGET_TOHAND,TargetCheck)
+end
+function SoulTransitionTarget(cards)
+  if GlobalCardMode==1 then
+    GlobalCardMode = nil
+    return GlobalTargetGet(cards,true)
+  end
+  return Add(cards,PRIO_TOGRAVE)
+end
+function SADTarget(cards)
+  if GlobalCardMode==1 then
+    GlobalCardMode = nil
+    return GlobalTargetGet(cards,true)
+  end
+  return Add(cards,PRIO_TOGRAVE)
+end
 function QliphortCard(cards,min,max,id,c)
   if c then
     id = c.id
@@ -418,13 +589,22 @@ function QliphortCard(cards,min,max,id,c)
   if id == 43241495 then
     return TrampolynxTarget(cards)
   end
+  if id == 13073850 then
+    return StealthTarget(cards)
+  end
+  if id == 88197162 then
+    return SoulTransitionTarget(cards)
+  end
+  if id == 25067275 then
+    return SADTarget(cards)
+  end
   return nil
 end
 function ChainArchive()
-  return CardsMatchingFilter(OppMon(),ArchiveFilter)>0
+  return CardsMatchingFilter(SubGroup(OppMon(),TargetCheck),ArchiveFilter)>0
 end
 function ChainGenome()
-  return CardsMatchingFilter(OppST(),DestroyFilter)>0
+  return CardsMatchingFilter(SubGroup(OppST(),TargetCheck),DestroyFilter)>0
 end
 function ChainApoqliphort()
   if RemovalCheck(04450854) then
@@ -449,7 +629,85 @@ function ChainVanity(c)
   end
   return false
 end
+function ChainReqliate(c)
+  local cards = SubGroup(AIField(),FilterPos,POS_FACEUP)
+  return CardsMatchingFilter(cards,QliphortFilter,20426097)>0 
+end
+function ChainLoseTurn(c)
+  return true
+end
+function ChainSoulTransition(c)
+  return true
+end
+function StealthFilter(c)
+  return Targetable(c,TYPE_MONSTER)
+  and Affected(c,TYPE_MONSTER,8)
+  and not ToHandBlacklist(c.id)
+end
+function ChainStealth(c)
+  return CardsMatchingFilter(OppField(),StealthFilter)>0 
+  or HasID(AIField(),65518099,true)
+end
+function ChainSoulTransition(c)
+  if RemovalCheckCard(c) then
+    return true
+  end
+  for i=1,#AIMon() do
+    local c = AIMon()[i]
+    if RemovalCheckCard(c) then
+      GlobalTargetSet(c)
+      GlobalCardMode = 1
+      return true
+    end
+  end
+  if HasID(AIMon(),91907707,true) 
+  and HasPriorityTarget(OppMon(),false,nil,ArchiveFilter)
+  and UnchainableCheck(88197162)
+  then
+    GlobalTargetSet(FindID(91907707,AIMon()))
+    GlobalCardMode = 1
+    return true
+  end
+  if HasID(AIMon(),37991342,true) 
+  and (HasPriorityTarget(OppST(),false,nil,DestroyFilter)
+  or DestroyCheck(OppST())>0 and Duel.GetCurrentPhase()==PHASE_END
+  and Duel.GetTurnPlayer()~=player_ai)
+  and UnchainableCheck(88197162)
+  then
+    GlobalTargetSet(FindID(37991342,AIMon()))
+    GlobalCardMode = 1
+    return true
+  end
+  local aimon,oppmon = GetBattlingMons()
+  if WinsBattle(oppmon,aimon) 
+  and aimon:IsSetCard(0xaa) 
+  and UnchainableCheck(88197162)
+  then
+    GlobalTargetSet(aimon)
+    GlobalCardMode = 1
+    return true
+  end
+  return false
+end
+function ChainSAD(c)
+  if RemovalCheckCard(c) then
+    return true
+  end
+  local aimon,oppmon = GetBattlingMons()
+  if WinsBattle(oppmon,aimon) 
+  and aimon:IsSetCard(0xaa) 
+  and UnchainableCheck(25067275)
+  then
+    GlobalTargetSet(aimon)
+    GlobalCardMode = 1
+    return true
+  end
+  return false
+end
 function QliphortChain(cards)
+  if HasID(cards,88197162,ChainSoulTransition) then
+    return {1,CurrentIndex}
+  end
   if HasID(cards,91907707) and ChainArchive() then
     return {1,CurrentIndex}
   end
@@ -474,6 +732,22 @@ function QliphortChain(cards)
   if HasID(cards,17639150) then -- Sacrifice
     return {1,CurrentIndex}
   end
+  if HasID(cards,51194046) then -- Monolith
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,20426097,ChainReqliate) then
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,25067275,ChainSAD) then
+    GlobalDuality = 1
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,24348807,ChainLoseTurn) then
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,13073850,ChainStealth) then
+    return {1,CurrentIndex}
+  end
   return nil
 end
 function QliphortEffectYesNo(id,card)
@@ -485,16 +759,20 @@ function QliphortEffectYesNo(id,card)
     result = 1
   end
   if id==64496451 or id==16178681 or id==43241495  -- Disk, Odd-Eyes,Trampolynx
-  or id==17639150 -- Sacrifice
+  or id==17639150 or id==51194046 -- Sacrifice, Monolith
   and NotNegated(card)
   then
+    result = 1
+  end
+  if id == 13073850 and ChainStealth(card) then
     result = 1
   end
   return result
 end
 QliphortAtt={
   27279764,90885155,64496451, --Killer, Shell, Disk
-  37991342,91907707 -- Genome, Archive
+  37991342,91907707,13073850, -- Genome, Archive, Stealth
+  51194046, -- Monolith
 }
 QliphortDef={
   65518099 -- Tool
