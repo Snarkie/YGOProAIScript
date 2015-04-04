@@ -904,7 +904,7 @@ function FFGetPos(id)
     if FFDef[i]==id then return POS_FACEUP_DEFENCE end
   end
   if id == 12014404 then -- Cowboy
-    if AI.GetPlayerLP(2)<=800 then
+    if AI.GetPlayerLP(2)<=800 or not BattlePhaseCheck() then
       return POS_FACEUP_DEFENCE
     else
       return POS_FACEUP_ATTACK

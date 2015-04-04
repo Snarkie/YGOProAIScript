@@ -52,13 +52,6 @@ function OnSelectEffectYesNo(id,triggeringCard)
 	  result = 1
       end
    end
-  
-   if id  == 79867938 then  -- Battlin' Boxer Headgeared
-    if Get_Card_Count_ID(AIDeck(),05361647,nil) > 0 and Get_Card_Count_ID(AIHand(),68144350,nil) > 0 then -- Battlin' Boxer Glassjaw, Battlin' Boxer Switchitter  
-      GlobalActivatedEffectID = id
-	  result = 1
-      end
-   end
    
    if id  == 73580471 then  -- Black Rose Dragon
     if Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") > Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") or Card_Count_Affected_By(EFFECT_INDESTRUCTABLE_BATTLE,OppMon()) > 0 then  

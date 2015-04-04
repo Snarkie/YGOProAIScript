@@ -811,6 +811,12 @@ function ScrapDragonTarget(cards)
   if HasID(cards,99365553) and LightpulsarCond(PRIO_TOFIELD) then
     return {CurrentIndex}
   end
+  if Duel.GetCurrentPhase() == PHASE_MAIN1 
+  and not (OppHasStrongestMonster() or HasPriorityTarget(OppMon(),true))
+  and DestroyCheck(OppST())>0 and CurrentOwner(cards[1])==2
+  then
+    return BestTargets(cards,1,TARGET_DESTROY,FilterLocation,LOCATION_SZONE)
+  end
   return BestTargets(cards,1,TARGET_DESTROY)
 end
 function ChaosSorcTarget(cards)

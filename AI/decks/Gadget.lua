@@ -586,6 +586,7 @@ function StardustSparkFilter(card,id)
   and not card:IsHasEffect(EFFECT_IMMUNE_EFFECT) 
   and not card:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET) 
   and (id == nil or card:GetCode()~=id)
+  and not (FilterSet(card,0x84) and HasIDNotNegated(AIMon(),23232295,true,HasMaterials))
 end
 function ChainStardustSpark()
   local ex,cg = Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_DESTROY)

@@ -34,81 +34,17 @@ function OnSelectCard(cards, minTargets, maxTargets, triggeringID,triggeringCard
     GlobalAIIsAttacking = nil
     return result
   end
-
--- ExodiaLib
+  
+  if not triggeringCard 
+  and GlobalMaterial==true
+  and Duel.GetCurrentChain()==0
+  then  
+    GlobalMaterial = nil
+    return OnSelectMaterial(cards,minTargets,maxTargets)
+  end
 if DeckCheck(DECK_EXODIA) then
-  local id = triggeringID
-  local result = {}
-  if triggeringCard then
-    id = triggeringCard.id
-  end
-  if id == 89997728 then --toon table of contents
-    for i=1,#cards do
-      if cards[i].id == 89997728 then -- find toon table of contents
-        result[1]=i
-        return result
-      end
-    end
-  elseif id == 98645731 then --duality
-    if not HasID(AIMon(),70791313,true) then
-      --ai does not control royal magic library, search for it
-      for i=1,#cards do
-        if cards[i].id == 70791313 then
-          result[1]=i
-          return result
-        end
-      end
-    else
-      --ai controls royal magic library, search for a spell card
-      for i=1,#cards do
-        if bit32.band(cards[i].type, TYPE_SPELL) > 0 then
-          result[1]=i
-          return result
-        end
-      end
-    end
-  elseif id == 85852291 then --mallet
-    if not HasID(AIMon(),70791313,true)then
-      for i=1,maxTargets do
-        result[i]=i
-      end
-    else
-      for i=1,#cards do
-        if bit32.band(TYPE_MONSTER,cards[i].type) > 0 
-        or cards[i].id == 75014062 and not HasID(AIDeck(),75014062,true)
-        or cards[i].id == 15259703 and HasID(AIHand(),89997728,true)
-        or cards[i].id == 89997728 and CardsMatchingFilter(AIHand(),FilterID,89997728)>1
-        then
-          result[#result+1] = i
-        end
-      end
-    end
-    if #result < minTargets then
-      for i=1,maxTargets do
-        result[i]=i
-      end
-    end
-    return result
-  elseif id == 75014062 then
-    result = {IndexByID(cards,70791313)} 
-  end
-  if #result < minTargets then
-    for i=1,minTargets do
-      result[i]=i
-    end
-  end
-  if triggeringID == 0 and not triggeringCard
-  and Duel.GetTurnPlayer()==player_ai
-  and Duel.GetCurrentPhase()==PHASE_END 
-  and minTargets==maxTargets and minTargets == #AIHand()-6
-  and LocCheck(cards,LOCATION_HAND,true)
-  then
-    --probably end phase discard
-    return Add(cards,PRIO_TOGRAVE,minTargets)
-  end
-  return result
+  return ExodiaCard(cards,minTargets,maxTargets,triggeringID,triggeringCard)
 end
-
 -- other decks 
 -- redirect to respective deck files
   local result = nil
@@ -148,11 +84,7 @@ end
 
 
  
-  if triggeringCard==nil and GlobalMaterial==true
-  then  
-    GlobalMaterial = nil
-    return OnSelectMaterial(cards,minTargets,maxTargets)
-  end
+
   --------------------------------------------
   -- Select minimum number of valid XYZ material monsters,   
   -- with lowest attack as tributes.
@@ -420,49 +352,6 @@ end
      GlobalActivatedCardID = nil
      return Get_Card_Index(cards, 2, "Highest", TYPE_MONSTER, POS_FACEUP)
    end
-
-  
-  --------------------------------------------     
-  -- Detach Battlin' Boxer Switchitter first if possible
-  -------------------------------------------- 
-  if GlobalActivatedCardID == 34086406 then  -- Lavalval Chain
-   if GlobalCardMode == 1 then
-   for i=1,#cards do
-        if cards[i].id == 68144350 then -- Battlin' Boxer Switchitter 
-		  GlobalCardMode = nil
-		  return {i}
-         end
-       end
-     end	
-   end 
- 
-  --------------------------------------------     
-  -- Discard Glassjaw first if possible
-  -------------------------------------------- 
-  if GlobalActivatedCardID == 34086406 then  -- Lavalval Chain
-   if GlobalCardMode == nil then
-   for i=1,#cards do
-        if cards[i].id == 05361647 then -- Battlin' Boxer Glassjaw 
-		  GlobalActivatedCardID = nil
-		  return {i}
-         end
-       end
-     end	
-   end 
- 
-  --------------------------------------------     
-  -- Select "Battlin' Boxer Glassjaw" if possible
-  --------------------------------------------   
-  if GlobalActivatedEffectID == 68144350 or  -- Battlin' Boxer Switchitter
-     GlobalActivatedEffectID == 79867938 or  -- Battlin' Boxer Headgeared
-	 GlobalActivatedCardID == 36916401  then -- Burnin' Boxin' Spirit
-	GlobalActivatedEffectID = nil
-	for i=1,#cards do
-      if cards[i].id == 05361647 then -- Battlin' Boxer Glassjaw   
-		 return {i}
-        end
-      end
-    end	
   
   --------------------------------------------     
   -- Select AI's random spell/trap card in hand
@@ -474,17 +363,7 @@ end
       end
    end
 
-  
-  --------------------------------------------     
-  -- Select Battlin' Boxer Switchitter in AI's deck to summon
-  --------------------------------------------   
-  if GlobalActivatedCardID == 00423585 then -- Summoner Monk
-    if GlobalCardMode == nil then   
-       GlobalActivatedCardID = nil
-       return Index_By_ID(cards, 1, "Highest", nil, nil, "==", 68144350)
-      end
-   end
-
+ 
   
   --------------------------------------------     
   -- Select Players strongest monster by attack points on the field.
@@ -1046,16 +925,6 @@ end
      return Index_By_ID(cards, 1, "Highest", nil, nil, "==", 11722335) 
     end
 
-  -----------------------------------------------
-  -- If every selectable card is a "Battlin' Boxer"
-  -- card, the activated Card ID isn't known, and
-  -- the minimum and maximum targets are both 1 then it's most likely 
-  -- "Battlin' Boxer Glassjaw's" add card effect, try to add 
-  -- "Battlin' Boxer Switchitter" if possible.
-  -----------------------------------------------
-  if triggeringID == 05361647 then
-     return Index_By_ID(cards, 1, "Highest", nil, nil, "==", 68144350) -- Battlin' Boxer Switchitter
-    end
 
 
   --------------------------------------------

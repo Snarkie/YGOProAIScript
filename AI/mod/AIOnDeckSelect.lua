@@ -219,7 +219,7 @@ AddPriority({
 [60645181] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Excalibur
 [21223277] = {1,1,1,1,1,1,5,1,3,1,nil},               -- R4torigus
 [10613952] = {1,1,1,1,3,1,6,1,3,1,R5torigusCond},     -- R5torigus
-[83519853] = {1,1,8,1,1,1,1,1,1,1,nil},               -- High Sally
+[83519853] = {1,1,6,1,1,1,1,1,1,1,nil},               -- High Sally
 [68618157] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Amaterasu
 [73289035] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Tsukuyomi
 })
@@ -373,9 +373,6 @@ function AssignPriority(cards,loc,filter,opt)
     local c = cards[i]
     c.index=i
     c.prio=GetPriority(c,loc)
-    if not FilterCheck(c,filter,opt) then
-      c.prio=-1
-    end
     if loc==PRIO_TOFIELD and c.location==LOCATION_DECK then
       c.prio=c.prio+2
     end
@@ -409,6 +406,9 @@ function AssignPriority(cards,loc,filter,opt)
       and c.xyz_material_count==0 
       then
         c.prio=c.prio+2
+      end
+      if not FilterCheck(c,filter,opt) then
+        c.prio=c.prio-9999
       end
     end
     if loc==PRIO_TOHAND and bit32.band(c.location,LOCATION_ONFIELD)>0 

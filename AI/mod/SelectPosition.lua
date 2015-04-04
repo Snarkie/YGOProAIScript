@@ -84,8 +84,8 @@ function OnSelectPosition(id, available)
   -- Expanding upon the above example.
   -- More cards to be added later.
   ------------------------------------
-  if id == 64631466 or id == 70908596 or   -- Relinquished, Constellar Kaust
-	 id == 23232295 or id == 88241506 then -- Battlin' Boxer Lead Yoke, Maiden with Eyes of Blue
+  if id == 64631466 or id == 70908596   -- Relinquished, Constellar Kaust
+	or id == 88241506 then -- Maiden with Eyes of Blue
 	result = POS_FACEUP_ATTACK
   end
   local positionfunctions={
@@ -105,8 +105,10 @@ function OnSelectPosition(id, available)
   end
   local d = DeckCheck()
   if d and d.Position then
-    result = d.Position(id,available)
+    local Position = d.Position(id,available)
+    if Position then result=Position end
   end
+  if result == nil then result = POS_FACEUP_ATTACK end
   if band(result,available) == 0 then
     if band(POS_FACEUP_ATTACK,available) > 0 then
       result = POS_FACEUP_ATTACK

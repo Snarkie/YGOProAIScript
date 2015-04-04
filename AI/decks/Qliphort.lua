@@ -56,7 +56,9 @@ function ScaleCheck(p)
 end
 function QliphortAttackBonus(id,level)
   if level == 4 then
-    if id == 90885155 or id == 64496451 then
+    if id == 90885155 or id == 64496451 
+    or id == 13073850
+    then
       return 1000
     elseif id == 37991342 or id == 91907707 then
       return 600
@@ -211,9 +213,11 @@ function UseTool(c)
   if bit32.band(c.location,LOCATION_HAND)>0 then
     return ScaleCheck() == false or ScaleCheck() < 8
   elseif bit32.band(c.location,LOCATION_SZONE)>0 then
+    if AI.GetPlayerLP(1)<=800 then return false end
     return AI.GetPlayerLP(1)>4000 or ScaleCheck() ~= true
     and PendulumSummon(2) or OppHasStrongestMonster()
   end
+  return false
 end
 function UseSacrifice()
   return not HasID(AIST(),17639150,true,nil,nil,nil,FilterPosition,POS_FACEUP) 
@@ -622,6 +626,12 @@ function ChainVanity(c)
     end
   end
   if MKBCheck(c) and Duel.GetTurnPlayer()~=player_ai then
+    return true
+  end
+  if HasIDNotNegated(AIMon(),83994433,true) 
+  and Duel.GetTurnPlayer()~=player_ai 
+  and not OppHasStrongestMonster()
+  then
     return true
   end
   if ScytheCheck() and not OppHasStrongestMonster() then

@@ -235,7 +235,7 @@ function ChainRoD(c)
   if RemovalCheckCard(c) and #targets>0 then
     return true
   end
-  if #targets2>0 then
+  if #targets2>0 and UnchainableCheck(83555666) then
     BestTargets(targets2,1,TARGET_DESTROY)
     GlobalTargetSet(targets2[1])
     GlobalCardMode = 1
@@ -245,6 +245,7 @@ function ChainRoD(c)
     local aimon,oppmon = GetBattlingMons()
     if WinsBattle(oppmon,aimon) 
     and RoDFilter(oppmon)
+    and UnchainableCheck(83555666) 
     then
       GlobalTargetSet(oppmon)
       GlobalCardMode = 1
@@ -254,6 +255,7 @@ function ChainRoD(c)
   if #OppMon()==1 and #targets==1 
   and Duel.GetCurrentPhase()==PHASE_END
   and ExpectedDamage(2)+targets[1].text_attack>AI.GetPlayerLP(2)
+  and UnchainableCheck(83555666) 
   then
     return true
   end

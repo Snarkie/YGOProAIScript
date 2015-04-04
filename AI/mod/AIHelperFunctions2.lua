@@ -10,6 +10,7 @@ function set_player_turn(init)
 		player_ai = Duel.GetTurnPlayer()
     playersetupcomplete = true
     SaveState()
+    GlobalPreviousLP=AI.GetPlayerLP(1)
     if GlobalCheating then
       EnableCheats()
     end
@@ -146,8 +147,8 @@ function HasIDNotNegated(cards,id,skipglobal,desc,loc,pos,filter,opt)
   return result
 end
 --checks if the card is in cards and not in check
-function NeedsCard(id,cards,check,skipglobal) 
-  return not HasID(check,id,true) and HasID(cards,id,skipglobal)
+function NeedsCard(id,cards,check,skipglobal,filter,opt) 
+  return not HasID(check,id,true) and HasID(cards,id,skipglobal,filter,opt)
 end
 -- returns true, if the AI has a card of this ID in hand, field, grave, or as an XYZ material
 function HasAccess(id)
@@ -626,7 +627,7 @@ function BestTargets(cards,count,target,filter,opt,immuneCheck,source)
       c.prio = 0
     end
     if filter and (opt == nil and not filter(c) or opt and not filter(c,opt)) then
-      c.prio = -9999
+      c.prio = c.prio-9999
     end
   end
   table.sort(cards,function(a,b) return a.prio > b.prio end)
@@ -887,10 +888,17 @@ function FilterAttribute(c,att)
   end
 end
 function FilterRace(c,race)
-  return bit32.band(c.type,TYPE_MONSTER)>0 and bit32.band(c.race,race)>0
+  if c.GetCode then
+    return FilterType(c,TYPE_MONSTER) and c:IsRace(race)
+  else
+    return FilterType(c,TYPE_MONSTER) and bit32.band(c.race,race)>0
+  end
 end
 function FilterLevel(c,level)
-  return bit32.band(c.type,TYPE_MONSTER)>0 and c.level==level
+  return FilterType(c,TYPE_MONSTER) and c.level==level
+end
+function FilterLevelMin(c,level)
+  return FilterType(c,TYPE_MONSTER) and c.level>=level
 end
 function FilterRank(c,rank)
   if c.GetCode then
@@ -907,16 +915,16 @@ function FilterType(c,type) -- TODO: change all filters to support card script
   end
 end
 function FilterAttackMin(c,attack)
-  return bit32.band(c.type,TYPE_MONSTER)>0 and c.attack>=attack
+  return FilterType(c,TYPE_MONSTER) and c.attack>=attack
 end
 function FilterAttackMax(c,attack)
-  return bit32.band(c.type,TYPE_MONSTER)>0 and c.attack<=attack
+  return FilterType(c,TYPE_MONSTER) and c.attack<=attack
 end
 function FilterDefenseMin(c,defense)
-  return bit32.band(c.type,TYPE_MONSTER)>0 and c.defense<=defense
+  return FilterType(c,TYPE_MONSTER) and c.defense<=defense
 end
 function FilterDefenseMax(c,defense)
-  return bit32.band(c.type,TYPE_MONSTER)>0 and c.defense<=defense
+  return FilterType(c,TYPE_MONSTER) and c.defense<=defense
 end
 function FilterID(c,id)
   return c.id==id
@@ -987,6 +995,11 @@ function HasEquips(c,opt)
 end
 function FilterPendulum(c)
   return not FilterType(c,TYPE_PENDULUM+TYPE_TOKEN) 
+end
+function FilterRevivable(c,skipcond)
+  return FilterType(c,TYPE_MONSTER)
+  and (not FilterStatus(c,STATUS_REVIVE_LIMIT) or FilterStatus(c,STATUS_PROC_COMPLETE))
+  and (skipcond or not FilterAffected(c,EFFECT_SPSUMMON_CONDITION))
 end
 --[[function ScaleCheck(p)
   local cards=AIST()
@@ -1332,7 +1345,7 @@ end
 DestRep={
 48739166,78156759,10002346, -- SHArk, Zenmaines, Gachi
 99469936,23998625,01855932, -- Crystal Zero Lancer, Heart-eartH, Kagutsuchi
-77631175,23232295,16259499, -- Comics Hero Arthur, Lead Yoke, Fortune Tune
+77631175,16259499, -- Comics Hero Arthur, Lead Yoke, Fortune Tune
 }
 -- function to determine, if a card has to be destroyed multiple times
 -- true = can be destroyed properly
@@ -1353,6 +1366,11 @@ function DestroyCountCheck(c,type,battle)
   end
   if Negated(c) then
     return c:is_affected_by(EFFECT_INDESTRUCTABLE_COUNT)==0
+  end
+  if BoxerMonsterFilter(c) 
+  and HasIDNotNegated(AIMon(),23232295,true,HasMaterials)
+  then
+    return false
   end
   for i=1,#DestRep do
     if c.id==DestRep[i] then
@@ -1483,6 +1501,9 @@ function CrashCheck(c)
   end
   if c.id == 94283662 and UseTrance(3) then
     return true -- Trance Archfiend
+  end
+  if c.id == 71921856 and HasMaterials(c) then
+    return true -- Nova Caesar
   end
   if CurrentMonOwner(c.cardid) ~= c.owner then
     return true
@@ -1879,4 +1900,15 @@ function TotalATK(cards,limit,filter,opt)
     result=result+cards[i].attack
   end
   return result
+end
+GlobalDamageTaken=0
+GlobalPreviousLP=nil
+function DamageSet()
+  if GlobalPreviousLP then
+    GlobalDamageTaken = GlobalPreviousLP-AI.GetPlayerLP(1)
+    GlobalPreviousLP = AI.GetPlayerLP(1)
+  end
+end
+function DamageTaken()
+  return GlobalDamageTaken
 end

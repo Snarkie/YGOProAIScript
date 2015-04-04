@@ -174,106 +174,10 @@ or DeckCheck(DECK_TELLARKNIGHT)
 or DeckCheck(DECK_NOBLEKNIGHT))
 --or DeckCheck(DECK_NEKROZ))
 
--- ExodiaLib:
 if DeckCheck(DECK_EXODIA) then
-  local summon = cards.summonable_cards
-  local activate = cards.activatable_cards
-  local cardid = 0
-  
-  for i=1,#summon do
-    if summon[i].id == 70791313 then --royal magic library
-      return COMMAND_SUMMON,i
-    end
-  end
-  
-  for i=1,#activate do
-    cardid = activate[i].id
-    if cardid == 39910367 then --endymion
-      return COMMAND_ACTIVATE,i
-    end
-  end
-  
-  for i=1,#activate do
-    cardid = activate[i].id
-    if cardid == 70791313 then --royal magic library
-      return COMMAND_ACTIVATE,i
-    end
-  end
-  for i=1,#activate do
-    cardid = activate[i].id
-    if cardid == 89997728 then --toon table of contents
-      if HasID(AIMon(),70791313,true) then
-        return COMMAND_ACTIVATE,i
-      end
-    end
-  end
-  local c = FindID(70791313,AIMon())
-  if HasID(activate,75014062) and c and c:get_counter(0x3001)<2 then -- Spell Power Grasp
-    return COMMAND_ACTIVATE,CurrentIndex
-  end
-  if HasID(activate,55144522) then -- Pot of Greed
-    return COMMAND_ACTIVATE,CurrentIndex
-  end
-  if HasID(activate,74029853) then -- Golden Bamboo Sword
-    return COMMAND_ACTIVATE,CurrentIndex
-  end
-  if HasID(activate,41587307) then -- Broken Bamboo Sword
-    return COMMAND_ACTIVATE,CurrentIndex
-  end
-  for i=1,#activate do
-    cardid = activate[i].id
-    if cardid == 39701395 then --cards of consonance
-      return COMMAND_ACTIVATE,i
-    end
-  end
-  for i=1,#activate do
-    cardid = activate[i].id
-    if cardid == 38120068 then --trade-in
-      return COMMAND_ACTIVATE,i
-    end
-  end
-  
-  for i=1,#activate do
-    cardid = activate[i].id
-    if cardid == 98645731 then --pot of duality
-      return COMMAND_ACTIVATE,i
-    end
-  end
-  
-  for i=1,#activate do
-    cardid = activate[i].id
-    if cardid == 70368879 then -- upstart
-      return COMMAND_ACTIVATE,i
-    end
-  end
-  if HasID(activate,33782437) then -- One Day of Piece
-    return COMMAND_ACTIVATE,CurrentIndex
-  end
-  for i=1,#activate do
-    cardid = activate[i].id
-    if cardid == 85852291 then --magical mallet
-      return COMMAND_ACTIVATE,i
-    end
-  end
-  
-  for i=1,#activate do
-    cardid = activate[i].id
-    if cardid == 15259703 then --toon world
-      if HasID(AIMon(),70791313,true) then
-        return COMMAND_ACTIVATE,i
-      end
-    end
-  end
-  if HasID(activate,75014062) then -- Spell Power Grasp
-    return COMMAND_ACTIVATE,CurrentIndex
-  end
-  if #AIHand()>6 and #cards.st_setable_cards > 0 
-  then
-    return COMMAND_SET_ST,1
-  end
-  --go to end phase
-  return COMMAND_TO_END_PHASE,1
+  return ExodiaInit(cards)
 end
+
 local backup = CopyMatrix(cards)
 local DeckCommand,DeckCommand2 = nil,nil
 local d = DeckCheck()
@@ -516,16 +420,6 @@ end
     end
   end
   
-  -----------------------------------------
-  -- Always try to summon Lead Yoke when possible
-  -----------------------------------------
-  for i=1,#SpSummonableCards do
-    if SpSummonableCards[i].id == 23232295 then -- Battlin' Boxer Lead Yoke
-		GlobalSSCardType = bit32.band(SpSummonableCards[i].type,TYPE_XYZ)
-		GlobalSSCardID = SpSummonableCards[i].id
-	   return COMMAND_SPECIAL_SUMMON,i
-      end
-   end
   
 -------------------------------------------------
 -- **********************************************
@@ -1129,22 +1023,7 @@ end
      end
    end
  end
-  
-  ---------------------------------------------
-  -- AI should activate: Burnin' Boxin' Spirit, 
-  -- if he has any "Battlin' Boxer" monsters on field
-  -- or in hand.
-  ---------------------------------------------          
-  for i=1,#ActivatableCards do  
-   if ActivatableCards[i].id == 36916401 then  -- Burnin' Boxin' Spirit
-	if Archetype_Card_Count(AIHand(),132,nil) > 0 or 
-	   Archetype_Card_Count(AIMon(),132,POS_FACEUP) > 0 then 
-	   GlobalActivatedCardID = ActivatableCards[i].id
-	  return COMMAND_ACTIVATE,i
-     end
-   end
- end
-    	    
+   
   ---------------------------------------------
   -- AI should activate: Black Illusion Ritual, 
   -- if opponent controls any cards.
@@ -1593,18 +1472,6 @@ end
       end
     end
   
-  
-  -----------------------------------------
-  -- Set Global1PTSparSSed variable to 1 when spar is special summoned
-  -----------------------------------------
-  for i=1,#SpSummonableCards do
-    if SpSummonableCards[i].id == 32750341 then -- Battlin' Boxer Spar
-        Global1PTSparSSed = 1 
-		return COMMAND_SPECIAL_SUMMON,i
-      end
-   end
- 
-  
   --------------------------------------------------
   -- Special summon Dark Grepher only, if there
   -- are non-boss lvl 5+ DARK cards in your hand
@@ -1846,41 +1713,7 @@ end
 		return COMMAND_SUMMON,i
        end
      end 
-  
-  -------------------------------------------------------  
-  -- AI should summon "Battlin' Boxer Headgeared" if he
-  -- has "Battlin' Boxer Glassjaw" in deck and "Battlin' Boxer Switchitter" in hand.
-  -------------------------------------------------------
-  for i=1,#SummonableCards do   
-	if SummonableCards[i].id == 79867938 then -- Battlin' Boxer Headgeared
-      if Get_Card_Count_ID(AIDeck(),05361647,nil) > 0 and Get_Card_Count_ID(AIHand(),68144350,nil) > 0 then -- Battlin' Boxer Glassjaw, Battlin' Boxer Switchitter 
-		GlobalSummonedThisTurn = GlobalSummonedThisTurn+1
-		return COMMAND_SUMMON,i
-       end
-     end
-   end
-   
-  -------------------------------------------------------
-	-- AI should normal summon Battlin' Boxer Switchitter
-	-- if he has a Battlin' Boxer monster in his graveyard,
-	-- and Battlin' Boxer Lead Yoke in his extra deck.
-	-------------------------------------------------------
-	for i = 1,#SummonableCards do
-		if SummonableCards[i].id == 68144350 then
-			local AIGrave = AI.GetAIGraveyard()
-			local AIExDeck = AI.GetAIExtraDeck()
-			for j = 1,#AIGrave do
-				if bit32.band(AIGrave[j].type,TYPE_MONSTER) > 0 and AIGrave[j].setcode == 132 then
-					for k = 1,#AIExDeck do
-						if AIExDeck[k].id == 23232295 then
-							GlobalSummonedThisTurn = GlobalSummonedThisTurn + 1
-							return COMMAND_SUMMON,i
-						end
-					end
-				end
-			end
-		end
-	end
+
     
   -------------------------------------------------------  
   -- AI should summon "Exiled Force" if players

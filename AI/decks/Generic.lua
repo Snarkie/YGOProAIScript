@@ -572,6 +572,8 @@ end
 function SummonStardustSpark(c)
   return NotNegated(c) and MP2Check() 
   or Negated(c) and OppGetStrongestAttDef()<2500
+  or HasID(AICards(),05851097,true) 
+  and (not OppHasStrongestMonster() or OppGetStrongestAttDef()<2500)
 end
 function JeweledRDAFilter(card,id)
   return card.cardid~=id and bit32.band(card.position,POS_FACEUP_ATTACK)>0 
@@ -587,6 +589,10 @@ function UseJeweledRDA(card,mod)
   then
     diff = diff+1
   end
+  if HasIDNotNegated(aimon,23232295,true,HasMaterials)
+  then
+    diff = diff+1
+  end
   AITargets[#AITargets+1]=card
   ApplyATKBoosts(AITargets)
   ApplyATKBoosts(OppTargets)
@@ -595,7 +601,9 @@ function UseJeweledRDA(card,mod)
   return #AITargets==1 or diff>1 or (diff<=1 and AIAtt-OppAtt < diff*500)
 end
 function SummonJeweledRDA(c)
-  return (UseJeweledRDA(c,1) or OppGetStrongestAttDef() > 2500) and NotNegated(c)
+  return (UseJeweledRDA(c,1) or OppGetStrongestAttDef() > 2500
+  or #AIMon()==2 and DestroyCheck(OppMon(),true,nil,FilterPosition,POS_FACEUP_ATTACK)>1) 
+  and NotNegated(c)
   or Negated(c) and OppGetStrongestAttDef() < c.attack
 end
 

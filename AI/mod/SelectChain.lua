@@ -23,8 +23,7 @@ function OnSelectChain(cards,only_chains_by_player,forced)
   local index = 1
   local ChainAllowed = 0
   SurrenderCheck()
-  
- 
+  DamageSet()
   ------------------------------------------
   -- The first time around, it sets the AI's
   -- turn (only if the AI is playing second).
@@ -131,6 +130,7 @@ function OnSelectChain(cards,only_chains_by_player,forced)
     local c = AIMon()[i]
     if c.id == 66547759 and NotNegated(c)
     and OPTCheck(c.cardid) and c.xyz_material_count>0
+    and FilterPosition(c,POS_FACEUP)
     then
       return 0,0
     end
@@ -139,7 +139,7 @@ function OnSelectChain(cards,only_chains_by_player,forced)
   local result,result2 = nil,nil
   local d = DeckCheck()
   if d and d.Chain then
-    result = d.Chain(cards,only_chains_by_player)
+    result,result2 = d.Chain(cards,only_chains_by_player)
   end
   if result ~= nil then
     if type(result)=="table" then

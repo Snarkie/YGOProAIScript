@@ -1,4 +1,4 @@
-Version = "0.28b"
+Version = "0.28c"
 Experimental = true
 
 --[[
@@ -61,6 +61,8 @@ require("ai.decks.Constellar")
 require("ai.decks.Blackwing")
 require("ai.decks.Harpie")
 require("ai.decks.HERO")
+require("ai.decks.ExodiaLib")
+require("ai.decks.Boxer")
 requireoptional("ai.decks.MyDeck")
 requireoptional("ai.decks.BlueEyes")
 

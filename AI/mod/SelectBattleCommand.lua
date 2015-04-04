@@ -135,13 +135,13 @@ function BestAttackTarget(cards,source,ignorebonus,filter,opt)
       end
     end
     if filter and (opt and not filter(c,opt) or opt==nil and  not filter(c)) then
-      c.prio = -99999
+      c.prio = c.prio-99999
     end
     if c.prio and c.prio>0 and not BattleTargetCheck(c,source) then
       c.prio = -4
     end
     if not AttackBlacklistCheck(c,source) then
-      c.prio = -99999
+      c.prio = c.prio-99999
     end
     if CanFinishGame(source,c) then
       c.prio=99999
@@ -182,7 +182,7 @@ function OnSelectBattleCommand(cards,activatable)
   --print("battle command selection")
   -- shortcut function that returns the proper attack index and sets some globals 
   -- needed for attack target selection
-  local function Attack(index,direct)
+  function Attack(index,direct)
     local i = cards[index].index
     if direct then
       GlobalAIIsAttacking = nil
@@ -194,7 +194,7 @@ function OnSelectBattleCommand(cards,activatable)
     return 1,i
   end
   
-  local function SortByATK(cards,descending)
+  function SortByATK(cards,descending)
     local func = function(a,b) return a.attack > b.attack end
     if descending then func = function(a,b) return a.attack < b.attack end end
     for i=1,#cards do
