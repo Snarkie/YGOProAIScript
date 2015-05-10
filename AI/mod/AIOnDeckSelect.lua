@@ -114,6 +114,7 @@ function PrioritySetup()
   MermailPriority()
   ChaosDragonPriority()
   QliphortPriority()
+  SatellarknightPriority()
   
 AddPriority({
 -- test
@@ -260,32 +261,7 @@ AddPriority({
 [08561192] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Leoh, Keeper of the Sacred Tree
 })
 
-AddPriority({
--- Satellarknight
-[75878039] = {8,1,5,4,8,5,4,2,1,1,DenebCond},         -- Satellarknight Deneb
-[02273734] = {6,4,7,1,3,1,6,1,1,1,AltairCond},        -- Satellarknight Altair
-[38667773] = {5,3,8,3,4,1,5,1,1,1,VegaCond},          -- Satellarknight Vega
-[63274863] = {7,2,6,2,6,1,1,1,1,1,SiriusCond},        -- Satellarknight Sirius
-[38331564] = {8,4,9,4,3,1,1,1,1,1,ScepterCond},       -- Star Seraph Scepter
-[91110378] = {7,3,4,0,4,1,1,1,1,1,SovereignCond},     -- Star Seraph Sovereign
-[37742478] = {6,4,5,0,1,1,1,1,1,1,HonestCond},        -- Honest
 
-[32807846] = {9,3,1,1,1,1,1,1,1,1,nil},               -- RotA
-[01845204] = {4,1,1,1,1,1,1,1,1,1,nil},               -- Instant Fusion
-[54447022] = {5,1,1,1,1,1,1,1,1,1,SoulChargeCond},    -- Soul Charge
-[25789292] = {3,1,1,1,1,1,1,1,1,1,nil},               -- Forbidden Chalice
-
-[41510920] = {6,2,1,1,1,1,1,1,1,1,nil},               -- Celestial Factor
-[34507039] = {3,1,1,1,1,1,1,1,1,1,nil},               -- Wiretap
-
-[63504681] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Heroic Champion - Rhongomiant
-[21501505] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Cairngorgon, Antiluminescent Knight
-[93568288] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Number 80: Rhapsody in Berserk
-[94380860] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Number 103: Ragnazero
-[42589641] = {1,1,1,1,6,2,8,1,1,1,nil},               -- Stellarknight Triveil
-[56638325] = {1,1,1,1,8,8,7,1,1,1,nil},               -- Stellarknight Delteros
-[17412721] = {1,1,6,1,1,1,1,1,1,1,NodenCond},         -- Elder God Noden
-})
 AddPriority({
 -- HAT
 [91812341] = {6,3,5,1,1,1,1,1,1,1,MyrmeleoCond},      -- Traptrix Myrmeleo

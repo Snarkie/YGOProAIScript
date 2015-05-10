@@ -52,7 +52,10 @@ function OnSelectTribute(cards,minTributes, maxTributes)
   return result
 end
 --from OnSelectCard
-function OnSelectMaterial(cards,min,max)
+function OnSelectMaterial(cards,min,max,id)
+  if id == 18326736 then -- Ptolemaios
+    return Add(cards,PRIO_TOGRAVE,math.max(min,math.min(3,max)))
+  end
   return Add(cards,PRIO_TOGRAVE,min)
 end
 

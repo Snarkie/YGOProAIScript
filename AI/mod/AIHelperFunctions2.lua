@@ -1,19 +1,37 @@
 player_ai = nil
 GlobalTargetID = nil
-GlobalCheating = false
 playersetupcomplete = false
+function OnAIGoingFirstSecond(name)
+  local result = 1
+  if name=="AI_Harpie"
+  or name=="AI_Blackwing"
+  then
+    player_ai = 1
+    result = 0
+  end
+  player_ai = 0
+  if GlobalCheating then
+    EnableCheats()
+  end
+  return result
+end
+function OnPlayerGoingFirstSecond(decision)
+  if decision == 1 then
+    player_ai = 1
+  else
+    player_ai = 0
+  end
+  if GlobalCheating then
+    EnableCheats()
+  end
+end
 -- Sets up some variables for using card script functions
 function set_player_turn(init)
-	if init and not playersetupcomplete
-  or player_ai == nil 
+	if not playersetupcomplete
   then
-		player_ai = Duel.GetTurnPlayer()
     playersetupcomplete = true
     SaveState()
     GlobalPreviousLP=AI.GetPlayerLP(1)
-    if GlobalCheating then
-      EnableCheats()
-    end
 	end
 end
 -- sets up cheats for the cheating AI
@@ -484,7 +502,7 @@ function NegateCheckCard(target,type,chainlink,filter,opt)
   end
   return false
 end
-function NegateCheckCardList(cards,type,chainlink,filter,opt)
+function NegateCheckList(cards,type,chainlink,filter,opt)
   if Duel.GetCurrentChain() == 0 then return false end
   local result = {}
   for i=1,#cards do
@@ -986,6 +1004,9 @@ function FilterOPT(c,hard)
     return OPTCheck(c.cardid)
   end
 end
+function FilterMaterials(c,count)
+  return c.xyz_material_count>=count
+end
 function HasMaterials(c)
   return c.xyz_material_count>0
 end
@@ -1373,7 +1394,9 @@ function DestroyCountCheck(c,type,battle)
     return false
   end
   for i=1,#DestRep do
-    if c.id==DestRep[i] then
+    if id==DestRep[i] 
+    and mats>0
+    then
       return false
     end
   end
@@ -1786,6 +1809,7 @@ function TurnEndCheck()
   return Duel.GetCurrentPhase()==PHASE_MAIN2 or not (GlobalBPAllowed 
   or Duel.GetCurrentPhase()==PHASE_DRAW or Duel.GetCurrentPhase()==PHASE_STANDBY)
 end
+
 function BattlePhaseCheck()
   return Duel.GetCurrentPhase()==PHASE_MAIN1 and GlobalBPAllowed
 end
@@ -1877,7 +1901,6 @@ end
 SavedCards={}
 function SaveCards()
   if #Field()==0 then return end
-  if player_ai==nil then player_ai=1 end
   for i=1,#Field() do
     local c=Field()[i]
     if SavedCards[c.cardid]==nil then

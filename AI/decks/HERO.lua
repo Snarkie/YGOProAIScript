@@ -37,7 +37,6 @@ AddPriority({
 
 })
 end
-
 function HEROFilter(c,exclude)
   local id = c.id
   if exclude and type(exclude)=="table" then 

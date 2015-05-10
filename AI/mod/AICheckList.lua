@@ -314,7 +314,7 @@ NSBL={
 91932350,68815132,89399912,52040216, -- Harpie Lady #1, Dancer, Tempest, Pet Dragon
 69884162,25259669,63060238,50720316, -- Neos Alius, Goblindbergh, Blazeman,Shadow Mist
 79979666,21565445,47826112,13073850, -- Bubbleman, Atlantean Neptabyss, Poseidra, Qli Stealth
-51194046, -- Qli Monolith
+51194046,18326736,58069384,10443957, -- Qli Monolith, Planetellarknight Ptolemaios, Cyber Dragon Nova, Infinity
 }
 function NormalSummonBlacklist(CardId) 
   for i=1,#NSBL do
@@ -418,6 +418,7 @@ SSBL={
 90953320,26593852,44508094, -- Hyper Librarian, Catastor, Stardust
 85909450,86848580,79979666, -- HPPD, Zerofyne, Bubbleman
 13959634,55863245, -- Moulinglacia, Child Dragon
+18326736,58069384,10443957, -- Planetellarknight Ptolemaios, Cyber Dragon Nova, Infinity
 }
 
 
@@ -865,6 +866,7 @@ ScriptedCards ={
 72345736,05133471,21565445,47826112, -- Six Sams United, Galaxy Cyclone, Atlantean Neptabyss, Poseidra
 13959634,72932673,13073850,88197162, -- Moulinglacia, Mizuchi, Qli Stealth, Soul Transition
 51194046,20426097,24348807,25067275, -- Qli Monolith, Re-qliate, Lose a Turn, Swords At Dawn
+18326736,58069384,10443957, -- Planetellarknight Ptolemaios, Cyber Dragon Nova, Infinity
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do

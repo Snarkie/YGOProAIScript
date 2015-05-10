@@ -1606,7 +1606,7 @@ function HasGwen(c)
   and HasID(c:get_equipped_cards(),19748583,true)
 end
 function GwenFilter(c,atk) -- for attack boosts
-  return Affected(c,TYPE_SPELL) and DestroyFilter(c)
+  return Affected(c,TYPE_SPELL) and DestroyFilter(c,true)
   and DestroyCountCheck(c,TYPE_SPELL,false) 
   and atk<c.attack
 end

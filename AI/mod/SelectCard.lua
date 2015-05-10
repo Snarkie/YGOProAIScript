@@ -40,7 +40,9 @@ function OnSelectCard(cards, minTargets, maxTargets, triggeringID,triggeringCard
   and Duel.GetCurrentChain()==0
   then  
     GlobalMaterial = nil
-    return OnSelectMaterial(cards,minTargets,maxTargets)
+    local id = GlobalSSCardID
+    GlobalSSCardID = nil
+    return OnSelectMaterial(cards,minTargets,maxTargets,id)
   end
 if DeckCheck(DECK_EXODIA) then
   return ExodiaCard(cards,minTargets,maxTargets,triggeringID,triggeringCard)
@@ -89,21 +91,36 @@ end
   -- Select minimum number of valid XYZ material monsters,   
   -- with lowest attack as tributes.
   --------------------------------------------   
- if GlobalSSCardID ~= nil and GlobalSSCardID ~= 91949988 
-  and GlobalSSCardType ~= nil and GlobalSSCardType > 0 
-  or (PtolemySSMode == 1 and GlobalSSCardID == 38495396 and GlobalSSCardType == nil) then
-	local function compare(a,b)
-      return a.attack < b.attack
+ if (GlobalSSCardID ~= nil and GlobalSSCardID ~= 91949988 
+ and GlobalSSCardType ~= nil and GlobalSSCardType > 0 
+ or PtolemySSMode == 1 and GlobalSSCardID == 38495396 
+ and GlobalSSCardType == nil)
+ and not triggeringCard
+ then
+  local function compare(a,b)
+    return a.attack < b.attack
+  end
+  if GlobalSSCardID == 44505297 then    --Inzektor Exa-Beetle
+    GlobalActivatedCardID = GlobalSSCardID
+  end
+  if GlobalSSCardID == 63504681 then -- Rhomgomiant
+    minTargets=maxTargets
+  end
+  local Ptolemaios=nil
+  if GlobalSSCardID == 18326736 then -- Ptolemaios
+    minTargets=math.min(maxTargets,math.max(minTargets,3))
+    Ptolemaios=true
+    if minTargets == 2 then
     end
-    if GlobalSSCardID == 44505297 then    --Inzektor Exa-Beetle
-      GlobalActivatedCardID = GlobalSSCardID
-    end
-    if GlobalSSCardID == 63504681 then
-      minTargets=maxTargets
-    end
-    GlobalSSCardID = nil
-    GlobalSSCardType = nil
+  end
+  GlobalSSCardID = nil
+  GlobalSSCardType = nil
 	PtolemySSMode = nil
+  if Ptolemaios==true and minTargets == 1 
+  then
+    GlobalSSCardID = 18326736
+    GlobalSSCardType = TYPE_XYZ
+  end
 	local list = {}
     for i=1,#cards do
       if cards[i] and bit32.band(cards[i].type,TYPE_MONSTER) > 0 
@@ -111,20 +128,27 @@ end
       then   
         cards[i].index=i
         list[#list+1]=cards[i]
-        if cards[i].id == 38331564 and minTargets>=3 then
-          cards[i].attack = -1
-          GlobalScepterOverride = GlobalScepterOverride + 1
+        if cards[i].id == 38331564 and (minTargets>=3 or Ptolemaios) then
+          if CardsMatchingFilter(OppField(),ScepterFilter)>0 then
+            cards[i].attack = -3
+          else
+            cards[i].attack = -1
+          end
         end
-        if cards[i].id == 91110378 and minTargets>=3 then
+        if cards[i].id == 91110378 then
           cards[i].attack = -2
-          GlobalScepterOverride = GlobalScepterOverride + 1
         end
       end
     end
     table.sort(list,compare)
     result={}
+    check={}
     for i=1,minTargets do
       result[i]=list[i].index
+      check[i]=list[i]
+    end
+    if #Field()>3 then
+      GlobalScepterOverride = GlobalScepterOverride + CardsMatchingFilter(check,FilterID,38331564)
     end
     return result
   end
@@ -133,8 +157,11 @@ end
   -- Select valid tribute targets when tribute 
   -- summoning a "Toon" monster.
   --------------------------------------------   
- if GlobalSSCardSetcode ~= nil and GlobalSSCardSetcode == 98 or
-  GlobalSSCardSetcode == 4522082 then
+ if GlobalSSCardSetcode ~= nil 
+ and (GlobalSSCardSetcode == 98 
+ or GlobalSSCardSetcode == 4522082 )
+ and not triggeringCard
+ then
   local result = {}
   local preferred = {}
   local valid = {}

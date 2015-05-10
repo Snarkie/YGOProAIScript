@@ -1,5 +1,5 @@
-Version = "0.28c"
-Experimental = true
+Version = "0.29"
+Experimental = false
 
 --[[
   AI Script for YGOPro Percy:
@@ -15,8 +15,36 @@ Experimental = true
   http://www.ygopro.co/Forum/tabid/95/g/posts/t/7877/AI-Updates
   
   Contributors: ytterbite, Sebrian, Skaviory, francot514
+  Optional decks: Yeon, Satone (Spellbook), rothayz (X-Saber)
+  You can find and download optional decks here:
+  http://www.ygopro.co/Forum/tabid/95/g/posts/t/7877/AI-Updates
   
   for more information about the AI script, check the ai-template.lua
+  
+  
+  
+  The MIT License (MIT)
+
+  Copyright (c) 2015 Snarky
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+
 ]]
 function requireoptional(module)
   if not pcall(require,module) then
@@ -63,8 +91,9 @@ require("ai.decks.Harpie")
 require("ai.decks.HERO")
 require("ai.decks.ExodiaLib")
 require("ai.decks.Boxer")
-requireoptional("ai.decks.MyDeck")
-requireoptional("ai.decks.BlueEyes")
+requireoptional("ai.decks.Spellbook")
+requireoptional("ai.decks.X-Saber")
+
 
 math.randomseed( require("os").time() )
 
@@ -73,4 +102,5 @@ function OnStartOfDuel()
   --if Experimental then AI.Chat("This is an experimental AI version, it might contain bugs and misplays") end
   SaveState()
 end
+
 

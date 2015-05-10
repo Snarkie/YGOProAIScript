@@ -315,6 +315,9 @@ end
 function SummonZenmainesBA()
   return false -- temp
 end
+function SummonFortuneTune()
+  return false -- temp
+end
 function BAInit(cards)
   GlobalPreparation = nil
   local Act = cards.activatable_cards

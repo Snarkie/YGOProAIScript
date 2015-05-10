@@ -1,3 +1,36 @@
+
+function SatellarknightPriority()
+
+AddPriority({
+-- Satellarknight
+[75878039] = {8,1,5,4,8,5,4,2,1,1,DenebCond},         -- Satellarknight Deneb
+[02273734] = {6,4,7,1,3,1,6,1,1,1,AltairCond},        -- Satellarknight Altair
+[38667773] = {5,3,8,3,4,1,5,1,1,1,VegaCond},          -- Satellarknight Vega
+[63274863] = {7,2,6,2,6,1,1,1,1,1,SiriusCond},        -- Satellarknight Sirius
+[38331564] = {8,4,9,4,3,1,1,1,1,1,ScepterCond},       -- Star Seraph Scepter
+[91110378] = {7,3,4,0,4,1,1,1,1,1,SovereignCond},     -- Star Seraph Sovereign
+[37742478] = {6,4,5,0,1,1,1,1,1,1,HonestCond},        -- Honest
+
+[32807846] = {9,3,1,1,1,1,1,1,1,1,nil},               -- RotA
+[01845204] = {4,1,1,1,1,1,1,1,1,1,nil},               -- Instant Fusion
+[54447022] = {5,1,1,1,1,1,1,1,1,1,SoulChargeCond},    -- Soul Charge
+[25789292] = {3,1,1,1,1,1,1,1,1,1,nil},               -- Forbidden Chalice
+
+[41510920] = {6,2,1,1,1,1,1,1,1,1,nil},               -- Celestial Factor
+[34507039] = {3,1,1,1,1,1,1,1,1,1,nil},               -- Wiretap
+
+[63504681] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Heroic Champion - Rhongomiant
+[21501505] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Cairngorgon, Antiluminescent Knight
+[93568288] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Number 80: Rhapsody in Berserk
+[94380860] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Number 103: Ragnazero
+[42589641] = {1,1,1,1,6,2,8,1,1,1,nil},               -- Stellarknight Triveil
+[56638325] = {1,1,1,1,8,8,7,1,1,1,nil},               -- Stellarknight Delteros
+[17412721] = {1,1,6,1,1,1,1,1,1,1,NodenCond},         -- Elder God Noden
+[18326736] = {1,1,1,1,1,1,1,1,1,1},                   -- Planetellarknight Ptolemaios
+[58069384] = {1,1,1,1,1,1,1,1,1,1},                   -- Cyber Dragon Nova
+[10443957] = {1,1,1,1,1,1,1,1,1,1},                   -- Cyber Dragon Infinity
+})
+end
 GlobalScepterOverride = 0
 function SatellarknightFilter(c)
   return IsSetCode(c.setcode,0x9c) and bit32.band(c.type,TYPE_MONSTER)>0
@@ -185,11 +218,12 @@ function SummonTriveil()
   and Duel.GetCurrentPhase()==PHASE_MAIN1 and GlobalBPAllowed)
 end 
 function ScepterFilter(c)
-  return c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0
+  return Affected(c,TYPE_MONSTER,4)
+  and Targetable(c,TYPE_MONSTER)
   and bit32.band(c.status,STATUS_LEAVE_CONFIRMED)==0
+  and (FilterPublic(c)
   and not DestroyBlacklist(c)
-  and (bit32.band(c.position, POS_FACEUP)>0 
-  or bit32.band(c.status,STATUS_IS_PUBLIC)>0)
+  or FilterPrivate(c))
 end
 function UseScepter()
   return CardsMatchingFilter(UseLists({OppMon(),OppST()}),ScepterFilter)>0 or HasID(AIMon(),91110378,true)
@@ -250,6 +284,12 @@ function UseChainTellar2()
  end
  return false
 end
+function SummonPtolemaiosTellarknight(c)
+  return InfinityCheck()
+  and (MP2Check()
+  or HasID(AIMon(),38331564,true) 
+  and CardsMatchingFilter(OppField(),ScepterFilter)>0)
+end
 function SatellarknightOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local Activatable = cards.activatable_cards
   local Summonable = cards.summonable_cards
@@ -258,6 +298,9 @@ function SatellarknightOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local SetableMon = cards.monster_setable_cards
   local SetableST = cards.st_setable_cards
   GlobalScepterOverride = 0
+  if HasIDNotNegated(Activatable,18326736,UsePtolemaios) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   if HasIDNotNegated(Activatable,37742478) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -317,6 +360,16 @@ if DeckCheck(DECK_TELLARKNIGHT) then
   end
   if HasID(SpSummonable,42589641) and SummonTriveil() then
     GlobalSSCardID = 42589641
+    GlobalSSCardType = TYPE_XYZ
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(SpSummonable,10443957) and SummonInfinity() then
+    GlobalSSCardID = 10443957
+    GlobalSSCardType = TYPE_XYZ
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(SpSummonable,18326736,SummonPtolemaiosTellarknight) then
+    GlobalSSCardID = 18326736
     GlobalSSCardType = TYPE_XYZ
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
@@ -398,7 +451,11 @@ function SatellarknightOnSelectCard(cards, minTargets, maxTargets,triggeringID,t
   else
     ID = triggeringID
   end
-  if GlobalScepterOverride>0 then
+  if GlobalSSCardID == 18326736 and HasID(AIMon(),18326736,true) then
+    GlobalSSCardID = nil
+    GlobalSSCardType = nil
+  end
+  if GlobalScepterOverride>0 and GlobalSSCardID ~= 18326736  then
     GlobalScepterOverride = GlobalScepterOverride-1
     return BestTargets(cards,1,TARGET_DESTROY)
   end
@@ -567,10 +624,12 @@ end
 
 
 SatellarknightAtt={
-  42589641,63504681,82633039,21501505
+  42589641,63504681,82633039,21501505,
+  58069384,10443957,
 }
 SatellarknightDef={
-  91110378,38667773,17412721,93568288
+  91110378,38667773,17412721,93568288,
+  18326736,
 }
 function SatellarknightOnSelectPosition(id, available)
   result = nil

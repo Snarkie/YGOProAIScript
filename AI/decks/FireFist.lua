@@ -71,10 +71,13 @@ function UseYoko()
   return false
 end
 function SpiritFilter(card)
-  return card.defense<=200 and bit32.band(card.attribute,ATTRIBUTE_FIRE) and card.level==3 
+  return card.defense<=200 
+  and bit32.band(card.attribute,ATTRIBUTE_FIRE) 
+  and card.level==3 
+  and not FilterType(card,TYPE_TUNER)
 end
 function SummonSpirit()
-  return CardsMatchingFilter(AIGrave(),SpiritFilter)>0 or CanXYZ(3)
+  return CardsMatchingFilter(AIGrave(),SpiritFilter)>0 --or CanXYZ(3)
 end
 function WolfbarkFilter(c)
   return bit32.band(c.race,RACE_BEASTWARRIOR)>0 and bit32.band(c.attribute,ATTRIBUTE_FIRE)>0 and c.level==4 
@@ -480,6 +483,12 @@ function SpiritTarget(cards)
   end
   if HasID(cards,30929786) then
     result=CurrentIndex
+  end
+  for i=1,#cards do
+    local c = cards[i]
+    if not FilterType(c,TYPE_TUNER) then
+      result = i
+    end
   end
   if result==nil then result=math.random(#cards) end
   return {result}

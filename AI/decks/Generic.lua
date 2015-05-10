@@ -1,11 +1,14 @@
 -----
 -- Staple cards, or cards used in multiple AI Extra Decks
 -----
-function XYZSummon(index)
+function XYZSummon(index,id)
   if index == nil then
     index = CurrentIndex
   end
   GlobalMaterial = true
+  if id then
+    GlobalSSCardID = id
+  end
   return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
 end
 function SummonExtraDeck(cards,prio)
@@ -68,6 +71,9 @@ function SummonExtraDeck(cards,prio)
   if HasID(Act,05318639,UseMST) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+  if HasID(Act,18326736,UsePtolemaios) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
 ---- 
 -- summon certain monsters before anything else
 ----   
@@ -119,6 +125,9 @@ function SummonExtraDeck(cards,prio)
 ---- 
 -- activate removal effects before progressing
 ---- 
+  if HasIDNotNegated(Act,10443957,UseInfinity) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   if HasIDNotNegated(Act,04779823) and UseMichael() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end 
@@ -271,6 +280,9 @@ function SummonExtraDeck(cards,prio)
   end
   
 -- Rank 6
+  if HasID(SpSum,10443957,SummonInfinity) then
+    return XYZSummon()
+  end
   if HasID(SpSum,38495396) and SummonPtolemy(SpSum[CurrentIndex]) then
     return XYZSummon()
   end
@@ -290,6 +302,9 @@ function SummonExtraDeck(cards,prio)
   end
 
 -- Rank 4
+  if HasID(SpSum,18326736,SummonPtolemaios) then
+    return XYZSummon(nil,18326736)
+  end
   if HasID(SpSum,94380860) and SummonRagnaZero(SpSum[CurrentIndex]) then            -- Ragna Zero
     return XYZSummon()
   end  
@@ -404,6 +419,39 @@ function SummonExtraDeck(cards,prio)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   return nil
+end
+function InfinityCheck()
+  return HasID(AIExtra(),58069384,true)
+  and HasIDNotNegated(AIExtra(),10443957,true)
+  and (HasIDNotNegated(AIExtra(),18326736,true)
+  and FieldCheck(4)==3
+  or HasIDNotNegated(AIMon(),18326736,true,FilterMaterials,3))
+  and DualityCheck()
+end
+function SummonPtolemaios(c)
+  return InfinityCheck()
+  and MP2Check()
+end
+function UsePtolemaios(c)
+  return InfinityCheck() and FilterMaterials(c,3)
+end
+function SummonInfinity(c)
+  return HasID(AIMon(),58069384,true)
+  and HasIDNotNegated(AIExtra(),10443957,true)
+end
+function InfinityFilter(c,source)
+  return Affected(c,TYPE_MONSTER,6)
+  and Targetable(c,TYPE_MONSTER)
+  and FilterPosition(c,POS_FACEUP_ATTACK)
+  and (CurrentOwner(c)==2
+  or CurrentOwner(c)==1 
+  and c.attack<=1500
+  and source.xyz_material_count<2
+  and not CardsEqual(c,source))
+end
+function UseInfinity(c)
+  return CardsMatchingFilter(OppMon(),InfinityFilter,c)>0
+  or TurnEndCheck() and CardsMatchingFilter(AIMon(),InfinityFilter,c)>0
 end
 function UseMST(c)
   local filter = function(c) 
@@ -1291,9 +1339,6 @@ function ChainCardNegation(card,targeted,removalonly,filter,opt,skipnegate)
       local e = Duel.GetChainInfo(i, CHAININFO_TRIGGERING_EFFECT)
       if e then
         c=e:GetHandler()
-        if player_ai==nil then -- Effect Veiler can be activated 
-          player_ai=1          -- before player setup is complete      
-        end                    -- which means the AI is player 2
         if CardNegateFilter(c,card,targeted,filter,opt) 
         and (not removalonly or RemovalCheckList(AIField(),nil,i))
         then
@@ -1586,6 +1631,9 @@ function PriorityChain(cards) -- chain these before anything else
   if HasIDNotNegated(cards,24696097,ChainNegation) then -- Shooting Star
     return {1,CurrentIndex}
   end
+  if HasIDNotNegated(cards,10443957,ChainNegation) then -- Infinity
+    return {1,CurrentIndex}
+  end
   if HasIDNotNegated(cards,99188141,ChainNegation) then -- THRIO
     return {1,CurrentIndex}
   end
@@ -1772,9 +1820,30 @@ function ChidoriTarget(cards)
   end
   return BestTargets(cards,1,TARGET_TODECK)
 end
+function PtolemaiosTarget(cards,min)
+  if LocCheck(cards,LOCATION_OVERLAY) then
+    return Add(cards,PRIO_TOGRAVE,min)
+  end
+  if LocCheck(cards,LOCATION_EXTRA) then
+    return Add(cards,PRIO_TOFIELD,min,FilterID,58069384)
+  end
+  return Add(cards,PRIO_TOGRAVE,min)
+end
+function InfinityTarget(cards)
+  if LocCheck(cards,LOCATION_OVERLAY) then
+    return Add(cards,PRIO_TOGRAVE)
+  end
+  return BestTargets(cards,1,TARGET_TOGRAVE)
+end
 function GenericCard(cards,min,max,id,c)
   if c then
     id = c.id
+  end 
+  if id == 18326736 then
+    return PtolemaiosTarget(cards,min)
+  end 
+  if id == 10443957 then
+    return InfinityTarget(cards)
   end 
   if id == 22653490 then
     return ChidoriTarget(cards)

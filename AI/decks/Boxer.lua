@@ -5,33 +5,26 @@ function BoxerStartup(deck)
   deck.Chain                = BoxerChain
   deck.EffectYesNo          = BoxerEffectYesNo
   deck.Position             = BoxerPosition
-  
   deck.YesNo                = BoxerYesNo
   deck.BattleCommand        = BoxerBattleCommand
   deck.AttackTarget         = BoxerAttackTarget
   deck.AttackBoost          = BoxerAttackBoost
-  
   --[[
   deck.Option 
   deck.Sum 
   deck.Tribute
-
   deck.DeclareCard
   deck.Number
   deck.Attribute
   deck.MonsterType
-  
   ]]
-  
   deck.ActivateBlacklist    = BoxerActivateBlacklist
   deck.SummonBlacklist      = BoxerSummonBlacklist
   deck.RepositionBlacklist  = BoxerRepoBlacklist
   deck.Unchainable          = BoxerUnchainable
-  
   --[[
   deck.SetBlacklist
   ]]
-  
   deck.PriorityList         = BoxerPriorityList
 end
 
@@ -91,7 +84,7 @@ function ThrasherCondBoxer(loc,c)
     and (CardsMatchingFilter(AIHand(),BoxerMonsterFilter,04549095)>0
     and not NormalSummonCheck() 
     or BattlePhaseCheck() and OppHasStrongestMonster()
-    and OppGetStrongestAttDef()<c)
+    and OppGetStrongestAttDef()<c.attack)
   end
   return true
 end
@@ -135,9 +128,9 @@ function SwitchitterCond(loc,c)
   end
   if loc == PRIO_TOGRAVE then
     return not HasAccess(68144350)
-    and (not HasID(AICards(),32807846,true)
-    or FieldCheck(4)==2)
+    and (not HasID(AICards(),32807846,true))
     or FilterLocation(c,LOCATION_OVERLAY)
+    or FieldCheck(4)==2 and CardsMatchingFilter(AIGrave(),GlassjawFilter)==0
   end
   return true
 end
@@ -161,11 +154,16 @@ function CounterpunchCond(loc,c)
   end
   return true
 end
+function LeadYokeCond(loc,c)
+  if loc == PRIO_TOHAND then
+    return not HasID(AIExtra(),23232295,true)
+  end
+  return true
+end
 BoxerPriorityList={                      
 --[12345678] = {1,1,1,1,1,1,1,1,1,1,XXXCond},  -- Format
 
 -- Boxer
-
 [65367484] = {5,1,1,1,1,1,1,1,1,1,ThrasherCondBoxer},  -- Thrasher
 [05361647] = {4,1,7,1,9,2,1,1,1,1,GlassjawCond},  -- BB Glassjaw
 [35537251] = {5,1,6,1,3,2,1,1,1,1,ShadowCond},  -- BB Shadow
@@ -198,7 +196,7 @@ BoxerPriorityList={
 [59627393] = {1,1,1,1,1,1,1,1,1,1},  -- BB Star Cestus
 [94380860] = {1,1,1,1,1,1,1,1,1,1},  -- Ragnazero
 [71921856] = {1,1,1,1,1,1,1,1,1,1},  -- BB Nova Caesar
-[23232295] = {2,1,1,1,1,1,1,1,1,1},  -- BB Lead Yoke
+[23232295] = {9,2,1,1,1,1,1,1,1,1,LeadYokeCond},  -- BB Lead Yoke
 [82633039] = {1,1,1,1,1,1,1,1,1,1},  -- Castel
 [46772449] = {1,1,1,1,1,1,1,1,1,1},  -- Exciton
 [34086406] = {1,1,1,1,1,1,1,1,1,1},  -- Lavalval 
@@ -216,18 +214,20 @@ function SummonThrasherBoxer(c,sum)
   if #AIMon()>0 or not DualityCheck() then
     return false
   end
-  if HasID(sum,68144350,nil,SummonSwitchitter) then
+  if HasIDNotNegated(sum,68144350,true,SummonSwitchitter) then
     return false
   end
-  if HasID(sum,53573406,nil,SummonChameleonBoxer) then
+  if HasIDNotNegated(sum,53573406,true,SummonChameleonBoxer) then
     return false
   end
   return true
 end
-function SummonSwitchitter(c)
+function SummonSwitchitter(c,sum)
   if CardsMatchingFilter(AIGrave(),BoxerMonsterFilter,04549095)>0
   and OverExtendCheck()
   and DualityCheck()
+  and not (HasID(AIMon(),23232295,true) 
+  and HasIDNotNegated(sum,53573406,true,SummonChameleonBoxer))
   then
     return true
   end
@@ -313,8 +313,10 @@ end
 function SummonBoxer(c,mode)
   if mode == 1 
   and (FieldCheck(4)==1 
-  or HasIDNotNegated(AICards(),36916401,true,UseBoxerSpirit,true)
-  or c.id~=32750341 and HasID(AIHand(),32750341,true))
+  or OverExtendCheck()
+  and (HasIDNotNegated(AICards(),36916401,true,UseBoxerSpirit,true)
+  or c.id~=32750341 and HasID(AIHand(),32750341,true) and MP2Check()
+  or c.id == 32750341 and CardsMatchingFilter(AIHand(),FilterID,32750341)>1 and MP2Check()))
   and DualityCheck()
   then
     return true
@@ -338,7 +340,6 @@ function UseBoxerSpirit(c,skip)
   and DualityCheck()
   and OPTCheck(36916401)
   then
-    OPTSet(36916401)
     return true
   end
   return false
@@ -375,10 +376,10 @@ function UseRotaBoxer(c,cards)
   then
     return false
   end
-  if HasID(Sum,53573406,true,SummonChameleonBoxer) then
+  if HasIDNotNegated(Sum,53573406,true,SummonChameleonBoxer) then
     return false
   end
-  if HasID(Sum,68144350,true,SummonSwitchitter) then
+  if HasIDNotNegated(Sum,68144350,true,SummonSwitchitter,Sum) then
     return false
   end
   if not NormalSummonCheck() and #Sum==0 then
@@ -402,7 +403,7 @@ function UseRotaBoxer(c,cards)
     return true
   end
   if CardsMatchingFilter(Sum,BoxerMonsterFilter,04549095)==0
-  and HasID(Act,36916401,true,UseBoxerSpirit)
+  and HasID(Act,36916401,true,UseBoxerSpirit,true)
   then
     return true
   end
@@ -480,6 +481,9 @@ function BoxerInit(cards)
   if HasID(Act,32807846,UseRotaBoxer,cards) then
     return COMMAND_ACTIVATE,CurrentIndex
   end
+  if HasID(SpSum,39765958,SummonJeweledRDA) then
+    return COMMAND_SPECIAL_SUMMON,CurrentIndex
+  end
   if HasID(SpSum,83994433,SummonSparkBoxer,1) then
     return COMMAND_SPECIAL_SUMMON,CurrentIndex
   end
@@ -501,7 +505,7 @@ function BoxerInit(cards)
   if HasID(SpSum,65367484,SummonThrasherBoxer,Sum) then
     return COMMAND_SPECIAL_SUMMON,CurrentIndex
   end
-  if HasID(Sum,68144350,SummonSwitchitter) then
+  if HasID(Sum,68144350,SummonSwitchitter,Sum) then
     return COMMAND_SUMMON,CurrentIndex
   end
   if HasID(Sum,79867938,SummonHeadgeared) then
@@ -522,6 +526,7 @@ function BoxerInit(cards)
     end
   end
   if HasID(Act,36916401,UseBoxerSpirit) then
+    OPTSet(36916401)
     return COMMAND_ACTIVATE,CurrentIndex
   end
   if HasID(SpSum,32750341,SummonSparrer,2) then

@@ -381,7 +381,7 @@ function HATCard(cards,min,max,id,c)
     id = c.id
   end
   if id == 68535320 or id == 95929069 then -- Fire Hand, Ice Hand
-    return BestTargets(cards,TARGET_DESTROY)
+    return BestTargets(cards,1,TARGET_DESTROY)
   end
   if id == 91812341 then
     return MyrmeleoTarget(cards)

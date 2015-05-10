@@ -581,9 +581,6 @@ function CheckTarget(source,cards,targeted,filter,opt)
     if CheckNegated(i) then
       local e = Duel.GetChainInfo(i, CHAININFO_TRIGGERING_EFFECT)
       if e then
-        if player_ai==nil then 
-          player_ai=1                
-        end
         local p=e:GetOwnerPlayer()
         local tg = Duel.GetChainInfo(i, CHAININFO_TARGET_CARDS)
         if p and p == 1-player_ai and tg and tg:GetCount()>0 then
@@ -635,9 +632,6 @@ function CheckSS(source,cards,targeted,loc,filter,opt)
     if CheckNegated(i) then
       local e = Duel.GetChainInfo(i, CHAININFO_TRIGGERING_EFFECT)
       if e then
-        if player_ai==nil then 
-          player_ai=1                
-        end
         local p=e:GetOwnerPlayer()
         local c = e:GetHandler()
         if p and p == 1-player_ai 
