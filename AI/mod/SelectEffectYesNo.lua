@@ -10,6 +10,7 @@
 -- 0 = no
 
 function OnSelectEffectYesNo(id,triggeringCard)
+  if not player_ai then player_ai = 1 end -- probably puzzle mode, so player goes first
   local result = nil
   local d = DeckCheck()
   if d and d.EffectYesNo then

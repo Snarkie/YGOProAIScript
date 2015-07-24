@@ -85,17 +85,11 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
   -- The first time around, it sets the AI's
   -- turn (only if the AI is playing first).
   ------------------------------------------
+  if not player_ai then player_ai = 1 end -- probably puzzle mode, so player goes first
   set_player_turn(true)
-  if GlobalAIPlaysFirst == nil then
-    if Duel.GetTurnCount() == 1 then
-      DeckCheck()
-      GlobalIsAIsTurn = 1
-      GlobalAIPlaysFirst = 1
-      GlobalAIIsAttacking = nil
-      Globals()
-	    ResetOncePerTurnGlobals()
-	  end
-  end
+  DeckCheck()
+  GlobalAIIsAttacking = nil
+  ResetOncePerTurnGlobals()
   GlobalBPAllowed = to_bp_allowed
   SaveCards()
   SurrenderCheck()
@@ -187,7 +181,6 @@ or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
 then
   return DeckCommand[1],DeckCommand[2]
 end
-
 if d and d.Init then
   DeckCommand,DeckCommand2 = d.Init(cards,to_bp_allowed,to_ep_allowed)
 end
@@ -350,7 +343,6 @@ if not ExtraCheck then
     return DeckCommand[1],DeckCommand[2]
   end
 end
-
 
 
 --
@@ -1617,6 +1609,15 @@ end
     end
   end
   
+  if HasID(SummonableCards,34627841) and HasID(AIHand(),89631139,true) then
+    return COMMAND_SUMMON,CurrentIndex
+  end
+  
+  if HasID(RepositionableCards,34627841,FilterPosition,POS_FACEDOWN_DEFENCE) 
+  and HasID(AIHand(),89631139,true) 
+  then
+    return COMMAND_CHANGE_POS,CurrentIndex
+  end
   --------------------------------------------
   -- Certain monsters are best normal summoned
   -- when the opponent controls Spells/Traps.

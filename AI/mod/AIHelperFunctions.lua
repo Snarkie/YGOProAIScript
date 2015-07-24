@@ -1851,6 +1851,28 @@ function ApplyATKBoosts(Cards)
     end
   end
   
+  -- Masked HERO Koga
+  if HasIDNotNegated(AICards(),50608164,true) then
+    local atk = 0
+    local Heroes = SubGroup(AIGrave(),HEROFilter)
+    if Heroes and #Heroes>0 then
+      SortByATK(Heroes,true)
+      atk = math.min(atk,Heroes[1].attack)
+    end
+    for i=1,#Cards do
+      local c = Cards[i]
+      if Targetable(c,TYPE_MONSTER) 
+      and Affected(c,TYPE_MONSTER,8)
+      and CurrentOwner(c)==2
+      then
+        local temp=c.attack
+        c.attack=math.max(0,c.attack-atk)
+        c.bonus=c.attack-temp
+      end
+    end
+  end
+  
+  
   local d = DeckCheck()
   if d and d.AttackBoost then
     d.AttackBoost(Cards)
@@ -1889,8 +1911,12 @@ end
 -- by the AI once per turn to prevent infinite loops.
 -- This will help allow them to be used once every turn.
 --------------------------------------------------------
+GlobalTurn = 0
 function ResetOncePerTurnGlobals()
-  --Duel.Draw(player_ai,1,REASON_EFFECT)
+  if GlobalTurn == Duel.GetTurnCount() then 
+    return
+  end
+  GlobalTurn = Duel.GetTurnCount() 
   Global1PTLylaST  = nil
   Global1PTGenome  = nil
   Global1PTHonest  = nil

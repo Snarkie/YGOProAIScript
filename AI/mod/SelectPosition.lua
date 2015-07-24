@@ -46,7 +46,6 @@ function OnSelectPosition(id, available)
    result = POS_FACEUP_DEFENCE
    end 
  end
-  
   -------------------------------------------------------
   -- If Treeborn Frog is being special summoned, check if
   -- Creature Swap is in hand, the opponent controls 1

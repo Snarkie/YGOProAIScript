@@ -11,7 +11,7 @@ AddPriority({
 [91110378] = {7,3,4,0,4,1,1,1,1,1,SovereignCond},     -- Star Seraph Sovereign
 [37742478] = {6,4,5,0,1,1,1,1,1,1,HonestCond},        -- Honest
 
-[32807846] = {9,3,1,1,1,1,1,1,1,1,nil},               -- RotA
+[32807846] = {9,3,1,1,1,1,2,1,1,1,nil},               -- RotA
 [01845204] = {4,1,1,1,1,1,1,1,1,1,nil},               -- Instant Fusion
 [54447022] = {5,1,1,1,1,1,1,1,1,1,SoulChargeCond},    -- Soul Charge
 [25789292] = {3,1,1,1,1,1,1,1,1,1,nil},               -- Forbidden Chalice
@@ -475,7 +475,7 @@ function SatellarknightOnSelectCard(cards, minTargets, maxTargets,triggeringID,t
     return SatellarknightAdd(cards)
   end
   if ID == 32807846 then
-    return Add(cards)
+    return RotaTarget(cards)
   end
   if ID == 56638325 then
     return DelterosTarget(cards,triggeringCard)

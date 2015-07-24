@@ -657,7 +657,8 @@ Unchainable={
 38296564,53567095,72930878,81983656, -- Safe Zone, Icarus, Black Sonic, BW Hawk Joe
 85215458,24508238,59616123,27243130, -- BW Kalut, D.D. Crow, Trap Stun, Forbidden lance
 77778835,21143940,84536654,57728570, -- Hysteric Party, Mask Change, Form Change, CCV
-83555666,88197162,24348807, --  Ring of Destruction, Soul Transition, Lose a turn
+83555666,88197162,24348807,21143940, --  Ring of Destruction, Soul Transition, Lose a turn, Mask Change
+84536654,50608164, -- Form Change, Koga
 }
 function isUnchainableTogether(CardId)
   for i=1,#Unchainable do
@@ -688,7 +689,7 @@ end
 function CardIsASearchCard(CardId)
   local Result = 0
   if CardId == 73628505 or --CardId == 32807846 or   -- Terraforming, ROTA
-     CardId == 00213326 or CardId == 25377819 or   -- E-Call, Convocation
+     --[[CardId == 00213326 or]] CardId == 25377819 or   -- E-Call, Convocation
      CardId == 54031490 or CardId == 94886282 or   -- SSS, Charge
      CardId == 96363153 or --CardId == 57103969 or   -- Tuning, FF Tenki
      CardId == 74968065 or CardId == 12171659 or   -- Hecatrice, Zeradias
@@ -866,7 +867,7 @@ ScriptedCards ={
 72345736,05133471,21565445,47826112, -- Six Sams United, Galaxy Cyclone, Atlantean Neptabyss, Poseidra
 13959634,72932673,13073850,88197162, -- Moulinglacia, Mizuchi, Qli Stealth, Soul Transition
 51194046,20426097,24348807,25067275, -- Qli Monolith, Re-qliate, Lose a Turn, Swords At Dawn
-18326736,58069384,10443957, -- Planetellarknight Ptolemaios, Cyber Dragon Nova, Infinity
+18326736,58069384,10443957,03819470, -- Planetellarknight Ptolemaios, Cyber Dragon Nova, Infinity, Seven Tools
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do

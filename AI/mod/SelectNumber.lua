@@ -9,11 +9,6 @@
 -- Return: index of the selected choice
 function OnSelectNumber(choices)
   local result = nil
-  local d = DeckCheck()
-  if d and d.Number then
-    result = d.Number(id,available)
-  end
-  if result~=nil then return result end
   -------------------------------------------
   -- The AI should always try to mill as many
   -- cards as possible with Card Trooper.
@@ -23,12 +18,18 @@ function OnSelectNumber(choices)
   then
     GlobalActivatedCardID = nil
     if #AIDeck()>10 then
-      return #choices
-    else
       return 1
+    else
+      return 3
     end
   end
-
+  
+  local d = DeckCheck()
+  if d and d.Number then
+    result = d.Number(id,available)
+  end
+  if result~=nil then return result end
+  
   -------------------------------------------
   -- Reset this variable if it gets this far.
   -------------------------------------------

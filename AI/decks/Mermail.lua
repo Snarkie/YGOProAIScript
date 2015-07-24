@@ -75,7 +75,7 @@ function PoseidraCond(loc,c)
 end
 function MizuchiCond(loc,c)
   if loc == PRIO_TOHAND then
-    return BattlePhaseCheck() or HasID(AICards,60202749,true)
+    return BattlePhaseCheck() or HasID(AICards(),60202749,true)
   end
   return true
 end

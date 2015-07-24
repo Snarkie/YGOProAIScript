@@ -93,6 +93,9 @@ require("ai.decks.ExodiaLib")
 require("ai.decks.Boxer")
 requireoptional("ai.decks.Spellbook")
 requireoptional("ai.decks.X-Saber")
+requireoptional("ai.decks.Cth")
+requireoptional("ai.decks.Wizard")
+requireoptional("ai.decks.Express")
 
 
 math.randomseed( require("os").time() )

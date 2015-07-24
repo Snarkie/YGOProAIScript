@@ -14,6 +14,7 @@
 
 GlobalChain = 0
 function OnSelectChain(cards,only_chains_by_player,forced)
+  if not player_ai then player_ai = 1 end -- probably puzzle mode, so player goes first
   if Duel.GetCurrentChain()<=GlobalChain then
     GlobalTargetList = {} -- reset variables for new chain
     GlobalNegatedChainLinks = {}
@@ -24,19 +25,8 @@ function OnSelectChain(cards,only_chains_by_player,forced)
   local ChainAllowed = 0
   SurrenderCheck()
   DamageSet()
-  ------------------------------------------
-  -- The first time around, it sets the AI's
-  -- turn (only if the AI is playing second).
-  -------------------------------------------
-  if GlobalAIPlaysFirst == nil then
-    if Duel.GetTurnCount() == 2 then
-      GlobalIsAIsTurn = 1
-      GlobalAIPlaysFirst = 0
-      ResetOncePerTurnGlobals()
-	  Globals()
-	end
-  end
-
+  ResetOncePerTurnGlobals()
+  GlobalAIIsAttacking = nil
   ----------------------------------------------
   -- This switches the GlobalIsAIsTurn variable.
   ----------------------------------------------
@@ -234,9 +224,12 @@ result = 0
   -- controls at least 2 more monsters than the AI.
   -------------------------------------------------
 	for i=1,#cards do
-      if cards[i].id == 53582587 and
-         Get_Card_Count(OppMon()) >= Get_Card_Count(AIMon()) + 2 then
-         GlobalActivatedCardID = cards[i].id
+      if cards[i].id == 53582587 
+      and Get_Card_Count(OppMon()) >= Get_Card_Count(AIMon()) + 2 
+      and not Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_SPECIAL_SUMMON) 
+      and not Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_NORMAL_SUMMON)
+      then
+        GlobalActivatedCardID = cards[i].id
         return 1,i
       end
    end

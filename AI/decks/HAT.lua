@@ -342,7 +342,8 @@ function CotHTarget(cards,c)
     result = Add(cards,PRIO_TOFIELD,1,FilterAttackMin,AI.GetPlayerLP(2)-ExpectedDamage(2))
   elseif GlobalCardMode == 1 then
     result = GlobalTargetGet(cards,true)
-  else
+  end
+  if result == nil then
     result = Add(cards,PRIO_TOFIELD,1,TargetCheck)
   end
   if cards[1].prio then 
@@ -516,6 +517,7 @@ end
 function MoonFilter2(c,p)
   return c:IsType(TYPE_MONSTER) and c:IsPosition(POS_FACEUP) and c:IsControler(p)
   and not c:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET) and not c:IsHasEffect(EFFECT_IMMUNE_EFFECT)
+  and not FilterType(c,TYPE_TOKEN)
 end
 function MoonFilter3(c)
   return MoonFilter(c) and ShadollFusionFilter(c)
@@ -584,7 +586,7 @@ function ChainBoM()
     end
     if CanFinishGame(source) and #AIMon()==0 
     and Targetable(source,TYPE_TRAP) and Affected(source,TYPE_TRAP)
-    and UnchainableCheck(50078509)
+    and UnchainableCheck(14087893)
     then
       GlobalCardMode = 1
       GlobalTargetSet(source)
@@ -594,6 +596,7 @@ function ChainBoM()
   if e and e:GetHandler():GetCode() == 44394295 
   and e:GetHandler():IsControler(1-player_ai)
   and CardsMatchingFilter(AIMon(),MoonFilter3)==1
+  and UnchainableCheck(14087893)
   then
     for i=1,#AIMon() do
       if MoonFilter3(AIMon()[i]) then

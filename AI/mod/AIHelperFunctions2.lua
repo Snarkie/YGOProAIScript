@@ -3,16 +3,17 @@ GlobalTargetID = nil
 playersetupcomplete = false
 function OnAIGoingFirstSecond(name)
   local result = 1
+  player_ai = 0
   if name=="AI_Harpie"
   or name=="AI_Blackwing"
   then
     player_ai = 1
     result = 0
   end
-  player_ai = 0
   if GlobalCheating then
     EnableCheats()
   end
+  Globals()
   return result
 end
 function OnPlayerGoingFirstSecond(decision)
@@ -24,6 +25,8 @@ function OnPlayerGoingFirstSecond(decision)
   if GlobalCheating then
     EnableCheats()
   end
+  Globals()
+  return
 end
 -- Sets up some variables for using card script functions
 function set_player_turn(init)
@@ -913,6 +916,8 @@ function FilterRace(c,race)
   end
 end
 function FilterLevel(c,level)
+  --print("Get Level")
+  --GetCaller()
   return FilterType(c,TYPE_MONSTER) and c.level==level
 end
 function FilterLevelMin(c,level)
@@ -1606,7 +1611,13 @@ end
 
 -- function to determine, if a card can attack for game 
 -- on an opponent's monster, or directly
-function CanFinishGame(c,target,atk)
+function CanFinishGame(c,target,atk,bonus,malus)
+  if not bonus then
+    bonus = 0
+  end
+  if not malus then
+    malus = 0
+  end
   if c == nil then
     return false
   end
@@ -1630,6 +1641,7 @@ function CanFinishGame(c,target,atk)
       p = 1 
     end
   end 
+  atk = atk + bonus
   if target == nil or FilterAffected(c,EFFECT_DIRECT_ATTACK) then
     return AI.GetPlayerLP(p)<=atk
   end
@@ -1639,8 +1651,9 @@ function CanFinishGame(c,target,atk)
     oppdef = target:GetDefence()
   else
     oppatk = target.attack
-    opdef = target.defense
+    oppdef = target.defense
   end
+  oppatk = math.max(0,oppatk-malus)
   if AttackBlacklistCheck(target,c) and BattleDamageCheck(target,c) then
     if FilterPosition(target,POS_FACEUP_ATTACK) then
       return AI.GetPlayerLP(p)<=atk-oppatk
@@ -1728,27 +1741,29 @@ end
 -- the other way around, get a card script object
 -- from an AI script card.
 function GetScriptFromCard(c)
-  local seq = Sequence(c)
-  local type = c.type
-  local loc = c.location
-  local p
-  if CurrentOwner(c) == 1 then
-    p = player_ai
-  else
-    p = 1-player_ai
-  end
-  local g = Duel.GetMatchingGroup(nil,p,LOCATION_ONFIELD,LOCATION_ONFIELD,nil)
   local result = nil
-  if g then
-    g:ForEach(function(c) 
-      if c:GetSequence()==seq 
-      and c:IsType(type) 
-      and c:IsControler(p) 
-      and c:IsLocation(loc)
-      then
-        result = c
-      end
-    end)
+  if c then 
+    local seq = Sequence(c)
+    local type = c.type
+    local loc = c.location
+    local p
+    if CurrentOwner(c) == 1 then
+      p = player_ai
+    else
+      p = 1-player_ai
+    end
+    local g = Duel.GetMatchingGroup(nil,p,LOCATION_ONFIELD,LOCATION_ONFIELD,nil)
+    if g then
+      g:ForEach(function(c) 
+        if c:GetSequence()==seq 
+        and c:IsType(type) 
+        and c:IsControler(p) 
+        and c:IsLocation(loc)
+        then
+          result = c
+        end
+      end)
+    end
   end
   return result
 end
@@ -1817,13 +1832,16 @@ end
 function Sequence(c)
   local cards = {AI.GetAIMonsterZones(),AI.GetOppMonsterZones(),
   AI.GetAISpellTrapZones(),AI.GetOppSpellTrapZones(),}
-  for i=1,#cards do
-    for j=1,#cards[i] do
-      if CardsEqual(c,cards[i][j]) then
-        return j-1
+  if cards and #cards>0 then
+    for i=1,#cards do
+      for j=1,#cards[i] do
+        if CardsEqual(c,cards[i][j]) then
+          return j-1
+        end
       end
     end
   end
+  return nil
 end
 
 function FilterCheck(c,filter,opt)

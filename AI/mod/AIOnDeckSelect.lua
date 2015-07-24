@@ -31,7 +31,7 @@ DECK_DARKWORLD    = NewDeck("Dark World"      ,34230233) -- DW Grapha
 DECK_CONSTELLAR   = NewDeck("Constellar"      ,78358521) -- Constellar Sombre
 DECK_BLACKWING    = NewDeck("Blackwing"       ,91351370) -- Black Whirlwind
 DECK_HARPIE       = NewDeck("Harpie"          ,19337371) -- Hysteric Sign
-DECK_HERO         = NewDeck("HERO"            ,45906428) -- Miracle Fusion
+DECK_HERO         = NewDeck("HERO"            ,50720316) -- Shadow Mist
 
 function IdentifierCheck(deck)
   if deck == nil or deck.Identifier == nil then return false end
@@ -115,6 +115,7 @@ function PrioritySetup()
   ChaosDragonPriority()
   QliphortPriority()
   SatellarknightPriority()
+  HEROPriority()
   
 AddPriority({
 -- test
@@ -383,9 +384,6 @@ function AssignPriority(cards,loc,filter,opt)
       then
         c.prio=c.prio+2
       end
-      if not FilterCheck(c,filter,opt) then
-        c.prio=c.prio-9999
-      end
     end
     if loc==PRIO_TOHAND and bit32.band(c.location,LOCATION_ONFIELD)>0 
     and not DeckCheck(DECK_HARPIE) -- temp
@@ -401,6 +399,9 @@ function AssignPriority(cards,loc,filter,opt)
     if loc==PRIO_TOGRAVE and not MacroCheck() then
       c.prio=-1*c.prio
     end
+    if not FilterCheck(c,filter,opt) then
+      c.prio=c.prio-9999
+    end
     SetMultiple(c.original_id)
   end
 end
@@ -413,6 +414,7 @@ function PriorityCheck(cards,loc,count,filter,opt)
   return cards[count].prio
 end
 function Add(cards,loc,count,filter,opt)
+  --GetCaller()
   local result={}
   if count==nil then count=1 end
   if loc==nil then loc=PRIO_TOHAND end

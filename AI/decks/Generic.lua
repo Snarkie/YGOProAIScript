@@ -418,6 +418,12 @@ function SummonExtraDeck(cards,prio)
   if HasIDNotNegated(Act,01845204) and UseInstantFusion(3) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+  if HasIDNotNegated(Act,98645731)  -- Duality
+  and not DeckCheck(DECK_HAT) and not DeckCheck(DECK_BUJIN) 
+  then
+    GlobalDuality = Duel.GetTurnCount()
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   return nil
 end
 function InfinityCheck()
@@ -459,11 +465,14 @@ function UseMST(c)
     and FilterPrivate(c)
     and DestroyFilter(c)
   end
+  local OppTargets=SubGroup(OppST(),filter)
   if (#AIField()==0 
   or #AIField()==CardsMatchingFilter(AIField(),FilterID,05318639))
-  and CardsMatchingFilter(OppST(),filter)>0
-  and CardsMatchingFilter(OppST(),filter)<=CardsMatchingFilter(AICards(),FilterID,05318639)
+  and #OppTargets>0
+  and #OppTargets<=CardsMatchingFilter(AICards(),FilterID,05318639)
   then
+    GlobalCardMode = 1
+    GlobalTargetSet(OppTargets[math.random(1,#OppTargets)])
     return true
   end
   return false

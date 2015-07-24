@@ -748,7 +748,7 @@ function XSaberChain(cards)
   end
 
   if HasID(cards, 03819470, ChainSevenTools) then
-      return {1,CurrentIndex}
+    --return {1,CurrentIndex}
   end
   return nil
 end

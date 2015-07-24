@@ -1,5 +1,5 @@
 --
---        Spellbook AI Version 1.2.1
+--        Spellbook AI Version 1.7.1
 --        produced by Yeon & Satone
 --
 --
@@ -15,9 +15,8 @@ EternityAlready = false
 MasterAlready = false
 PowerAlready = false
 LifeAlready = false
-SummonedAlready = false
 function SpellbookStartup(deck)
-  AI.Chat("Spellbook of Judgment AI ver 1.2.1")
+  AI.Chat("Spellbook of Judgment AI ver 1.7.1")
   AI.Chat("produced by Yeon & Satone")
   
   deck.Init = SpellbookOnSelectInit
@@ -41,13 +40,25 @@ function SpellbookStartup(deck)
   ]]
   deck.ActivateBlacklist    = SpellbookActivateBlacklist
   deck.SummonBlacklist      = SpellbookSummonBlacklist
-  deck.RepositionBlacklist  = BoxerRepoBlacklist
+  deck.RepositionBlacklist  = SpellbookRepoBlacklist
   deck.Unchainable          = BoxerUnchainable
-  --[[
-  deck.SetBlacklist
-  ]]
+  deck.SetBlacklist	= SpellbookSetBlacklist
   deck.PriorityList         = BoxerPriorityList
   SpellbookResetOPT()
+	local e0=Effect.GlobalEffect()
+	e0:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+	e0:SetCode(EVENT_CHAIN_SOLVED)
+	e0:SetOperation(function(e,tp,eg,ep,ev,re,r,rp)
+		local g=Duel.GetFieldGroup(player_ai,LOCATION_HAND,0)
+		Duel.ConfirmCards(1-player_ai,g)
+	end)
+	Duel.RegisterEffect(e0,0)
+	local e1=e0:Clone()
+	e1:SetCode(EVENT_TO_HAND)
+	Duel.RegisterEffect(e1,0)
+	local e2=e0:Clone()
+	e2:SetCode(EVENT_PHASE_START+PHASE_MAIN1)
+	Duel.RegisterEffect(e2,0)
 end
 DECK_SPELLBOOK    = NewDeck("Spellbook",46448938,SpellbookStartup)
 SpellbookActivateBlacklist={
@@ -60,6 +71,7 @@ SpellbookActivateBlacklist={
 }
 SpellbookSummonBlacklist={
 89631139,86585274,01249315,
+40908371,
 }
 SpellbookSetBlacklist={
 25123082,40230018,56981417,
@@ -67,8 +79,14 @@ SpellbookSetBlacklist={
 52628687,56321639,97997309,
 88616795,
 }
+SpellbookRepoBlacklist={
+41855169,14824019,
+}
+function SpellbookHasSpellcaster()
+	return ((HasID(AIHand(),14824019) or HasID(AIHand(),88241506) or HasID(AIHand(),41855169) or HasID(AIHand(),88240808) or (HasID(AIHand(),89739383) and not SecretsAlready)) and GlobalSummonedThisTurn<1) or #AIMon()>0
+end
 function UseJudgment()
-	return ((HasID(AIHand(),25123082) and UsePower() and not PowerAlready) or (HasID(AIHand(),89739383) and not SecretsAlready) or HasID(AIHand(),56321639) or HasID(AIHand(),33981008) or (HasID(AIHand(),56981417) and CheckMaster() and not MasterAlready and (HasID(UseLists({AIGrave(),AIST()}),89739383) or HasID(UseLists({AIGrave(),AIST()}),40230018)) or (HasID(AIHand(),14824019) and not SummonedAlready)) or (HasID(AIHand(),61592395) and HasID(AIBanish(),89739383))) and SpellbookSearchCheck()
+	return ((HasID(AIHand(),25123082) and UsePower() and not PowerAlready) or (HasID(AIHand(),89739383) and not SecretsAlready) or HasID(AIHand(),56321639) or HasID(AIHand(),33981008) or (HasID(AIHand(),56981417) and CheckMaster() and not MasterAlready and (HasID(UseLists({AIGrave(),AIST()}),89739383) or HasID(UseLists({AIGrave(),AIST()}),40230018)) or (HasID(AIHand(),14824019) and GlobalSummonedThisTurn<1)) or (HasID(AIHand(),61592395) and HasID(AIBanish(),89739383))) and SpellbookSearchCheck()
 end
 function UsePower()
 	if Duel.GetTurnCount() == 1 or AI.GetCurrentPhase() == PHASE_MAIN2 then
@@ -86,9 +104,16 @@ end
 function CheckMasterFilter(c)
 	return c.setcode == 0x106e and c.id ~= 56981417
 end
+function CheckEternityFilter(c)
+	return c.setcode == 0x106e and c.id ~= 61592395 and bit32.band(c.type,TYPE_SPELL)>0
+end
 function CheckMaster()
 	local master = SubGroup(AIHand(),CheckMasterFilter)
-	return master and #master>0 and (#AIMon()>0 or ((HasID(AIHand(),14824019) or HasID(AIHand(),88241506) or HasID(AIHand(),41855169) or HasID(AIHand(),88240808)) and not AlreadySummoned))
+	return master and #master>0 and SpellbookHasSpellcaster()
+end
+function CheckEternity()
+	local eternity = SubGroup(AIBanish(),CheckEternityFilter)
+	return eternity and #eternity>0
 end
 function JudgmentSummonable()
 	return (HasID(UseLists({AIHand(),AIST()}),46448938,true) or (HasID(UseLists({AIHand(),AIST()}),61592395,true) and HasID(AIBanish(),46448938,true))) and HasID(UseLists({AIHand(),AIST()}),89739383,true) and Duel.IsExistingMatchingCard(Card.IsSetCard,player_ai,LOCATION_HAND,0,3,nil,0x106e)
@@ -130,19 +155,19 @@ function SpellbookOnSelectInit(cards,to_bp_allowed,to_ep_allowed)
 		return {COMMAND_CHANGE_POS,CurrentIndex}
 	end
 	if HasID(Summonable,41855169) and JudgmentSummonable() then
-		SummonedAlready = true
+		GlobalSummonedThisTurn = GlobalSummonedThisTurn + 1
 		return {COMMAND_SUMMON,IndexByID(Summonable,41855169)}
 	end
 	if HasID(Summonable,88241506) and JudgmentSummonable() then
-		SummonedAlready = true
+		GlobalSummonedThisTurn = GlobalSummonedThisTurn + 1
 		return {COMMAND_SUMMON,IndexByID(Summonable,88241506)}
 	end
 	if HasID(Summonable,88240808) and JudgmentSummonable() then
-		SummonedAlready = true
+		GlobalSummonedThisTurn = GlobalSummonedThisTurn + 1
 		return {COMMAND_SUMMON,IndexByID(Summonable,88240808)}
 	end
 	if HasID(Summonable,14824019) and SpellbookSearchCheck() then
-		SummonedAlready = true
+		GlobalSummonedThisTurn = GlobalSummonedThisTurn + 1
 		return {COMMAND_SUMMON,IndexByID(Summonable,14824019)}
 	end
 	if HasID(Activatable,46448938) and UseJudgment() then
@@ -213,6 +238,18 @@ function SpellbookOnSelectInit(cards,to_bp_allowed,to_ep_allowed)
 	if not HasID(AIST(),88616795) and (AI.GetCurrentPhase() == PHASE_MAIN2 or not GlobalBPAllowed) and #AIMon()>0 and HasID(SetableST,88616795) then
 		return {COMMAND_SET_ST,IndexByID(SetableST,88616795)}
 	end
+	if HasID(Repositionable,14824019) and Repositionable[CurrentIndex].position == POS_FACEUP_ATTACK and (Duel.GetCurrentPhase()==PHASE_MAIN2 or not GlobalBPAllowed) then
+		return {COMMAND_CHANGE_POS,CurrentIndex}
+	end
+	if HasID(Repositionable,41855169) and Repositionable[CurrentIndex].position == POS_FACEUP_ATTACK and Repositionable[CurrentIndex].attack<Repositionable[CurrentIndex].defense then
+		return {COMMAND_CHANGE_POS,CurrentIndex}
+	end
+	if HasID(Repositionable,41855169) and Repositionable[CurrentIndex].position == POS_FACEUP_DEFENCE and Repositionable[CurrentIndex].attack>Repositionable[CurrentIndex].defense then
+		return {COMMAND_CHANGE_POS,CurrentIndex}
+	end
+	if HasID(SpSummonable,40908371) and (Duel.GetCurrentPhase()==PHASE_MAIN2 or not GlobalBPAllowed) then
+		return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,1249315)}
+	end
 end
 function SpellbookOnSelectCard(cards, minTargets, maxTargets,ID,triggeringCard)
 	if ID == 40230018 or ID == 14824019 or ID == 89739383 or ID == 61592395 then
@@ -266,34 +303,72 @@ function PowerTarget(cards)
 	end
 	return result
 end
+bookbanish={}
 function SetBookBanishPriority(cards)
+	bookbanish[46448938]=0
+	bookbanish[40230018]=0
+	bookbanish[33981008]=0
+	bookbanish[88616795]=0
+	bookbanish[52628687]=0
+	bookbanish[56981417]=0
+	bookbanish[89739383]=0
+	bookbanish[25123082]=0
+	bookbanish[97997309]=0
 	for i=1,#cards do
 		local c = cards[i]
 		c.index = i
 		c.prio = 0
 		if c.id == 46448938 then
-			c.prio = 17
+			c.prio = 22
+			if bookbanish[c.id] == 1 then
+				c.prio = c.prio + 7
+			end
+			bookbanish[c.id] = 1
 		end
 		if c.id == 40230018 then
-			c.prio = 16
+			c.prio = 21
+			if bookbanish[c.id] == 1 then
+				c.prio = c.prio + 7
+			end
+			bookbanish[c.id] = 1
 		end
 		if c.id == 33981008 or c.id == 88616795 or c.id == 52628687 then
-			c.prio = 15
+			c.prio = 20
+			if bookbanish[c.id] == 1 then
+				c.prio = c.prio + 7
+			end
+			bookbanish[c.id] = 1
 		end
 		if c.id == 56981417 then
-			c.prio = 14
+			c.prio = 19
+			if bookbanish[c.id] == 1 then
+				c.prio = c.prio + 7
+			end
+			bookbanish[c.id] = 1
 		end
 		if c.id == 89739383 then
-			c.prio = 13
+			c.prio = 18
+			if bookbanish[c.id] == 1 then
+				c.prio = c.prio + 7
+			end
+			bookbanish[c.id] = 1
 		end
 		if c.id == 25123082 then
-			c.prio = 12
+			c.prio = 17
+			if bookbanish[c.id] == 1 then
+				c.prio = c.prio + 7
+			end
+			bookbanish[c.id] = 1
 		end
 		if c.id == 97997309 then
-			c.prio = 11
+			c.prio = 16
+			if bookbanish[c.id] == 1 then
+				c.prio = c.prio + 7
+			end
+			bookbanish[c.id] = 1
 		end
 		if c.location == LOCATION_HAND then
-			c.prio = c.prio - 9
+			c.prio = c.prio - 14
 		end
 	end
 end
@@ -628,9 +703,6 @@ function SpellbookOnSelectChain(cards,only_chains_by_player)
 		JudgmentCount = 0
 		return {1,CurrentIndex}
 	end
-	if HasID(cards,12607053) and ChainWaboku() then
-		return {1,CurrentIndex}
-	end
 	if HasID(cards,88616795) and ChainWisdom() then
 		JudgmentCount = JudgmentCount + 1
 		return {1,CurrentIndex}
@@ -649,13 +721,21 @@ function SpellbookOnSelectChain(cards,only_chains_by_player)
 		JudgmentCount = JudgmentCount + 1
 		return {1,CurrentIndex}
 	end
-  if HasID(cards,05851097) and ChainVanity() then
-    return {1,CurrentIndex}
-  end
-	if HasID(cards,97997309,nil,1567956944) then
-		return {0,CurrentIndex}
+	if HasID(cards,84749824) and HasID(AIMon(),41855169,true) then
+		return {1,CurrentIndex}
+	end
+	if HasID(cards,12607053) and SpellbookChainWaboku() and Global1PTWaboku ~= 1 then
+	  	Global1PTWaboku = 1 
+		return {1,CurrentIndex}
 	end
 	return nil
+end
+function SpellbookChainWaboku()
+	local target = Duel.GetAttackTarget()
+	if target and target:IsControler(player_ai) and target:IsCode(41855169) then
+		return true
+	end
+	return false
 end
 function ChainFateSecond()
 	local ex,cg = Duel.GetOperationInfo(Duel.GetCurrentChain(),CATEGORY_DESTROY)
@@ -672,16 +752,6 @@ function ChainFateSecond()
 		end
 	end
 	return false
-end
-function ChainVanity()
-  for i=1,Duel.GetCurrentChain() do
-    if Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_SPECIAL_SUMMON) 
-    and  Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_PLAYER)~=player_ai 
-    then
-      return true
-    end
-  end
-  return false
 end
 function SpellbookOnSelectEffectYesNo(id,triggeringCard)
 	local result = nil
@@ -728,50 +798,50 @@ function SetSpellbookPriority(cards,count)
 		c.index=i
 		c.prio=0
 		if c.id==40230018 then
-			if count>1 and not HasID(AIHand(),c.id,true) and count+Duel.GetFieldGroupCount(player_ai,LOCATION_HAND,0)-spellbook[40230018]>6 then
+			if count>1 and not (HasID(AIHand(),c.id,true) or HasID(AIHand(),89631139,true)) and count+Duel.GetFieldGroupCount(player_ai,LOCATION_HAND,0)-spellbook[40230018]>6 then
 				c.prio=200
 			end
 		end
-		if c.id==14824019 and (Duel.GetTurnCount()~=1 or not AIMon() or #AIMon()<1) and not SummonedAlready then
-			c.prio=66
+		if c.id==14824019 and (Duel.GetTurnCount()~=1 or not AIMon() or #AIMon()<1) and GlobalSummonedThisTurn<1 then
+			c.prio=68
 		end
 		if c.id==46448938 then
-			c.prio=46
+			c.prio=48
 			if JudgmentAlready or not UseJudgment() then
-				c.prio=c.prio-24
+				c.prio=c.prio-26
 			end
 		end
 		if c.id==89739383 then
-			c.prio=44
+			c.prio=46
 			if SecretsAlready and AI.GetCurrentPhase()~=PHASE_END then
-				c.prio=c.prio-24
+				c.prio=c.prio-26
 			end
 		end
 		if c.id==56981417 then
-			c.prio=42
+			c.prio=44
 			if (MasterAlready and AI.GetCurrentPhase()~=PHASE_END) or not CheckMaster() then
-				c.prio=c.prio-24
+				c.prio=c.prio-26
 			end
 		end
 		if c.id==25123082 then
-			c.prio=40
-			if (PowerAlready and AI.GetCurrentPhase()~=PHASE_END) or not UsePower() then
-				c.prio=c.prio-24
+			c.prio=42
+			if (PowerAlready and AI.GetCurrentPhase()~=PHASE_END) or not UsePower() or not SpellbookHasSpellcaster() then
+				c.prio=c.prio-26
 			end
 		end
 		if c.id==52628687 then
-			c.prio=38
+			c.prio=40
 			if (LifeAlready and AI.GetCurrentPhase()~=PHASE_END) or not UseLife() then
-				c.prio=c.prio-24
+				c.prio=c.prio-26
 			end
 		end
 		if c.id==97997309 then
-			c.prio=36
-			if FatePlus() then
-				c.prio=64
+			c.prio=38
+			if FatePlus() and SpellbookHasSpellcaster() then
+				c.prio=66
 			end
-			if HasID(UseLists({AIHand(),AIST()}),12607053,true) or HasID(UseLists({AIHand(),AIST()}),84749824,true) then
-				c.prio=c.prio-24
+			if HasID(UseLists({AIHand(),AIST()}),12607053,true) or HasID(UseLists({AIHand(),AIST()}),84749824,true) or not SpellbookHasSpellcaster() then
+				c.prio=c.prio-26
 			end
 		end
 		if c.id==33981008 then
@@ -780,29 +850,32 @@ function SetSpellbookPriority(cards,count)
 		if c.id==88616795 then
 			c.prio=30
 			if JudgmentAlready and JudgmentCount>2 then
-				c.prio=35
+				c.prio=36
+			end
+			if not SpellbookHasSpellcaster() then
+				c.prio=c.prio-26
 			end
 		end
 		if c.id==61592395 then
 			c.prio=28
-			if EternityAlready then
-				c.prio=c.prio-24
+			if (LifeAlready and AI.GetCurrentPhase()~=PHASE_END) or not CheckEternity() then
+				c.prio=c.prio-26
 			end
 		end
 		if c.id==56321639 then
 			c.prio=26
 		end
 		if HasID(AIST(),c.id,true) or HasID(AIHand(),c.id,true) then
-			c.prio=c.prio-24
+			c.prio=c.prio-26
 		end
 		if c.location == LOCATION_DECK and (c.id==25123082 or c.id==33981008 or c.id==40230018 or c.id==52628687 or c.id==56321639 or c.id==56981417 or c.id==61592395 or c.id==88616795 or c.id==89739383 or c.id==97997309) then
-			c.prio=c.prio-spellbook[c.id]*24
+			c.prio=c.prio-spellbook[c.id]*26
 			spellbook[c.id]=spellbook[c.id]+1
 		end
 		if c.location == LOCATION_REMOVED then
 			c.prio=c.prio+1
 		end
-		if c.id==56981417 and c.location == LOCATION_REMOVED and c.prio<42 then
+		if c.id==56981417 and c.location == LOCATION_REMOVED and c.prio<44 then
 			c.prio=32
 		end
 		if c.id == 41855169 and c.location == LOCATION_DECK then
@@ -856,6 +929,9 @@ function SetJudgmentPriority(cards,count)
 			if HasID(AIHand(),c.id,true) then
 				ct=1
 			end
+			if HasID(AIHand(),c.id,89631139) then
+				ct=ct+1
+			end
 			if count+Duel.GetFieldGroupCount(player_ai,LOCATION_HAND,0)-ct-judgment[40230018]>6 then
 				c.prio=100
 			end
@@ -863,7 +939,7 @@ function SetJudgmentPriority(cards,count)
 		if c.id==89739383 then
 			c.prio=19
 		end
-		if c.id==61592395 then
+		if c.id==61592395 and (HasID(AIST(),97997309,true) or HasID(AIBanish(),46448938,true)) then
 			c.prio=18
 		end
 		if c.id==56321639 then
@@ -880,7 +956,7 @@ function SetJudgmentPriority(cards,count)
 		end
 		if c.id==97997309 then
 			c.prio=13
-			if FatePlus() then
+			if FatePlus() and SpellbookHasSpellcaster() then
 				c.prio=28
 			end
 		end
@@ -889,6 +965,9 @@ function SetJudgmentPriority(cards,count)
 		end
 		if c.id==33981008 then
 			c.prio=11
+		end
+		if c.id==89631139 then
+			c.prio=10000
 		end
 		if (HasID(AIST(),c.id,true) and c.id~=56321639) or HasID(AIHand(),c.id,true) then
 			c.prio=c.prio-10
@@ -1165,16 +1244,8 @@ function EnableSpellbookCheck()
 		MasterAlready = false
 		PowerAlready = false
 		LifeAlready = false
-		SummonedAlready = false
 	end)
 	Duel.RegisterEffect(e3,0)
-	local e4=Effect.GlobalEffect()
-	e4:SetType(EFFECT_TYPE_CONTINUOUS+EFFECT_TYPE_FIELD)
-	e4:SetCode(EVENT_SUMMON)
-	e4:SetOperation(function(e,tp,eg,ep,ev,re,r,rp)
-		SummonedAlready = true
-	end)
-	Duel.RegisterEffect(e4,0)
 end
 SpellbookTurn=0
 function SpellbookResetOPT()
@@ -1190,7 +1261,6 @@ function SpellbookResetOPT()
     MasterAlready = false
     PowerAlready = false
     LifeAlready = false
-    SummonedAlready = false
     EnableSpellbookCheck()
   end
 end
