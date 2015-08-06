@@ -923,6 +923,9 @@ end
 function FilterLevelMin(c,level)
   return FilterType(c,TYPE_MONSTER) and c.level>=level
 end
+function FilterLevelMax(c,level)
+  return FilterType(c,TYPE_MONSTER) and c.level<=level
+end
 function FilterRank(c,rank)
   if c.GetCode then
     return FilterType(c,TYPE_XYZ) and c:GetRank()==rank
@@ -938,10 +941,22 @@ function FilterType(c,type) -- TODO: change all filters to support card script
   end
 end
 function FilterAttackMin(c,attack)
-  return FilterType(c,TYPE_MONSTER) and c.attack>=attack
+  local atk = 0
+  if c.GetCode then
+    atk = c:GetAttack()
+  else
+    atk = c.attack
+  end
+  return FilterType(c,TYPE_MONSTER) and atk>=attack
 end
 function FilterAttackMax(c,attack)
-  return FilterType(c,TYPE_MONSTER) and c.attack<=attack
+  local atk = 0
+  if c.GetCode then
+    atk = c:GetAttack()
+  else
+    atk = c.attack
+  end
+  return FilterType(c,TYPE_MONSTER) and atk<=attack
 end
 function FilterDefenseMin(c,defense)
   return FilterType(c,TYPE_MONSTER) and c.defense<=defense

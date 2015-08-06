@@ -116,7 +116,7 @@ function SummonExtraDeck(cards,prio)
   if HasIDNotNegated(SpSum,31437713) and SummonHeartlanddracoFinish() then
     return XYZSummon()
   end
-  if HasIDNotNegated(SpSum,00005509) and SummonUtopiaLightningFinish(SpSum[CurrentIndex],2) then
+  if HasIDNotNegated(SpSum,56832966) and SummonUtopiaLightningFinish(SpSum[CurrentIndex],2) then
     return XYZSummon()
   end
   if HasIDNotNegated(SpSum,84013237) and SummonUtopiaLightningFinish(SpSum[CurrentIndex],1) then
@@ -1137,15 +1137,15 @@ function SummonUtopiaLightningFinish(c,mode)
   and Duel.GetCurrentPhase() == PHASE_MAIN1 
   then
     if mode == 1 then 
-      c = FindID(00005509,AIExtra()) 
-      if HasID(AIExtra(),00005509,true)
+      c = FindID(56832966,AIExtra()) 
+      if HasID(AIExtra(),56832966,true)
       and HasID(AIExtra(),84013237,true)
       and CardsMatchingFilter(OppMon(),LightningFinishFilter,c)>0 
       then
         return true
       end
     else
-      if HasID(AIExtra(),00005509,true)
+      if HasID(AIExtra(),56832966,true)
       and HasID(AIMon(),84013237,true)
       and CardsMatchingFilter(OppMon(),LightningFinishFilter,c)>0 
       then
@@ -1407,6 +1407,9 @@ function ChainBTS(card)
         --return true
       end
     end
+  end
+  if RemovalCheckCard(card) then
+	return true
   end
   return false
 end
@@ -1734,7 +1737,7 @@ function GenericChain(cards)
   if HasIDNotNegated(cards,10406322,UseAlsei) then
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,00005509,ChainUtopiaLightning) then
+  if HasIDNotNegated(cards,56832966,ChainUtopiaLightning) then
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,55713623,ChainShrink) then
@@ -1907,7 +1910,7 @@ function GenericEffectYesNo(id,card)
   if id == 10406322 and UseAlsei(card) then
     result = 1
   end
-  if id == 00005509 and ChainUtopiaLightning(card) then
+  if id == 56832966 and ChainUtopiaLightning(card) then
     result = 1
   end
   return result

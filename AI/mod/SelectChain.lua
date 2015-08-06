@@ -399,7 +399,7 @@ end
    if cards[i].id == 98045062 then -- Enemy Controller
 	if Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") < Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") and 
 	   Get_Card_Att_Def(AIMon(),"attack",">",POS_FACEUP,"attack") > Get_Card_Att_Def(OppMon(), "attack", ">", POS_FACEUP_ATTACK, "defense") then
-      return 1,i
+      --return 1,i
      end
    end
  end

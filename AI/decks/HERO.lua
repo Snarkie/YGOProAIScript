@@ -606,8 +606,9 @@ function SummonDarkLaw(c,darkheroes)
     return true
   end
   for i=1,Duel.GetCurrentChain() do
-    local tg = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TARGET_CARDS)
-    if (Duel.GetOperationInfo(i,CATEGORY_TOHAND) and tg == nil
+	local e = Duel.GetChainInfo(i,CHAININFO_TRIGGERING_EFFECT)
+    if (e and bit32.band(e:GetCategory(),CATEGORY_SEARCH)>0
+	and bit32.band(e:GetCategory(),CATEGORY_TOHAND)>0
     or Duel.GetOperationInfo(i,CATEGORY_DRAW)
     or Duel.GetOperationInfo(i,CATEGORY_TOGRAVE)
     or Duel.GetOperationInfo(i,CATEGORY_DECKDES))

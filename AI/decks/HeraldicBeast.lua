@@ -854,59 +854,40 @@ function ChainSafeZone(c)
 end
 
 function LanceFilter(card)
-	return card:IsControler(player_ai) and card:IsType(TYPE_MONSTER) 
-  and card:IsLocation(LOCATION_MZONE) and card:IsPosition(POS_FACEUP)
-  and not card:IsHasEffect(EFFECT_IMMUNE_EFFECT)
+  return Targetable(card,TYPE_SPELL)
+  and Affected(card,TYPE_SPELL)
+  and FilterType(card,TYPE_MONSTER)
+  and FilterPosition(card,POS_FACEUP)
+  and FilterLocation(card,LOCATION_MZONE)
 end
 function ChainLance()
-	local ex,cg = Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_DESTROY)
-	if ex then
-		--if cg:IsExists(function(c) return c:IsControler(player_ai) and c:IsCode(27243130) end, 1, nil) then
-      --return true
-    --end	
-  end
-  local cc=Duel.GetCurrentChain()
-  local cardtype = Duel.GetChainInfo(cc, CHAININFO_EXTTYPE)
-  local ex,cg = Duel.GetOperationInfo(cc, CATEGORY_DESTROY)
-  local tg = Duel.GetChainInfo(cc, CHAININFO_TARGET_CARDS)
-  local e = Duel.GetChainInfo(cc, CHAININFO_TRIGGERING_EFFECT)
-  local p = Duel.GetChainInfo(cc, CHAININFO_TRIGGERING_PLAYER)
-  local source = Duel.GetAttacker()
-	local target = Duel.GetAttackTarget()
-  if e and e:GetHandler():GetCode()==27243130 then
-    return false
-  end
-  if source and target then
-    if source:IsControler(player_ai) then
-      target = Duel.GetAttacker()
-      source = Duel.GetAttackTarget()
-    end
-  end
-  local g
-  if ex and cg then
-    g = cg:Filter(LanceFilter, nil):GetMaxGroup(Card.GetAttack)
-  elseif tg then
-    g = tg:Filter(LanceFilter, nil):GetMaxGroup(Card.GetAttack)
-  end
-  if g and bit32.band(cardtype, TYPE_SPELL+TYPE_TRAP)>0 
-  and p ~= player_ai and UnchainableCheck(27243130)
-  then
-    if source and target and target:IsCode(g:GetFirst():GetCode())
-    and source:IsPosition(POS_FACEUP_ATTACK) and target:IsPosition(POS_FACEUP_ATTACK)
-    and source:GetAttack()>target:GetAttack()-800
-    then
-      return false
-    end
-    GlobalTargetSet(g:GetFirst(),AIMon())
-    return true
-  end
-  if Duel.GetCurrentPhase() == PHASE_DAMAGE and source and target then
-    if source:GetAttack() >= target:GetAttack() and math.max(source:GetAttack()-800,0) <= target:GetAttack() 
-    and source:IsPosition(POS_FACEUP_ATTACK) and target:IsPosition(POS_FACEUP_ATTACK) and target:IsControler(player_ai)
-    and not source:IsHasEffect(EFFECT_IMMUNE_EFFECT)
+  local targets={}
+  local aimon,oppmon=GetBattlingMons()
+  for i=1,#AIMon() do
+    local c = AIMon()[i]
+    if RemovalCheckCard(c,nil,TYPE_SPELL+TYPE_TRAP,nil,LanceFilter)
     and UnchainableCheck(27243130)
     then
-      GlobalTargetSet(source,OppMon())
+
+    if not(aimon and oppmon 
+    and CardsEqual(aimon,c) 
+    and not AttackBoostCheck(-800)) 
+    then
+      targets[#targets+1]=c
+    end
+    end
+  end
+  if #targets>0 then
+    SortByATK(targets)
+    GlobalTargetSet(targets[1])
+    return true
+  end
+  if Duel.GetCurrentPhase() == PHASE_DAMAGE and aimon and oppmon then
+    if AttackBoostCheck(0,800)
+    and LanceFilter(oppmon)
+    and UnchainableCheck(27243130)
+    then
+      GlobalTargetSet(oppmon)
       return true
     end
   end

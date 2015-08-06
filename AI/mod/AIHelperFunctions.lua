@@ -1665,19 +1665,20 @@ function ApplyATKBoosts(Cards)
   if #Cards > 0 then
     local ST = AIST()
     local check = false
-    for i=1,#ST do
-      if ST[i].id == 27243130 and bit32.band(ST[i].status,STATUS_SET_TURN)==0 then
-        check = true
-      end
+    if HasIDNotNegated(AIST(),27243130,true) then
+      check = true
     end
-    if HasID(AIHand(),27243130,true) and Duel.GetLocationCount(player_ai,LOCATION_SZONE)>0 then
+    if HasIDNotNegated(AIHand(),27243130,true) 
+    and Duel.GetLocationCount(player_ai,LOCATION_SZONE)>0 
+    then
       check = true
     end
     if check then
       for i=1,#Cards do
-        if CurrentOwner(Cards[i])==2 
-        and Cards[i]:is_affected_by(EFFECT_IMMUNE_EFFECT)==0
-        and Cards[i]:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
+        local c = Cards[i]
+        if CurrentOwner(c)==2 
+        and Affected(c,TYPE_SPELL)
+        and Targetable(c,TYPE_SPELL)
         then
           Cards[i].attack = Cards[i].attack -800
           Cards[i].bonus = -800
@@ -2026,6 +2027,12 @@ end
 -- if both are equal, and False if any field is different.
 ----------------------------------------------------------
 function CardsEqual(Card1, Card2)
+  if Card1 and Card1.GetCode then
+    Card1=GetCardFromScript(Card1)
+  end
+  if Card2 and Card2.GetCode then
+    Card2=GetCardFromScript(Card2)
+  end
   return Card1 and Card2 and Card1.cardid==Card2.cardid
 end
 

@@ -14,7 +14,7 @@ function CthStartup(deck)
      e1:SetType(EFFECT_TYPE_FIELD)
      e1:SetCode(EFFECT_PUBLIC)
      e1:SetTargetRange(LOCATION_HAND,0)
-     Duel.RegisterEffect(e1,player_ai)
+     --Duel.RegisterEffect(e1,player_ai)
 end
 DECK_CTH = NewDeck("Cth",11066358,CthStartup)
 CthPriorityList={
