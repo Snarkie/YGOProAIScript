@@ -9,9 +9,9 @@ function MonarchStartup(deck)
   deck.BattleCommand        = MonarchBattleCommand
   deck.AttackTarget         = MonarchAttackTarget
   deck.AttackBoost          = MonarchAttackBoost
-  deck.Tribute				= MonarchTribute
+  deck.Tribute				      = MonarchTribute
+  deck.Option               = MonarchOption
   --[[
-  deck.Option 
   deck.Sum 
   deck.DeclareCard
   deck.Number
@@ -43,7 +43,7 @@ MonarchActivateBlacklist={
 61318483, -- Jackfrost
 12538374, -- Treeborn
 33609262, -- Tenacity
-05318639, -- MST
+--05318639, -- MST
 79844764, -- Stormforth
 98045062, -- Econ
 36776089, -- Centaurea
@@ -51,6 +51,7 @@ MonarchActivateBlacklist={
 58058134, -- Slacker
 46895036, -- Ghostrick Dullahan
 53334641, -- Ghostrick Angel of Mischief
+02766877, -- Daigusto Phoenix
 }
 MonarchSummonBlacklist={
 47297616, -- LADD
@@ -69,9 +70,7 @@ MonarchSummonBlacklist={
 12538374, -- Treeborn
 97268402, -- Veiler
 
-43202238, -- Yazi
-82044279, -- Clear Wing
-73580471, -- Black Rose
+--82044279, -- Clear Wing
 50091196, -- Formula
 01639384, -- Felgrand
 91949988, -- Gaia Dragon
@@ -84,6 +83,7 @@ MonarchSummonBlacklist={
 58058134, -- Slacker
 46895036, -- Ghostrick Dullahan
 53334641, -- Ghostrick Angel of Mischief
+02766877, -- Daigusto Phoenix
 }
 MonarchSetBlacklist={
 33609262, -- Tenacity
@@ -294,16 +294,32 @@ function SummonSwap(c,mode)
   return false
 end
 function SSSwap(c,mode)
-  if mode==1 then
-    return (HasID(AIHand(),12538374,true) or HasID(AIHand(),01357146,true)
-    or CardsMatchingFilter(AIHand(),FilterID,09126351)>1)
-    and NormalSummonCheck()
+  if mode==1 
+  and (HasID(AIHand(),12538374,true) 
+  or HasID(AIHand(),01357146,true)
+  or CardsMatchingFilter(AIHand(),FilterID,09126351)>1)
+  and (TributeCount() == 0 and TributeSummons(1,1)>0 or TributeCount() == 1 
+  and TributeSummons(1,1)==0 and TributeSummons(2,1)>0)
+  and not LADDCheck()
+  then
+    GlobalSSCardID=09126351
+    return true
+  end
+  if mode==2
+  and (HasID(AIHand(),12538374,true) 
+  or HasID(AIHand(),01357146,true)
+  or CardsMatchingFilter(AIHand(),FilterID,09126351)>1)
+  and NormalSummonCheck()
+  and not LADDCheck()
+  then
+    GlobalSSCardID=09126351
+    return true
   end
   return false
 end
 function UseSwap(c,mode)
   if mode==1 then
-    if TurnEndCheck() and #AIHand()<6 then
+    if MP2Check() and #AIHand()<6 then
       GlobalCardMode=1
       return true
     end
@@ -343,9 +359,13 @@ function SetRonin(mode)
   return TurnEndCheck()
 end
 function SummonMegaMobius(c,mode)
-  if mode==2 then mode=1 end
   if mode==1 and NotNegated(c) then
     return DestroyCheck(OppST())>1
+  end
+  if mode==2 then
+    return OppHasStrongestMonster()
+    and (HasPriorityTarget(OppMon())
+    or #OppMon()>1)
   end
   return false
 end
@@ -373,9 +393,13 @@ function SummonMegaCaius(c,mode)
   return false
 end
 function SummonMobius(c,mode)
-  if mode==2 then mode=1 end
   if mode==1 and NotNegated(c) then
     return DestroyCheck(OppST())>0
+  end
+  if mode==2 then
+    return OppHasStrongestMonster()
+    and (HasPriorityTarget(OppMon())
+    or #OppMon()>1)
   end
   return false
 end
@@ -420,6 +444,29 @@ function SummonGorz(c,mode)
   return false
 end
 function SummonVeiler(c,mode)
+  if mode==1 then
+    if FieldCheck(1)>0 
+    and HasIDNotNegated(AIExtra(),50091196,true) -- Formula
+    and DualityCheck()
+    then
+      return true
+    end
+    if FieldCheck(7)>0
+    and HasIDNotNegated(AIExtra(),76774528,true) -- Scrap
+    and DualityCheck()
+    and CardsMatchingFilter(OppField(),DestroyFilter)>0
+    and HasID(AIMon(),12538374,true)
+    then
+      return true
+    end
+    if FieldCheck(6)>0
+    and TurnEndCheck()
+    and DualityCheck()
+    and OppGetStrongestAttack()<2500
+    then
+      return true
+    end
+  end
   return false
 end
 function SummonRonin(c,mode)
@@ -428,9 +475,22 @@ function SummonRonin(c,mode)
     return (CardsMatchingFilter(AIGrave(),FrogFilter,12538374)>0
     or CardsMatchingFilter(cards,FilterID,12538374)>1)
     and not LADDCheck()
+    and (TributeSummons(2,1)>0 and TributeCount()==1)
+    and not NormalSummonCheck()
+  end
+  if mode == 2 then
+    return (CardsMatchingFilter(AIGrave(),FrogFilter,12538374)>0
+    or CardsMatchingFilter(cards,FilterID,12538374)>1)
+    and not LADDCheck()
     and (TributeSummons(1,1)>0 and TributeCount()==0
     or TributeSummons(2,1)>0 and TributeCount()==1)
     and not NormalSummonCheck()
+  end
+  if mode == 3 then
+    return (CardsMatchingFilter(AIGrave(),FrogFilter,12538374)>0
+    or CardsMatchingFilter(cards,FilterID,12538374)>1)
+    and FieldCheck(2)==1
+    and (OppHasStrongestMonster() or BattlePhaseCheck())
   end
   return false
 end
@@ -505,6 +565,72 @@ end
 function SummonAngel(c,mode)
   return HasID(AIMon(),46895036,true)
 end
+function SummonFormula(c)
+  return true
+end
+function SummonSlacker(c,mode)
+  return TurnEndCheck()
+end
+function DownerdFilter(c)
+  return FilterType(c,TYPE_XYZ) 
+  and c.rank>4
+  and c.xyz_material_count==0
+end
+function SummonDownerd(c,mode)
+  return CardsMatchingFilter(AIMon(),DownerdFilter)>0
+end
+function CentaureaFilter(c,source)
+  return not FilterAffected(c,EFFECT_CANNOT_BE_BATTLE_TARGET)
+  and AttackBlacklistCheck(c,source)
+  and Affected(c,TYPE_MONSTER,2)
+  and PriorityTarget(c)
+end
+function SummonCentaurea(c,mode)
+  return OppHasStrongestMonster()
+  and (CardsMatchingFilter(OppMon(),CentaureaFilter,c)>0
+  or CanWinBattle(c,OppMon()))
+end
+function SummonGachi(c,mode)
+  return true
+end
+function SummonScrap(c,mode)
+  if mode == 1 then
+    local cards=UseLists(AIMon(),AIGrave())
+    if HasID(cards,12538374,true) 
+    and CardsMatchingFilter(OppField(),DestroyFilter)>0
+    and MP2Check()
+    then  
+      return true
+    end
+    if OppHasStrongestMonster() 
+    and OppGetStrongestAttDef()<=c.attack
+    then
+      return true
+    end
+  end
+  return false
+end
+function SummonPhoenix(c,mode)
+  if mode == 1 then
+    local atk = math.max(c.attack,AIGetStrongestAttack(false,PhoenixFilter))
+    if (#OppMon()==0 or OppGetStrongestAttDef()<atk)
+    and BattlePhaseCheck()
+    then
+      return true
+    end
+  end
+  return false
+end
+function PhoenixFilter(c)
+  return FilterAttribute(c,ATTRIBUTE_WIND)
+  and (#OppMon()==0 or CanWinBattle(c,OppMon()))
+  and Targetable(c,TYPE_MONSTER)
+  and Affected(c,TYPE_MONSTER,2)
+end
+function UsePhoenix(c,mode)
+  return BattlePhaseCheck()
+  and CardsMatchingFilter(AIMon(),PhoenixFilter)
+end
 function MonarchInit(cards)
   local Act = cards.activatable_cards
   local Sum = cards.summonable_cards
@@ -521,6 +647,9 @@ function MonarchInit(cards)
   if HasID(SpSum,09126351,SSSwap,1) then
     return COMMAND_SPECIAL_SUMMON,CurrentIndex
   end
+  if HasID(SpSum,09126351,SSSwap,2) then
+    return COMMAND_SPECIAL_SUMMON,CurrentIndex
+  end
   if HasID(Act,09126351,UseSwap,1) then
     return COMMAND_ACTIVATE,CurrentIndex
   end
@@ -533,11 +662,14 @@ function MonarchInit(cards)
   if HasID(SpSum,46895036,SummonDullahan,1) then
     return COMMAND_SPECIAL_SUMMON,CurrentIndex
   end
+  if HasID(Act,01357146,SummonRonin,1) then
+    return COMMAND_ACTIVATE,CurrentIndex
+  end
   local mode = 1
   if GlobalStormforth == Duel.GetTurnCount() then
     mode = 2
   end
-  if HasID(Sum,23689697,SummonMegaMobius,mode) then
+  if HasID(Sum,23689697,SummonMegaMobius,1) then
     return COMMAND_SUMMON,CurrentIndex
   end
   if HasID(Sum,47297616,SummonLADD,mode) then
@@ -546,7 +678,7 @@ function MonarchInit(cards)
   if HasID(Sum,87288189,SummonMegaCaius,mode) then
     return COMMAND_SUMMON,CurrentIndex
   end
-  if HasID(Sum,04929256,SummonMobius,mode) then
+  if HasID(Sum,04929256,SummonMobius,1) then
     return COMMAND_SUMMON,CurrentIndex
   end
   if HasID(Sum,09748752,SummonCaius,mode) then
@@ -558,10 +690,16 @@ function MonarchInit(cards)
   if HasID(Sum,47084486,SummonVanity,mode) then
     return COMMAND_SUMMON,CurrentIndex
   end
-  if HasID(Sum,47084486,SummonGorz,mode) then
+  if HasID(Sum,04929256,SummonMobius,2) and mode==2 then
     return COMMAND_SUMMON,CurrentIndex
   end
-  if HasID(Act,01357146,SummonRonin,1) then
+  if HasID(Sum,23689697,SummonMegaMobius,2) and mode==2 then
+    return COMMAND_SUMMON,CurrentIndex
+  end
+  if HasID(Sum,44330098,SummonGorz,mode) then
+    return COMMAND_SUMMON,CurrentIndex
+  end
+  if HasID(Act,01357146,SummonRonin,2) then
     return COMMAND_ACTIVATE,CurrentIndex
   end
   if HasID(Sum,09126351,SummonSwap,1) then
@@ -576,9 +714,7 @@ function MonarchInit(cards)
   if HasIDNotNegated(Sum,41386308,SummonMath,2) then
     return COMMAND_SUMMON,CurrentIndex
   end
-  if HasIDNotNegated(Sum,97268402,SummonVeiler,1) then
-    return COMMAND_SUMMON,CurrentIndex
-  end
+
   if HasID(Sum,92661479,SummonBounzer,1) then
     return COMMAND_SUMMON,CurrentIndex
   end
@@ -592,6 +728,39 @@ function MonarchInit(cards)
     return COMMAND_SPECIAL_SUMMON,CurrentIndex
   end
   if HasID(SpSum,53334641,SummonAngel) then
+    return COMMAND_SPECIAL_SUMMON,CurrentIndex
+  end
+  if HasIDNotNegated(Sum,97268402,SummonVeiler,1) then
+    return COMMAND_SUMMON,CurrentIndex
+  end
+  if HasID(SpSum,50091196,SummonFormula) then
+    return COMMAND_SPECIAL_SUMMON,CurrentIndex
+  end
+  if HasID(SpSum,76774528,SummonScrap,1) then
+    return COMMAND_SPECIAL_SUMMON,CurrentIndex
+  end
+  if HasID(SpSum,82044279,SummonClearWing) then
+    --return COMMAND_SPECIAL_SUMMON,CurrentIndex
+  end
+  if HasID(SpSum,58058134,SummonSlacker) then
+    return COMMAND_SPECIAL_SUMMON,CurrentIndex
+  end
+  if HasID(SpSum,72167543,SummonDownerd) then
+    return COMMAND_SPECIAL_SUMMON,CurrentIndex
+  end
+  if HasID(Act,01357146,SummonRonin,3) then
+    return COMMAND_ACTIVATE,CurrentIndex
+  end
+  if HasID(Act,02766877,UsePhoenix) then
+    return COMMAND_ACTIVATE,CurrentIndex
+  end
+  if HasID(SpSum,02766877,SummonPhoenix,1) then
+    return COMMAND_SPECIAL_SUMMON,CurrentIndex
+  end
+  if HasID(SpSum,36776089,SummonCentaurea) then
+    return COMMAND_SPECIAL_SUMMON,CurrentIndex
+  end
+  if HasID(SpSum,10002346,SummonGachi) then
     return COMMAND_SPECIAL_SUMMON,CurrentIndex
   end
   if HasID(SetMon,12538374,SetTreeborn,1) then
@@ -653,6 +822,10 @@ function SwapTarget(cards)
     GlobalCardMode=nil
     return Add(cards,PRIO_TOHAND,1,FilterID,09126351)
   end
+  if LocCheck(cards,LOCATION_HAND) then
+    GlobalSSCardID = nil
+    return Add(cards,PRIO_TOGRAVE)
+  end
   return Add(cards,PRIO_TOGRAVE,1,FilterLocation,LOCATION_DECK)
 end
 function CaiusTarget(cards)
@@ -685,13 +858,13 @@ end
 function MobiusFilter(c)
   return Affected(c,TYPE_MONSTER,6)
   and Targetable(c,TYPE_MONSTER)
-  and DestroyFilter()
+  and DestroyFilter(c)
   and CurrentOwner(c)==2
 end
 function MegaMobiusFilter(c)
   return Affected(c,TYPE_MONSTER,8)
   and Targetable(c,TYPE_MONSTER)
-  and DestroyFilter()
+  and DestroyFilter(c)
   and CurrentOwner(c)==2
 end
 function MobiusTarget(cards,max)
@@ -725,6 +898,12 @@ function DullahanTarget(cards)
   end
   return BestTargets(cards)
 end
+function PhoenixTarget(cards)
+  if LocCheck(cards,LOCATION_OVERLAY) then  
+    return Add(cards,PRIO_TOGRAVE)
+  end
+  return BestTargets(cards,1,TARGET_PROTECT)
+end
 function MonarchCard(cards,min,max,id,c)
   if not c and GlobalStormforth==Duel.GetTurnCount()
   and min==1 and max==1 and Duel.GetTurnPlayer()==player_ai
@@ -732,7 +911,7 @@ function MonarchCard(cards,min,max,id,c)
   then
     return StormforthTarget(cards)
   end
-  if id == 09126351 then
+  if id == 09126351 or GlobalSSCardID == 09126351 then
     return SwapTarget(cards)
   end
   if id == 41386308 then -- Mathematician
@@ -780,7 +959,8 @@ function ChainEcon(c)
   and Duel.GetCurrentPhase()==PHASE_STANDBY
   and HasID(AIMon(),12538374,true) 
   and CardsMatchingFilter(OppMon(),EconFilter)>0
-  and TributeSummons()>0
+  and (TributeSummons(2)>0
+  or TributeSummons()>0)
   and UnchainableCheck(98045062)
   then
     return true
@@ -816,10 +996,39 @@ function ChainMath(c)
   return false
 end
 function ChainGorz(c)
-  return true
+  local aimon,oppmon=GetBattlingMons()
+  if OppGetStrongestAttack()<=c.attack then
+    return true
+  end
+  if oppmon and OppGetStrongestAttack()>=oppmon:GetAttack() then
+    return true
+  end
+  if OppGetStrongestAttack(CanAttack,true)>=0.7*AI.GetPlayerLP(1)
+  then
+    return true
+  end
+  return false
 end
 function ChainJackfrost(c)
-  return true
+  local cards = GetAttackers()
+  local aimon,oppmon=GetBattlingMons()
+  if BattleDamage(nil,oppmon)>=AI.GetPlayerLP(1) then
+    return true
+  end
+  if HasIDNotNegated(AIHand(),44330098,true) -- Gorz
+  and not DualityCheck()
+  and #AIField()==0
+  then
+    return false
+  end
+  if BattleDamage(nil,oppmon)>=0.7*AI.GetPlayerLP(1) then
+    return true
+  end
+  if ExpectedDamage()==BattleDamage(nil,oppmon)
+  then 
+    return true
+  end
+  return false
 end
 function ChainMobius(c)
   return DestroyCheck(OppST())>0
@@ -849,6 +1058,9 @@ function ChainDullahan(c)
     return true
   end
 end
+function ChainCentaurea(c)
+  return true
+end
 function MonarchChain(cards)
   if HasID(cards,46895036,ChainDullahan) then
     return 1,CurrentIndex
@@ -877,6 +1089,9 @@ function MonarchChain(cards)
   if HasID(cards,98045062,ChainEcon) then
     return 1,CurrentIndex
   end
+  if HasID(cards,36776089,ChainCentaurea) then
+    return {1,CurrentIndex}
+  end
   return nil
 end
 function MonarchEffectYesNo(id,card)
@@ -904,6 +1119,9 @@ function MonarchEffectYesNo(id,card)
   if id == 23689697 and ChainMegaMobius(card) then 
     return 1
   end
+  if id == 36776089 and ChainCentaurea(card) then 
+    return 1
+  end
   return nil
 end
 
@@ -914,6 +1132,15 @@ function MonarchYesNo(desc)
   return nil
 end
 
+function MonarchOption(options)
+  for i=1,#options do
+    if options[i] == 1568720993 then  -- Econ
+      return i
+    end
+  end
+  return nil
+end
+    
 function MonarchTribute(cards,min, max)
 end
 function MonarchBattleCommand(cards,targets,act)
@@ -957,8 +1184,8 @@ MonarchAtt={
 38495396, -- Ptolemy
 92661479, -- Bounzer
 36776089, -- Centaurea
-10002346, -- Gachi
 46895036, -- Dullahan
+02766877, -- Daigusto Phoenix
 }
 MonarchDef={
 23434538, -- Maxx "C"
@@ -969,6 +1196,8 @@ MonarchDef={
 50091196, -- Formula
 01249315, -- Herald of Pure Light
 58058134, -- Slacker
+10002346, -- Gachi
+44330099, -- Gorz token
 }
 function MonarchPosition(id,available)
   result = nil

@@ -107,6 +107,14 @@ end
 function RubicCond(loc,c)
   if loc == PRIO_TOFIELD then
     return not(FilterLocation(c,LOCATION_GRAVE))
+    and HasID(AIMon(),83531441,true)
+    and not HasID(AIMon(),10802915,true)
+    and Duel.GetTurnPlayer()==player_ai
+    and Duel.GetCurrentPhase()~=PHASE_END
+    and CardsMatchingFilter(AIHand(),BAMonsterFilter,00734741)>0
+    and (#AIST()==0 or not NormalSummonCheck())
+    and HasID(AIExtra(),00601193,true)
+    and not HasID(AIMon(),00601193,true)
   end
   return true 
 end
@@ -318,6 +326,12 @@ end
 function SummonFortuneTune()
   return false -- temp
 end
+function RepoDante(c)
+  return FilterPosition(c,POS_FACEUP_DEFENCE)
+  and BattlePhaseCheck()
+  and (#OppMon()==0 or OppGetStrongestAttDef()<=1000)
+  and NotNegated(c)
+end
 function BAInit(cards)
   GlobalPreparation = nil
   local Act = cards.activatable_cards
@@ -489,6 +503,9 @@ function BAInit(cards)
   if HasID(Act,47805931) then -- Giga-Brillant
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+  if HasID(Rep,83531441,RepoDante) then
+    return {COMMAND_CHANGE_POS,CurrentIndex}
+  end
   return nil
 end
 function FireLakeTarget(cards,min,max)
@@ -587,7 +604,7 @@ function BACard(cards,min,max,id,c)
     return Add(cards,PRIO_TOGRAVE)
   end
   if id == 62957424 then
-    return Add(cards,PRIO_TOFIELD)
+    return Add(cards,PRIO_TOFIELD,1,BAMonsterFilter)
   end
   if id == 00005497 then
     return MalacodaTarget(cards,c)
@@ -690,7 +707,7 @@ function ChainFarfa()
   return CardsMatchingFilter(OppMon(),FarfaFilter)>0
 end
 function ChainLibic()
-  return CardsMatchingFilter(AIHand(),FarfaFilter)>0
+  return CardsMatchingFilter(AIHand(),LibicFilter)>0
 end
 function BAChain(cards)
   if HasID(cards,57143342,false,nil,LOCATION_GRAVE) then -- Cir

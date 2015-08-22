@@ -504,7 +504,7 @@ end
 function RoDFilter(c)
   if c.GetCode then
     atk = c:GetAttack()
-    textatk = c:GetBaseAttack()
+    textatk = c:GetTextAttack()
   else
     atk = c.attack
     textatk = c.text_attack
@@ -513,13 +513,31 @@ function RoDFilter(c)
   and FilterPosition(c,POS_FACEUP)
   and Targetable(c,TYPE_TRAP)
   and Affected(c,TYPE_TRAP)
-  and atk<AI.GetPlayerLP(1)
-  and textatk<AI.GetPlayerLP(2)
+  and textatk<AI.GetPlayerLP(1)
+  and atk<=AI.GetPlayerLP(2)
+end
+function RoDFinishFilter(c)
+  if c.GetCode then
+    atk = c:GetAttack()
+    textatk = c:GetTextAttack()
+  else
+    atk = c.attack
+    textatk = c.text_attack
+  end
+  return RoDFilter(c)
+  and textatk>=AI.GetPlayerLP(2)
 end
 function ChainRoD(c)
   local targets = SubGroup(OppMon(),RoDFilter)
   local targets2 = SubGroup(targets,PriorityTarget,true)
+  local targets3 = SubGroup(targets,RoDFinishFilter,true)
   if RemovalCheckCard(c) and #targets>0 then
+    return true
+  end
+  if #targets3>0 and UnchainableCheck(83555666) then
+    BestTargets(targets3,1,TARGET_DESTROY)
+    GlobalTargetSet(targets3[1])
+    GlobalCardMode = 1
     return true
   end
   if #targets2>0 and UnchainableCheck(83555666) then

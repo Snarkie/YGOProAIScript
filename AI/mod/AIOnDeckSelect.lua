@@ -128,7 +128,7 @@ AddPriority({
 [20758643] = {6,2,8,2,8,2,1,1,5,1,GraffCond},    -- BA Graff
 [10802915] = {8,2,3,2,2,1,4,1,8,3,TourGuideCond},-- Tour Guide
 [84764038] = {5,2,5,4,5,2,6,1,4,2,ScarmCond},    -- BA Scarm
-[00734741] = {4,2,3,1,3,3,1,1,6,1,RubicCond},    -- BA Rubic
+[00734741] = {4,2,6,3,3,3,1,1,6,1,RubicCond},    -- BA Rubic
 [36553319] = {4,2,4,1,4,3,1,1,6,1,FarfaCond},    -- BA Farfa
 [09342162] = {3,2,6,1,6,3,1,1,6,1,CagnaCond},    -- BA Cagna
 [62957424] = {3,2,3,1,3,3,1,1,6,1,LibicCond},    -- BA Libic

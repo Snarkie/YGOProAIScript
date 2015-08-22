@@ -1,4 +1,4 @@
-Version = "0.30a"
+Version = "0.30b"
 Experimental = true
 
 --[[
@@ -105,6 +105,21 @@ function OnStartOfDuel()
   AI.Chat("AI script version "..Version)
   --if Experimental then AI.Chat("This is an experimental AI version, it might contain bugs and misplays") end
   SaveState()
+  
+  -- display draws in debug console
+  local e4=Effect.GlobalEffect()
+  e4:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+  e4:SetCode(EVENT_DRAW)
+  e4:SetOperation(function(e,tp,eg,ep,ev,re,r,rp)
+    if eg and eg:GetCount()>0 then
+      eg:ForEach(function(c)
+        if c:GetOwner()==player_ai then
+          print("AI draws: "..c:GetCode())
+        end
+      end)
+    end
+	end)
+  Duel.RegisterEffect(e4,player_ai)
 end
 
 

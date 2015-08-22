@@ -1679,6 +1679,7 @@ function ApplyATKBoosts(Cards)
         if CurrentOwner(c)==2 
         and Affected(c,TYPE_SPELL)
         and Targetable(c,TYPE_SPELL)
+        and not ArmadesCheck(c)
         then
           Cards[i].attack = Cards[i].attack -800
           Cards[i].bonus = -800
@@ -1817,6 +1818,7 @@ function ApplyATKBoosts(Cards)
     and NotNegated(c)
     and #OppMon()>0
     then
+      c.bonus = 5000-c.attack
       c.attack = 5000
     end
   end

@@ -16,7 +16,7 @@ function CthStartup(deck)
      e1:SetTargetRange(LOCATION_HAND,0)
      --Duel.RegisterEffect(e1,player_ai)
 end
-DECK_CTH = NewDeck("Cth",11066358,CthStartup)
+DECK_CTH = NewDeck("Cth",12948099,CthStartup)
 CthPriorityList={
 [15839054] = {1,1,-10,1,9.5,1,1,1,-10,1,nil},
 [17412721] = {1,1,6,1,1.5,1,1,1,1,1,nil},

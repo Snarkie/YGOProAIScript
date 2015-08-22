@@ -195,7 +195,7 @@ function OppHasMonster()
   return #cards>0
 end
 
-function AIGetStrongestAttack(skipbonus)
+function AIGetStrongestAttack(skipbonus,filter,opt)
   local cards=AIMon()
   local result=0
   ApplyATKBoosts(cards)
@@ -204,6 +204,7 @@ function AIGetStrongestAttack(skipbonus)
     if c
     and c:is_affected_by(EFFECT_CANNOT_ATTACK)==0 
     and c.attack>result 
+    and FilterCheck(c,filter,opt)
     and not (FilterPosition(c,POS_DEFENCE) 
     and (FilterStatus(c,STATUS_SUMMON_TURN)
     or FilterStatus(c,STATUS_JUST_POS)))
@@ -530,31 +531,7 @@ function NegateCheck(id)
   end
   return false
 end
-function ExpectedDamageFilter(card)
-  return card:IsControler(1-player_ai) and card:IsType(TYPE_MONSTER) and card:IsPosition(POS_FACEUP_ATTACK)
-  and card:GetAttackedCount()==0 and not card:IsHasEffect(EFFECT_CANNOT_ATTACK_ANNOUNCE) and not card:IsHasEffect(EFFECT_CANNOT_ATTACK)
-end
-function ExpectedDamageFilter2(card)
-  return card:IsControler(player_ai) and card:IsType(TYPE_MONSTER) and card:IsPosition(POS_FACEUP_ATTACK)
-  and card:GetAttackedCount()==0 and not card:IsHasEffect(EFFECT_CANNOT_ATTACK_ANNOUNCE) and not card:IsHasEffect(EFFECT_CANNOT_ATTACK)
-end
--- checks the damage the AI is expected to take or dish out during this turn
-function ExpectedDamage(player)
-  local result=0
-  local g = nil
-  if player and player == 2 then
-    g=Duel.GetMatchingGroup(ExpectedDamageFilter2,player_ai,LOCATION_MZONE,0,nil,p) 
-  else
-    g=Duel.GetMatchingGroup(ExpectedDamageFilter,1-player_ai,LOCATION_MZONE,0,nil,p) 
-  end
-  local c=nil
-  if g then c=g:GetFirst() end
-  while c do
-    result=result+c:GetAttack()
-    c=g:GetNext()
-  end
-  return result
-end
+
 TARGET_OTHER    = 0
 TARGET_DESTROY  = 1
 TARGET_TOGRAVE  = 2
@@ -995,7 +972,11 @@ function FilterStatus(c,status)
   end
 end
 function FilterSummon(c,type)
-  return bit32.band(c.summon_type,type)>0
+  if c.GetCode then
+    return bit32.band(c:GetSummonType(),SUMMON_TYPE_NORMAL)>0
+  else
+    return bit32.band(c.summon_type,type)>0
+  end
 end
 function FilterAffected(c,effect)
   if c.GetCode then
@@ -1126,7 +1107,7 @@ function FindID(id,cards,index,filter,opt)
 end
 
 
-function AttackBoostCheck(bonus,malus,player,filter,cond)
+function AttackBoostCheck(bonus,malus,player,filter,opt)
   local source = Duel.GetAttacker()
   local target = Duel.GetAttackTarget()
   if bonus == nil then bonus = 0 end
@@ -1240,7 +1221,7 @@ end
 function Affected(c,type,level)
   local id
   local immune = false
-  local atkdiff
+  local atkdiff = 0
   local lvl
   if c.GetCode then
     id = c:GetCode()
@@ -1267,6 +1248,8 @@ function Affected(c,type,level)
   if immune and FilterSet(c,0xaa) -- Qliphort
   then
     return not FilterSummon(c,SUMMON_TYPE_NORMAL)
+    or FilterType(c,TYPE_NORMAL)
+    or Negated(c)
     or ((bit32.band(type,TYPE_MONSTER)==0 
     and id ~=27279764 and id ~=40061558) -- Towers, Skybase
     or lvl<=level ) 
@@ -1359,6 +1342,9 @@ function DualityCheck(player)
   if player == 1 and HasIDNotNegated(OppMon(),72634965,true,nil,nil,POS_FACEUP) then 
     return false -- Vanity's Ruler
   end
+  if player == 2 and HasIDNotNegated(AIMon(),72634965,true,nil,nil,POS_FACEUP) then 
+    return false -- Vanity's Ruler
+  end
   return true
 end
 
@@ -1378,6 +1364,9 @@ function MacroCheck(player)
     return false -- Dimensional Fissure
   end
   if player == 1 and HasIDNotNegated(OppMon(),58481572,true,nil,nil,POS_FACEUP) then
+    return false -- Dark Law
+  end
+  if player == 2 and HasIDNotNegated(AIMon(),58481572,true,nil,nil,POS_FACEUP) then
     return false -- Dark Law
   end
   return true
@@ -1423,6 +1412,47 @@ function DestroyCountCheck(c,type,battle)
   return c:is_affected_by(EFFECT_INDESTRUCTABLE_COUNT)==0
 end
 
+Armades={
+56421754, -- U.A. Mighty Slugger
+45349196, -- Archfiend Black Skull Dragon
+83866861, -- Frightfur Mad Chimera
+29357956, -- GB Nerokius
+57477163, -- Frightfur Sheep
+88033975, -- Armades
+56832966, -- Utopia Lightning
+}
+
+function ArmadesCheck(c,filter,opt)
+  if c then
+    local id=c.id
+    for i=1,#Armades do
+      if Armades[i]==id then
+        return NotNegated(c)
+      end
+    end
+  end
+  --58569561 -- Aromage Rosemary
+  return false
+end
+
+Stareater={
+41517789, -- Star Eater
+86274272, -- Dododo Bot
+19700943, -- Ritual Beast Ulti-Apelio
+}
+
+function StareaterCheck(c,filter,opt)
+  if c then
+    local id=c.id
+    for i=1,#Stareater do
+      if Stareater[i]==id then
+        return NotNegated(c)
+      end
+    end
+  end
+  return false
+end
+
 AttBL={
 78371393,04779091,31764700, -- Yubel 1,2 and 3
 54366836,88241506,23998625, -- Lion Heart, Maiden with the Eyes of Blue, Heart-eartH
@@ -1440,6 +1470,9 @@ function AttackBlacklistCheck(c,source)
     id=c.id
   end
   if Negated(c) then
+    return true
+  end
+  if SelectAttackConditions(c,source) then
     return true
   end
   for i=1,#AttBL do
@@ -1465,22 +1498,38 @@ function BattleDamageCheck(c,source)
   and AttackBlacklistCheck(c,source)
 end
 
+function SafeAttackCheck(c,source)
+  return c:is_affected_by(EFFECT_CANNOT_BE_BATTLE_TARGET)==0
+  and AttackBlacklistCheck(c,source)
+end
+function AttackedCount(c)
+  if not c.GetCode then
+    c=GetScriptFromCard(c)
+  end
+  return c:GetAttackedCount()
+end
 function BattleDamage(c,source,atk,oppatk,oppdef,pierce)
+  if c and c.GetCode then
+    c=GetCardFromScript(c)
+  end
+  if source and source.GetCode then
+    source=GetCardFromScript(source)
+  end
   if atk == nil  then
     atk = source.attack
+  end
+  if c == nil then
+    if FilterAffected(source,EFFECT_CANNOT_DIRECT_ATTACK) then
+      return 0
+    else 
+      return atk*AvailableAttacks(source)
+    end
   end
   if oppatk == nil then
     oppatk = c.attack
   end
   if oppdef == nil then
     oppdef = c.defense
-  end
-  if c == nil then
-    if FilterAffected(source,EFFECT_CANNOT_DIRECT_ATTACK) then
-      return 0
-    else
-      return atk
-    end
   end
   if pierce == nil then
     pierce = FilterAffected(source,EFFECT_PIERCE) and NotNegated(source)
@@ -1562,35 +1611,37 @@ function CrashCheck(c)
   return false
 end
 
--- function to determine, if a card can win a battle against any of the targets, and if the 
--- target is expected to hit the graveyard (for effects that trigger on battle destruction)
-function CanWinBattle(c,targets,tograve,ignorebonus,filter,opt)
+-- function to determine, if a card can attack into another card
+-- without needing any bonus attack or taking any damage
+function CanAttackSafely(c,targets,filter,opt)
   local sub = SubGroup(targets,filter,opt)
   local atk = c.attack
-  sub = SubGroup(sub,BattleTargetCheck,c)
+  local baseatk = c.attack
+  local usedatk
+  if c.bonus then
+    baseatk = math.max(0,atk-c.bonus)
+  end
+  sub = SubGroup(sub,SafeAttackCheck,c)
   if tograve == true then
     sub = SubGroup(sub,FilterPendulum)
     if not MacroCheck(1) then
       return false
     end
   end
-  if ignorebonus and c.bonus and c.bonus > 0 then
-    atk = math.max(0,atk - c.bonus)
-  end
   for i=1,#sub do
-    local oppatk = sub[i].attack
-    local oppdef = sub[i].defense
-    if ignorebonus and sub[i].bonus and sub[i].bonus < 0 then
-      oppatk = oppatk - sub[i].bonus
-    end
-    if FilterPosition(sub[i],POS_FACEDOWN_DEFENCE) and not FilterPublic(sub[i]) then
+    local target = sub[i]
+    usedatk = atk
+    local oppatk = target.attack
+    local oppdef = target.defense
+    usedatk = baseatk
+    if FilterPosition(target,POS_FACEDOWN_DEFENCE) and not FilterPublic(target) then
       oppdef = 1500
     end
-    if (FilterPosition(sub[i],POS_ATTACK) and (oppatk<atk
-    or CrashCheck(c) and oppatk==atk)
-    or FilterPosition(sub[i],POS_DEFENCE) and (oppdef<atk)
-    and (FilterPosition(sub[i],POS_FACEUP) or FilterPublic(sub[i]))) 
-    and BattleTargetCheck(sub[i],c) 
+    if (FilterPosition(target,POS_ATTACK) and (oppatk<usedatk
+    or CrashCheck(c) and oppatk==usedatk)
+    or FilterPosition(target,POS_DEFENCE) and (oppdef<usedatk)
+    and (FilterPosition(target,POS_FACEUP) or FilterPublic(target))) 
+    and SafeAttackCheck(target,c) 
     then
       return true
     end
@@ -1598,9 +1649,107 @@ function CanWinBattle(c,targets,tograve,ignorebonus,filter,opt)
   return false
 end  
 
+-- function to determine, if a card can win a battle against any of the targets, and if the 
+-- target is expected to hit the graveyard (for effects that trigger on battle destruction)
+function CanWinBattle(c,targets,tograve,ignorebonus,filter,opt)
+  local sub = SubGroup(targets,filter,opt)
+  local atk = c.attack
+  local baseatk = c.attack
+  local usedatk
+  if c.bonus then
+    baseatk = math.max(0,atk-c.bonus)
+  end
+  sub = SubGroup(sub,BattleTargetCheck,c)
+  if tograve == true then
+    sub = SubGroup(sub,FilterPendulum)
+    if not MacroCheck(1) then
+      return false
+    end
+  end
+  for i=1,#sub do
+    local target = sub[i]
+    usedatk = atk
+    local oppatk = target.attack
+    local oppdef = target.defense
+    if ignorebonus or ArmadesCheck(target)
+    then
+      usedatk = baseatk
+    end
+    if (ignorebonus or ArmadesCheck(target) or StareaterCheck(target))
+    and target.bonus 
+    then
+      oppatk = oppatk - target.bonus
+    end
+    if FilterPosition(target,POS_FACEDOWN_DEFENCE) and not FilterPublic(target) then
+      oppdef = 1500
+    end
+    if (FilterPosition(target,POS_ATTACK) and (oppatk<usedatk
+    or CrashCheck(c) and oppatk==usedatk)
+    or FilterPosition(target,POS_DEFENCE) and (oppdef<usedatk)
+    and (FilterPosition(target,POS_FACEUP) or FilterPublic(target))) 
+    and BattleTargetCheck(target,c) 
+    then
+      return true
+    end
+  end
+  return false
+end  
+
+
+function AvailableAttacks(c,direct)
+  local result=1
+  if not c then
+    return 0
+  end
+  if not c.GetCode then
+    c=GetScriptFromCard(c)
+  end
+  local id=c:GetCode()
+  if FilterAffected(c,EFFECT_EXTRA_ATTACK) then
+    result=2
+  end
+  --[[if id == then  -- special cases
+    result=3
+  end]]
+  return result-c:GetAttackedCount()
+end
+
+function CanAttack(c,direct,filter,opt)
+  return FilterPosition(c,POS_FACEUP_ATTACK)
+  and AvailableAttacks(c)>0
+  and not FilterAffected(c,EFFECT_CANNOT_ATTACK)
+  and (not direct or not FilterAffected(c,EFFECT_CANNOT_DIRECT_ATTACK))
+  and FilterCheck(c,filter,opt)
+end
+
+-- checks the damage the AI is expected to take or dish out during this turn
+-- assuming only direct attacks
+function ExpectedDamage(player)
+  local cards = OppMon()
+  if player == 2 then
+    cards = AIMon()
+  end
+  local result=0
+  local g = nil
+  for i=1,#cards do
+    local c=cards[i]
+    --print("checking: "..c.id)
+    --print(CanAttack(c))
+    --print(CanDealBattleDamage(c))
+    --print(BattleDamage(nil,c))
+    if CanAttack(c) and CanDealBattleDamage(c) then
+      result=result+BattleDamage(nil,c)
+    end
+  end
+  return result
+end
+
 -- function to determine, if a card can deal battle damage to a targets
 -- for search effects, or just to push damage against battle-immune targets
 function CanDealBattleDamage(c,targets,ignorebonus,filter,opt)
+  if targets == nil then
+    targets = {}
+  end
   if #targets == 0 then
     return true
   end
@@ -1834,6 +1983,26 @@ function GetBattlingMons()
     end
   end
   return aimon,oppmon
+end
+function GetAttackers(p,direct,filter,opt)
+  local cards = OppMon()
+  local result = {}
+  if p == nil then
+    p = 1
+  end
+  if p == 2 then
+    cards = AIMon()
+  end
+  if direct == nil then
+    direct = true
+  end
+  for i=1,#cards do
+    local c=cards[i]  
+    if CanAttack(c,direct,filter,opt) then
+      result[#result+1]=c
+    end
+  end
+  return result
 end
 function TurnEndCheck()
   return Duel.GetCurrentPhase()==PHASE_MAIN2 or not (GlobalBPAllowed 

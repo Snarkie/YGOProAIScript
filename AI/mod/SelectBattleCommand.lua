@@ -59,6 +59,11 @@ function AttackTargetSelection(cards,attacker)
       return BestAttackTarget(cards,attacker)
     end
     
+    -- Centaurea
+    if id == 36776089 and CardsMatchingFilter(cards,CentaureaFilter,attacker)>0 then       
+      return BestTargets(cards,1,TARGET_TOHAND,CentaureaFilter,attacker,true,attacker)
+    end
+    
     -- Catastor
     if id == 26593852 and CardsMatchingFilter(cards,CatastorFilter)>0 then       
       return BestTargets(cards,1,TARGET_DESTROY,CatastorFilter,nil,true,attacker)
@@ -295,6 +300,11 @@ function OnSelectBattleCommand(cards,activatable)
     return Attack(CurrentIndex)
   end
   
+  -- Centaurea
+  if HasID(cards,36776089) and CardsMatchingFilter(OppMon(),CentaureaFilter)>0 then 
+    return Attack(CurrentIndex)
+  end
+  
   -- Mermail Abysslinde
   if HasID(cards,23899727) and LindeCheck() then 
     return Attack(CurrentIndex)
@@ -374,7 +384,7 @@ function OnSelectBattleCommand(cards,activatable)
   if #targets>0 and #cards>0  then
     for i=1,#cards do
       for j=1,#targets do
-        if FilterPosition(targets[j],POS_FACEDOWN_DEFENCE) and (cards[i].attack > 1500 
+        if FilterPosition(targets[j],POS_FACEDOWN_DEFENCE) and (cards[i].attack >= 1500 
         or FilterPublic(targets[j]) and cards[i].attack > targets[j].defense)
         then
           return Attack(1)
@@ -397,6 +407,17 @@ function OnSelectBattleCommand(cards,activatable)
   SortByATK(cards,true)
   if #OppMon()==0 and #cards>0 then
     return Attack(1,true)
+  end
+  --print("attack anyways")
+  -- might finish off some stuff (against monsters with a protection count)
+  -- but might also attack into battle-immune targets for no reason.
+  SortByATK(cards,true)
+  if #targets>0 and #cards>0 then
+    for i=1,#cards do
+      if CanAttackSafely(cards[i],targets) then
+        return Attack(i)
+      end
+    end
   end
   --print("forced")
   -- forced to attack
@@ -433,6 +454,67 @@ function OnSelectBattleCommand(cards,activatable)
   return 0,0
 
 end
-
-
+--[[
+78371393,04779091,31764700, -- Yubel 1,2 and 3
+54366836,88241506,23998625, -- Lion Heart, Maiden with the Eyes of Blue, Heart-eartH
+80344569,68535320,95929069, -- Grand Mole, Fire Hand, Ice Hand
+74530899, -- Metaion
+]]
+function AttackIceHand(c,source)
+  return not MacroCheck(2)
+  or DestroyCheck(AIST())<1
+  or ArmadesCheck(source)
+  or CardsMatchingFilter(AIMon(),FilterAttackMin,1500)>2
+end
+function AttackFireHand(c,source)
+  return not MacroCheck(2)
+  or DestroyCheck(AIMon())<1
+  or ArmadesCheck(source)
+  or StarEaterCheck(source)
+  or CardsMatchingFilter(AIMon(),FilterAttackMin,1500)>2
+end
+function AttackYubel(c,source)
+  return Negated(c)
+  or ArmadesCheck(source)
+  or StarEaterCheck(source)
+end
+function AttackMaiden(c,source)
+  return Negated(c)
+  or ArmadesCheck(source)
+  or FilterPosition(source,POS_DEFENCE)
+  or CardsMatchingFilter(AIMon(),FilterAttackMin,3000)>0
+  or DualityCheck(2)
+end
+function AttackMole(c,source)
+  return Negated(c)
+  or ArmadesCheck(source)
+  or StareaterCheck(source)
+  or CardsMatchingFilter(AIMon(),FilterAttackMin,1500)>1
+end
+function AttackMetaion(c,source)
+  return Negated(c)
+  or ArmadesCheck(source)
+  or StareaterCheck(source)
+end
+function SelectAttackConditions(c,source) 
+  if c.id == 95929069 then
+    return AttackIceHand(c,source)
+  end
+  if c.id == 68535320 then
+    return AttackFireHand(c,source)
+  end
+  if c.id == 78371393 or c.id == 04779091 or c.id == 31764700 then -- Yubel 1,2 and 3
+    return AttackYubel(c,source)
+  end
+  if c.id == 88241506 then
+    return AttackMaiden(c,source)
+  end
+  if c.id == 80344569 then
+    return AttackMole(c,source)
+  end
+  if c.id == 74530899 then
+    return AttackMetaion(c,source)
+  end
+  return true
+end
   

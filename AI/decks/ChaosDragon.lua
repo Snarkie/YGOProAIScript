@@ -328,8 +328,10 @@ end
 function UseScrapDragon()
   return DestroyCheck(OppField())>0 and (HasID(AIMon(),34408491,true) 
   or (PriorityCheck(AIField(),PRIO_TOGRAVE)>4 
-  and (MP2Check() or HasPriorityTarget(OppField(),true))) 
+  and (MP2Check() or HasPriorityTarget(OppField(),true) 
+  or OppHasStrongestMonster() or HasID(AIMon(),12538374,true))) 
   or (HasID(AIMon(),99365553,true) and LightpulsarCond(PRIO_TOFIELD)))
+  or OppHasStrongestMonster()
 end
 function SummonBLS()
   return OverExtendCheck() and #OppMon()>0 and ChaosSummonCheck()>4
@@ -931,9 +933,6 @@ function ChaosDragonOnSelectCard(cards, minTargets, maxTargets,triggeringID,trig
   end
   return nil
 end
-function ChainGorz()
-  return true
-end
 function ChainTrag()
   local c=Duel.GetAttacker()
   c=OppMon()
@@ -977,7 +976,7 @@ function ChaosDragonOnSelectChain(cards,only_chains_by_player)
   if HasIDNotNegated(cards,83531441) then -- Dante
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,44330098) and ChainGorz() then
+  if HasIDNotNegated(cards,44330098,ChainGorz) then
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,98777036) and ChainTrag() then
@@ -1000,7 +999,7 @@ function ChaosDragonOnSelectEffectYesNo(id,card)
   then
     result = 1
   end
-  if id == 44330098 and ChainGorz() then
+  if id == 44330098 and ChainGorz(card) then
     result = 1
   end
   if id == 98777036 and ChainTrag() then

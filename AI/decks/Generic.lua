@@ -1017,7 +1017,7 @@ function ZenmainesFilter(c,source)
   return (c.attack>source.attack and DestroyFilterIgnore(c) 
   and AI.GetPlayerLP(1)>(c.attack-source.attack)+800
   or c.attack==source.attack and DestroyCheck(OppField())>1)
-  and AttackBlacklistCheck(c)
+  and AttackBlacklistCheck(c,source)
   and FilterPosition(c,POS_FACEUP_ATTACK)
   and not FilterAffected(c,EFFECT_CANNOT_BE_BATTLE_TARGET)
 end
@@ -1415,7 +1415,7 @@ function ChainBTS(card)
 end
 function ChainFiendish(card)
   local c = ChainCardNegation(card,true,false,FilterType,TYPE_MONSTER)
-  if c then
+  if c and Affected(c,TYPE_TRAP) then
     GlobalTargetSet(c,OppMon())
     return true
   end
