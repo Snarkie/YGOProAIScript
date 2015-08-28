@@ -649,6 +649,23 @@ function BestTargets(cards,count,target,filter,opt,immuneCheck,source)
   end
   return result
 end
+function RandomTargets(cards,count,filter,opt)
+  result={}
+  for i=1,#cards do
+    local c = cards[i]
+    c.index = i
+    if FilterCheck(c) then
+      c.prio = math.random(1,100)
+    else
+      c.prio = 0
+    end
+  end
+  table.sort(cards,function(a,b) return a.prio > b.prio end) 
+  for i=1,count do
+    result[i]=cards[i].index
+  end
+  return result
+end
 function GlobalTargetSet(c,cards)
   if cards == nil then
     cards = All()
@@ -917,6 +934,15 @@ function FilterType(c,type) -- TODO: change all filters to support card script
     return bit32.band(c.type,type)>0
   end
 end
+function FilterAttack(c,attack)
+  local atk = 0
+  if c.GetCode then
+    atk = c:GetAttack()
+  else
+    atk = c.attack
+  end
+  return FilterType(c,TYPE_MONSTER) and atk==attack
+end
 function FilterAttackMin(c,attack)
   local atk = 0
   if c.GetCode then
@@ -935,11 +961,32 @@ function FilterAttackMax(c,attack)
   end
   return FilterType(c,TYPE_MONSTER) and atk<=attack
 end
+function FilterDefense(c,attack)
+  local def = 0
+  if c.GetCode then
+    def = c:GetAttack()
+  else
+    def = c.attack
+  end
+  return FilterType(c,TYPE_MONSTER) and def==defense
+end
 function FilterDefenseMin(c,defense)
-  return FilterType(c,TYPE_MONSTER) and c.defense<=defense
+  local def = 0
+  if c.GetCode then
+    def = c:GetAttack()
+  else
+    def = c.attack
+  end
+  return FilterType(c,TYPE_MONSTER) and def<=defense
 end
 function FilterDefenseMax(c,defense)
-  return FilterType(c,TYPE_MONSTER) and c.defense<=defense
+  local def = 0
+  if c.GetCode then
+    def = c:GetAttack()
+  else
+    def = c.attack
+  end
+  return FilterType(c,TYPE_MONSTER) and def<=defense
 end
 function FilterID(c,id)
   return c.id==id
@@ -973,9 +1020,9 @@ function FilterStatus(c,status)
 end
 function FilterSummon(c,type)
   if c.GetCode then
-    return bit32.band(c:GetSummonType(),SUMMON_TYPE_NORMAL)>0
+    return bit32.band(c:GetSummonType(),type)==type
   else
-    return bit32.band(c.summon_type,type)>0
+    return bit32.band(c.summon_type,type)==type
   end
 end
 function FilterAffected(c,effect)
@@ -1733,10 +1780,6 @@ function ExpectedDamage(player)
   local g = nil
   for i=1,#cards do
     local c=cards[i]
-    --print("checking: "..c.id)
-    --print(CanAttack(c))
-    --print(CanDealBattleDamage(c))
-    --print(BattleDamage(nil,c))
     if CanAttack(c) and CanDealBattleDamage(c) then
       result=result+BattleDamage(nil,c)
     end
@@ -2136,4 +2179,28 @@ function DamageSet()
 end
 function DamageTaken()
   return GlobalDamageTaken
+end
+function ChainCheck(id,player,link,filter,opt)
+  local start=1
+  local stop=Duel.GetCurrentChain()
+  if link then
+    start = link
+    stop = link
+  end
+  local result = 0
+  for i=start,stop do
+    local c
+    local e=Duel.GetChainInfo(i,CHAININFO_TRIGGERING_EFFECT)
+    if e and e:GetHandler() then
+      c = e:GetHandler()
+      if c:GetCode() == id
+      and not player or c:GetControler() == player
+      and FilterCheck(c,filter,opt)
+      then
+        result = result+1
+      end
+    end
+  end
+  if result == 0 then result = false end
+  return result
 end

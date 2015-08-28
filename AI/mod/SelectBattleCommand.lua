@@ -470,13 +470,13 @@ function AttackFireHand(c,source)
   return not MacroCheck(2)
   or DestroyCheck(AIMon())<1
   or ArmadesCheck(source)
-  or StarEaterCheck(source)
+  or StareaterCheck(source)
   or CardsMatchingFilter(AIMon(),FilterAttackMin,1500)>2
 end
 function AttackYubel(c,source)
   return Negated(c)
   or ArmadesCheck(source)
-  or StarEaterCheck(source)
+  or StareaterCheck(source)
 end
 function AttackMaiden(c,source)
   return Negated(c)

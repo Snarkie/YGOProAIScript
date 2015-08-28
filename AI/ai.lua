@@ -1,4 +1,4 @@
-Version = "0.30b"
+Version = "0.30c"
 Experimental = true
 
 --[[
@@ -92,6 +92,7 @@ require("ai.decks.HERO")
 require("ai.decks.ExodiaLib")
 require("ai.decks.Boxer")
 require("ai.decks.Monarch")
+require("ai.decks.MegaMonarch")
 requireoptional("ai.decks.Spellbook")
 requireoptional("ai.decks.X-Saber")
 requireoptional("ai.decks.Cth")
