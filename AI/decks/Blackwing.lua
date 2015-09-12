@@ -635,7 +635,7 @@ function HawkJoeTarget(cards,source)
   if LocCheck(cards,LOCATION_GRAVE) then
     return Add(cards,PRIO_TOFIELD)
   end
-  if RemovalCheckCard(source,CATEGORY_DESTROY,nil,Duel.GetCurrentChain()-1)then--,nil,Duel.GetCurrentChain()) then
+  if RemovalCheckCard(source,CATEGORY_DESTROY,nil,nil,Duel.GetCurrentChain()-1)then--,nil,Duel.GetCurrentChain()) then
     return BestTargets(cards)
   end
   local e = Duel.GetChainInfo(Duel.GetCurrentChain()-1,CHAININFO_TRIGGERING_EFFECT)

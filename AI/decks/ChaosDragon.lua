@@ -831,9 +831,9 @@ function ChaosSorcTarget(cards)
 end
 function CaiusTarget(cards)
   if AI.GetPlayerLP(2)<=1000 then
-    return BestTargets(cards,1,PRIO_BANISH,FilterAttribute,ATTRIBUTE_DARK)
+    return BestTargets(cards,1,TARGET_BANISH,FilterAttribute,ATTRIBUTE_DARK)
   end
-  return BestTargets(cards,1,PRIO_BANISH)
+  return BestTargets(cards,1,TARGET_BANISH)
 end
 function ChaosDragonOnSelectCard(cards, minTargets, maxTargets,triggeringID,triggeringCard)
   local ID 

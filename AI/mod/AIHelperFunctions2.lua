@@ -416,7 +416,7 @@ function RemovalCheck(id,category)
   end
   return false
 end
-function RemovalCheckCard(target,category,type,chainlink,filter,opt)
+function RemovalCheckCard(target,category,cardtype,targeted,chainlink,filter,opt)
   if Duel.GetCurrentChain() == 0 then return false end
   local cat={CATEGORY_DESTROY,CATEGORY_REMOVE,
   CATEGORY_TOGRAVE,CATEGORY_TOHAND,
@@ -426,7 +426,13 @@ function RemovalCheckCard(target,category,type,chainlink,filter,opt)
   then
     return false
   end
-  if category then cat={category} end
+  if category then 
+    if type(category)=="table" then
+      cat=category
+    else
+      cat={category}
+    end
+  end
   local a=1
   local b=Duel.GetCurrentChain()
   if chainlink then
@@ -437,9 +443,13 @@ function RemovalCheckCard(target,category,type,chainlink,filter,opt)
     for j=a,b do
       local ex,cg = Duel.GetOperationInfo(j,cat[i])
       local e = Duel.GetChainInfo(j,CHAININFO_TRIGGERING_EFFECT)
-      if ex and CheckNegated(j) and (type==nil
-      or e and e:GetHandler():IsType(type))
+      local tg = Duel.GetChainInfo(j,CHAININFO_TARGET_CARDS)
+      if ex and CheckNegated(j) and (cardtype==nil
+      or e and e:GetHandler():IsType(cardtype))
       then
+        if targeted and not tg then 
+          return false
+        end
         if target==nil then 
           return cg
         end
@@ -457,11 +467,11 @@ function RemovalCheckCard(target,category,type,chainlink,filter,opt)
   end
   return false
 end
-function RemovalCheckList(cards,category,type,chainlink,filter,opt)
+function RemovalCheckList(cards,category,type,targeted,chainlink,filter,opt)
   if Duel.GetCurrentChain() == 0 then return false end
   local result = {}
   for i=1,#cards do
-    local c = RemovalCheckCard(cards[i],category,type,chainlink,filter,opt)
+    local c = RemovalCheckCard(cards[i],category,type,targeted,chainlink,filter,opt)
     if c then result[#result+1]=c end
   end
   if #result>0 then
@@ -654,7 +664,7 @@ function RandomTargets(cards,count,filter,opt)
   for i=1,#cards do
     local c = cards[i]
     c.index = i
-    if FilterCheck(c) then
+    if FilterCheck(c,filter,opt) then
       c.prio = math.random(1,100)
     else
       c.prio = 0
@@ -961,30 +971,30 @@ function FilterAttackMax(c,attack)
   end
   return FilterType(c,TYPE_MONSTER) and atk<=attack
 end
-function FilterDefense(c,attack)
+function FilterDefense(c,defense)
   local def = 0
   if c.GetCode then
-    def = c:GetAttack()
+    def = c:GetDefence()
   else
-    def = c.attack
+    def = c.defense
   end
   return FilterType(c,TYPE_MONSTER) and def==defense
 end
 function FilterDefenseMin(c,defense)
   local def = 0
   if c.GetCode then
-    def = c:GetAttack()
+    def = c:GetDefence()
   else
-    def = c.attack
+    def = c.defense
   end
   return FilterType(c,TYPE_MONSTER) and def<=defense
 end
 function FilterDefenseMax(c,defense)
   local def = 0
   if c.GetCode then
-    def = c:GetAttack()
+    def = c:GetDefence()
   else
-    def = c.attack
+    def = c.defense
   end
   return FilterType(c,TYPE_MONSTER) and def<=defense
 end
@@ -1209,7 +1219,10 @@ function NormalSummonCheck(player)
     return Duel.GetActivityCount(player,ACTIVITY_NORMALSUMMON)>0
   end
 end
-
+function NormalSummonCount(player)
+  if player == nil then player = player_ai end
+  return Duel.GetActivityCount(player,ACTIVITY_NORMALSUMMON)
+end
 function SpecialSummonCheck(player)
   if player == nil then player = player_ai end
   -- wrapper for changed card script function

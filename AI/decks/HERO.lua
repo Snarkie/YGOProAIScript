@@ -76,6 +76,29 @@ AddPriority({
 
 })
 end
+function HEROChainOrder(cards)
+  result = {}
+	--print("OnSelectChainOrder card list:")
+	--for i=1,#cards do
+		--print(i, cards[i].id)
+	--end
+  if HasID(cards,58481572,true) and HasID(cards,50720316,true) then
+    for i=1,#cards do
+      if cards[i].id == 58481572 then
+        for j=1,#cards do
+          if cards[j].id == 50720316 then
+            result[i]=j
+            result[j]=i
+          end
+        end
+      else
+        result[i]=i
+      end
+    end
+    return result
+  end
+  return nil
+end
 function HEROFilter(c,exclude)
   local id = c.id
   if exclude and type(exclude)=="table" then 
@@ -577,7 +600,7 @@ function CCVFilter(c)
 end
 function ChainCCV(card)
   local c = nil
-  local targets = RemovalCheckList(AIMon(),nil,nil,nil,CCVFilter)
+  local targets = RemovalCheckList(AIMon(),nil,nil,nil,nil,CCVFilter)
   if targets and #targets == 1 then
     GlobalTargetSet(targets[1])
     GlobalCardMode = 1
@@ -784,35 +807,7 @@ function HEROChain(cards)
   end
   return nil
 end
-function OnSelectChainOrder(cards)
-	local result = {}
-	
-	--print("OnSelectChainOrder card list:")
-	--for i=1,#cards do
-		--print(i, cards[i].id)
-	--end
-  if HasID(cards,58481572,true) and HasID(cards,50720316,true) then
-    for i=1,#cards do
-      if cards[i].id == 58481572 then
-        for j=1,#cards do
-          if cards[j].id == 50720316 then
-            result[i]=j
-            result[j]=i
-          end
-        end
-      else
-        result[i]=i
-      end
-    end
-    return result
-  end
-	
-	-- Example implementation: pick the same order as the cards
-	for i=1,#cards do
-		result[i]=i
-	end
-	return result
-end
+
 function HEROEffectYesNo(id,card)
   local result = nil
   if id == 58481572 -- Dark Law

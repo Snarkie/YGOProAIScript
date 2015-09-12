@@ -1,5 +1,5 @@
-Version = "0.30c"
-Experimental = true
+Version = "0.31"
+Experimental = false
 
 --[[
   AI Script for YGOPro Percy:
@@ -70,6 +70,7 @@ require("ai.mod.SelectPosition")
 require("ai.mod.SelectSum")
 require("ai.mod.SelectTribute")
 require("ai.mod.SelectYesNo")
+require("ai.mod.SelectChainOrder")
 require("ai.decks.Generic")
 require("ai.decks.FireFist")
 require("ai.decks.HeraldicBeast")

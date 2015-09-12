@@ -2039,9 +2039,11 @@ function CardsEqual(Card1, Card2)
 end
 
 function ListHasCard(cards,c)
-  for i=1,#cards do
-    if CardsEqual(cards[i],c) then
-      return true
+  if cards and c then
+    for i=1,#cards do
+      if CardsEqual(cards[i],c) then
+        return true
+      end
     end
   end
   return false

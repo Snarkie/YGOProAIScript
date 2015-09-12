@@ -823,7 +823,7 @@ function ChainSafeZone(c)
   if not UnchainableCheck(38296564) then
     return false
   end
-  local targets=RemovalCheckList(AIMon(),CATEGORY_DESTROY,nil,nil,SafeZoneFilter)
+  local targets=RemovalCheckList(AIMon(),CATEGORY_DESTROY,nil,nil,nil,SafeZoneFilter)
   if targets and #targets > 0 then
     BestTargets(targets,1,TARGET_PROTECT)
     GlobalTargetSet(targets[1],targets)
@@ -865,7 +865,7 @@ function ChainLance()
   local aimon,oppmon=GetBattlingMons()
   for i=1,#AIMon() do
     local c = AIMon()[i]
-    if RemovalCheckCard(c,nil,TYPE_SPELL+TYPE_TRAP,nil,LanceFilter)
+    if RemovalCheckCard(c,nil,TYPE_SPELL+TYPE_TRAP,nil,nil,LanceFilter)
     and UnchainableCheck(27243130)
     then
 

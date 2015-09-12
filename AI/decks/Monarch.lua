@@ -190,7 +190,7 @@ function TributeCount(mega)
     end
   end
   if GlobalStormforth == Duel.GetTurnCount() 
-  and CardsMatchingFilter(OppMon(),StormforthFilter)
+  and CardsMatchingFilter(OppMon(),StormforthFilter)>0
   then
     result=result+1
   end
@@ -384,11 +384,17 @@ function MegaCaiusFilter(c)
   and CurrentOwner(c)==2
 end
 function SummonMegaCaius(c,mode)
-  if mode == 1 and NotNegated(c) then
-    return CardsMatchingFilter(OppField(),MegaCaiusFilter)>0
+  if mode == 1 and NotNegated(c) 
+  and CardsMatchingFilter(OppField(),MegaCaiusFilter)>0
+  then
+    GlobalSummonedCard = c
+    return true
   end
-  if mode == 2 and NotNegated(c) then
-    return CardsMatchingFilter(OppField(),StormforthFilter,MegaCaiusFilter)>0
+  if mode == 2 and NotNegated(c) 
+  and CardsMatchingFilter(OppField(),StormforthFilter,MegaCaiusFilter)>0
+  then
+    GlobalSummonedCard = c
+    return true
   end
   return false
 end

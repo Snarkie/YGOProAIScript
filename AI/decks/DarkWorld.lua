@@ -532,7 +532,7 @@ function EEVFilter(c)
 end
 function ChainEEV(card)
   local c = nil
-  local targets = RemovalCheckList(AIMon(),nil,nil,nil,EEVFilter)
+  local targets = RemovalCheckList(AIMon(),nil,nil,nil,nil,EEVFilter)
   if targets and #targets == 1 then
     GlobalTargetSet(targets[1],AIMon())
     GlobalCardMode = 1

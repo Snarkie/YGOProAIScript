@@ -1180,7 +1180,7 @@ function SummonGaiaDragonFinish(source)
   return result
 end
 function ChainOmega(source)
-  local cards = RemovalCheckList(AIMon(),nil,TYPE_SPELL+TYPE_TRAP,nil,ConstellarMonsterFilter)
+  local cards = RemovalCheckList(AIMon(),nil,TYPE_SPELL+TYPE_TRAP,nil,nil,ConstellarMonsterFilter)
   if cards and #cards>0 then
     return true
   end
