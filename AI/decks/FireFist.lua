@@ -165,7 +165,7 @@ function SummonVulcanFF()
 end
 
 
-function SummonCardinal()
+function SummonCardinal(c)
   local cards=UseLists({OppMon(),OppST()})
   local result=0;
   for i=1,#cards do
@@ -183,7 +183,7 @@ function SummonCardinal()
       result=result+1
     end]]
   end
-  return result>=4 and MP2Check()
+  return result>=4 and MP2Check(c)
 end
 function UseTensu()
   return CardsMatchingFilter(AIHand(),function(c) return c.race==RACE_BEASTWARRIOR end)>0
@@ -337,17 +337,17 @@ function FireFistInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(SpSummonable,74168099) then -- Horse Prince                
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasID(SpSummonable,37057743) and MP2Check() then -- Lion Emperor                
+  if HasID(SpSummonable,37057743,MP2Check) then -- Lion Emperor                
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasID(SpSummonable,58504745) and SummonCardinal() then -- Cardinal           
+  if HasID(SpSummonable,58504745,SummonCardinal) then -- Cardinal           
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,58504745)}
   end
 
-  if HasID(SpSummonable,89856523) and MP2Check() and Chance(50) then -- Kirin            
+  if HasID(SpSummonable,89856523,MP2Check) and Chance(50) then -- Kirin            
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasID(SpSummonable,96381979) and MP2Check() and not DeckCheck(DECK_BUJIN) then -- Tiger King 
+  if HasID(SpSummonable,96381979,MP2Check) and not DeckCheck(DECK_BUJIN) then -- Tiger King 
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SetableMon,93294869) then --Wolf

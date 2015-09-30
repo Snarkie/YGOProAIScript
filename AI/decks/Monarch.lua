@@ -503,7 +503,7 @@ end
 function SummonBounzer(c,mode)
   if mode == 1 then
     return OppGetStrongestAttDef<c.attack
-    and MP2Check()
+    and MP2Check(c)
     and NotNegated(c)
     and not LADDCheck()
   end
@@ -604,7 +604,7 @@ function SummonScrap(c,mode)
     local cards=UseLists(AIMon(),AIGrave())
     if HasID(cards,12538374,true) 
     and CardsMatchingFilter(OppField(),DestroyFilter)>0
-    and MP2Check()
+    and MP2Check(c)
     then  
       return true
     end

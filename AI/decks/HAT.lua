@@ -211,6 +211,10 @@ end
 function SetMonster()
   return #AIMon()==0 and (Duel.GetCurrentPhase()==PHASE_MAIN2 or not GlobalBPAllowed)
 end
+function SetDionaea()
+  return #AIMon()==0 and (Duel.GetCurrentPhase()==PHASE_MAIN2 or not GlobalBPAllowed)
+  and CardsMatchingFilter(AIGrave(),TraptrixFilter)==0
+end
 function ScytheCheck()
   local tuners = 0
   local nontuners = 0
@@ -287,7 +291,7 @@ function HATInit(cards)
   if HasID(Repositionable,95929069,false,nil,nil,POS_FACEDOWN_DEFENCE) and SummonIceHand() then
     return {COMMAND_CHANGE_POS,CurrentIndex}
   end
-  if HasID(SetableMon,45803070) and SetMonster() then
+  if HasID(SetableMon,45803070) and SetDionaea() then
     return {COMMAND_SET_MONSTER,CurrentIndex}
   end
   if HasID(SetableMon,91812341) and SetMonster() then
@@ -644,11 +648,23 @@ function ChainDPrison()
   end
   return false
 end
+function BottomlessFilter(c,type)
+  return DestroyFilter(c,true,true)
+  and Affected(c,type,4)
+  and (type~=TYPE_TRAP or not TraptrixFilter(c))
+  and c.attack>=1500
+end
 function ChainBottomless()
-  if not UnchainableCheck(29401950) then
-    return false
+  if not AI.GetLastSummonedCards then -- TODO: only for backwards compatibility, remove later
+    return UnchainableCheck(29401950) 
   end
-  return true
+  local targets = SubGroup(AI.GetLastSummonedCards(),BottomlessFilter,TYPE_TRAP)
+  if UnchainableCheck(29401950) 
+  and #targets>0
+  then
+    return true
+  end
+  return false
 end
 function ChainTTHN()
   if not UnchainableCheck(29616929) then

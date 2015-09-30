@@ -184,7 +184,7 @@ function EquipFilter(c)
   or c.id == 47120245 and ArmsCount(AIDeck())>2
   or c.id == 13391185 and UseChad()
   or c.id == 53550467 and OPTCheck(53550467)
-  and DestroyCheck(OppField(),false,false,FilterPosition,POS_FACEUP)>0
+  and DestroyCheck(OppField(),false,false,false,FilterPosition,POS_FACEUP)>0
   or c.id == 73359475)
   and not EquipCheck(c) then
     return true
@@ -566,7 +566,7 @@ function BlackSallyFilter(c)
   return NobleMonsterFilter(c) and bit32.band(c.type,TYPE_NORMAL)>0
 end
 function UseBlackSally()
-  return MP2Check() and (ArmsAvailable()==0 or PriorityCheck(AIMon(),PRIO_TOGRAVE,1,NobleMonsterFilter)>2)
+  return MP2Check(2000) and (ArmsAvailable()==0 or PriorityCheck(AIMon(),PRIO_TOGRAVE,1,NobleMonsterFilter)>2)
 end
 function SummonBlackSally()
   return (HasID(AIGrave(),10736540,true) and SummonHighSally() 
@@ -686,7 +686,7 @@ function SummonMerlin()
 end
 function SummonDrystan()
   return ArmsAvailable()>0 and OPTCheck(53550467) 
-  and DestroyCheck(OppField(),false,false,FilterPosition,POS_FACEUP)>0
+  and DestroyCheck(OppField(),false,false,false,FilterPosition,POS_FACEUP)>0
   and not UseMedraut()
 end
 function HighSallyFilter(c)
@@ -1156,7 +1156,7 @@ function EquipTargetCheck(cards,skipmultiple)
   if result then return result end
   result = EquipTargetCheckFunc(cards,13391185,UseChad,true,false,skipmultiple) 
   if result then return result end
-  result = EquipTargetCheckFunc(cards,53550467,function() return DestroyCheck(OppField(),false,false,FilterPosition,POS_FACEUP)>0 and OPTCheck(53550467) end,nil,true,skipmultiple) 
+  result = EquipTargetCheckFunc(cards,53550467,function() return DestroyCheck(OppField(),false,false,false,FilterPosition,POS_FACEUP)>0 and OPTCheck(53550467) end,nil,true,skipmultiple) 
   if result then return result end
   result = EquipTargetCheckFunc(cards,73359475,function() return true end,nil,false,skipmultiple) 
   if result then return result end

@@ -206,8 +206,7 @@ function AIGetStrongestAttack(skipbonus,filter,opt)
     and c.attack>result 
     and FilterCheck(c,filter,opt)
     and not (FilterPosition(c,POS_DEFENCE) 
-    and (FilterStatus(c,STATUS_SUMMON_TURN)
-    or FilterStatus(c,STATUS_JUST_POS)))
+    and c.turnid==Duel.GetTurnCount())
     then
       result=c.attack
       if skipbonus then
@@ -308,9 +307,20 @@ function RandomIndexFilter(cards,filter,opt)
   return {0}
 end
 -- check, if the AI can wait for an XYZ/Synchro summon until Main Phase 2
-function MP2Check()
+function MP2Check(atk)
+  print("MP2Check")
+  if atk and type(atk)=="table" then
+    if atk.GetCode then
+      atk=atk:GetAttack()
+    else
+      atk=atk.attack
+    end
+  end
+  print(atk)
+  print(ExpectedDamage(2))
   return AI.GetCurrentPhase() == PHASE_MAIN2 or not(GlobalBPAllowed)
   or OppHasStrongestMonster() and not(CanUseHand())
+  or atk and ExpectedDamage(2)<atk
 end
 -- check how many monsters of a specific level are on the field. optional filter
 function FieldCheck(level,filter,opt)
@@ -885,22 +895,22 @@ end
 function Negated(c)
   return not NotNegated(c)
 end
-function DestroyFilter(c,nontarget)
+function DestroyFilter(c,nontarget,skipblacklist)
   return not FilterAffected(c,EFFECT_INDESTRUCTABLE_EFFECT)
   and not FilterStatus(c,STATUS_LEAVE_CONFIRMED)
   and (nontarget==true or not FilterAffected(c,EFFECT_CANNOT_BE_EFFECT_TARGET))
-  and not (DestroyBlacklist(c)
-  and FilterPublic(c))
+  and (skipblacklist or not (DestroyBlacklist(c)
+  and FilterPublic(c)))
 end
-function DestroyFilterIgnore(c,nontarget)
-  return DestroyFilter(c)
+function DestroyFilterIgnore(c,nontarget,skipblacklist)
+  return DestroyFilter(c,skipblacklist)
   and not IgnoreList(c)
 end
 -- returns the amount of cards that can be safely destroyed in a list of cards
-function DestroyCheck(cards,nontarget,skipignore,filter,opt)
+function DestroyCheck(cards,nontarget,skipignore,skipblacklist,filter,opt)
   return CardsMatchingFilter(cards,
   function(c) 
-    return DestroyFilter(c,nontarget) 
+    return DestroyFilter(c,nontarget,skipblacklist) 
     and (skipignore or not IgnoreList(c))
     and FilterCheck(c,filter,opt)
   end)
@@ -1001,8 +1011,14 @@ end
 function FilterID(c,id)
   return c.id==id
 end
+function ExcludeID(c,id)
+  return c.id~=id
+end
 function FilterOriginalID(c,id)
   return c.original_id==id
+end
+function ExcludeOriginalID(c,id)
+  return c.original_id~=id
 end
 function FilterPosition(c,pos)
   if c.GetCode then
@@ -1514,33 +1530,16 @@ function StareaterCheck(c,filter,opt)
 end
 
 AttBL={
+-- obsolete?!?
 78371393,04779091,31764700, -- Yubel 1,2 and 3
 54366836,88241506,23998625, -- Lion Heart, Maiden with the Eyes of Blue, Heart-eartH
 80344569,68535320,95929069, -- Grand Mole, Fire Hand, Ice Hand
 74530899, -- Metaion
 }
 -- cards that should not be attacked without negating them first
--- (or under special circumstances) TODO: Define conditions
--- true = free to attack
+-- (or under special circumstances) 
 function AttackBlacklistCheck(c,source)
-  local id
-  if c.GetCode then
-    id=c:GetCode()
-  else
-    id=c.id
-  end
-  if Negated(c) then
-    return true
-  end
-  if SelectAttackConditions(c,source) then
-    return true
-  end
-  for i=1,#AttBL do
-    if id == AttBL[i] then
-      return false
-    end
-  end
-  return true
+  return SelectAttackConditions(c,source)
 end
 -- function to determine, if a card can be destroyed by battle
 -- and should be attacked at all
@@ -1773,9 +1772,13 @@ function AvailableAttacks(c,direct)
   end]]
   return result-c:GetAttackedCount()
 end
-
+function CanChangePos(c)
+  return not FilterAffected(c,EFFECT_CANNOT_CHANGE_POSITION)
+  and c.turnid<Duel.GetTurnCount()
+end
 function CanAttack(c,direct,filter,opt)
-  return FilterPosition(c,POS_FACEUP_ATTACK)
+  return (FilterPosition(c,POS_FACEUP_ATTACK)
+  or FilterPosition(c,POS_DEFENCE) and CanChangePos(c))
   and AvailableAttacks(c)>0
   and not FilterAffected(c,EFFECT_CANNOT_ATTACK)
   and (not direct or not FilterAffected(c,EFFECT_CANNOT_DIRECT_ATTACK))
@@ -1793,7 +1796,7 @@ function ExpectedDamage(player)
   local g = nil
   for i=1,#cards do
     local c=cards[i]
-    if CanAttack(c) and CanDealBattleDamage(c) then
+    if c and CanAttack(c,true) and CanDealBattleDamage(c) then
       result=result+BattleDamage(nil,c)
     end
   end
@@ -1967,23 +1970,30 @@ function GetScriptFromCard(c)
     local type = c.type
     local loc = c.location
     local p
+    local g
     if CurrentOwner(c) == 1 then
       p = player_ai
     else
       p = 1-player_ai
     end
-    local g = Duel.GetMatchingGroup(nil,p,LOCATION_ONFIELD,LOCATION_ONFIELD,nil)
+    g = Duel.GetFieldGroup(p,LOCATION_ONFIELD,LOCATION_ONFIELD)
+    if FilterStatus(c,STATUS_SUMMONING) then
+      return nil -- TODO: fix this when summon limbo is supported
+    end
     if g then
-      g:ForEach(function(c) 
-        if c:GetSequence()==seq 
-        and c:IsType(type) 
-        and c:IsControler(p) 
-        and c:IsLocation(loc)
+      g:ForEach(function(card) 
+        if card:GetSequence()==seq 
+        and card:IsType(type) 
+        and card:GetControler()==p 
+        and card:IsLocation(loc)
         then
-          result = c
+          result = card
         end
       end)
     end
+  end
+  if result == nil then
+    print("WARNING: ScriptFromCard invalid return")
   end
   return result
 end

@@ -14,11 +14,11 @@ function OnSelectChainOrder(cards)
   if d and d.ChainOrder then
     result = d.ChainOrder(cards)
   end
-  if result then
+  if result and #result>0 then
     return result
   end
   result = HEROChainOrder(cards) 
-  if result then
+  if result and #result>0 then
     return result
   end
   result = {}

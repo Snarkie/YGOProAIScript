@@ -417,7 +417,7 @@ SSBL={
 23693634,50321796,76913983, -- Colossal Fighter, Synch Brionac, BW Armed Wind
 90953320,26593852,44508094, -- Hyper Librarian, Catastor, Stardust
 85909450,86848580,79979666, -- HPPD, Zerofyne, Bubbleman
-13959634,55863245, -- Moulinglacia, Child Dragon
+13959634,55863245,06511113, -- Moulinglacia, Child Dragon, Rafflesia
 18326736,58069384,10443957, -- Planetellarknight Ptolemaios, Cyber Dragon Nova, Infinity
 }
 
@@ -658,7 +658,7 @@ Unchainable={
 85215458,24508238,59616123,27243130, -- BW Kalut, D.D. Crow, Trap Stun, Forbidden lance
 77778835,21143940,84536654,57728570, -- Hysteric Party, Mask Change, Form Change, CCV
 83555666,88197162,24348807,21143940, --  Ring of Destruction, Soul Transition, Lose a turn, Mask Change
-84536654,50608164, -- Form Change, Koga
+84536654,50608164,06511113, -- Form Change, Koga, Rafflesia, Treacherous
 }
 function isUnchainableTogether(CardId)
   for i=1,#Unchainable do
@@ -870,6 +870,7 @@ ScriptedCards ={
 13959634,72932673,13073850,88197162, -- Moulinglacia, Mizuchi, Qli Stealth, Soul Transition
 51194046,20426097,24348807,25067275, -- Qli Monolith, Re-qliate, Lose a Turn, Swords At Dawn
 18326736,58069384,10443957,03819470, -- Planetellarknight Ptolemaios, Cyber Dragon Nova, Infinity, Seven Tools
+29401950,06511113,99590524, -- Bottomless, Rafflesia, Treacherous
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do

@@ -652,7 +652,7 @@ end
   --------------------------------------------- 
   for i=1,#ActivatableCards do  
    if ActivatableCards[i].id == 19596712 or -- Abyss-scale of Cetus
-      ActivatableCards[i].id == 72932673 or -- Abyss-scale of the Mizuchi
+      --ActivatableCards[i].id == 72932673 or -- Abyss-scale of the Mizuchi
       ActivatableCards[i].id == 08719957 then -- Abyss-scale of the Kraken      
     if Archetype_Card_Count(AIMon(), 7667828, POS_FACEUP) > 0 then
        GlobalActivatedCardID = ActivatableCards[i].id

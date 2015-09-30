@@ -184,7 +184,7 @@ function UseDelteros()
   return CardsMatchingFilter(UseLists({OppMon(),OppST()}),DelterosFilter)>0
 end
 function SummonDelteros()
-  return (MP2Check() or SeraphCheck()) 
+  return (MP2Check(2500) or SeraphCheck()) 
   and (UseDelteros() or HasID(UseLists({AIHand(),AIST()}),41510920,true))
 end
 function SummonTriveil()
@@ -241,7 +241,7 @@ function UseOuroboros3()
   return #OppGrave > 0
 end
 function SummonOuroboros()
-  return (MP2Check() or SeraphCheck())  and (UseOuroboros1() or UseOuroboros2())
+  return (MP2Check(2750) or SeraphCheck())  and (UseOuroboros1() or UseOuroboros2())
 end
 
 function UseCotH2()
@@ -269,7 +269,7 @@ function SummonSharkKnight1(cards)
   return #targets>0 and OPTCheck(48739166)
 end
 function SummonLavalvalChain1()
-  return DeckCheck(DECK_TELLARKNIGHT) and MP2Check() and (not HasAccess(75878039) or OppGetStrongestAttack()<1800)
+  return DeckCheck(DECK_TELLARKNIGHT) and MP2Check(1800) and (not HasAccess(75878039) or OppGetStrongestAttack()<1800)
 end
 function UseChainTellar1()
   return DeckCheck(DECK_TELLARKNIGHT) and not HasAccess(75878039)

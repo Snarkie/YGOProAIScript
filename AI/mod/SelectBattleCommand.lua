@@ -250,6 +250,15 @@ function OnSelectBattleCommand(cards,activatable)
   end
   -- First, attack with monsters, that get beneficial effects from destroying stuff
   --print("specific attackers")
+  
+  -- BLS
+  if HasIDNotNegated(cards,72989439) 
+  and (CanWinBattle(cards[CurrentIndex],targets) 
+  or #OppMon()==0 and GlobalBLS==Duel.GetTurnCount())
+  then 
+    return Attack(CurrentIndex)
+  end
+  
   -- High Laundsallyn
   if HasIDNotNegated(cards,83519853) and CanWinBattle(cards[CurrentIndex],targets,true) then 
     return Attack(CurrentIndex)
@@ -257,11 +266,6 @@ function OnSelectBattleCommand(cards,activatable)
   
   -- Shura
   if HasIDNotNegated(cards,58820853) and CanWinBattle(cards[CurrentIndex],targets,true) then 
-    return Attack(CurrentIndex)
-  end
-  
-  -- BLS
-  if HasIDNotNegated(cards,72989439) and CanWinBattle(cards[CurrentIndex],targets) then 
     return Attack(CurrentIndex)
   end
   
@@ -387,7 +391,7 @@ function OnSelectBattleCommand(cards,activatable)
         if FilterPosition(targets[j],POS_FACEDOWN_DEFENCE) and (cards[i].attack >= 1500 
         or FilterPublic(targets[j]) and cards[i].attack > targets[j].defense)
         then
-          return Attack(1)
+          return Attack(i)
         end
       end
     end
@@ -496,6 +500,12 @@ function AttackMetaion(c,source)
   or ArmadesCheck(source)
   or StareaterCheck(source)
 end
+function AttackCatastor(c,source)
+  return Negated(c)
+  or ArmadesCheck(source)
+  or StareaterCheck(source)
+  or FilterAttribute(source,ATTRIBUTE_DARK)
+end
 function SelectAttackConditions(c,source) 
   if c.id == 95929069 then
     return AttackIceHand(c,source)
@@ -514,6 +524,9 @@ function SelectAttackConditions(c,source)
   end
   if c.id == 74530899 then
     return AttackMetaion(c,source)
+  end
+  if c.id == 26593852 then
+    return AttackCatastor(c,source)
   end
   return true
 end

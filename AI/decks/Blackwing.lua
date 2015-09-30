@@ -390,7 +390,7 @@ function SummonKalut()
   return false
 end
 function SummonArmorMaster()
-  return MP2Check()
+  return MP2Check(2500)
 end
 function UseIcarus()
   local targets = SubGroup(OppField(),IcarusFilter)
@@ -408,7 +408,7 @@ function SummonMKB()
   and (HasID(AIST(),05851097,true)
   or HasID(AIST(),38296564,true))
   and HasIDNotNegated(AIExtra(),76067258,true)
-  and MP2Check()
+  and MP2Check(2500)
 end
 function UseMKB()
   return true

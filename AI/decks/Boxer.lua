@@ -276,7 +276,7 @@ function SummonChainBoxer(c)
   and HasID(AIExtra(),34086406,true)
   and (not OppHasStrongestMonster()
   or OppGetStrongestAttack()<1800)
-  and MP2Check()
+  and MP2Check(c)
 end
 function UseChainBoxer(c,mode)
   local cards = UseLists(AIGrave(),c.xyz_materials)
@@ -298,7 +298,7 @@ end
 function SummonLeadYoke(c)
   return NotNegated(c) 
   and not HasID(AIMon(),23232295,true)
-  and MP2Check()
+  and MP2Check(c)
 end
 function SummonStarCestus(c)
   return NotNegated(c)
@@ -308,7 +308,7 @@ function SummonNovaCaesar(c)
   local cards = UseLists(SubGroup(AIMon(),FilterLevel,4),AIGrave())
   return NotNegated(c) 
   and CardsMatchingFilter(cards,BoxerMonsterFilter,04549095)>2
-  and MP2Check()
+  and MP2Check(c)
 end
 function SummonBoxer(c,mode)
   if mode == 1 
@@ -437,7 +437,7 @@ function SummonSparkBoxer(c,mode)
   then
     return true
   end
-  if mode == 2 and NotNegated(c) and MP2Check() 
+  if mode == 2 and NotNegated(c) and MP2Check(c) 
   or Negated(c) and OppGetStrongestAttDef()<2500
   then
     return true

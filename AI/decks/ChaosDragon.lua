@@ -316,7 +316,7 @@ function UseChaosSorc()
   and CardsMatchingFilter(OppMon(),ChaosSorcFilter)>0)
 end
 function SummonGauntletLauncher()
-  return DestroyCheck(OppMon())>1 and MP2Check()
+  return DestroyCheck(OppMon())>1 and MP2Check(2400)
 end
 function UseGauntletLauncher()
   return DestroyCheck(OppMon())>0 
@@ -328,7 +328,7 @@ end
 function UseScrapDragon()
   return DestroyCheck(OppField())>0 and (HasID(AIMon(),34408491,true) 
   or (PriorityCheck(AIField(),PRIO_TOGRAVE)>4 
-  and (MP2Check() or HasPriorityTarget(OppField(),true) 
+  and (MP2Check(2800) or HasPriorityTarget(OppField(),true) 
   or OppHasStrongestMonster() or HasID(AIMon(),12538374,true))) 
   or (HasID(AIMon(),99365553,true) and LightpulsarCond(PRIO_TOFIELD)))
   or OppHasStrongestMonster()
@@ -987,12 +987,13 @@ function ChaosDragonOnSelectChain(cards,only_chains_by_player)
   end
   return nil
 end
+GlobalBLS=0
 function ChaosDragonOnSelectEffectYesNo(id,card)
   local result = nil
   local field = bit32.band(card.location,LOCATION_ONFIELD)>0
   local grave = bit32.band(card.location,LOCATION_GRAVE)>0
   if id==34408491 or id==61901281 or id==99234526 or id==99365553 -- Beelze, Collapserpent, Wyverbuster, Lightpulsar
-  or id==72989439 or id==16404809 or id==10802915 -- BLS, Kuribandit, Tour Guide,
+  or id==16404809 or id==10802915 -- Kuribandit, Tour Guide,
   or id==51858306 or id==07391448 or id==83531441 -- Eclipse Wyvern, Goyo Guardian
   or id==84764038 -- Scarm
   and NotNegated(card) 
@@ -1007,6 +1008,10 @@ function ChaosDragonOnSelectEffectYesNo(id,card)
   end
   if id == 09748752 then
     result = 1
+  end
+  if id==72989439 then
+    result = 1
+    GlobalBLS = Duel.GetTurnCount()
   end
   return result
 end

@@ -284,7 +284,7 @@ function SummonChainDW(card)
   or CardsMatchingFilter(AIHand(),DarkWorldMonsterFilter,34230233)>0
   and not NormalSummonCheck()
   or HasID(AIHand(),33731070,true) and DiscardOutlets()>0
-  or MP2Check() --and not HasAccess(34230233)
+  or MP2Check(1800) --and not HasAccess(34230233)
   )
   and HasID(AIDeck(),34230233,true)
   then
@@ -402,7 +402,7 @@ function DarkWorldInit(cards)
   if HasID(Sum,94283662) and UseTrance(2) then
     return {COMMAND_SUMMON,CurrentIndex}
   end
-  if HasIDNotNegated(Act,41930553) and UseDarkSmog() then
+  if HasIDNotNegated(Act,41930553,UseDarkSmog) then
     OPTSet(Act[CurrentIndex].cardid)
     return {COMMAND_ACTIVATE,CurrentIndex} 
   end
@@ -652,7 +652,8 @@ function CheckSS(source,cards,targeted,loc,filter,opt)
 end
 function ChainDarkSmog(card)
   if RemovalCheckCard(card) 
-  and PriorityCheck(AIHand(),PRIO_DISCARD,1,FilterRace,RACE_FIEND)>4 
+  and (PriorityCheck(AIHand(),PRIO_DISCARD,1,FilterRace,RACE_FIEND)>4 
+  or FilterPosition(card,POS_FACEDOWN))
   then
     return true
   end
@@ -682,6 +683,7 @@ function ChainDarkSmog(card)
   end
   if HasPriorityTarget(OppField(),true) 
   and HasID(AIHand(),34230233,true)
+  and CardsMatchingFilter(OppGrave(),FilterType,TYPE_MONSTER)>0
   and Duel.GetTurnPlayer() == 1-player_ai
   then
     return true

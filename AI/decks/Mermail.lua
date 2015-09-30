@@ -12,7 +12,7 @@ AddPriority({
 [74298287] = {5,2,3,2,2,2,4,1,3,3,DineCond},          -- Mermail Abyssdine
 [37104630] = {5,2,8,1,7,2,6,2,2,2,InfantryCond},      -- Atlantean Heavy Infantry
 [00706925] = {4,2,4,1,7,2,6,2,2,2,MarksmanCond},      -- Atlantean Marksman
-[74311226] = {7,5,9,1,8,4,6,4,1,1,nil},               -- Atlantean Dragoons
+[74311226] = {7,5,9,1,8,4,6,4,1,1,DragoonsCond},      -- Atlantean Dragoons
 [21565445] = {6,1,6,1,9,1,5,1,5,1,NeptabyssCond},     -- Atlantean Prince Neptabyss
 [47826112] = {8,1,5,1,6,1,5,1,1,1,PoseidraCond},      -- Atlantean Poseidra
 [13959634] = {9,1,1,1,1,1,1,1,1,1,MoulinclaciaCond},  -- Elemental Lord Moulinclacia
@@ -48,11 +48,15 @@ end
 function AtlanteanFilter(c,exclude)
   return IsSetCode(c.setcode,0x77) and (exclude == nil or c.id~=exclude)
 end
+function MermailFilter(c,exclude)
+  return IsSetCode(c.setcode,0x74) and (exclude == nil or c.id~=exclude)
+end
 function NeptabyssCond(loc,c) 
   if loc == PRIO_TOHAND then
-    return not (HasID(AICards(),21565445,true)
+    return (not (HasID(AICards(),21565445,true)
     or  HasID(AICards(),78868119,true))
-    and OPTCheck(21565445) 
+    and OPTCheck(21565445) )
+    or FilterLocation(c,LOCATION_MZONE)
   end
   if loc == PRIO_TOGRAVE or loc == PRIO_DISCARD then
     return OPTCheck(21565446) 
@@ -68,8 +72,14 @@ function NeptabyssCond(loc,c)
 end
 function PoseidraCond(loc,c)
   if loc == PRIO_TOHAND then
-    return SummonPoseidra()
+    return SummonPoseidra(c)
     or LeoComboCheck()
+  end
+  if loc == PRIO_DISCARD then
+    if SummonPoseidra(c) then
+      return 8
+    end
+    return true
   end
   return true
 end
@@ -138,7 +148,16 @@ function MarksmanCond(loc)
     return CardsMatchingFilter(UseLists({OppMon(),OppST()}),MarksmanFilter)
     > GetMultiple(00706925)
   elseif loc == PRIO_TOFIELD then
-    return #OppMon()==0 and Duel.GetTurnCount()>1
+    return #OppMon()==0 and BattlePhaseCheck()
+    --and not HasIDNotNegated(AIMon(),21954587,true)
+  end
+  return true
+end
+function DragoonsCond(loc)
+  if loc == PRIO_DISCARD then
+    if SummonPoseidra() then
+      return 7
+    end
   end
   return true
 end
@@ -147,9 +166,14 @@ function GundeFilter(c)
 end
 function GundeCond(loc)
   if loc == PRIO_DISCARD then
-    return CardsMatchingFilter(AIGrave(),GundeFilter)>0
-    and OPTCheck(69293721)
+    return (CardsMatchingFilter(AIGrave(),GundeFilter)>0
+    or GlobalGunde)
     and Duel.GetLocationCount(player_ai,LOCATION_MZONE)>1
+    and OPTCheck(69293721)
+  end
+  if loc == PRIO_TOHAND then
+    return not HasID(AIHand(),69293721,true)
+    and GetMultiple(69293721)==0
   end
   return true
 end
@@ -289,10 +313,16 @@ function MermailGetPriority(c,loc)
   end
   checklist = Prio[id]
   if checklist then
-    if checklist[11] and not(checklist[11](loc,c)) then
-      loc = loc + 1
-    end
-    result = checklist[loc]
+    if checklist[11] then
+      if type(checklist[11](loc,c))=="number" then
+        result = checklist[11](loc,c)
+      else
+        if not(checklist[11](loc,c)) then
+          loc = loc + 1
+        end
+        result = checklist[loc]
+      end
+    end 
   end
   if GlobalSummonNegated and id==23899727 
   and loc == PRIO_TOFIELD and OPTCheck(23899727) 
@@ -300,14 +330,27 @@ function MermailGetPriority(c,loc)
     result = 10
     GlobalSummonNegated=nil
   end
+  if GundeFilter(c) and loc==PRIO_DISCARD and GlobalGunde then
+    result = 0.1*result + 6
+  end
   return result
 end
+GlobalGunde = nil
 function MermailAssignPriority(cards,loc,filter,opt)
   local index = 0
+  local check = false
   Multiple = nil
   for i=1,#cards do
+    if GundeFilter(cards[i]) then
+      check = true
+    end
+  end
+  if GlobalGunde and not check then
+    GlobalGunde = nil
+  end
+  for i=1,#cards do
     cards[i].index=i
-     if not MermailMultiTargetFilter(cards[i]) then
+    if not MermailMultiTargetFilter(cards[i]) then
       cards[i].prio=-1
     else
       cards[i].prio=MermailGetPriority(cards[i],loc)
@@ -325,6 +368,7 @@ function MermailAssignPriority(cards,loc,filter,opt)
 end
 function MermailPriorityCheck(cards,loc,count,filter,opt)
   if count == nil then count = 1 end
+  if count > 1 and HasID(AIHand(),69293721,true) then GlobalGunde = true end
   if loc==nil then loc=PRIO_TOHAND end
   if cards==nil or #cards<count then return -1 end
   MermailAssignPriority(cards,loc,filter,opt)
@@ -334,6 +378,7 @@ end
 function MermailAdd(cards,loc,count,filter,opt)
   local result={}
   if count==nil then count=1 end
+  if count > 1 and HasID(AIHand(),69293721,true) then GlobalGunde = true end
   if loc==nil then loc=PRIO_TOHAND end
   local compare = function(a,b) return a.prio>b.prio end
   MermailAssignPriority(cards,loc,filter,opt)
@@ -346,7 +391,16 @@ function MermailAdd(cards,loc,count,filter,opt)
 end
 function UseMegalo(card)
   return OverExtendCheck()
-  and MermailPriorityCheck(AIHand(),PRIO_DISCARD,2,FilterAttribute,ATTRIBUTE_WATER)>3
+  and (MermailPriorityCheck(AIHand(),PRIO_DISCARD,2,FilterAttribute,ATTRIBUTE_WATER)>3
+  or HasID(AIHand(),69293721,true) 
+  and OPTCheck(69293721) 
+  and CardsMatchingFilter(AIHand(),GundeFilter)>1
+  or #OppMon()==0
+  and HasID(AIMon(),21565445)
+  and OPTCheck(21565446)
+  and BattlePhaseCheck()
+  and MermailPriorityCheck(AIHand(),PRIO_DISCARD,1,FilterAttribute,ATTRIBUTE_WATER)>3
+  or #AIHand()>6)
 end
 function MegaloFilter(c)
   return bit32.band(c.position,POS_FACEUP_ATTACK)>0 
@@ -354,7 +408,7 @@ function MegaloFilter(c)
 end
 function UseMegaloField(card)
   local cards = SubGroup(AIMon(),MegaloFilter)
-  return #cards>0
+  if #cards>0
   and #OppMon()==0 and GlobalBPAllowed
   and Duel.GetCurrentPhase() == PHASE_MAIN1
   and card.attack>=2000
@@ -362,6 +416,10 @@ function UseMegaloField(card)
   and card:is_affected_by(EFFECT_CANNOT_ATTACK_ANNOUNCE)==0
   and bit32.band(card.position,POS_FACEUP_ATTACK)>0
   or MermailPriorityCheck(cards,PRIO_TOGRAVE)>4
+  then
+    OPTSet(card)
+    return true
+  end
 end
 function UseTeus()
   return MermailPriorityCheck(AIHand(),PRIO_DISCARD,1,FilterAttribute,ATTRIBUTE_WATER)>4
@@ -397,17 +455,23 @@ function UseBahamut()
   return Duel.GetCurrentPhase() == PHASE_MAIN2 or Duel.GetTurnCount()==1
 end
 function SummonGaios()
-  return MP2Check() and OppGetStrongestAttDef()<2800
+  return MP2Check(2800) and OppGetStrongestAttDef()<2800
 end
 function SummonDiva1()
-  return (HasIDNotNegated(AIST(),60202749,true) and Duel.GetLocationCount(player_ai,LOCATION_MZONE)>2 
-  or FieldCheck(4)>1 and Duel.GetLocationCount(player_ai,LOCATION_MZONE)>1)
+  return (HasIDNotNegated(AIST(),60202749,true) 
+  and Duel.GetLocationCount(player_ai,LOCATION_MZONE)>2 
+  or FieldCheck(4)>1 
+  and Duel.GetLocationCount(player_ai,LOCATION_MZONE)>1)
   and HasID(AIExtra(),70583986,true)
   or HasID(AIDeck(),21565445,true) and OPTCheck(21565445)
 end
 function SummonDiva2()
-  return OverExtendCheck() and OppGetStrongestAttDef()<2300 and SummonArmades()
-  and Duel.GetCurrentPhase() == PHASE_MAIN1 and GlobalBPAllowed and Duel.GetLocationCount(player_ai,LOCATION_MZONE)>1
+  return OverExtendCheck() 
+  and OppGetStrongestAttDef()<2300 
+  and SummonArmades()
+  and Duel.GetCurrentPhase() == PHASE_MAIN1 
+  and GlobalBPAllowed
+  and Duel.GetLocationCount(player_ai,LOCATION_MZONE)>1
 end
 function SummonDewloren()
   return MermailPriorityCheck(UseLists({AIMon(),AIST()}),PRIO_TOHAND,3)>1
@@ -538,17 +602,35 @@ function PoseidraFilter(c)
 end
 function SummonPoseidra(c)
   local cards = SubGroup(AIMon(),PoseidraFilter)
-  return #cards>2 and MermailPriorityCheck(cards,PRIO_TOGRAVE,2)>4
+  return #cards>2 --and MermailPriorityCheck(cards,PRIO_TOGRAVE,2)>4
 end
 function SummonInfantry(c)
-  return HasID(AIHand(),78868119,true) and not HasID(AIMon(),37104630,true)
-  and BattlePhaseCheck() and CardsMatchingFilter(AIHand(),FilterAttribute,ATTRIBUTE_WATER)>1
+  return HasID(AIHand(),78868119,true) 
+  and not HasID(AIMon(),37104630,true)
+  and BattlePhaseCheck() 
+  and CardsMatchingFilter(AIHand(),FilterAttribute,ATTRIBUTE_WATER)>1
+  and Duel.GetLocationCount(player_ai,LOCATION_MZONE)>2
 end
 function SummonChildDragon(c)
   return LeoComboCheck() and not HasID(AIMon(),37104630,true)
 end
 function SummonLeoMermail(c)
   return LeoComboCheck()
+end
+function MizuchiFilter(c,id)
+  return MermailFilter(c)
+  and CanAttack(c)
+  and c.id~=23899727 -- Linde
+  and c.id~=69293721 -- Gunde
+  and (id==nil or c.id==id)
+end
+function UseMizuchi(c)
+  return CardsMatchingFilter(AIMon(),MizuchiFilter)>0
+  and (BattlePhaseCheck() or HasIDNotNegated(AIMon(),74371660,true))
+end
+function SummonDragoons(c)
+  return HasIDNotNegated(AIMon(),21954587,true,OPTCheck)
+  and BattlePhaseCheck()
 end
 function MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local Activatable = cards.activatable_cards
@@ -585,6 +667,15 @@ function MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(Activatable,96947648) and UseSalvage() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+  if HasIDNotNegated(Summonable,37104630,SummonInfantry) then
+    return {COMMAND_SUMMON,CurrentIndex}
+  end
+  if HasIDNotNegated(Summonable,78868119) and SummonDiva1() then
+    return {COMMAND_SUMMON,CurrentIndex}
+  end
+  if HasIDNotNegated(Summonable,21565445,SummonNeptabyss) then
+    return {COMMAND_SUMMON,CurrentIndex}
+  end
   if HasID(Activatable,21954587,false,nil,LOCATION_HAND) and UseMegalo(Activatable[CurrentIndex]) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -618,15 +709,6 @@ function MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     GlobalSummonNegated=true
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasIDNotNegated(Summonable,37104630,SummonInfantry) then
-    return {COMMAND_SUMMON,CurrentIndex}
-  end
-  if HasIDNotNegated(Summonable,78868119) and SummonDiva1() then
-    return {COMMAND_SUMMON,CurrentIndex}
-  end
-  if HasIDNotNegated(Summonable,21565445,SummonNeptabyss) then
-    return {COMMAND_SUMMON,CurrentIndex}
-  end
   if HasID(Summonable,04904812) and SummonUndine() then
     return {COMMAND_SUMMON,CurrentIndex}
   end
@@ -659,6 +741,9 @@ function MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   end
   if HasID(SpSummonable,48739166) and SummonSharkKnightMermail(OppMon()) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(Summonable,74311226,SummonDragoons) then
+    return {COMMAND_SUMMON,CurrentIndex}
   end
   if HasID(Summonable,00706925) and SummonMarksman() then
     return {COMMAND_SUMMON,CurrentIndex}
@@ -702,6 +787,9 @@ function MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_CHANGE_POS,CurrentIndex}
   end
   if HasIDNotNegated(Activatable,47826112,false,nil,LOCATION_HAND,SummonPoseidra) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Activatable,72932673,UseMizuchi) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   cards=AIHand()
@@ -835,7 +923,7 @@ function PoseidraTarget(cards,min)
   return MermailAdd(cards,PRIO_TOGRAVE,min)
 end
 function MizuchiTarget(cards)
-  return BestTargets(cards,1,TARGET_PROTECT,FilterID,21954587)
+  return BestTargets(cards,1,TARGET_PROTECT,MizuchiFilter,21954587)
 end
 function MegaloTarget(cards,min)
   if min==2 then
@@ -849,9 +937,19 @@ function MegaloTarget(cards,min)
   end
   return BestTargetsMermail(cards,min)
 end
+function MarksmanTarget(cards,c)
+  if FilterLocation(c,LOCATION_MZONE) then
+    if SummonInfantry() then
+      return MermailAdd(cards,PRIO_TOFIELD,1,FilterID,37104630)
+    end
+    return MermailAdd(cards,PRIO_TOFIELD)
+  end
+  return BestTargetsMermail(cards)
+end
 function MermailOnSelectCard(cards, minTargets, maxTargets,triggeringID,triggeringCard)
   local ID 
   local result=nil
+  GlobalGunde=nil
   if triggeringCard then
     ID = triggeringCard.id
   else
@@ -861,7 +959,7 @@ function MermailOnSelectCard(cards, minTargets, maxTargets,triggeringID,triggeri
     return BestTargetsMermail(cards)
   end
   if ID == 00706925 then
-    return BestTargetsMermail(cards)
+    return MarksmanTarget(cards,triggeringCard)
   end
   if ID == 21954587 then
     return MegaloTarget(cards,minTargets)
@@ -1174,8 +1272,8 @@ MermailAtt={
   37104630, -- Infantry (for Megalo)
 }
 MermailDef={
-  59170782,50789693,22446869,  -- Trite, Kappa,Teus
-  23899727, -- Linde
+  59170782,50789693,--22446869,  -- Trite, Kappa,Teus
+  --23899727, -- Linde
 }
 function MermailOnSelectPosition(id, available)
   result = nil
@@ -1187,6 +1285,27 @@ function MermailOnSelectPosition(id, available)
     and Duel.GetTurnPlayer()==player_ai) 
     then 
       result=POS_FACEUP_DEFENCE 
+    end
+  end
+  if id == 22446869 then -- Teus
+    if Duel.GetTurnPlayer()==player_ai
+    and BattlePhaseCheck() 
+    and (CardsMatchingFilter(OppMon(),FilterAttackMin,1700)==0 
+    or not OppHasStrongestMonster())
+    then
+      result=POS_FACEUP_ATTACK
+    else
+      result=POS_FACEUP_DEFENCE
+    end
+  end
+  if id == 23899727 then -- Linde
+    if Duel.GetTurnPlayer()==player_ai
+    and BattlePhaseCheck() 
+    and LindeCheck()
+    then
+      result=POS_FACEUP_ATTACK
+    else
+      result=POS_FACEUP_DEFENCE
     end
   end
   return result

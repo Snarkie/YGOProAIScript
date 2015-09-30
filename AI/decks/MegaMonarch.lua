@@ -351,6 +351,11 @@ function TributeFodder()
       result=result+1
     end
   end
+  if CardsMatchingFilter(OppMon(),StormforthFilter)>0
+  and GlobalStormforth == Duel.GetTurnCount() 
+  then
+    result=result+1
+  end
   return result
 end
 function TributesAvailable(oppturn)
@@ -813,7 +818,8 @@ function MegaMonarchInit(cards)
     local MonarchST=CardsMatchingFilter(AIHand(),MonarchFilter)
     for i=1,#SetST do 
       local c = SetST[i]
-      if c.id == 79844764 and not HasID(AIST(),79844764,true) and MonarchST>1
+      if c.id == 79844764 and not HasID(AIST(),79844764,true) 
+      and (MonarchST>1 or HasID(AIHand(),00006700,true))
       or c.id == 00006734 and not HasID(AIST(),00006734,true) and MonarchST>1
       or c.id == 05318639
       or c.id == 32807846

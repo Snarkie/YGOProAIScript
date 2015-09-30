@@ -4,15 +4,28 @@ function ShadollFusionCond(loc)
   end
   return true
 end
+function SendToGraveFilter(c,id)
+   return c.id == id 
+  and c.turnid == Duel.GetTurnCount()
+end
+function ShaddollGraveCheck(id)
+  return CardsMatchingFilter(AIGrave(),SendToGraveFilter,id)==0
+end
 function FalconCond(loc)
   if loc == PRIO_TOGRAVE then
-    return OPTCheck(37445295) and GetMultiple(37445295)==0 and not HasID(AIMon(),37445295,true)
+    return OPTCheck(37445295) 
+    and GetMultiple(37445295)==0 
+    and not HasID(AIMon(),37445295,true)
+    and ShaddollGraveCheck(37445295)
   end
   return true
 end
 function HedgehogCond(loc)
   if loc == PRIO_TOGRAVE then
-    return OPTCheck(04939890) and NeedsCard(37445295,AIDeck(),UseLists({AIHand(),AIMon()}),true) and GetMultiple(04939890)==0
+    return OPTCheck(04939890) 
+    and NeedsCard(37445295,AIDeck(),UseLists({AIHand(),AIMon()}),true) 
+    and GetMultiple(04939890)==0
+    and ShaddollGraveCheck(04939890)
   end
   return true
 end
@@ -21,8 +34,12 @@ function ShadollFilter(c)
 end
 function LizardCond(loc)
   if loc == PRIO_TOGRAVE then
-    return OPTCheck(30328508) and (HasID(AIGrave(),44394295,true) and HasID(AIDeck(),04904633,true)
-    or CardsMatchingFilter(AIGrave(),ShadollFilter)<6) and GetMultiple(30328508)==0
+    return (OPTCheck(30328508) 
+    and (HasID(AIGrave(),44394295,true) 
+    and HasID(AIDeck(),04904633,true)
+    or CardsMatchingFilter(AIGrave(),ShadollFilter)<6) 
+    and GetMultiple(30328508)==0)
+    and ShaddollGraveCheck(30328508)
   end
   return true
 end
@@ -33,13 +50,18 @@ function DragonFilter(c)
 end
 function DragonCond(loc)
   if loc == PRIO_TOGRAVE then
-    return OPTCheck(77723643) and CardsMatchingFilter(OppST(),DragonFilter)>0 and GetMultiple(77723643)==0
+    return OPTCheck(77723643) 
+    and CardsMatchingFilter(OppST(),DragonFilter)>0 
+    and GetMultiple(77723643)==0
+    and ShaddollGraveCheck(77723643)
   end
   return true
 end
 function BeastCond(loc)
   if loc == PRIO_TOGRAVE then
-    return OPTCheck(03717252) and GetMultiple(03717252)==0
+    return OPTCheck(03717252) 
+    and GetMultiple(03717252)==0
+    and ShaddollGraveCheck(03717252)
   end
   return true
 end
@@ -221,7 +243,7 @@ function SummonMichael(c)
   return c and (CardsMatchingFilter(UseLists({OppMon(),OppST()}),MichaelFilter)>0 
   and AI.GetPlayerLP(1)>1000 and NotNegated(c)  
   or Negated (c) and OppGetStrongestAttDef()<2600)
-  and MP2Check() and HasID(AIExtra(),04779823,true)
+  and MP2Check(c) and HasID(AIExtra(),04779823,true)
 end
 function UseMichael()
   return CardsMatchingFilter(UseLists({OppMon(),OppST()}),MichaelFilter)>0
@@ -467,7 +489,7 @@ function FacingTheShadowsTarget(cards,min,max)
     result={}
     for i=1,#cards do
       local id=cards[i].id
-      if id==37445295 and UseFalcon()
+      if id==37445295 and UseFalcon() 
       or id==04939890 and UseHedgehog()
       or id==30328508 and UseLizard()
       or id==77723643 and UseDragon2()
@@ -719,11 +741,17 @@ function ChainSanctum()
   return nil
 end
 
-function ChainFacingTheShadows()
+function ChainFacingTheShadows(c)
   local result = false
   local e = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
-  if RemovalCheck(77505534) then 
-    result = true
+  if RemovalCheckCard(c) then
+    if e and e:GetHandler():GetCode()==12697630 then 
+      return false
+    end
+    return true
+  end
+  if UnchainableCheck(77505534) then
+    return false
   end
   if RemovalCheck(37445295) and UseFalcon() then
     OPTSet(37445295)
@@ -1044,7 +1072,7 @@ function ShadollOnSelectChain(cards,only_chains_by_player)
   if HasID(cards,94192409) and ChainCompulse() then
     return {1,CurrentIndex}
   end
-  if HasID(cards,77505534) and ChainFacingTheShadows() then
+  if HasID(cards,77505534,ChainFacingTheShadows) then
     return {1,CurrentIndex}
   end
   --if HasID(cards,34507039) and ChainWireTap() then

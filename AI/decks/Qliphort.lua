@@ -259,8 +259,12 @@ function TributeSummonDisk()
   return false
 end
 function TributeSummonKiller()
-  if TributeCheck(3) and (not SkillDrainCheck() or TributeCheck(3)>5 and OppHasStrongestMonster())
-  and not NormalSummonCheck(player_ai) and (ExpectedDamage(2)<AI.GetPlayerLP(2)
+  if TributeCheck(3) 
+  and (not SkillDrainCheck() 
+  or TributeCheck(3)>5 
+  and OppHasStrongestMonster())
+  and not NormalSummonCheck(player_ai)
+  and (ExpectedDamage(2)<AI.GetPlayerLP(2)
   or OppHasStrongestMonster())
   then
     return true

@@ -393,7 +393,7 @@ function SetSign(c,cards)
 end
 function SummonHPPD(c)
   return AI.GetPlayerLP(2)<=4000
-  and MP2Check()
+  and MP2Check(2000)
 end
 function RepoHPPD(c)
   return FilterPosition(c,POS_DEFENCE) and c.xyz_material_count>0
@@ -442,7 +442,7 @@ function SummonEmeralHarpie(c)
   if not DeckCheck(DECK_HARPIE) then return false end
   if LadyCount(UseLists(AIMon(),AIGrave(),AIMaterials()))>5
   and LadyCount(AIGrave())>2
-  and MP2Check() 
+  and MP2Check(1800) 
   and not OppHasStrongestMonster()
   then
     return true
@@ -458,7 +458,7 @@ function SummonChainHarpie(c)
   and OPTCheck(56585883))
   and (not OppHasStrongestMonster() 
   or OppGetStrongestAttDef()<1800)
-  and MP2Check()
+  and MP2Check(c)
 end
 function UseChainHarpie(c,mode)
   if not DeckCheck(DECK_HARPIE) then return false end

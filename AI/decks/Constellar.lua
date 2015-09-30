@@ -222,12 +222,12 @@ function SummonChainConstellar(mode)
     return true
   end
   if mode == 2 and (HasID(AIHand(),78364470,true) 
-  or HasID(AIHand(),41269771,true)) and MP2Check()
+  or HasID(AIHand(),41269771,true)) and MP2Check(1800)
   and (not OppHasStrongestMonster() or OppGetStrongestAttDef()<1800)
   then
     return true
   end
-  if mode == 3 and MP2Check() 
+  if mode == 3 and MP2Check(1800) 
   and (not OppHasStrongestMonster() or OppGetStrongestAttDef()<1800)
   then
     return true

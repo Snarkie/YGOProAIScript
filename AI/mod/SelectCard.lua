@@ -714,7 +714,7 @@ end
   -- select Ai's monster of specified id with strongest attack (for now)
   --------------------------------------------   
    if GlobalActivatedCardID == 19596712 or -- Abyss-scale of Cetus
-      GlobalActivatedCardID == 72932673 or -- Abyss-scale of the Mizuchi
+      --GlobalActivatedCardID == 72932673 or -- Abyss-scale of the Mizuchi
       GlobalActivatedCardID == 08719957 then -- Abyss-scale of the Kraken       
       GlobalActivatedCardID = nil		 
       return Index_By_SetCode(cards,1,"Highest",nil,POS_FACEUP,"==",7667828)

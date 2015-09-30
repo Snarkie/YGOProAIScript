@@ -328,7 +328,7 @@ function WizardInit(cards)
 		OPTSet(57624336)
 		return {COMMAND_ACTIVATE,CurrentIndex}
 	end
-	if HasID(Act,72714461,nil,nil,LOCATION_SZONE) and OPTCheck(53208660) then
+	if HasIDNotNegated(Act,72714461,nil,nil,LOCATION_SZONE) and OPTCheck(53208660) then
 		return {COMMAND_ACTIVATE,CurrentIndex}
 	end
 	if HasID(Act,72714461,nil,nil,LOCATION_HAND) and (UseInsight() or WizardPendulumSummonExCheck(Act[CurrentIndex].id)) then

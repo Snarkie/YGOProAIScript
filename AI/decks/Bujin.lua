@@ -12,7 +12,7 @@ BujinPrio[05818294] = {3,1,2,2,8,4,0} -- Turtle
 BujinPrio[69723159] = {2,1,1,1,7,3,0} -- Quilin
 BujinPrio[88940154] = {2,1,1,1,6,3,0} -- Centipede
 BujinPrio[50474354] = {2,1,0,0,2,2,5} -- Peacock
-BujinPrio[56574543] = {3,1,0,0,10,6,0} -- Sinyou
+BujinPrio[56574543] = {3,1,0,0,10,6,0}-- Sinyou
 BujinPrio[37742478] = {8,2,0,0,0,0,0} -- Honest
 
 BujinPrio[73906480] = {4,2,0,0,0,0,0} -- Bujincarnation
@@ -32,7 +32,12 @@ BujinPrio[75840616] = {0,0,8,6,1,1,1} -- Bujintei Susanowo
 BujinPrio[01855932] = {0,0,6,3,1,1,1} -- Bujintei Kagutsuchi
 BujinPrio[73289035] = {0,0,5,4,1,1,1} -- Bujintei Tsukuyomi
 BujinPrio[68618157] = {0,0,7,6,1,1,1} -- Bujintei Amaterasu
-
+function BujinFilter(c,exclude)
+  return IsSetCode(c.setcode,0x88) and (exclude == nil or c.id~=exclude)
+end
+function BujinMonsterFilter(c,exclude)
+  return BujinFilter(c,exclude) and FilterType(c,TYPE_MONSTER)
+end
 function BujinGetPriority(id,loc)
   local index = 0
   local checklist = nil
@@ -41,7 +46,7 @@ function BujinGetPriority(id,loc)
     index = 1
     checklist = AIHand()
     if id==32339440 or id==53678698 then checklist = UseLists({AIHand(),AIMon()}) end
-  elseif loc == LOCATION_FIELD then
+  elseif loc == LOCATION_ONFIELD then
     index = 3
     checklist = AIMon()
   elseif loc == LOCATION_GRAVE then
@@ -56,27 +61,32 @@ function BujinGetPriority(id,loc)
   if checklist and checklist[index] then result = checklist[index] end
   return result
 end
-function BujinAssignPriority(cards,loc)
+function BujinAssignPriority(cards,loc,filter,opt)
   local index = 0
   for i=1,#cards do
     cards[i].index=i
     cards[i].prio=BujinGetPriority(cards[i].id,loc)
+    if filter and (opt==nil and not filter(cards[i]) 
+    or opt and not filter(cards[i],opt)) 
+    then
+      cards[i].prio=-1
+    end
   end
 end
-function BujinPriorityCheck(cards,loc,count)
+function BujinPriorityCheck(cards,loc,count,filter,opt)
   if count == nil then count = 1 end
   if loc==nil then loc=LOCATION_HAND end
   if #cards==0 then return -1 end
-  BujinAssignPriority(cards,loc)
+  BujinAssignPriority(cards,loc,filter,opt)
   table.sort(cards,function(a,b) return a.prio>b.prio end)
   return cards[count].prio
 end
-function BujinAdd(cards,loc,count)
+function BujinAdd(cards,loc,count,filter,opt)
   local result={}
   if count==nil then count=1 end
   if loc==nil then loc=LOCATION_HAND end
   local compare = function(a,b) return a.prio>b.prio end
-  BujinAssignPriority(cards,loc)
+  BujinAssignPriority(cards,loc,filter,opt)
   table.sort(cards,compare)
   for i=1,count do
     result[i]=cards[i].index
@@ -99,7 +109,7 @@ function KagutsuchiFilter(c)
   return bit32.band(c.race,RACE_BEASTWARRIOR)>0 and not c.id==32339440
 end
 function SummonKagutsuchi()
-  return CardsMatchingFilter(AIMon(),KagutsuchiFilter)>1 and MP2Check()
+  return CardsMatchingFilter(AIMon(),KagutsuchiFilter)>1 and MP2Check(2500)
 end
 function SummonTsukuyomi()
   return UseTsukuyomi(AIHand())
@@ -159,14 +169,14 @@ function UseRegaliaGrave()
   if RemovalCheck(30338466) then
     if BujinPriorityCheck(AIGrave())>2 
     and (BujinPriorityCheck(AIBanish(),LOCATION_GRAVE) < BujinPriorityCheck(AIGrave()) 
-    or BujinPriorityCheck(UseLists({AIHand(),AIField()}),LOCATION_FIELD)<3 )
+    or BujinPriorityCheck(UseLists({AIHand(),AIField()}),LOCATION_ONFIELD)<3 )
     then
       GlobalCardMode=1
       return true 
     end
   end	
-  if Duel.GetTurnPlayer()==player_ai and BujinPriorityCheck(AIHand(),LOCATION_FIELD)<2 
-  and BujinPriorityCheck(AIGrave(),LOCATION_FIELD)>4 and OverExtendCheck() 
+  if Duel.GetTurnPlayer()==player_ai and BujinPriorityCheck(AIHand(),LOCATION_ONFIELD)<2 
+  and BujinPriorityCheck(AIGrave(),LOCATION_ONFIELD)>4 and OverExtendCheck() 
   and not NormalSummonCheck(player_ai)
   then
     GlobalCardMode=2
@@ -221,7 +231,7 @@ function BujinXYZCheck()
 end
 function SummonTigerKingBujin()
   return DeckCheck(DECK_BUJIN) and not HasID(UseLists({AIMon(),AIHand()}),32339440) 
-  and HasID(AIDeck(),32339440) and HasID(AIDeck(),57103969) and MP2Check()
+  and HasID(AIDeck(),32339440) and HasID(AIDeck(),57103969) and MP2Check(2200)
 end
 function SharkKnightFilterBujin(c)
   return bit32.band(c.position,POS_FACEUP_ATTACK)>0 
@@ -270,7 +280,6 @@ function BujinOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Activatable,73906480) and UseBujincarnation() then
-    GlobalCardMode = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Activatable,57103969) then -- Tenki
@@ -319,7 +328,7 @@ function BujinOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   end
   --
 if DeckCheck(DECK_BUJIN) then
-  BujinAssignPriority(Summonable,LOCATION_FIELD)
+  BujinAssignPriority(Summonable,LOCATION_ONFIELD)
   table.sort(Summonable,function(a,b) return a.prio>b.prio end)
   if Summonable and Summonable[1] and (Summonable[1].prio>0 
   or HasID(AIMon(),32339440) and Summonable[1].prio>3)
@@ -438,23 +447,41 @@ function HirumeTarget(cards)
   end
   return BujinAdd(cards,LOCATION_REMOVED)
 end
+function BujincarnationFilter(c,exclude)
+  return BujinMonsterFilter(c,exclude)
+  and FilterRevivable(c,true)
+end
+GlobalBujincarnationID = nil
 function BujincarnationTarget(cards)
-  local result=BujinAdd(cards,LOCATION_FIELD)
-  if GlobalCardMode==1 then
-    GlobalCardMode=nil
-  else
-    if BujinPriorityCheck(cards,LOCATION_GRAVE)>3 then
-      result=BujinAdd(cards,LOCATION_GRAVE)
+  local grave = SubGroup(AIGrave(),BujinMonsterFilter)
+  local banish = SubGroup(AIBanish(),BujinMonsterFilter)
+  local check = nil
+  for i=1,#banish do
+    local c = banish[i]
+    if check~=nil and c.id ~= check 
+    or not FilterRace(c,RACE_BEASTWARRIOR)
+    then
+      check = false
+    else
+      check = c.id
     end
   end
-  return result
+  if LocCheck(cards,LOCATION_GRAVE) then
+    BujinAdd(cards,LOCATION_ONFIELD,1,ExcludeID,check)
+    GlobalBujincarnationID=cards[1].id
+    return {cards[1].index}
+  end
+  if LocCheck(cards,LOCATION_REMOVED) then
+    return BujinAdd(cards,LOCATION_GRAVE,1,ExcludeID,GlobalBujincarnationID)
+  end
+  return BujinAdd(cards,LOCATION_ONFIELD)
 end
 function RegaliaTarget(cards)
   local result=nil
   if GlobalCardMode==1 then
     result=BujinAdd(cards)
   elseif GlobalCardMode==2 then
-    result=BujinAdd(cards,LOCATION_FIELD)
+    result=BujinAdd(cards,LOCATION_ONFIELD)
   elseif GlobalCardMode==3 then
     result={IndexByID(cards,68601507)}
   else
@@ -472,7 +499,7 @@ end
 function BujinXYZTarget(cards,count)
   GlobalBujinSS=nil
   result={}
-  BujinAssignPriority(cards,LOCATION_FIELD)
+  BujinAssignPriority(cards,LOCATION_ONFIELD)
   table.sort(cards,function(a,b) return a.prio<b.prio end)
   for i=1,count do
     result[i]=cards[i].index
@@ -572,7 +599,7 @@ function ChainHare()
       local c=g:GetFirst()
       local p,hp,a,ha=0,0,0,0
       while c do
-        p=BujinGetPriority(c:GetCode(),LOCATION_FIELD)
+        p=BujinGetPriority(c:GetCode(),LOCATION_ONFIELD)
         a=c:GetAttack()
         if hp<p or hp==p and ha<a then
           hp=p

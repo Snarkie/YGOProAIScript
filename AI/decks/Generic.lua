@@ -329,6 +329,9 @@ function SummonExtraDeck(cards,prio)
   if HasIDNotNegated(SpSum,22653490,SummonChidori,2) then              -- Chidori
     return XYZSummon()
   end
+  if HasIDNotNegated(SpSum,06511113,SummonRafflesia) then
+    return XYZSummon()
+  end
   if HasIDNotNegated(SpSum,63746411) and SummonGiantHand() then
     return XYZSummon()
   end
@@ -426,6 +429,12 @@ function SummonExtraDeck(cards,prio)
   end
   return nil
 end
+function SummonRafflesia(c)
+  return CardsMatchingFilter(AIDeck(),TrapholeFilter)>0
+  and TurnEndCheck() and (#OppMon()==0 
+  or OppGetStrongestAttack()<c.attack 
+  and #SubGroup(OppST(),FilterPosition,POS_FACEDOWN)>2)
+end
 function InfinityCheck()
   return HasID(AIExtra(),58069384,true)
   and HasIDNotNegated(AIExtra(),10443957,true)
@@ -478,7 +487,7 @@ function UseMST(c)
   return false
 end
 function SummonStardust(c)
-  return OppGetStrongestAttDef()<2500 and MP2Check()
+  return OppGetStrongestAttDef()<2500 and MP2Check(c)
 end
 function SummonColossal(c)
   return BattlePhaseCheck() and (OppGetStrongestAttack()==c.attack
@@ -513,11 +522,11 @@ function SummonLibrarian(c)
   and OppGetStrongestAttDef()<=c.attack
 end
 function SummonZombiestein(c)
-  return MP2Check() and OppHasStrongestMonster() --and OppGetStrongestAttack()>2800
+  return MP2Check(c) and OppHasStrongestMonster() --and OppGetStrongestAttack()>2800
   and OppGetStrongestAttack()<4500
 end
-function SummonFelgrand()
-  return MP2Check() and OppGetStrongestAttack()<2800
+function SummonFelgrand(c)
+  return MP2Check(c) and OppGetStrongestAttack()<2800
   and not SkillDrainCheck()
 end
 function UseFieldNuke(exclude)
@@ -558,7 +567,7 @@ function SummonLavalvalChain()
   then
     return false
   else
-    return MP2Check() and OppGetStrongestAttDef()<1800 and #AIGrave()<10
+    return MP2Check(1800) and OppGetStrongestAttDef()<1800 and #AIGrave()<10
   end
 end
 function UseLavalvalChain()
@@ -604,7 +613,7 @@ function SummonRagnaZero(card)
   return false
 end
 function SummonImpKing(c)
-  return MP2Check() 
+  return MP2Check(c) 
   and (CardsMatchingFilter(AIDeck(),FilterRace,RACE_REPTILE)>0
   and NotNegated(c)
   or Negated(c) and OppGetStrongestAttDef() < 2300
@@ -620,14 +629,14 @@ function SummonBigEye()
   return CardsMatchingFilter(OppMon(),BigEyeFilter)>0 and MP2Check()
 end
 function SummonNaturiaBeast(c)
-  return OppGetStrongestAttDef()<2200 and MP2Check()
+  return OppGetStrongestAttDef()<2200 and MP2Check(c)
 end
 function SummonArmades()
   return Duel.GetCurrentPhase() == PHASE_MAIN1 and OppGetStrongestAttDef()<2300 
   and GlobalBPAllowed
 end
 function SummonStardustSpark(c)
-  return NotNegated(c) and MP2Check() 
+  return NotNegated(c) and MP2Check(c) 
   or Negated(c) and OppGetStrongestAttDef()<2500
   or HasID(AICards(),05851097,true) 
   and (not OppHasStrongestMonster() or OppGetStrongestAttDef()<2500)
@@ -666,7 +675,7 @@ end
 
 function SummonClearWing(c)
   return OppGetStrongestAttDef() < c.attack 
-  and MP2Check()
+  and MP2Check(c)
 end
 function UseBigEye()
   return true
@@ -707,7 +716,7 @@ function EmeralFilter(c)
   return bit32.band(c.type,TYPE_MONSTER)>0
 end
 function SummonEmeral()
-  return HasID(AIExtra(),00581014,true) and MP2Check() 
+  return HasID(AIExtra(),00581014,true) and MP2Check(1800) 
   and CardsMatchingFilter(AIGrave(),EmeralFilter)>10 
   and (OppGetStrongestAttDef()<1800 
   or not OppHasStrongestMonster())
@@ -838,7 +847,8 @@ function UseSkyblaster()
   return CardsMatchingFilter(OppField(),SkyblasterFilter)>0
 end
 function SummonLeoh(c)
-  return c and OppGetStrongestAttDef() < c.attack and MP2Check() and HasID(AIExtra(),08561192,true)
+  return c and OppGetStrongestAttDef() < c.attack 
+  and MP2Check(c) and HasID(AIExtra(),08561192,true)
 end
 function SummonMechquipped()
   return Duel.GetCurrentPhase() == PHASE_MAIN2 or Duel.GetTurnCount()==1
@@ -847,7 +857,7 @@ function DwellerFilter(c)
   return FilterAttribute(c,ATTRIBUTE_WATER) and FilterLevel(c,4)
 end
 function SummonDweller()
-  return false--MP2Check() and CardsMatchingFilter(AIMon(),DwellerFilter)>0 and OppGetStrongestAttDef()<2200
+  return MP2Check(2200) and CardsMatchingFilter(AIMon(),DwellerFilter)>0 and OppGetStrongestAttDef()<2200
 end
 function PleiadesFilter(c)
   return Targetable(c,TYPE_MONSTER)
@@ -969,10 +979,10 @@ function SummonPleiades()
   and AI.GetPlayerLP(2)<=2500 and BattlePhaseCheck())
 end
 function SummonGiantHand()
-  return MP2Check() and OppGetStrongestAttDef()<2000
+  return MP2Check(2000) and OppGetStrongestAttDef()<2000
 end
 function SummonCairngorgon(c)
-  return OppGetStrongestAttDef()<c.attack and MP2Check()
+  return OppGetStrongestAttDef()<c.attack and MP2Check(c)
   and (NotNegated(c) or OppHasStrongestMonster())
 end
 function SummonRhapsody()
@@ -1060,7 +1070,7 @@ function AlseiFilter(c,source)
   and Targetable(c,TYPE_MONSTER)
 end
 function SummonAlsei(c)
-  return MP2Check() and UseAlsei(c)
+  return MP2Check(c) and UseAlsei(c)
   and HasPriorityTarget(OppField(),false,nil,AlseiFilter,c)
 end
 function UseAlsei(c)
@@ -1109,7 +1119,7 @@ function PtolemyFilter(c)
 end
 function SummonPtolemy(c)
   return (NotNegated(c) 
-  and (FieldCheck(6)>1 and MP2Check()
+  and (FieldCheck(6)>1 and MP2Check(c)
   or CardsMatchingFilter(AIMon(),PtolemyFilter)>0))
   or OppHasStrongestMonster() and OppGetStrongestAttack()<c.attack
 end
@@ -1236,7 +1246,7 @@ function SummonMoonlightRose(c)
   or not DeckCheck(DECK_SHADDOLL))
   and HasID(AIExtra(),33698022,true)
   and CardsMatchingFilter(OppMon(),MoonlightRoseFilter)>0
-  and MP2Check()
+  and MP2Check(c)
 end
 function VulcanFilter(c)
   return Affected(c,TYPE_MONSTER,6)
@@ -1251,9 +1261,9 @@ function SummonVulcan(c)
 end
 function UseGalaxyCyclone(mode)
   if mode == 1 then
-    return DestroyCheck(OppST(),false,false,FilterPosition,POS_FACEDOWN)>0
+    return DestroyCheck(OppST(),false,false,false,FilterPosition,POS_FACEDOWN)>0
   end
-  return DestroyCheck(OppST(),false,false,FilterPosition,POS_FACEUP)>0
+  return DestroyCheck(OppST(),false,false,false,FilterPosition,POS_FACEUP)>0
 end
 ----
 
@@ -1615,6 +1625,83 @@ function ChainDecree(source)
   end
   return false
 end
+function TreacherousFilter(c,type)
+  return Affected(c,type,4)
+  and Targetable(c,type)
+  and (type~=TYPE_TRAP or not TraptrixFilter(c))
+end
+GlobalRafflesia = nil
+function ChainRafflesia(source,mode)
+  if mode == 1 then
+    local e=Duel.GetChainInfo(Duel.GetCurrentChain(),CHAININFO_TRIGGERING_EFFECT)
+    local check = false
+    if e then
+      local c=e:GetHandler()
+      if bit32.band(c:GetSummonType(),SUMMON_TYPE_SPECIAL)==SUMMON_TYPE_SPECIAL
+      and c:GetFlagEffect(29616929)>0
+      then
+        check=true
+      end
+    end
+    if HasID(AIDeck(),29616929,true) 
+    and check
+    and UnchainableCheck(06511113)
+    and ChainNegation(source)
+    then
+      GlobalRafflesia = 29616929
+      return true
+    end
+  elseif mode == 2 then
+    local summoned 
+    if AI.GetLastSummonedCards then -- TODO: only for backwards compatibility, remove later
+      summoned = AI.GetLastSummonedCards()
+    else
+      summoned = OppMon()
+    end
+    if HasID(AIDeck(),29401950,true)
+    and (Duel.CheckEvent(EVENT_SUMMON_SUCCESS)
+    or Duel.CheckEvent(EVENT_SPSUMMON_SUCCESS)
+    or Duel.CheckEvent(EVENT_FLIP_SUMMON_SUCCESS))
+    then
+      local targets = SubGroup(summoned,BottomlessFilter,TYPE_MONSTER)
+      if #targets>2 
+      and UnchainableCheck(06511113)
+      then
+        GlobalRafflesia = 29401950
+        return true
+      end
+    end
+    if HasID(AIDeck(),99590524,true)
+    and CardsMatchingFilter(AIGrave(),FilterType,TYPE_TRAP)==0
+    and CardsMatchingFilter(OppMon(),TreacherousFilter,TYPE_MONSTER)>1
+    and UnchainableCheck(06511113)
+    then
+      GlobalRafflesia = 99590524
+      return true
+    end
+    if HasID(AIDeck(),29401950,true)
+    and (Duel.CheckEvent(EVENT_SUMMON_SUCCESS)
+    or Duel.CheckEvent(EVENT_SPSUMMON_SUCCESS)
+    or Duel.CheckEvent(EVENT_FLIP_SUMMON_SUCCESS))
+    then
+      local targets = SubGroup(summoned,BottomlessFilter,TYPE_MONSTER)
+      if #targets>0 
+      and UnchainableCheck(06511113)
+      then
+        GlobalRafflesia = 29401950
+        return true
+      end
+    end
+  end
+  if RemovalCheckCard(c) and #AIMon()<2 then
+    --return true
+  end
+  return false
+end
+function ChainTreacherous(c)
+  return CardsMatchingFilter(OppMon(),TreacherousFilter,TYPE_TRAP)>1
+  and UnchainableCheck(99590524)
+end
 function PriorityChain(cards) -- chain these before anything else
   if HasIDNotNegated(cards,58120309,ChainNegation) then -- Starlight Road
     return {1,CurrentIndex}
@@ -1659,6 +1746,9 @@ function PriorityChain(cards) -- chain these before anything else
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,71068247,ChainNegation) then -- Totem Bird
+    return {1,CurrentIndex}
+  end
+  if HasIDNotNegated(cards,06511113,ChainRafflesia,1) then -- Rafflesia
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,41510920,ChainNegation) then -- Stellarnova Alpha
@@ -1707,6 +1797,9 @@ function PriorityChain(cards) -- chain these before anything else
   if HasIDNotNegated(cards,63746411,ChainGiantHand) then
     return {1,CurrentIndex}
   end
+  if HasIDNotNegated(cards,06511113,ChainRafflesia,2) then
+    return {1,CurrentIndex}
+  end
   if HasIDNotNegated(cards,01639384,ChainFelgrand) then
     return {1,CurrentIndex}
   end
@@ -1720,6 +1813,9 @@ function PriorityChain(cards) -- chain these before anything else
     return {1,CurrentIndex}
   end
   
+  if HasIDNotNegated(cards,99590524,ChainTreacherous) then
+    return {1,CurrentIndex}
+  end
   if HasIDNotNegated(cards,26329679,ChainOmega) then
     return {1,CurrentIndex}
   end
@@ -1847,9 +1943,21 @@ function InfinityTarget(cards)
   end
   return BestTargets(cards,1,TARGET_TOGRAVE)
 end
+function RafflesiaTarget(cards,min)
+  if LocCheck(cards,LOCATION_OVERLAY) then
+    return Add(cards,PRIO_TOGRAVE)
+  end
+  if LocCheck(cards,LOCATION_DECK) then
+    return Add(cards,PRIO_TOHAND,1,FilterID,GlobalRafflesia)
+  end
+  return BestTargets(cards,min,TARGET_DESTROY)
+end
 function GenericCard(cards,min,max,id,c)
   if c then
     id = c.id
+  end 
+  if id == 06511113 then
+    return RafflesiaTarget(cards,min)
   end 
   if id == 18326736 then
     return PtolemaiosTarget(cards,min)
@@ -1918,6 +2026,9 @@ end
 
 function GenericPosition(id,available)
   result = nil
+  if id == 06511113 then
+    result = POS_FACEUP_DEFENCE
+  end
   if id == 78156759 then
     local c = FindID(78156759,AIExtra())
     if ZenmainesCheck(c,OppMon())

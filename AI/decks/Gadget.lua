@@ -269,11 +269,11 @@ function JeweledRDAFilter(card,id)
   and card:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0 and card:is_affected_by(EFFECT_IMMUNE_EFFECT)==0
 end
 function SummonGearGigant()
-  return OppGetStrongestAttDef()<2300 and MP2Check()
+  return OppGetStrongestAttDef()<2300 and MP2Check(2300)
 end
 function SummonChainGadget()
   return DeckCheck(DECK_GADGET) and not HasAccess(90411554) 
-  and MP2Check() and OppGetStrongestAttDef()<=1800
+  and MP2Check(1800) and OppGetStrongestAttDef()<=1800
 end
 function UseMegaform()
   return true
