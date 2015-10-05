@@ -569,7 +569,7 @@ function AHATarget(cards)
     if HasID(cards,22653490) and SummonChidoriHeraldic() then
       result=IndexByID(cards,22653490)
     end
-    if HasID(cards,94380860) and SummonRagnaZero(cards[CurrentIndex]) then
+    if HasID(cards,94380860,SummonRagnaZero) then
       result=IndexByID(cards,94380860)
     end
     if HasID(cards,61344030) and SummonPaladynamo() then

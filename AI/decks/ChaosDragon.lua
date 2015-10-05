@@ -328,10 +328,10 @@ end
 function UseScrapDragon()
   return DestroyCheck(OppField())>0 and (HasID(AIMon(),34408491,true) 
   or (PriorityCheck(AIField(),PRIO_TOGRAVE)>4 
-  and (MP2Check(2800) or HasPriorityTarget(OppField(),true) 
+  and (MP2Check() or HasPriorityTarget(OppField(),true) 
   or OppHasStrongestMonster() or HasID(AIMon(),12538374,true))) 
   or (HasID(AIMon(),99365553,true) and LightpulsarCond(PRIO_TOFIELD)))
-  or OppHasStrongestMonster()
+  or OppHasStrongestMonster() and #AICards()>1
 end
 function SummonBLS()
   return OverExtendCheck() and #OppMon()>0 and ChaosSummonCheck()>4
@@ -899,6 +899,7 @@ function ChaosDragonOnSelectCard(cards, minTargets, maxTargets,triggeringID,trig
     return Add(cards)
   end
   if ID == 10802915 then -- Tour Guide
+    GlobalSummonNegated=true
     return Add(cards,PRIO_TOFIELD)
   end
   if ID == 00691925 then -- Solar Recharge
@@ -1033,7 +1034,8 @@ function ChaosDragonOnSelectPosition(id, available)
   end
   if id == 83531441 then -- Dante
     if GlobalBPAllowed and Duel.GetCurrentPhase()==PHASE_MAIN1 
-    and OppGetWeakestAttDef()<2500 or CardsMatchingFilter(OppMon(),FilterPosition,POS_FACEDOWN)>0
+    and Duel.GetTurnPlayer() == player_ai
+    and (OppGetWeakestAttDef()<2500 or CardsMatchingFilter(OppMon(),FilterPosition,POS_FACEDOWN)>0)
     then
       result=POS_FACEUP_ATTACK
     else

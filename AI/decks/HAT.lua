@@ -548,7 +548,11 @@ function ChainBoM()
   end
   cg = NegateCheck()
   if cg and Duel.GetCurrentChain()>1 then
-		if cg:IsExists(function(c) return c:IsControler(player_ai) end, 1, nil) then
+    if c and c:GetCode() == 29616929 then
+      return false
+    end
+		if cg:IsExists(function(c) return c:IsControler(player_ai) end, 1, nil) 
+    then
       local g=cg:Filter(MoonFilter2,nil,player_ai):GetMaxGroup(Card.GetAttack)
       if g then
         GlobalCardMode = 1

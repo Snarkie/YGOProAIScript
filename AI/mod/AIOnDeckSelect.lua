@@ -413,7 +413,6 @@ function PriorityCheck(cards,loc,count,filter,opt)
   return cards[count].prio
 end
 function Add(cards,loc,count,filter,opt)
-  --GetCaller()
   local result={}
   if count==nil then count=1 end
   if loc==nil then loc=PRIO_TOHAND end

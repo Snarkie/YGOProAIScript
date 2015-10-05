@@ -654,16 +654,7 @@ function ForceStrixTarget(cards)
   end
   return Add(cards)
 end
-function GetCaller()
-    local func = debug.getinfo(1)
-    s = func.name or func.source..", line: "..func.currentline
-    if s then print("this function: "..s) end
-    func = debug.getinfo(2)
-    s = func.name or func.source..", line: "..func.currentline
-    if s then print("calling function: "..s) end
-end
 function BlizzardTarget(cards)
-  --GetCaller()
   return Add(cards,PRIO_TOFIELD,1,FilterLevel,4)
 end
 function IcarusTarget(cards,min)

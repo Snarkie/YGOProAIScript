@@ -383,7 +383,7 @@ if DeckCheck(DECK_TELLARKNIGHT) then
     GlobalSSCardType = TYPE_XYZ
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasID(SpSummonable,94380860) and SummonRagnaZero() then
+  if HasID(SpSummonable,94380860,SummonRagnaZero) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSummonable,46772449) and DeckCheck(DECK_TELLARKNIGHT) and SummonBelzebuth() then
@@ -440,7 +440,7 @@ function NodenTarget(cards)
   if HasID(cards,38331564) then
     return {CurrentIndex}
   else
-    return SatellarknightAdd(cards,PRIO_TOFIELD)
+    return Add(cards,PRIO_TOFIELD,1,FilterLevel,4)
   end
 end
 function SatellarknightOnSelectCard(cards, minTargets, maxTargets,triggeringID,triggeringCard)

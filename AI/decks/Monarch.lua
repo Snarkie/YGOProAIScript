@@ -32,7 +32,7 @@ end
 
 MonarchIdentifier = 09126351 -- Swap Frog
 
-DECK_Monarch = NewDeck("Frog Monarchs",MonarchIdentifier,MonarchStartup) 
+DECK_MONARCH = NewDeck("Frog Monarchs",MonarchIdentifier,MonarchStartup) 
 
 MonarchActivateBlacklist={
 23689697, -- Mega Mobius

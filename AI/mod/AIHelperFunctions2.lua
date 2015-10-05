@@ -308,7 +308,6 @@ function RandomIndexFilter(cards,filter,opt)
 end
 -- check, if the AI can wait for an XYZ/Synchro summon until Main Phase 2
 function MP2Check(atk)
-  print("MP2Check")
   if atk and type(atk)=="table" then
     if atk.GetCode then
       atk=atk:GetAttack()
@@ -316,8 +315,6 @@ function MP2Check(atk)
       atk=atk.attack
     end
   end
-  print(atk)
-  print(ExpectedDamage(2))
   return AI.GetCurrentPhase() == PHASE_MAIN2 or not(GlobalBPAllowed)
   or OppHasStrongestMonster() and not(CanUseHand())
   or atk and ExpectedDamage(2)<atk
@@ -692,6 +689,7 @@ function GlobalTargetSet(c,cards)
   end
   if c == nil then
     print("Warning: null card for Global Target")
+    PrintCallingFunction()
     return nil
   end
   if c.GetCode then
@@ -712,6 +710,8 @@ function GlobalTargetGet(cards,index)
   end
   if c == nil then
     print("Warning: Null GlobalTargetGet")
+    print(cardid)
+    PrintCallingFunction()
   end
   return c
 end
@@ -831,6 +831,7 @@ function NotNegated(c)
   local player
   if c==nil then
     print("warning: NotNegated null card")
+    PrintCallingFunction()
     return true
   end
   if c.GetCode then
@@ -930,8 +931,6 @@ function FilterRace(c,race)
   end
 end
 function FilterLevel(c,level)
-  --print("Get Level")
-  --GetCaller()
   return FilterType(c,TYPE_MONSTER) and c.level==level
 end
 function FilterLevelMin(c,level)
@@ -1268,10 +1267,27 @@ function TargetProtection(c,type)
   end
   return false
 end
+function PrintCallingFunction()
+  local func
+  print("calling functions:")
+  for i=1,10 do
+    func = debug.getinfo(i)
+    if func then
+      s = func.name or func.source..", line: "..func.currentline
+      if s then print("function "..i..": "..s) end
+    end
+  end
+  print("calling functions end")
+end
 function Targetable(c,type)
   local id
   local p
   local targetable
+  if not c then
+    print("Warning: Null card Targetable")
+    PrintCallingFunction()
+    return false
+  end
   if c.GetCode then
     id = c:GetCode()
     p = c:GetControler()
@@ -1299,16 +1315,24 @@ function Affected(c,type,level)
   local immune = false
   local atkdiff = 0
   local lvl
+  local materials = 0
+  if not c then
+    print("Warning: Null card Affected")
+    PrintCallingFunction()
+    return false
+  end
   if c.GetCode then
     id = c:GetCode()
     immune = c:IsHasEffect(EFFECT_IMMUNE_EFFECT) 
     atkdiff = c:GetBaseAttack() - c:GetAttack()
     lvl = c:GetLevel()
+    materials = c:GetMaterialCount()
   else
     id = c.id
     immune = c:is_affected_by(EFFECT_IMMUNE_EFFECT)>0
     atkdiff = c.base_attack - c.attack
     lvl = c.level
+    materials = c.xyz_material_count
   end
   if type == nil then
     type = TYPE_SPELL
@@ -1331,11 +1355,17 @@ function Affected(c,type,level)
     or lvl<=level ) 
   end
   if immune and FilterSet(c,0x108a) -- Traptrix
+  and id ~= 06511113 -- Rafflesia
   then
     return true
   end
   if immune and id == 10817524 then -- First of the Dragons
     return type~=TYPE_MONSTER
+  end
+  if immune and id == 06511113 --Traptrix Rafflesia
+  and materials>0
+  then
+    return type~=TYPE_TRAP
   end
   return not immune
 end
@@ -1755,22 +1785,14 @@ function CanWinBattle(c,targets,tograve,ignorebonus,filter,opt)
 end  
 
 
-function AvailableAttacks(c,direct)
-  local result=1
+function AvailableAttacks(c)
   if not c then
     return 0
   end
-  if not c.GetCode then
-    c=GetScriptFromCard(c)
-  end
-  local id=c:GetCode()
-  if FilterAffected(c,EFFECT_EXTRA_ATTACK) then
-    result=2
-  end
-  --[[if id == then  -- special cases
-    result=3
-  end]]
-  return result-c:GetAttackedCount()
+  local cardscript=GetScriptFromCard(c)
+  local aiscript=GetCardFromScript(c)
+  local result=1+aiscript.extra_attack_count
+  return result-cardscript:GetAttackedCount()
 end
 function CanChangePos(c)
   return not FilterAffected(c,EFFECT_CANNOT_CHANGE_POSITION)
@@ -1941,61 +1963,90 @@ end
 function GetCardFromScript(c,cards)
   if c==nil then 
     print("Warning: Requesting null card conversion")
+    PrintCallingFunction()
     return nil 
   end
-  local seq = c:GetSequence()+1
-  if c:IsLocation(LOCATION_MZONE) then
-    if c:IsControler(player_ai) then
-      cards = AI.GetAIMonsterZones()
-    else
-      cards = AI.GetOppMonsterZones()
+  if AI.GetCardObjectFromScript then 
+    if c.GetCode then
+      return AI.GetCardObjectFromScript(c)
+    elseif c.id then
+      return c
     end
-  elseif c:IsLocation(LOCATION_SZONE) then
-    if c:IsControler(player_ai) then
-      cards = AI.GetAISpellTrapZones()
+    print("Warning: invalid type to convert to card")
+    PrintCallingFunction()
+    return nil
+  else -- TODO: only for backwards compatibility, remove later
+    local seq = c:GetSequence()+1
+    if c:IsLocation(LOCATION_MZONE) then
+      if c:IsControler(player_ai) then
+        cards = AI.GetAIMonsterZones()
+      else
+        cards = AI.GetOppMonsterZones()
+      end
+    elseif c:IsLocation(LOCATION_SZONE) then
+      if c:IsControler(player_ai) then
+        cards = AI.GetAISpellTrapZones()
+      else
+        cards = AI.GetOppSpellTrapZones()
+      end
     else
-      cards = AI.GetOppSpellTrapZones()
+      return GetCardFromScriptOld(c,cards)
     end
-  else
-    return GetCardFromScriptOld(c,cards)
+    return cards[seq] 
   end
-  return cards[seq]
 end
 -- the other way around, get a card script object
 -- from an AI script card.
 function GetScriptFromCard(c)
-  local result = nil
-  if c then 
-    local seq = Sequence(c)
-    local type = c.type
-    local loc = c.location
-    local p
-    local g
-    if CurrentOwner(c) == 1 then
-      p = player_ai
-    else
-      p = 1-player_ai
-    end
-    g = Duel.GetFieldGroup(p,LOCATION_ONFIELD,LOCATION_ONFIELD)
-    if FilterStatus(c,STATUS_SUMMONING) then
-      return nil -- TODO: fix this when summon limbo is supported
-    end
-    if g then
-      g:ForEach(function(card) 
-        if card:GetSequence()==seq 
-        and card:IsType(type) 
-        and card:GetControler()==p 
-        and card:IsLocation(loc)
-        then
-          result = card
-        end
-      end)
-    end
+  if c == nil then
+    print("Warning: Requesting null card conversion")
+    PrintCallingFunction()
+    return nil
   end
-  if result == nil then
-    print("WARNING: ScriptFromCard invalid return")
+  if AI.GetScriptFromCardObject then 
+    if c.GetCode then
+      return c
+    elseif c.id then
+      return AI.GetScriptFromCardObject(c)
+    end
+     print("Warning: invalid type to convert to card")
+     PrintCallingFunction()
+    return nil
+  else -- TODO: only for backwards compatibility, remove later
+    local result = nil
+    if c then 
+      local seq = Sequence(c)
+      local type = c.type
+      local loc = c.location
+      local p
+      local g
+      if CurrentOwner(c) == 1 then
+        p = player_ai
+      else
+        p = 1-player_ai
+      end
+      g = Duel.GetFieldGroup(p,LOCATION_ONFIELD,LOCATION_ONFIELD)
+      if FilterStatus(c,STATUS_SUMMONING) then
+        return nil -- TODO: fix this when summon limbo is supported
+      end
+      if g then
+        g:ForEach(function(card) 
+          if card:GetSequence()==seq 
+          and card:IsType(type) 
+          and card:GetControler()==p 
+          and card:IsLocation(loc)
+          then
+            result = card
+          end
+        end)
+      end
+    end
+    if result == nil then
+      print("Warning: ScriptFromCard invalid return")
+      PrintCallingFunction()
+    end
+    return result
   end
-  return result
 end
 function Surrender()
   AI.Chat("I give up!")

@@ -1217,7 +1217,7 @@ function NekrozChain(cards)
   if HasID(cards,25857246) and ChainValk(cards[CurrentIndex]) then
     return {1,CurrentIndex}
   end
-  if HasID(cards,74122412) and ChainGungnir(cards[CurrentIndex]) then
+  if HasID(cards,74122412,ChainGungnir) then
     return {1,CurrentIndex}
   end
   if HasID(cards,52068432) and ChainTrishula(cards[CurrentIndex]) then

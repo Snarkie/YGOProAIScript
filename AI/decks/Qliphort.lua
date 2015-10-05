@@ -638,7 +638,9 @@ function ChainVanity(c)
   then
     return true
   end
-  if ScytheCheck() and not OppHasStrongestMonster() then
+  if ScytheCheck() and not OppHasStrongestMonster() 
+  and Duel.GetCurrentChain() == 0
+  then
     return true
   end
   return false

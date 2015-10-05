@@ -20,6 +20,7 @@ function OnSelectChain(cards,only_chains_by_player,forced)
     GlobalNegatedChainLinks = {}
   end
   GlobalChain=Duel.GetCurrentChain()
+  GlobalSummonNegated = nil
   local result = 0
   local index = 1
   local ChainAllowed = 0

@@ -371,7 +371,7 @@ if DeckCheck(DECK_BUJIN) then
   if HasID(SpSummonable,96381979) and SummonTigerKingBujin() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasID(SpSummonable,94380860) and BujinXYZCheck() and SummonRagnaZero() then
+  if HasID(SpSummonable,94380860,SummonRagnaZero) and BujinXYZCheck() then
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,94380860)}
   end  
   if HasID(SpSummonable,61344030) and BujinXYZCheck() and SummonPaladynamo() and Chance(50) then

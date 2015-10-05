@@ -148,18 +148,34 @@ function CagnaCond(loc,c)
   end
   return true
 end
-function LibicFilter(c)
+function LibicFilter(c,source)
   return FilterSet(c,0xb1) and FilterType(c,TYPE_MONSTER) and FilterLevel(c,3)
+  and not CardsEqual(c,source)
 end
 function LibicCond(loc,c)
   if loc == PRIO_TOHAND then
     return not HasID(UseLists(AIHand(),AIMon()),62957424,true)
   end
   if loc == PRIO_TOFIELD then
-    return not(FilterLocation(c,LOCATION_GRAVE))
+    if OPTCheck(62957424) 
+    and CardsMatchingFilter(AIHand(),LibicFilter,c)>0 
+    and CardsMatchingFilter(AIMon(),NotBAMonsterFilter)>0 
+    and not GlobalSummonNegated
+    then
+      return 9
+    end
+    return not(FilterLocation(c,LOCATION_GRAVE)) 
   end
   if loc == PRIO_TOGRAVE then
-    return OPTCheck(62957424) and CardsMatchingFilter(AIHand(),LibicFilter)>0
+    if OPTCheck(62957424) and CardsMatchingFilter(AIHand(),LibicFilter,c)>0 then
+      if CardsMatchingFilter(AIMon(),NotBAMonsterFilter)>0 
+      and not GlobalSummonNegated
+      then
+        return 9
+      end
+      return true
+    end
+    return false
   end
   return true
 end
@@ -604,6 +620,7 @@ function BACard(cards,min,max,id,c)
     return Add(cards,PRIO_TOGRAVE)
   end
   if id == 62957424 then
+    GlobalSummonNegated = true
     return Add(cards,PRIO_TOFIELD,1,BAMonsterFilter)
   end
   if id == 00005497 then

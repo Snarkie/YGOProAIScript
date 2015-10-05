@@ -9,7 +9,7 @@ function XYZSummon(index,id)
   if id then
     GlobalSSCardID = id
   end
-  return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  return {COMMAND_SPECIAL_SUMMON,index}
 end
 function SummonExtraDeck(cards,prio)
   local Act = cards.activatable_cards
@@ -305,7 +305,7 @@ function SummonExtraDeck(cards,prio)
   if HasID(SpSum,18326736,SummonPtolemaios) then
     return XYZSummon(nil,18326736)
   end
-  if HasID(SpSum,94380860) and SummonRagnaZero(SpSum[CurrentIndex]) then            -- Ragna Zero
+  if HasID(SpSum,94380860,SummonRagnaZero) then            -- Ragna Zero
     return XYZSummon()
   end  
   if HasIDNotNegated(SpSum,22653490,SummonChidori,1) then              -- Chidori
@@ -668,7 +668,7 @@ function UseJeweledRDA(card,mod)
 end
 function SummonJeweledRDA(c)
   return (UseJeweledRDA(c,1) or OppGetStrongestAttDef() > 2500
-  or #AIMon()==2 and DestroyCheck(OppMon(),true,nil,FilterPosition,POS_FACEUP_ATTACK)>1) 
+  or #AIMon()==2 and DestroyCheck(OppMon(),true,false,false,FilterPosition,POS_FACEUP_ATTACK)>1) 
   and NotNegated(c)
   or Negated(c) and OppGetStrongestAttDef() < c.attack
 end
@@ -834,7 +834,8 @@ function UseCowboyAtt(c)
   and (c == nil or c.xyz_material_count>0)
 end
 function SummonCowboyAtt()
-  return OppHasStrongestMonster() and UseCowboyAtt() and BattlePhaseCheck()
+  return OppHasStrongestMonster() and UseCowboyAtt() 
+  and BattlePhaseCheck() and not(CanUseHand())
 end
 function SkyblasterFilter(c)
   return bit32.band(c.position,POS_FACEUP)>0 and c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0

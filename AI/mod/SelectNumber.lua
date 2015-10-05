@@ -14,10 +14,22 @@ function OnSelectNumber(choices)
   -- cards as possible with Card Trooper.
   -------------------------------------------
   if GlobalActivatedCardID == 85087012 -- Card Trooper
-  or GlobalActivatedCardID == 83531441 -- Dante
   then
     GlobalActivatedCardID = nil
     if #AIDeck()>10 then
+      return 1
+    else
+      return 3
+    end
+  end
+  
+  if GlobalActivatedCardID == 83531441 -- Dante
+  then
+    GlobalActivatedCardID = nil
+    if #AIDeck()>10 
+    and ((OPTCheck(57143342) or OPTCheck(20758643))
+    or BattlePhaseCheck())
+    then
       return 1
     else
       return 3
