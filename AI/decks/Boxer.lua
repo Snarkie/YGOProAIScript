@@ -475,6 +475,7 @@ function BoxerInit(cards)
   local Rep = cards.repositionable_cards
   local SetMon = cards.monster_setable_cards
   local SetST = cards.st_setable_cards
+  GlobalYokeOverride = nil
   if HasID(Act,81439173) then --test
     return COMMAND_ACTIVATE,CurrentIndex
   end
@@ -598,12 +599,18 @@ function ShadowTarget(cards)
   return Add(cards,PRIO_TOGRAVE)
 end
 function LeadYokeTarget(cards)
-  if HasID(cards,05361647) 
-  and CardsMatchingFilter(AIGrave(),GlassjawFilter)>0
-  then
-    return {CurrentIndex}
+  if LocCheck(cards,LOCATION_OVERLAY) then
+    if HasID(cards,05361647) 
+    and CardsMatchingFilter(AIGrave(),GlassjawFilter)>0
+    then
+      return {CurrentIndex}
+    end
+    return Add(cards,PRIO_TOGRAVE)
   end
-  return Add(cards,PRIO_TOGRAVE)
+  if LocCheck(cards,LOCATION_MZONE) then
+    return BestTargets(cards,1,TARGET_PROTECT)
+  end
+  --return BestTargets(cards)
 end
 function NovaCaesarTarget(cards,count)
   return Add(cards,PRIO_TOFIELD,count,FilterLocation,LOCATION_GRAVE)
@@ -645,8 +652,7 @@ function BoxerCard(cards,min,max,id,c)
   if id == 35537251 then
     return ShadowTarget(cards)
   end
-  if GlobalActivatedCardID == 23232295 then
-    GlobalActivatedCardID = nil
+  if GlobalYokeOverride then
     return LeadYokeTarget(cards)
   end
   if id == 71921856 then
@@ -692,6 +698,7 @@ function ChainVeil(c)
   and DualityCheck()
 end
 function BoxerChain(cards)
+  GlobalYokeOverride = nil
   if HasIDNotNegated(cards,08316565,ChainNegation) then -- Jolt Counter
     return 1,CurrentIndex
   end
@@ -751,10 +758,10 @@ function BoxerEffectYesNo(id,card)
   end
   return nil
 end
-
+GlobalYokeOverride = nil
 function BoxerYesNo(desc)
   if desc == 371716721 then -- Lead Yoke protection
-    GlobalActivatedCardID = 23232295
+    GlobalYokeOverride = true
     return 1
   end
   return nil
@@ -763,14 +770,16 @@ function YokeBuffCheck(c)
   return NotNegated(c) and HasMaterials(c) 
   and c.attack+800*c.xyz_material_count>=OppGetStrongestAttDef()
 end
-function YokeFilter(c,atk)
-  return BattleTargetCheck(c)
+function YokeFilter(c,source)
+  local atk=source.attack
+  return BattleTargetCheck(c,source)
   and FilterPosition(c,POS_FACEUP_ATTACK)
   and FilterAttackMin(c,atk)
   and AI.GetPlayerLP(1)-c.attack+atk>800
 end
-function VeilFilter(c,atk)
-  return BattleTargetCheck(c)
+function VeilFilter(c,source)
+  local atk=source.attack
+  return BattleTargetCheck(c,source)
   and (FilterPosition(c,POS_FACEUP_ATTACK)
   and FilterAttackMin(c,atk)
   and AI.GetPlayerLP(1)-c.attack+atk>0
@@ -790,7 +799,8 @@ function BoxerBattleCommand(cards,targets,act)
     for i=1,#cards do
       local c = cards[i]
       if BoxerMonsterFilter(c,23232295)
-      and CardsMatchingFilter(targets,YokeFilter,c.attack)>0
+      and c.id~=79867938
+      and CardsMatchingFilter(targets,YokeFilter,c)>0
       then
         return Attack(i)
       end
@@ -798,7 +808,7 @@ function BoxerBattleCommand(cards,targets,act)
   end
   if HasIDNotNegated(cards,79867938)
   and HasID(AIHand(),13313278,true,ChainVeil)
-  and CardsMatchingFilter(targets,VeilFilter,cards[CurrentIndex].attack)>0
+  and CardsMatchingFilter(targets,VeilFilter,cards[CurrentIndex])>0
   then
     return Attack(CurrentIndex)
   end
@@ -808,16 +818,17 @@ function BoxerAttackTarget(cards,attacker)
   and HasIDNotNegated(cards,23232295,true,YokeBuffCheck)
   then
     if BoxerMonsterFilter(attacker,23232295)
-    and CardsMatchingFilter(cards,YokeFilter,attacker.attack)>0
+    and attacker.id~=79867938
+    and CardsMatchingFilter(cards,YokeFilter,attacker)>0
     then
-      return BestAttackTarget(cards,attacker,false,YokeFilter,attacker.attack)
+      return BestAttackTarget(cards,attacker,false,YokeFilter,attacker)
     end
   end
   if attacker.id == 79867938
   and HasID(AIHand(),13313278,true,ChainVeil)
-  and CardsMatchingFilter(cards,VeilFilter,cards[CurrentIndex].attack)>0
+  and CardsMatchingFilter(cards,VeilFilter,cards[CurrentIndex])>0
   then
-    return BestAttackTarget(cards,attacker,false,VeilFilter,attacker.attack)
+    return BestAttackTarget(cards,attacker,false,VeilFilter,attacker)
   end
 end
 function BoxerAttackBoost(cards)

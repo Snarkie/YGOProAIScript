@@ -16,7 +16,7 @@ AddPriority({
 [38495396] = {1,1,1,1,4,2,1,1,8,1,PtolemyCond},       -- Constellar Ptolemy M7
 [26329679] = {1,1,1,1,1,1,1,1,9,1,nil},               -- Constellar Omega
 [31386180] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Tiras
-[00005509] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Utopia Lightning
+[56832966] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Utopia Lightning
 [84013237] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Utopia
 [31437713] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Heartlanddraco
 })
@@ -148,7 +148,8 @@ function SummonKaus(mode)
   return false
 end
 function UseKaus(c)
-  return (CardsMatchingFilter(AIMon(),ConstellarNonXYZFilter)>1 
+  local cards=SubGroup(AIMon(),FilterPosition,POS_FACEUP)
+  return (CardsMatchingFilter(cards,ConstellarNonXYZFilter)>1 
   or FieldCheck(5)==1 and c.level<5)
   and FieldCheck(5)~=2
 end
@@ -407,7 +408,7 @@ end
 
 ConstellarAtt={
 70908596,78364470,41269771,78358521,
-91949988,31386180,84013237,00005509,
+91949988,31386180,84013237,56832966,
 26329679,31437713,
 }
 ConstellarDef={

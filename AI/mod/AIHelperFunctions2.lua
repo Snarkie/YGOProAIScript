@@ -6,6 +6,7 @@ function OnAIGoingFirstSecond(name)
   player_ai = 0
   if name=="AI_Harpie"
   or name=="AI_Blackwing"
+  or name=="AI_ClownShaddoll"
   then
     player_ai = 1
     result = 0
@@ -287,6 +288,11 @@ function OppHasMonsterInMP2()
 end
 -- returns count of cards matching a filter in a card list
 function CardsMatchingFilter(cards,filter,opt)
+  if not cards then
+    print("Warning: CardsMatchingFilter null cards")
+    PrintCallingFunction()
+    cards={}
+  end
   local result = 0
   for i=1,#cards do
     if FilterCheck(cards[i],filter,opt) then
@@ -428,8 +434,7 @@ function RemovalCheckCard(target,category,cardtype,targeted,chainlink,filter,opt
   local cat={CATEGORY_DESTROY,CATEGORY_REMOVE,
   CATEGORY_TOGRAVE,CATEGORY_TOHAND,
   CATEGORY_TODECK,CATEGORY_CONTROL}
-  if card and filter and (opt and not filter(card,opt)
-  or opt==nil and not filter(card))
+  if target and not FilterCheck(target,filter,opt)
   then
     return false
   end
@@ -1059,6 +1064,7 @@ function FilterAffected(c,effect)
 end
 function FilterPublic(c)
   return FilterStatus(c,STATUS_IS_PUBLIC) or FilterPosition(c,POS_FACEUP)
+  or FilterSummon(c,SUMMON_TYPE_SPECIAL) -- TODO: find better check
 end
 function FilterPrivate(c)
   return not FilterPublic(c)
@@ -1376,40 +1382,68 @@ PriorityTargetList=
 }
 PriorityGraveTargetList=
 {
-  34230233 -- Grapha
+  34230233,12538374, -- Grapha, Treeborn
 }
 function PriorityTarget(c,destroycheck,loc,filter,opt) -- preferred target for removal
   local result = false
+  --print("Priority target check: "..c.id)
+  --PrintCallingFunction()
   if loc == nil then loc = LOCATION_ONFIELD end
   if loc == LOCATION_ONFIELD then
-    if FilterType(c,TYPE_MONSTER) and (bit32.band(c.type,TYPE_FUSION+TYPE_RITUAL+TYPE_XYZ+TYPE_SYNCHRO)>0 
-    or c.level>4 and c.attack>2000)
+    --print("on field")
+    if FilterType(c,TYPE_MONSTER) 
+    and (bit32.band(c.type,TYPE_FUSION+TYPE_RITUAL+TYPE_XYZ+TYPE_SYNCHRO)>0 
+    or c.level>4 and c.attack>2000
+    or c.attack>=2500)
     and not (FiendishCheck(c) and AIGetStrongestAttack()>c.attack)
     then
+      --print("strong monster")
       result = true
     end
     for i=1,#PriorityTargetList do
       if PriorityTargetList[i]==c.id then
+        --print("on list")
         result = true
       end
     end
+    if FilterLocation(c,LOCATION_SZONE) and FilterType(c,TYPE_PENDULUM) 
+    and CardsMatchingFilter(AIST(),function(c)
+      return FilterLocation(c,LOCATION_SZONE) 
+      and FilterType(c,TYPE_PENDULUM)
+      and DestroyFilter(c) end)>1 
+    then
+      --print("pendulum scales")
+      result = true
+    end
+    --print("check attack blacklist")
+    --print(AttackBlacklistCheck(c))
     result = (result or not AttackBlacklistCheck(c))
   elseif loc == LOCATION_GRAVE then
+    --print("in grave")
     for i=1,#PriorityGraveTargetList do
       if PriorityGraveTargetList[i]==c.id then
+        --print("grave priority target")
         result = true
       end
     end
   end
-  if result and (not destroycheck or DestroyCheck(c)) 
+  if result and (not destroycheck or DestroyFilter(c)) 
   and FilterPublic(c) and (filter == nil or (opt==nil and filter(c) or filter(c,opt)))
   then
+    --print("returning true")
     return true
   end
   return false
 end
 function HasPriorityTarget(cards,destroycheck,loc,filter,opt)
   if HasIDNotNegated(cards,05851097,true,nil,nil,POS_FACEUP,FilterPublic) then -- Vanity's Emptiness
+    return true
+  end
+  if CardsMatchingFilter(cards,function(c)
+    return FilterLocation(c,LOCATION_SZONE) 
+    and FilterType(c,TYPE_PENDULUM)
+    and DestroyFilter(c) end)>1 
+  then
     return true
   end
   local count = 0
@@ -1488,13 +1522,21 @@ DestRep={
 function DestroyCountCheck(c,type,battle)
   local id
   local mats
+  local p
+  local cards
   local negated
   if c.GetCode then
     id = c:GetCode()
     mats = c:GetGetMaterialCount()
+    if c:GetControler()==player_ai then
+      p = 1
+    else
+      p = 2
+    end
   else
     id = c.id
     mats = c.xyz_material_count
+    p = CurrentOwner(c)
   end
   if id == 81105204 then
     return Negated(c) or bit32.band(type,TYPE_SPELL+TYPE_TRAP)==0
@@ -1503,8 +1545,13 @@ function DestroyCountCheck(c,type,battle)
   if Negated(c) then
     return c:is_affected_by(EFFECT_INDESTRUCTABLE_COUNT)==0
   end
+  if p==1 then
+    cards=AIMon()
+  else  
+    cards=OppMon()
+  end
   if BoxerMonsterFilter(c) 
-  and HasIDNotNegated(AIMon(),23232295,true,HasMaterials)
+  and HasIDNotNegated(cards,23232295,true,HasMaterials)
   then
     return false
   end
@@ -1689,8 +1736,8 @@ function CrashCheck(c)
   if CurrentMonOwner(c.cardid) ~= c.owner then
     return true
   end
-  if #OppMon()==1 and #AIMon()>1 then
-    --return true
+  if #AIMon()-#OppMon()>1 and OppGetStrongestAttack()==AIGetStrongestAttack() then
+    return true
   end
   for i=1,#CrashList do
     if CrashList[i]==c.id then
@@ -1772,10 +1819,9 @@ function CanWinBattle(c,targets,tograve,ignorebonus,filter,opt)
     if FilterPosition(target,POS_FACEDOWN_DEFENCE) and not FilterPublic(target) then
       oppdef = 1500
     end
-    if (FilterPosition(target,POS_ATTACK) and (oppatk<usedatk
+    if FilterPosition(target,POS_ATTACK) and (oppatk<usedatk
     or CrashCheck(c) and oppatk==usedatk)
-    or FilterPosition(target,POS_DEFENCE) and (oppdef<usedatk)
-    and (FilterPosition(target,POS_FACEUP) or FilterPublic(target))) 
+    or FilterPosition(target,POS_DEFENCE) and oppdef<usedatk 
     and BattleTargetCheck(target,c) 
     then
       return true
@@ -1791,7 +1837,12 @@ function AvailableAttacks(c)
   end
   local cardscript=GetScriptFromCard(c)
   local aiscript=GetCardFromScript(c)
-  local result=1+aiscript.extra_attack_count
+  local result=0
+  if aiscript.extra_attack_count then -- TODO: backwards compatibility
+    result = 1+aiscript.extra_attack_count
+  else
+    result = 2
+  end
   return result-cardscript:GetAttackedCount()
 end
 function CanChangePos(c)
@@ -1809,7 +1860,7 @@ end
 
 -- checks the damage the AI is expected to take or dish out during this turn
 -- assuming only direct attacks
-function ExpectedDamage(player)
+function ExpectedDamage(player,filter,opt)
   local cards = OppMon()
   if player == 2 then
     cards = AIMon()
@@ -1818,7 +1869,7 @@ function ExpectedDamage(player)
   local g = nil
   for i=1,#cards do
     local c=cards[i]
-    if c and CanAttack(c,true) and CanDealBattleDamage(c) then
+    if c and CanAttack(c,true,filter,opt) and CanDealBattleDamage(c,nil,nil,filter,opt) then
       result=result+BattleDamage(nil,c)
     end
   end
@@ -1976,6 +2027,10 @@ function GetCardFromScript(c,cards)
     PrintCallingFunction()
     return nil
   else -- TODO: only for backwards compatibility, remove later
+    if c.id then
+      return c
+    end
+    PrintCallingFunction()
     local seq = c:GetSequence()+1
     if c:IsLocation(LOCATION_MZONE) then
       if c:IsControler(player_ai) then
@@ -2015,6 +2070,9 @@ function GetScriptFromCard(c)
   else -- TODO: only for backwards compatibility, remove later
     local result = nil
     if c then 
+      if c.GetCode then
+        return c
+      end
       local seq = Sequence(c)
       local type = c.type
       local loc = c.location
@@ -2146,7 +2204,7 @@ function Sequence(c)
 end
 
 function FilterCheck(c,filter,opt)
-  return c and (filter==nil or opt==nil 
+  return c and (not filter or opt==nil 
   and filter(c) or filter(c,opt))
 end
 

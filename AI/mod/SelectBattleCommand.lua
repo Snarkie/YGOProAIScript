@@ -116,16 +116,29 @@ end
 function BestAttackTarget(cards,source,ignorebonus,filter,opt)
   --print("best attack target")
   local atk = source.attack
-  if ignorebonus and source.bonus and source.bonus > 0 then
-    atk = math.max(0,atk - source.bonus)
+  local bonus = 0
+  if source.bonus and source.bonus > 0 then
+    bonus = source.bonus
+  end
+  if ignorebonus then
+    atk = math.max(0,atk - bonus)
   end
   local result = nil
   for i=1,#cards do
     local c = cards[i]
     c.index = i
     if FilterPosition(c,POS_FACEUP_ATTACK) then
-      if c.attack<atk or CrashCheck(source) and c.attack==atk then 
-        c.prio = c.attack
+      if c.attack<atk 
+      or (CrashCheck(source) and c.attack==atk 
+      and AIGetStrongestAttack()<=c.attack) 
+      then 
+        if atk-bonus<=c.attack
+        and CanWinBattle(source,cards,nil,true)
+        then
+          c.prio = 1
+        else
+          c.prio = c.attack
+        end
       else
         c.prio = c.attack * -1
       end
@@ -491,6 +504,7 @@ function AttackMaiden(c,source)
 end
 function AttackMole(c,source)
   return Negated(c)
+  or not source
   or ArmadesCheck(source)
   or StareaterCheck(source)
   or CardsMatchingFilter(AIMon(),FilterAttackMin,1500)>1
@@ -505,6 +519,12 @@ function AttackCatastor(c,source)
   or ArmadesCheck(source)
   or StareaterCheck(source)
   or FilterAttribute(source,ATTRIBUTE_DARK)
+end
+function AttackConstruct(c,source)
+  return Negated(c)
+  or ArmadesCheck(source)
+  or StareaterCheck(source)
+  or not FilterSummon(source,SUMMON_TYPE_SPECIAL)
 end
 function SelectAttackConditions(c,source) 
   if c.id == 95929069 then
@@ -527,6 +547,9 @@ function SelectAttackConditions(c,source)
   end
   if c.id == 26593852 then
     return AttackCatastor(c,source)
+  end
+  if c.id == 20366274 then
+    return AttackConstruct(c,source)
   end
   return true
 end

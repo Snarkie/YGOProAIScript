@@ -93,6 +93,7 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
   GlobalBPAllowed = to_bp_allowed
   SaveCards()
   SurrenderCheck()
+
   ---------------------------------------
   -- Don't do anything if the AI controls
   -- a face-up Light and Darkness Dragon.
@@ -181,6 +182,50 @@ or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
 then
   return DeckCommand[1],DeckCommand[2]
 end
+
+-- If the AI can attack for game, attempt to do so first
+
+-- opp has no monsters to defend
+if #OppMon()==0 
+and ExpectedDamage(2,FilterPosition,POS_ATTACK)>AI.GetPlayerLP(2)
+and to_bp_allowed
+and BattlePhaseCheck()
+then
+  return COMMAND_TO_NEXT_PHASE,1
+end
+
+-- AI has a direct attacker
+local g=SubGroup(AIMon(),FilterAffected,EFFECT_DIRECT_ATTACK)
+local result = 0
+for i=1,#g do
+  local c=g[i]
+  if CanAttack(c,true)
+  and CanDealBattleDamage(c)
+  then
+    result=result+c.attack
+  end
+end
+if result>AI.GetPlayerLP(2) 
+and to_bp_allowed
+and BattlePhaseCheck()
+then
+  return COMMAND_TO_NEXT_PHASE,1
+end
+
+-- AI can attack for game on an opponent's monster
+for i=1,#AIMon() do
+  for j=1,#OppMon() do
+    source=AIMon()[i]
+    target=OppMon()[i]
+    if CanFinishGame(source,target)
+    and to_bp_allowed
+    and BattlePhaseCheck()
+    then
+      return COMMAND_TO_NEXT_PHASE,1
+    end
+  end
+end
+  
 if d and d.Init then
   DeckCommand,DeckCommand2 = d.Init(cards,to_bp_allowed,to_ep_allowed)
 end

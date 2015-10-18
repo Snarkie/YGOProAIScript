@@ -132,15 +132,17 @@ AddPriority({
 [36553319] = {4,2,4,1,4,3,1,1,6,1,FarfaCond},    -- BA Farfa
 [09342162] = {3,2,6,1,6,3,1,1,6,1,CagnaCond},    -- BA Cagna
 [62957424] = {3,2,3,1,3,3,1,1,6,1,LibicCond},    -- BA Libic
-[00005497] = {8,2,1,1,2,2,1,1,5,1,MalacodaCond}, -- BA Malacoda
+[81992475] = {9,2,9,1,9,1,1,1,6,1,BarbarCond},   -- BA Barbar
+[35330871] = {8,2,1,1,2,2,1,1,5,1,MalacodaCond}, -- BA Malacoda
 
 [73680966] = {5,1,1,1,1,1,1,1,1,1,TBOTECond},    -- The Beginning of the End
 [62835876] = {9,1,1,1,5,1,1,1,1,1,GECond},       -- BA Good&Evil
 [36006208] = {8,2,1,1,4,1,1,1,1,1,FireLakeCond}, -- BA Fire Lake
+[20036055] = {4,2,1,1,3,1,1,1,1,1,},             -- BA Traveler
 [63356631] = {1,1,1,1,1,1,1,1,1,1,PWWBCond},     -- PWWB
 [71587526] = {1,1,1,1,1,1,1,1,1,1,KarmaCutCond}, -- Karma Cut
 
-[00601193] = {1,1,10,1,1,1,1,1,1,1,VirgilCond},   -- BA Virgil
+[00601193] = {1,1,10,1,1,1,1,1,1,1,VirgilCond},  -- BA Virgil
 [72167543] = {1,1,1,1,1,1,1,1,1,1},              -- Downerd Magician
 [81330115] = {1,1,1,1,1,1,1,1,1,1},              -- Acid Golem of Destruction
 [31320433] = {1,1,1,1,1,1,1,1,1,1},              -- Nightmare Shark
@@ -152,6 +154,8 @@ AddPriority({
 [83531441] = {1,1,9,1,5,2,1,1,5,1,DanteCond},    -- BA Dante
 [16259549] = {1,1,1,1,1,1,1,1,1,1},              -- Fortune Tune
 [26563200] = {1,1,1,1,1,1,1,1,1,1},              -- Muzurythm the String Djinn
+[27552504] = {1,1,1,1,1,1,1,1,1,1},              -- Beatrice, the Eternal Lady
+[18386170] = {1,1,1,1,1,1,1,1,1,1},              -- Dante, Pilgrim of the Burning Abyss
 })
 AddPriority({
 -- Nekroz: 

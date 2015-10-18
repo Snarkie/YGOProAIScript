@@ -193,6 +193,9 @@ function TourGuideCond(loc,c)
     and not (HasID(cards,63356631,true) or HasID(cards,71587526 ,true))
     and not SkillDrainCheck()
     and (DiscardOutlets()==0 or CardsMatchingFilter(AIMon(),DarkWorldMonsterFilter)>0)
+    and not ((Duel.GetCurrentPhase()==PHASE_END or Duel.GetTurnPlayer()==player_ai)
+    and (HasID(AIMon(),83531441) or CardsMatchingFilter(AIMon(),BASelfDestructFilter)>0)
+    or NormalSummonCheck())
   end
   if loc == PRIO_BANISH then
     return bit32.band(c.location,LOCATION_HAND)==0 or CardsMatchingFilter(AIHand(),FilterID,10802915)>1
@@ -969,9 +972,6 @@ function ChaosDragonOnSelectChain(cards,only_chains_by_player)
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,07391448) then -- Goyo Guardian
-    return {1,CurrentIndex}
-  end
-  if HasIDNotNegated(cards,13700002) then -- Dante Proxy
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,83531441) then -- Dante

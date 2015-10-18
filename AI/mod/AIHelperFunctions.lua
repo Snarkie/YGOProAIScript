@@ -1813,7 +1813,7 @@ function ApplyATKBoosts(Cards)
   -- Utopia Lightning
   for i=1,#Cards do
     local c = Cards[i]
-    if c.id == 00005509 
+    if c.id == 56832966 
     and c.xyz_material_count>1
     and NotNegated(c)
     and #OppMon()>0

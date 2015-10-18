@@ -48,8 +48,11 @@ function GraffCond(loc,c)
     return not HasID(UseLists(AIHand(),AIMon()),20758643,true)
   end
   if loc == PRIO_TOFIELD then
-    return OPTCheck(20758643) and CardsMatchingFilter(AIDeck(),BAMonsterFilter,20758643)>0
+    return OPTCheck(20758643) 
+    and CardsMatchingFilter(AIDeck(),BAMonsterFilter,20758643)>0
     and not HasID(AIMon(),20758643,true)
+    and (CardsMatchingFilter(AIMon(),NotBAMonsterFilter)==0 
+    or GlobalSummonNegated)
   end
   if loc == PRIO_TOGRAVE then
     return OPTCheck(20758643) and CardsMatchingFilter(AIDeck(),BAMonsterFilter,20758643)>0
@@ -63,6 +66,8 @@ function CirCond(loc,c)
   if loc == PRIO_TOFIELD then
     return OPTCheck(57143342) and CardsMatchingFilter(AIGrave(),BAMonsterFilter,57143342)>0
     and not HasID(AIMon(),57143342,true)
+    and (CardsMatchingFilter(AIMon(),NotBAMonsterFilter)==0 
+    or GlobalSummonNegated)
   end
   if loc == PRIO_TOGRAVE then
     return OPTCheck(57143342) and CardsMatchingFilter(AIGrave(),BAMonsterFilter,57143342)>0
@@ -105,10 +110,15 @@ function CalcabCond(loc,c)
   return true
 end
 function RubicCond(loc,c)
+  if loc == PRIO_TOHAND then
+    return not HasID(AICards(),00734741,true)
+    and not HasAccess(00601193)
+  end
   if loc == PRIO_TOFIELD then
     return not(FilterLocation(c,LOCATION_GRAVE))
     and HasID(AIMon(),83531441,true)
     and not HasID(AIMon(),10802915,true)
+    and not HasID(AICards(),00734741,true)
     and Duel.GetTurnPlayer()==player_ai
     and Duel.GetCurrentPhase()~=PHASE_END
     and CardsMatchingFilter(AIHand(),BAMonsterFilter,00734741)>0
@@ -122,6 +132,7 @@ function FarfaFilter(c)
   return FilterType(c,TYPE_MONSTER) 
   and Targetable(c,TYPE_MONSTER)
   and Affected(c,TYPE_MONSTER,3)
+  and CurrentOwner(c)==2
 end
 function FarfaCond(loc,c)
   if loc == PRIO_TOHAND then
@@ -145,6 +156,28 @@ function CagnaCond(loc,c)
   if loc == PRIO_TOGRAVE then
     return OPTCheck(09342162) and not (HasID(AIGrave(),62835876,true) 
     or HasID(UseLists(AIHand(),AIGrave(),AIST()),36006208,true) )
+    and CardsMatchingFilter(AIHand(),BAFilter)>0
+  end
+  return true
+end
+function BarbarDamage()
+  return math.min(3,CardsMatchingFilter(AIGrave(),BAMonsterFilter,81992475))*300
+end
+function BarbarFinish(cards)
+  if not cards then cards=AIDeck() end
+  return HasID(cards,81992475,true,OPTCheck,81992475)
+  and BarbarDamage()>=AI.GetPlayerLP(2)
+  and MacroCheck()
+end
+function BarbarCond(loc,c)
+  if loc == PRIO_TOHAND then
+    return BarbarDamage()>=AI.GetPlayerLP(2)
+  end
+  if loc == PRIO_TOFIELD then
+    return BarbarDamage()>=AI.GetPlayerLP(2)
+  end
+  if loc == PRIO_TOGRAVE then
+    return BarbarDamage()>=AI.GetPlayerLP(2)
   end
   return true
 end
@@ -190,13 +223,13 @@ function VirgilCond(loc,c)
 end
 function ReleaserCond(loc,c)
   if loc == PRIO_TOGRAVE then
-    return not DeckCheck(DECK_BA) or HasID(AIHand(),00005497,true)
+    return not DeckCheck(DECK_BA) or HasID(AIHand(),35330871,true)
   end
   return true
 end
 function GECond(loc,c)
   if loc == PRIO_TOHAND then
-    return HasID(AIHand(),00005497,true)
+    return HasID(AIHand(),35330871,true)
   end
   if loc == PRIO_TOGRAVE then
     --return not HasID(AIGrave(),62835876,true)
@@ -214,6 +247,7 @@ function FireLakeCond(loc,c)
     return GetMultiple(36006208)==0 
     and not HasID(GlobalTargetList,36006208,true)
     and not HasID(UseLists(AIHand(),AIST()),36006208,true)
+    and CardsMatchingFilter(AICards(),BAMonsterFilter)>1
   end
   return true
 end
@@ -228,9 +262,12 @@ function TourguideFilter(c)
   return bit32.band(c.type,TYPE_MONSTER)>0 and bit32.band(c.race,RACE_FIEND)>0 and c.level==3
 end
 function SummonTourguide()
-  return CardsMatchingFilter(UseLists({AIDeck(),AIHand()}),TourguideFilter)>1 and DualityCheck()
-  and (DeckCheck(DECK_BA) and CardsMatchingFilter(AIMon(),BASelfDestructFilter)==0
-  or not DeckCheck(DECK_BA) and HasID(AIExtra(),83531441,true))
+  return CardsMatchingFilter(UseLists({AIDeck(),AIHand()}),TourguideFilter)>1 
+  and DualityCheck()
+  and (DeckCheck(DECK_BA) 
+  and CardsMatchingFilter(AIMon(),BASelfDestructFilter)==0
+  or not DeckCheck(DECK_BA) 
+  and HasID(AIExtra(),83531441,true))
 end
 function SummonCir()
   return  CardsMatchingFilter(AIMon(),NotBAMonsterFilter)==0 
@@ -294,7 +331,7 @@ function UseGE()
 end
 function SummonGigaBrillant()
   return CardsMatchingFilter(AIMon(),BASelfDestructFilter)<3 and #AIMon()>3
-  and GlobalBPAllowed and Duel.GetCurrentPhase == PHASE_MAIN1
+  and BattlePhaseCheck()
 end
 function AlucardFilter(c)
   return FilterPosition(c,POS_FACEDOWN) and DestroyFilter(c)
@@ -310,10 +347,13 @@ function SummonLevia()
   return CardsMatchingFilter(AIMon(),BASelfDestructFilter)<4
 end
 function TemtempoFilter(c)
-  return FilterType(c,TYPE_XYZ) and c.xyz_material_count>0 and Targetable(c,TYPE_MONSTER) and Affected(c,3)
+  return FilterType(c,TYPE_XYZ) 
+  and c.xyz_material_count>0 
+  and Targetable(c,TYPE_MONSTER) 
+  and Affected(c,3)
 end
 function UseTemtempo()
-  return CardsMatchingFilter(OppField(),TemtempoFilter)>0
+  return CardsMatchingFilter(OppMon(),TemtempoFilter)>0
 end
 function SummonTemtempo()
   return CardsMatchingFilter(AIMon(),BASelfDestructFilter)<3 and UseTemtempo()
@@ -334,7 +374,13 @@ function SummonNightmareShark()
   and DeckCheck(DECK_BA)
 end
 function SummonDownerd()
-  return CardsMatchingFilter(AIMon(),BASelfDestructFilter)==0 and HasID(AIMon(),83531441,true,nil,POS_FACEUP_ATTACK)
+  if CardsMatchingFilter(AIMon(),BASelfDestructFilter)==0 
+  and HasID(AIMon(),83531441,true,DisabledDanteFilter)
+  and Duel.GetCurrentPhase()==PHASE_MAIN2
+  then
+    GlobalSSCardID = 72167543
+    return true
+  end
 end
 function SummonZenmainesBA()
   return false -- temp
@@ -343,10 +389,45 @@ function SummonFortuneTune()
   return false -- temp
 end
 function RepoDante(c)
-  return FilterPosition(c,POS_FACEUP_DEFENCE)
+  return FilterPosition(c,POS_DEFENCE)
   and BattlePhaseCheck()
-  and (#OppMon()==0 or OppGetStrongestAttDef()<=1000)
+  and (#OppMon()==0 or OppGetStrongestAttDef()<=c.attack)
   and NotNegated(c)
+  or FilterPosition(c,POS_FACEUP_ATTACK)
+  and (Negated(c)
+  or TurnEndCheck()
+  or OppGetStrongestAttDef()>=1000 
+  and OppHasStrongestMonster())
+end
+function DisabledDanteFilter(c)
+  return FilterAffected(c,EFFECT_DISABLE_EFFECT)
+  or FilterAffected(c,EFFECT_DISABLE)
+  or FilterAffected(c,EFFECT_CANNOT_ATTACK)
+  or TurnEndCheck() and FilterPosition(c,POS_FACEUP_ATTACK)
+  or c.xyz_material_count==0 and (c.attack<2500 or TurnEndCheck())
+end
+function BeatriceDiscardFilter(c)
+  return BAMonsterFilter(c)
+  -- and 
+end
+function SummonBeatrice(c,mode)
+  if mode == 1 
+  and HasID(AIMon(),83531441,true,DisabledDanteFilter)
+  and CardsMatchingFilter(AIMon(),BASelfDestructFilter)<2
+  --and CardsMatchingFilter(AIHand(),BeatriceDiscardFilter)>0
+  then
+    GlobalSSCardID = c.id
+    return true
+  end
+  if mode == 2
+  and HasID(AIMon(),83531441,true)
+  and CardsMatchingFilter(AIMon(),BASelfDestructFilter)<1
+  and PriorityCheck(AIHand(),PRIO_TOGRAVE,1,BeatriceDiscardFilter)>3
+  and MP2Check(2500)
+  then
+    GlobalSSCardID = c.id
+    return true
+  end
 end
 function BAInit(cards)
   GlobalPreparation = nil
@@ -375,6 +456,12 @@ function BAInit(cards)
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSum,83531441) and SummonDanteBA() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(SpSum,27552504,SummonBeatrice,1) then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(SpSum,27552504,SummonBeatrice,2) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSum,31320433) and SummonNightmareShark() then
@@ -420,6 +507,12 @@ function BAInit(cards)
   if HasID(Sum,84764038) and SummonScarm() then
     return {COMMAND_SUMMON,CurrentIndex}
   end
+  if HasID(Act,81992475,false,nil,LOCATION_HAND,SSBA)  -- Barbar
+  and not BarbarFinish(AIHand())
+  then
+    OPTSet(81992475)
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   if HasID(Act,73213494,false,nil,LOCATION_HAND) and SSBA(Act[CurrentIndex]) then -- Calcab
     OPTSet(73213494)
     return {COMMAND_ACTIVATE,CurrentIndex}
@@ -432,12 +525,12 @@ function BAInit(cards)
     OPTSet(62957424)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Act,09342162,false,nil,LOCATION_HAND) and SSBA(Act[CurrentIndex]) then -- Cagna
-    OPTSet(09342162)
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
   if HasID(Act,36553319,false,nil,LOCATION_HAND) and SSBA(Act[CurrentIndex]) then -- Farfa
     OPTSet(36553319)
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasID(Act,09342162,false,nil,LOCATION_HAND) and SSBA(Act[CurrentIndex]) then -- Cagna
+    OPTSet(09342162)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Act,00734741,false,nil,LOCATION_HAND) and SSBA(Act[CurrentIndex]) then -- Rubic
@@ -456,7 +549,10 @@ function BAInit(cards)
   if HasID(Sum,62957424) and SummonBA() then
     return {COMMAND_SUMMON,CurrentIndex}
   end
-  if HasID(Sum,873213494) and SummonBA() then
+  if HasID(Sum,81992475,SummonBA) then
+    return {COMMAND_SUMMON,CurrentIndex}
+  end
+  if HasID(Sum,73213494) and SummonBA() then
     return {COMMAND_SUMMON,CurrentIndex}
   end
   if HasID(Sum,47728740) and SummonBA() then
@@ -477,7 +573,7 @@ function BAInit(cards)
     OPTSet(57143342)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(SSetMon,57143342) and SetCir() then
+  if HasID(SetMon,57143342) and SetCir() then
     return {COMMAND_SET_MONSTER,CurrentIndex}
   end
   if HasID(SetMon,20758643) and SetBA() then
@@ -487,6 +583,9 @@ function BAInit(cards)
     return {COMMAND_SET_MONSTER,CurrentIndex}
   end
   if HasID(SetMon,73213494) and SetBA() then
+    return {COMMAND_SET_MONSTER,CurrentIndex}
+  end
+  if HasID(SetMon,81992475) and SetBA() then
     return {COMMAND_SET_MONSTER,CurrentIndex}
   end
   if HasID(SetMon,36553319) and SetBA() then
@@ -504,7 +603,7 @@ function BAInit(cards)
   if HasID(SetMon,00734741) and SetBA() then
     return {COMMAND_SET_MONSTER,CurrentIndex}
   end
-  if HasID(SSetMon,57143342) and SetBA() then
+  if HasID(SetMon,57143342) and SetBA() then
     return {COMMAND_SET_MONSTER,CurrentIndex}
   end
   if HasID(SpSum,72167543) and SummonDownerd() then
@@ -582,9 +681,97 @@ function TemtempoTarget(cards)
   end
   return BestTargets(cards,1,TARGET_OTHER)
 end
+function BeatriceSummonTarget(cards)
+  if LocCheck(cards,LOCATION_ONFIELD) then
+    GlobalSSCardID = nil
+    return Add(cards,PRIO_TOGRAVE,1,DisabledDanteFilter)
+  elseif LocCheck(cards,LOCATION_HAND) then
+    return Add(cards,PRIO_TOGRAVE)
+  end
+end
+function BeatriceTarget(cards,c)
+  if LocCheck(cards,LOCATION_OVERLAY) then
+    if GlobalBeatriceID 
+    and HasID(c.xyz_materials,GlobalBeatriceID,true)
+    then
+      local id = GlobalBeatriceID
+      GlobalBeatriceID = nil
+      return Add(cards,PRIO_TOGRAVE,1,FilterID,id)
+    else
+      return Add(cards,PRIO_TOGRAVE)
+    end
+  elseif LocCheck(cards,LOCATION_DECK) then
+    if GlobalBeatriceID then
+      local id = GlobalBeatriceID
+      GlobalBeatriceID = nil
+      return Add(cards,PRIO_TOGRAVE,1,FilterID,id)
+    else
+      return Add(cards,PRIO_TOGRAVE)
+    end
+  elseif LocCheck(cards,LOCATION_EXTRA) then
+    return Add(cards,PRIO_TOFIELD,1,FilterID,18386170)
+  end
+  return Add(cards,PRIO_TOGRAVE)   
+end
+function DownerdSummonTarget(cards)
+  if LocCheck(cards,LOCATION_ONFIELD) then
+    GlobalSSCardID = nil
+    return Add(cards,PRIO_TOGRAVE,1,DisabledDanteFilter)
+  end
+end
+GlobalPilgrimID = nil
+function PilgrimTarget(cards)
+  if GlobalPilgrimID then
+    local id = GlobalPilgrimID
+    GlobalPilgrimID = nil
+    return Add(cards,PRIO_TOGRAVE,1,FilterID,id)
+  end
+  return Add(cards,PRIO_TOGRAVE)
+end
+function BarbarTarget(cards,max)
+  return Add(cards,PRIO_BANISH,max)
+end
+GlobalGriefingID = nil
+function FiendGriefingTarget(cards)
+  if LocCheck(cards,LOCATION_GRAVE) then
+    return BestTargets(cards,1,TARGET_TODECK)
+  elseif LocCheck(cards,LOCATION_DECK) then
+    if GlobalGriefingID then
+      local id = GlobalGriefingID
+      GlobalGriefingID = nil
+      return Add(cards,PRIO_TOGRAVE,1,FilterID,id)
+    end
+    return Add(cards,PRIO_TOGRAVE)
+  end
+  return BestTargets(cards)
+end
+function TravelerTarget(cards,max)
+  return Add(cards,PRIO_TOFIELD,max)
+end
 function BACard(cards,min,max,id,c)
+  if not c and GlobalSSCardID == 27552504 then
+    return BeatriceSummonTarget(cards)
+  end
+  if not c and GlobalSSCardID == 72167543 then
+    return DownerdSummonTarget(cards)
+  end
   if c then
     id = c.id
+  end
+  if id == 60743819 then
+    return FiendGriefingTarget(cards)
+  end
+  if id == 20036055 then
+    return TravelerTarget(cards,max)
+  end
+  if id == 81992475 then
+    return BarbarTarget(cards,max)
+  end
+  if id == 27552504 then
+    return BeatriceTarget(cards,c)
+  end
+  if id == 18386170 then
+    return PilgrimTarget(cards,c)
   end
   if id == 20758643 then
     return Add(cards,PRIO_TOFIELD)
@@ -623,7 +810,7 @@ function BACard(cards,min,max,id,c)
     GlobalSummonNegated = true
     return Add(cards,PRIO_TOFIELD,1,BAMonsterFilter)
   end
-  if id == 00005497 then
+  if id == 35330871 then
     return MalacodaTarget(cards,c)
   end
    if id == 62835876 then
@@ -726,7 +913,168 @@ end
 function ChainLibic()
   return CardsMatchingFilter(AIHand(),LibicFilter)>0
 end
+GlobalBeatriceID = nil
+function ChainBeatrice(c)
+  if FilterLocation(c,LOCATION_GRAVE) then
+    return true
+  elseif FilterLocation(c,LOCATION_ONFIELD) then
+    if RemovalCheckCard(c) or NegateCheckCard(c) then
+      return true
+    end
+    if (BarbarFinish(AIDeck()) and NotNegated(c)
+    or BarbarFinish(c.xyz_materials))
+    and UnchainableCheck(81992475)
+    then
+      GlobalGriefingID = 81992475
+      return true
+    end
+    if HasPriorityTarget(OppMon(),false,nil,FarfaFilter)
+    and (HasID(AIDeck(),36553319,true,OPTCheck,36553319) and NotNegated(c)
+    or HasID(c.xyz_materials,36553319,true,OPTCheck,36553319))
+    and UnchainableCheck(27552504)
+    then
+      GlobalBeatriceID = 36553319
+      return true
+    end
+    if Duel.CheckTiming(TIMING_END_PHASE) 
+    and Duel.GetTurnPlayer() == 1-player_ai
+    and (NotNegated(c) or PriorityCheck(c.xyz_materials,PRIO_TOGRAVE)>3)
+    and UnchainableCheck(27552504)
+    then
+      return true
+    end
+    if Duel.GetTurnPlayer() == player_ai
+    and UnchainableCheck(27552504)
+    and (NotNegated(c) or PriorityCheck(c.xyz_materials,PRIO_TOGRAVE)>3)
+    then
+      return true
+    end
+  end
+  return false
+end
+function ChainPilgrim(c)
+  if FilterLocation(c,LOCATION_GRAVE) then
+    return true
+  elseif FilterLocation(c,LOCATION_ONFIELD) then
+    if RemovalCheckCard(c) or NegateCheckCard(c) then
+      return PriorityCheck(AIHand(),PRIO_TOGRAVE)>3
+      and NotNegated(c)
+    end
+    if BarbarFinish(AIHand())
+    and UnchainableCheck(81992475)
+    then
+      GlobalGriefingID = 81992475
+      return true
+    end
+    if HasPriorityTarget(OppMon(),false,nil,FarfaFilter)
+    and HasID(AIHand(),36553319,true,OPTCheck,36553319) 
+    and NotNegated(c)
+    and UnchainableCheck(18386170)
+    then
+      GlobalPilgrimID = 36553319
+      return true
+    end
+    if Duel.CheckTiming(TIMING_END_PHASE) 
+    and Duel.GetTurnPlayer() == 1-player_ai
+    and PriorityCheck(AIHand(),PRIO_TOGRAVE)>3
+    and NotNegated(c)
+    and UnchainableCheck(18386170)
+    then
+      return true
+    end
+    if Duel.GetTurnPlayer() == player_ai
+    and UnchainableCheck(18386170)
+    and PriorityCheck(AIHand(),PRIO_TOGRAVE)>3
+    and NotNegated(c)
+    then
+      return true
+    end
+  end
+  return false
+end
+function ChainBarbar(c)
+  return BarbarDamage()>=0.8*AI.GetPlayerLP(2)
+  and OPTCheck(81992475)
+end
+function ChainFiendGriefing(c)
+  if RemovalCheckCard(c) then
+    return true
+  end
+  if BarbarFinish(AIDeck())
+  and UnchainableCheck(81992475)
+  then
+    GlobalGriefingID = 81992475
+    return true
+  end
+  if HasPriorityTarget(OppMon(),false,nil,FarfaFilter)
+  and HasID(AIDeck(),36553319,true,OPTCheck,36553319) 
+  and UnchainableCheck(60743819)
+  then
+    GlobalGriefingID = 36553319
+    return true
+  end
+  if Duel.CheckTiming(TIMING_END_PHASE) 
+  and Duel.GetTurnPlayer() == 1-player_ai
+  and UnchainableCheck(60743819)
+  then
+    return true
+  end
+  if Duel.GetTurnPlayer() == player_ai
+  and UnchainableCheck(60743819)
+  and NotBAMonsterFilter(c)==0
+  and (Duel.GetCurrentPhase()==PHASE_MAIN1
+  or Duel.GetCurrentPhase()==PHASE_MAIN2)
+  then
+    return true
+  end
+  return false
+end
+function TravelerFilter(c)
+  return BAMonsterFilter(c)
+  and FilterRevivable(c)
+  and c.turnid == Duel.GetTurnCount()
+end
+function ChainTraveler(c)
+  if RemovalCheckCard(c) then
+    return true
+  end
+  local targets = CardsMatchingFilter(AIGrave(),TravelerFilter)
+  local space = Duel.GetLocationCount(player_ai,LOCATION_MZONE)
+  local count = math.min(targets,space)
+  if Duel.CheckTiming(TIMING_END_PHASE) 
+  and Duel.GetTurnPlayer() == 1-player_ai
+  and Duel.GetCurrentChain() == 0
+  and count>2
+  then
+    return true
+  end
+  if Duel.GetTurnPlayer() == player_ai
+  and Duel.GetCurrentChain() == 0
+  and count>2
+  then
+    return true
+  end
+  if Duel.GetTurnPlayer() == 1-player_ai
+  and Duel.GetCurrentPhase() == PHASE_BATTLE
+  and #AIMon()==0
+  and ExpectedDamage(1)>=0.7*AI.GetPlayerLP(1)
+  then
+    return true
+  end
+end
 function BAChain(cards)
+  if HasID(cards,20036055,ChainTraveler) then
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,81992475,ChainBarbar) then
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,27552504,ChainBeatrice) then
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,18386170,ChainPilgrim) then
+    return {1,CurrentIndex}
+  end
   if HasID(cards,57143342,false,nil,LOCATION_GRAVE) then -- Cir
     OPTSet(57143342)
     return {1,CurrentIndex}
@@ -770,11 +1118,23 @@ function BAChain(cards)
   if HasID(cards,63356631) and ChainPWWB() then
     return {1,CurrentIndex}
   end
+  if HasID(cards,60743819,ChainFiendGriefing) then
+    return {1,CurrentIndex}
+  end
   return nil
 end
 
 function BAEffectYesNo(id,card)
   local result = nil
+  if id == 18386170 and ChainPilgrim(card) then
+    result = 1
+  end
+  if id == 81992475 and ChainBarbar(card) then
+    result = 1
+  end
+  if id == 27552504 and ChainBeatrice(card) then
+    result = 1
+  end
   if id==57143342 and FilterLocation(card,LOCATION_GRAVE) then -- Cir
     OPTSet(57143342)
     result = 1
@@ -816,14 +1176,16 @@ BAAtt={
   72167543, -- Downerd
   81330115,31320433,47805931, -- Acid, Nightmare Shark, Giga-Brillant
   75367227,68836428,52558805, -- Alucard, Levia, Temtempo
+  18386170, -- Pilgrim
 }
 BAVary={
   57143342,73213494,09342162, -- Cir, Calcab, Cagna
   47728740,20758643,62957424, -- Alich, Graff, Libic
+  27552504, -- Beatrice
 }
 BADef={
   84764038,00734741,78156759, -- Scarm, Rubic, Zenmaines
-  16259549,62957424,36553319,  -- Fortune Tune, Farfa
+  16259549,62957424,36553319, -- Fortune Tune, Farfa
 }
 
 function BAPosition(id,available)
@@ -837,7 +1199,13 @@ function BAPosition(id,available)
   for i=1,#BAVary do
     if BAVary[i]==id 
     then 
-      if GlobalBPAllowed and Duel.GetTurnCount()>1 then result=nil else result=POS_FACEUP_DEFENCE end
+      if BattlePhaseCheck() 
+      and Duel.GetTurnPlayer()==player_ai 
+      then 
+        result=nil 
+      else 
+        result=POS_FACEUP_DEFENCE 
+      end
     end
   end
   for i=1,#BADef do

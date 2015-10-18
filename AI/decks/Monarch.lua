@@ -582,7 +582,7 @@ function DownerdFilter(c)
   and c.rank>4
   and c.xyz_material_count==0
 end
-function SummonDownerd(c,mode)
+function SummonDownerdMonarch(c,mode)
   return CardsMatchingFilter(AIMon(),DownerdFilter)>0
 end
 function CentaureaFilter(c,source)
@@ -751,7 +751,7 @@ function MonarchInit(cards)
   if HasID(SpSum,58058134,SummonSlacker) then
     return COMMAND_SPECIAL_SUMMON,CurrentIndex
   end
-  if HasID(SpSum,72167543,SummonDownerd) then
+  if HasID(SpSum,72167543,SummonDownerdMonarch) then
     return COMMAND_SPECIAL_SUMMON,CurrentIndex
   end
   if HasID(Act,01357146,SummonRonin,3) then
@@ -848,7 +848,7 @@ function StormforthTargetFilter(c)
   or not Affected(c,TYPE_MONSTER,6)
 end
 function StormforthTargetFilter2(c)
-  return not BattleTargetCheck(c)
+  return not BattleTargetCheck(c,nil)
 end
 function StormforthTarget(cards)
   if CardsMatchingFilter(cards,StormforthTargetFilter)>0 then

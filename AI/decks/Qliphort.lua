@@ -646,13 +646,10 @@ function ChainVanity(c)
   return false
 end
 function ChainReqliate(c)
-  local cards = SubGroup(AIField(),FilterPos,POS_FACEUP)
+  local cards = SubGroup(AIField(),FilterPosition,POS_FACEUP)
   return CardsMatchingFilter(cards,QliphortFilter,20426097)>0 
 end
 function ChainLoseTurn(c)
-  return true
-end
-function ChainSoulTransition(c)
   return true
 end
 function StealthFilter(c)
@@ -698,6 +695,9 @@ function ChainSoulTransition(c)
   if WinsBattle(oppmon,aimon) 
   and aimon:IsSetCard(0xaa) 
   and UnchainableCheck(88197162)
+  and (not (ExpectedDamage(1)>=AI.GetPlayerLP(1))
+  or HasID(AIMon(),91907707,true)
+  or #AIMon()>1)
   then
     GlobalTargetSet(aimon)
     GlobalCardMode = 1

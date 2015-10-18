@@ -747,20 +747,20 @@ function MegaMonarchInit(cards)
   if HasID(Act,59463312,UseEidos,1) then
     return COMMAND_ACTIVATE,CurrentIndex
   end
-  if HasIDNotNegated(Sum,95457011,SummonIdea,1) then
-    return COMMAND_SUMMON,CurrentIndex
-  end
-  if HasIDNotNegated(Sum,59463312,SummonEidos,1) then
-    return COMMAND_SUMMON,CurrentIndex
-  end
-  if HasIDNotNegated(Act,54241725,UseOriginalGrave,1) then
-    return COMMAND_ACTIVATE,CurrentIndex
-  end
   if HasID(Act,95993388,UseLandrobe) then
     return COMMAND_ACTIVATE,CurrentIndex
   end
   if HasID(Act,79844764,UseStormforthM,1) then
     return COMMAND_ACTIVATE,CurrentIndex
+  end
+  if HasIDNotNegated(Act,54241725,UseOriginalGrave,1) then
+    return COMMAND_ACTIVATE,CurrentIndex
+  end
+  if HasIDNotNegated(Sum,95457011,SummonIdea,1) then
+    return COMMAND_SUMMON,CurrentIndex
+  end
+  if HasIDNotNegated(Sum,59463312,SummonEidos,1) then
+    return COMMAND_SUMMON,CurrentIndex
   end
   if HasIDNotNegated(Act,19870120,UseMarch) then
     return COMMAND_ACTIVATE,CurrentIndex
@@ -1084,9 +1084,9 @@ function ChainOriginal(c)
       return true
     end
     if RemovalCheckList(AIMon(),{CATEGORY_DESTROY,CATEGORY_TOGRAVE},nil,nil,nil,FilterID,95457011)
-    and (CardsMatchingFilter(AIBanish(),MonarchFilter)==0
-    or CardsMatchingFilter(AIGrave(),MonarchFilter)>3)
+    and CardsMatchingFilter(AIBanish(),MonarchFilter)==0
     and not ChainCheck(96570609,player_ai)
+    and OPTCheck(954570111)
     then
       OPTSet(54241725)
       return true
@@ -1102,8 +1102,7 @@ function ChainOriginal(c)
       end
       if aimon and aimon:GetCode()==95457011 
       and WinsBattle(oppmon,aimon)
-      and (CardsMatchingFilter(AIBanish(),MonarchFilter)==0
-      or CardsMatchingFilter(AIGrave(),MonarchFilter)>3)
+      and CardsMatchingFilter(AIBanish(),MonarchFilter)==0
       then
         OPTSet(54241725)
         return true

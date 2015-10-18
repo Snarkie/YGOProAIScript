@@ -11,6 +11,45 @@ function XYZSummon(index,id)
   end
   return {COMMAND_SPECIAL_SUMMON,index}
 end
+function Summon(index)
+  if index == nil then
+    index = CurrentIndex
+  end
+  return {COMMAND_SUMMON,index}
+end
+function SpSummon(index,id)
+  if index == nil then
+    index = CurrentIndex
+  end
+  if id then
+    GlobalSSCardID = id
+  end
+  return {COMMAND_SPECIAL_SUMMON,index}
+end
+function Activate(index)
+  if index == nil then
+    index = CurrentIndex
+  end
+  return {COMMAND_ACTIVATE,index}
+end
+function SetMon(index)
+  if index == nil then
+    index = CurrentIndex
+  end
+  return {COMMAND_SET_MONSTER,index}
+end
+function SetST(index)
+  if index == nil then
+    index = CurrentIndex
+  end
+  return {COMMAND_SET_ST,index}
+end
+function Repo(index)
+  if index == nil then
+    index = CurrentIndex
+  end
+  return {COMMAND_CHANGE_POS,index}
+end
 function SummonExtraDeck(cards,prio)
   local Act = cards.activatable_cards
   local Sum = cards.summonable_cards
@@ -53,6 +92,9 @@ function SummonExtraDeck(cards,prio)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Act,89882100) then  -- Night Beam
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Act,67616300,UseChickenGame) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Act,05133471,nil,nil,LOCATION_GRAVE) 
@@ -401,7 +443,9 @@ function SummonExtraDeck(cards,prio)
     GlobalCardMode = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  
+  if HasIDNotNegated(SpSum,81330115,SummonAcidGolem) then
+    return XYZSummon()
+  end
 
   
 -- if the opponent still has stronger monsters, use Raigeki  
@@ -428,6 +472,29 @@ function SummonExtraDeck(cards,prio)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   return nil
+end
+function SummonAcidGolem(c)
+  return Negated(c) 
+  and OppGetStrongestAttDef()<c.attack
+end
+function UseChickenGame(c)
+--67616300
+--1081860800 draw
+--1081860801 destroy
+--1081860802 lp
+  if FilterLocation(c,LOCATION_HAND) then
+    return ExpectedDamage(2)<.5*AI.GetPlayerLP(2)
+    and CardsMatchingFilter(AIST(),FilterType,TYPE_FIELD)==0
+  end
+  if ExpectedDamage(2)>=.5*AI.GetPlayerLP(2)
+  or #AIHand()>6
+  then
+    return c.description==1081860801
+    and AI.GetPlayerLP(1)>1000
+  else
+    return c.description==1081860800
+    and AI.GetPlayerLP(1)>2000
+  end
 end
 function SummonRafflesia(c)
   return CardsMatchingFilter(AIDeck(),TrapholeFilter)>0
@@ -1059,6 +1126,8 @@ function SummonNightmareSharkFinish()
   return GlobalBPAllowed 
   and Duel.GetCurrentPhase() == PHASE_MAIN1 
   and AI.GetPlayerLP(2)<=2000
+  and not HasID(AIMon(),31320433,true)
+  and #OppMon()>0
 end
 function UseNightmareShark()
   return GlobalBPAllowed and Duel.GetCurrentPhase() == PHASE_MAIN1
@@ -1130,10 +1199,13 @@ end
 function SummonHPPDFinish()
   return BattlePhaseCheck()
   and AI.GetPlayerLP(2)<=2000
+  and #OppMon()>0
 end
 function SummonHeartlanddracoFinish()
   return BattlePhaseCheck()
   and AI.GetPlayerLP(2)<=2000
+  and #OppMon()>0
+  and OPTCheck(02273734)
 end
 function UseHeartlanddraco()
   return BattlePhaseCheck()
@@ -1201,6 +1273,7 @@ function SummonOmega(c)
   return NotNegated(c) and (not OppHasStrongestMonster() or OppGetStrongestAttDef()<c.attack)
   and CardsMatchingFilter(OppST(),FilterPosition,POS_FACEDOWN)>2
   or Negated(c) and OppHasStrongestMonster() and OppGetStrongestAttDef()<c.attack
+  or DeckCheck(DECK_CONSTELLAR) and TurnEndCheck() and OppGetStrongestAttDef()<c.attack
 end
 function InstantFusionFilter(c)
   return bit32.band(c.attribute,ATTRIBUTE_LIGHT)>0 and c.level==5
@@ -1774,6 +1847,9 @@ function PriorityChain(cards) -- chain these before anything else
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,50323155,ChainNegation) then -- Black Horn of Heaven
+    return {1,CurrentIndex}
+  end
+  if HasIDNotNegated(cards,40605147,ChainNegation) then -- Solemn Notice
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,84749824,ChainNegation) then -- Solemn Warning

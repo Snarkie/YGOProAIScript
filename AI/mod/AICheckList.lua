@@ -315,6 +315,7 @@ NSBL={
 69884162,25259669,63060238,50720316, -- Neos Alius, Goblindbergh, Blazeman,Shadow Mist
 79979666,21565445,47826112,13073850, -- Bubbleman, Atlantean Neptabyss, Poseidra, Qli Stealth
 51194046,18326736,58069384,10443957, -- Qli Monolith, Planetellarknight Ptolemaios, Cyber Dragon Nova, Infinity
+81992475 -- BA Barbar
 }
 function NormalSummonBlacklist(CardId) 
   for i=1,#NSBL do
@@ -408,7 +409,7 @@ SSBL={
 26563200,82044279,73445448, -- Muzurythm, Clear Wing Synchro Dragon, Zombiestein
 01639384,10406322,66547759, -- Felgrand, Sylvan Alsei, Lancelot
 88120966,78156759,31386180, -- Giant Grinder, Zenmaines, Tiras
-84013237,00005509,31437713, -- Utopia, Utopia Lightning, Heartlanddraco
+84013237,56832966,31437713, -- Utopia, Utopia Lightning, Heartlanddraco
 81983656,69031175,95040215, -- BW Hawk Joe, Armor Master, Nothung
 73347079,81105204,49003716, -- Force Strix, BW Kris, Bora
 02009101,28190303,73652465, -- BW Gale, Gladius, Oroshi
@@ -419,6 +420,7 @@ SSBL={
 85909450,86848580,79979666, -- HPPD, Zerofyne, Bubbleman
 13959634,55863245,06511113, -- Moulinglacia, Child Dragon, Rafflesia
 18326736,58069384,10443957, -- Planetellarknight Ptolemaios, Cyber Dragon Nova, Infinity
+27552504,18386170, -- Beatrice, Pilgrim
 }
 
 
@@ -459,7 +461,7 @@ RepoBL={
   37445295,04939890,30328508, -- Shadoll Falcon,Hedgehog,Lizard
   77723643,03717252,21502796, -- Shadoll Dragon, Beast,Ryko
   23899727,88241506,15914410, -- Mermail Abysslinde, Blue-Eyes Maiden, Mechquipped Angineer
-  23232295,85909450, -- Lead Yoke, HPPD
+  23232295,85909450,83531441, -- Lead Yoke, HPPD, Dante
 }
 ---------------------------------------------------------
 -- Checks if the specified card ID is in this "blacklist"
@@ -530,10 +532,14 @@ function DestroyBlacklist(c) -- cards to not destroy in your opponent's possessi
       return true
     end
   end
-  if id == 68535320 and #AIMon()>0 then -- Fire Hand
+  if id == 68535320 and #AIMon()>0 
+  and MacroCheck(2)
+  then -- Fire Hand
     return true
   end
-  if id == 95929069 and #AIST()>0 then -- Ice Hand
+  if id == 95929069 and #AIST()>0 
+  and MacroCheck(2)
+  then -- Ice Hand
     return true
   end
   return false
@@ -559,6 +565,7 @@ function IgnoreList(c) -- cards to ignore with removal effects
   if FilterSet(c,0x207a) -- Noble Arms
   and id~=46008667      -- except Excaliburn
   and faceup
+  and MacroCheck(2)
   then 
     return true
   end
@@ -571,6 +578,11 @@ function IgnoreList(c) -- cards to ignore with removal effects
   or id == 50078509) -- Fiendish Chain
   and FilterPosition(c,POS_FACEUP)
   and CardTargetCheck(c)==0 then
+    return true
+  end
+  if id == 07563759 -- Flame Mascot
+  and MacroCheck(2)
+  then
     return true
   end
   for i=1,#Ignore do
@@ -658,7 +670,9 @@ Unchainable={
 85215458,24508238,59616123,27243130, -- BW Kalut, D.D. Crow, Trap Stun, Forbidden lance
 77778835,21143940,84536654,57728570, -- Hysteric Party, Mask Change, Form Change, CCV
 83555666,88197162,24348807,21143940, --  Ring of Destruction, Soul Transition, Lose a turn, Mask Change
-84536654,50608164,06511113, -- Form Change, Koga, Rafflesia, Treacherous
+84536654,50608164,06511113,30575681, -- Form Change, Koga, Rafflesia, Treacherous, Bedwyr
+27552504,18386170,60743819,20036055, -- Beatrice, Pilgrim, Fiend Griefing, Traveler
+36553319, -- Farfa
 }
 function isUnchainableTogether(CardId)
   for i=1,#Unchainable do
@@ -671,6 +685,9 @@ end
 
 function UnchainableCheck(id)
   local e = nil
+  if type(id)=="table" then
+    id=id.id
+  end
   for i=1,Duel.GetCurrentChain() do
     e = Duel.GetChainInfo(i, CHAININFO_TRIGGERING_EFFECT)
     if e and isUnchainableTogether(e:GetHandler():GetCode())>0 
@@ -836,7 +853,7 @@ ScriptedCards ={
 71587526,72167543,81330115,31320433,  -- Karma Cut, Downerd Magician, Acid Golem, Nightmare Shark
 47805931,75367227,68836428,52558805,  -- Giga-Brillant, Ghostrick Alucard, Tri-Edge Levia, Temptempo the Percussion Djinn
 16259549,51617185,36553319,09342162,  -- Fortune Tune, Machina Megaform, BA Farfa, Cagna
-62957424,00005497,62835876,73680966,  -- BA Libic, Malacoda, Good&Evil, The Beginning of the End
+62957424,35330871,62835876,73680966,  -- BA Libic, Malacoda, Good&Evil, The Beginning of the End
 25857246,52738610,97211663,30312361,  -- Necroz Valkyrus, Dance Princess, Cycle, Phantom of Chaos
 12580477,45986603,16195942,56574543,  -- Raigeki, Snatch Steal, Dark Rebellion Dragon, Bujingi Sinyou
 86346643,63465535,26563200,74822425,  -- Rainbow Neos, Underground Arachnid, Muzurythm, Shaddoll Shekinaga
@@ -846,7 +863,7 @@ ScriptedCards ={
 10406322,66547759,88120966,78156759,  -- Sylvan Alsei, Lancelot, Giant Grinder, Zenmaines
 74294676,42752141,71068247,50323155,  -- Laggia, Dolkka, Totem Bird, Black Horn
 02956282,82044279,99188141,41269771,  -- Naturia Barkion, Clear Wing Synchro Dragon, THRIO, Constellar Algiedi
-78358521,35544402,31386180,00005509,  -- Constellar Sombre, Twinkle, Tiras, Utopia Lightning
+78358521,35544402,31386180,56832966,  -- Constellar Sombre, Twinkle, Tiras, Utopia Lightning
 31437713,57103969,72959823,53567095, -- Heartlanddraco, Tenki, Panzer Dragon, Icarus
 81105204,58820853,49003716,14785765, -- BW Kris, Shura, Bora, Zephyros
 85215458,02009101,55610595,28190303, -- BW Kalut, Gale, Pinaka, Gladius
@@ -870,7 +887,9 @@ ScriptedCards ={
 13959634,72932673,13073850,88197162, -- Moulinglacia, Mizuchi, Qli Stealth, Soul Transition
 51194046,20426097,24348807,25067275, -- Qli Monolith, Re-qliate, Lose a Turn, Swords At Dawn
 18326736,58069384,10443957,03819470, -- Planetellarknight Ptolemaios, Cyber Dragon Nova, Infinity, Seven Tools
-29401950,06511113,99590524, -- Bottomless, Rafflesia, Treacherous
+29401950,06511113,99590524,81992475, -- Bottomless, Rafflesia, Treacherous, BA Barbar
+27552504,18386170,60743819,20036055, -- Beatrice, Pilgrim, Fiend Griefing, Traveler
+40605147, -- Solemn Notice
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do

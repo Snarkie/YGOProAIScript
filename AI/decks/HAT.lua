@@ -547,7 +547,7 @@ function ChainBoM()
     return false
   end
   cg = NegateCheck()
-  if cg and Duel.GetCurrentChain()>1 then
+  if cg and Duel.GetCurrentChain()>1 and not DeckCheck(DECK_BA) then
     if c and c:GetCode() == 29616929 then
       return false
     end
@@ -562,7 +562,7 @@ function ChainBoM()
     end	
   end
   cg = RemovalCheck()
-  if cg then
+  if cg and not DeckCheck(DECK_BA) then
     if cg:IsExists(function(c) return c:IsControler(player_ai) end, 1, nil) then
       local g=cg:Filter(MoonFilter2,nil,player_ai):GetMaxGroup(Card.GetAttack)
       if g and e and MoonWhitelist2(e:GetHandler():GetCode()) then

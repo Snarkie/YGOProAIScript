@@ -237,8 +237,11 @@ function UseLeviairDW()
   return CardsMatchingFilter(AIBanish(),LeviairDWFilter)>0
 end
 function SummonTourGuideDW(mode)
-  return DualityCheck() and not SkillDrainCheck()
-  and WindaCheck() and Duel.GetLocationCount(player_ai,LOCATION_MZONE)>1
+  return DualityCheck() 
+  and not SkillDrainCheck()
+  and not DeckCheck(DECK_BA)
+  and WindaCheck()
+  and Duel.GetLocationCount(player_ai,LOCATION_MZONE)>1
   and (mode == 1 and LeviairDWCheck(true) 
   or mode == 2 and SummonGraphaCheck(true)
   or mode == 3 and CardsMatchingFilter(UseLists({AIDeck(),AIHand()}),TourguideFilter)>1)

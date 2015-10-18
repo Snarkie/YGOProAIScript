@@ -696,9 +696,6 @@ function ChainWireTap()
   end
   return false 
 end
-function ChainBookOfMoon() 
-  return false
-end
 function SanctumFilter(c)
   return PriorityTarget(c,true,nil,FilterPosition,POS_FACEUP)
 end
@@ -1078,9 +1075,6 @@ function ShadollOnSelectChain(cards,only_chains_by_player)
   --if HasID(cards,34507039) and ChainWireTap() then
     --return {1,CurrentIndex}
   --end
-  if HasID(cards,14087893) and ChainBookOfMoon() then
-    return {1,CurrentIndex}
-  end
   if HasID(cards,12444060,false,nil,LOCATION_ONFIELD) and ChainSanctum() then
     return {1,CurrentIndex}
   end

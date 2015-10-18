@@ -672,12 +672,116 @@ end
 function UseBedwyr()
   return false
 end
+GlobalBedwyrID = 0
 function ChainBedwyr()
   local e = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
   if e and e:GetHandler():IsType(TYPE_EQUIP) then
     return false
   end
-  return Duel.GetCurrentPhase()==PHASE_MAIN1 and Duel.GetTurnPlayer()==1-player_ai
+  if not UnchainableCheck(30575681) then
+    return false
+  end
+  if HasID(AIST(),07452945,true,FilterPosition,POS_FACEUP) then
+    local destiny = FindID(07452945,AIST())
+    local eq = destiny:get_equip_target()[1]
+    local targets = {}
+    for i=1,#AIMon() do
+      local c=AIMon()[i]
+      if RemovalCheckCard(c,CATEGORY_DESTROY) 
+      and not RemovalCheckCard(eq,CATEGORY_DESTROY)
+      and not CardsEqual(c,eq)
+      and not (HasID(c:get_equipped_cards(),19748583,true) and FilterAttribute(c,ATTRIBUTE_LIGHT))
+      then
+        targets[#targets+1]=c
+      end
+    end
+    if #targets>0 then
+      BestTargets(targets,1,TARGET_PROTECT)
+      GlobalBedwyrID = 07452945
+      GlobalTargetSet(targets[1])
+      return true
+    end
+  end
+  if HasID(AIST(),19748583,true,FilterPosition,POS_FACEUP) then
+    local gwen = FindID(19748583,AIST())
+    local eq = gwen:get_equip_target()[1]
+    local targets = {}
+    for i=1,#AIMon() do
+      local c=AIMon()[i]
+      if RemovalCheckCard(c,CATEGORY_DESTROY)
+      and FilterAttribute(c,ATTRIBUTE_LIGHT)
+      and not DarkCheck(c.id)
+      and not RemovalCheckCard(eq,CATEGORY_DESTROY)
+      and not CardsEqual(c,eq)
+      and not (HasID(c:get_equipped_cards(),19748583,true) and FilterAttribute(c,ATTRIBUTE_LIGHT))
+      then
+        targets[#targets+1]=c
+      end
+    end
+    if #targets>0 then
+      BestTargets(targets,1,TARGET_PROTECT)
+      GlobalBedwyrID = 19748583
+      GlobalTargetSet(targets[1])
+      return true
+    end
+    local aimon,oppmon=GetBattlingMons()
+    if Duel.GetTurnPlayer()==1-player_ai 
+    and WinsBattle(oppmon,aimon)
+    and aimon:GetEquipGroup():FilterCount(function(c)return c:GetCode()==19748583 end,nil)==0
+    and (DarkCheck(aimon:GetCode())
+    and Affected(oppmon,TYPE_SPELL)
+    and DestroyFilterIgnore(oppmon,true)
+    or AttackBoostCheck(300))
+    then
+      GlobalBedwyrID = 19748583
+      GlobalTargetSet(aimon)
+      return true
+    end
+  end
+  if HasID(AIST(),23562407,true,FilterPosition,POS_FACEUP) then
+    local aimon,oppmon=GetBattlingMons()
+    if Duel.GetTurnPlayer()==1-player_ai 
+    and WinsBattle(oppmon,aimon)
+    and aimon:GetEquipGroup():FilterCount(function(c)return c:GetCode()==23562407 end,nil)==0
+    and AttackBoostCheck(500)
+    then
+      GlobalBedwyrID = 23562407
+      GlobalTargetSet(aimon)
+      return true
+    end
+  end
+  if HasID(AIST(),14745409,true,FilterPosition,POS_FACEUP) then
+    local gallatin=FindID(14745409,AIST())
+    local atk = 1000-((Duel.GetTurnCount()-GlobalGallatinTurn[gallatin.cardid])*200)
+    local aimon,oppmon=GetBattlingMons()
+    if atk>0
+    and Duel.GetTurnPlayer()==1-player_ai 
+    and WinsBattle(oppmon,aimon)
+    and aimon:GetEquipGroup():FilterCount(function(c)return c:GetCode()==14745409 end,nil)==0
+    and AttackBoostCheck(atk)
+    then
+      GlobalBedwyrID = 14745409
+      GlobalTargetSet(aimon)
+      return true
+    end
+  end
+  if HasID(AIST(),07452945,true,FilterPosition,POS_FACEUP) then
+    local aimon,oppmon=GetBattlingMons()
+    if Duel.GetTurnPlayer()==1-player_ai 
+    and WinsBattle(oppmon,aimon)
+    and aimon:GetEquipGroup():FilterCount(function(c)return c:GetCode()==07452945 end,nil)==0
+    and not (aimon:GetEquipGroup():FilterCount(function(c)return c:GetCode()==19748583 end,nil)>0
+    and DarkCheck(aimon:GetCode())
+    and Affected(oppmon,TYPE_SPELL)
+    and DestroyFilterIgnore(oppmon,true))
+    then
+      GlobalBedwyrID = 07452945
+      GlobalTargetSet(aimon)
+      return true
+    end
+  end
+  return false
+  --return Duel.GetCurrentPhase()==PHASE_MAIN1 and Duel.GetTurnPlayer()==1-player_ai
 end
 function SummonMerlin()
   return DualityCheck() and OPTCheck(03580032) and not UseMedraut()
@@ -892,6 +996,9 @@ function NobleInit(cards)
   local Rep = cards.repositionable_cards
   local SetMon = cards.monster_setable_cards
   local SetST = cards.st_setable_cards
+  if HasID(Act,00691925) then -- TODO: just for testing
+    return Activate()
+  end
   if HasID(AIMon(),73289035,true,nil,nil,nil,TsukuyomiFilter) 
   and #SetST>0 and #AIHand()>1 and TsukuyomiHandCheck() then
     return {COMMAND_SET_ST,1}
@@ -929,6 +1036,10 @@ function NobleInit(cards)
   end
   if HasID(Sum,10736540) and SummonLady() then
     return {COMMAND_SUMMON,CurrentIndex}
+  end
+  if HasID(Act,19748583,false,nil,LOCATION_GRAVE) and HasID(AIMon(),21223277,true) then
+    OPTSet(19748583)
+    return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Act,21223277) and UseR4torigus() then
     return {COMMAND_ACTIVATE,CurrentIndex}
@@ -1259,11 +1370,13 @@ end
 function ArmsTargets(cards,max)
   local result = {}
   for i=1,#cards do
-    if cards[i].owner == 1 and cards[i]:get_equip_target()
-    and (cards[i].id == 23562407 and OPTCheck(23562407) 
-    or cards[i].id == 14745409 and OPTCheck(14745409) 
-    and GlobalGallatinTurn[cards[i].cardid] and GlobalGallatinTurn[cards[i].cardid]<Duel.GetTurnCount()
-    or cards[i]:get_equip_target() and CurrentMonOwner(cards[i]:get_equip_target().cardid)==2)
+    local c = cards[i]
+    if c.owner == 1 and ArmsFilter(c) and c:get_equip_target()
+    and (c.id == 23562407 and OPTCheck(23562407) 
+    or c.id == 14745409 and OPTCheck(14745409) 
+    and GlobalGallatinTurn[c.cardid] 
+    and GlobalGallatinTurn[c.cardid]<Duel.GetTurnCount() 
+    or CurrentOwner(c:get_equip_target()[1])==2)
     then
       result[#result+1]=i
       if #result >= max then break end
@@ -1330,10 +1443,11 @@ function BedwyrTarget(cards)
   if FilterLocation(cards[1],LOCATION_DECK) then
     return Add(cards)
   elseif FilterLocation(cards[1],LOCATION_MZONE) then
-    return EquipTarget(cards)
+    return GlobalTargetGet(cards,true)
   elseif FilterLocation(cards[1],LOCATION_SZONE) then
-    return {math.random(#cards)}
+    return BestTargets(cards,1,TARGET_PROTECT,FilterID,GlobalBedwyrID)
   end
+  return BestTargets(cards,1,TARGET_PROTECT)
 end
 function BlackSallyTarget(cards,c)
   if GlobalCardMode == 1 then
