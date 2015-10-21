@@ -101,10 +101,10 @@ end
 
 function AitherCond(loc,c)
   if loc == PRIO_TOHAND then
-    return not HasID(AIHand(),c.id,true)
+    return not HasAccess(c.id)
   end
-  if loc == PRIO_TOFIELD then
-    return SummonAither(c,mode,true)
+  if loc == PRIO_TOFIELD then -- for Dominion
+    return SummonAither(c,1,true)
   end
   return true
 end
@@ -112,8 +112,8 @@ function ErebusCond(loc,c)
   if loc == PRIO_TOHAND then
     return not HasAccess(c.id)
   end
-  if loc == PRIO_TOFIELD then
-    return SummonErebus(c,mode,true)
+  if loc == PRIO_TOFIELD then -- for Dominion
+    return SummonErebus(c,1,true)
   end
   if loc == PRIO_TOGRAVE then
     if FilterLocation(c,LOCATION_MZONE) then
@@ -128,8 +128,8 @@ function MegaThestalosCond(loc,c)
     return not HasID(AIHand(),c.id,true)
     and #OppHand()>0
   end
-  if loc == PRIO_TOFIELD then
-    return SummonMegaThestalos(c,mode,true)
+  if loc == PRIO_TOFIELD then -- for Dominion
+    return SummonMegaThestalos(c,1,true)
   end
   return true
 end
@@ -138,8 +138,8 @@ function MegaCaiusCond(loc,c)
     return not HasID(AIHand(),c.id,true)
     and CardsMatchingFilter(OppField(),MegaCaiusFilter)>1
   end
-  if loc == PRIO_TOFIELD then
-    return SummonMegaCaius(c,mode,true)
+  if loc == PRIO_TOFIELD then -- for Dominion
+    return SummonMegaCaius(c,1,true)
   end
   return true
 end
@@ -159,7 +159,7 @@ end
 function EidosCond(loc,c)
   if loc == PRIO_TOFIELD then
     return FilterLocation(c,LOCATION_DECK) 
-    and NormalSummonCheck()
+    and (NormalSummonCheck() or TributeSummonsM(0,1)>1 or HasIDNotNegated(AIST(),61466310,true))
   end
   if loc == PRIO_TOGRAVE then
     return not FilterLocation(c,LOCATION_DECK) 
@@ -299,8 +299,8 @@ MegaMonarchPriorityList={
 [23064604] = {8,2,8,3,8,5,1,1,1,1,ErebusCond},          -- Erebus
 [69230391] = {5,2,5,1,1,1,1,1,1,1,MegaThestalosCond},   -- Mega Thestalos
 [87288189] = {6,3,6,1,1,1,1,1,1,1,MegaCaiusCond},       -- Mega Caius
-[09748752] = {1,1,1,1,1,1,1,1,1,1,CaiusCond},           -- Caius
-[26205777] = {1,1,1,1,1,1,1,1,1,1,ThestalosCond},           -- Caius
+[09748752] = {1,1,4,1,1,1,1,1,1,1,CaiusCond},           -- Caius
+[26205777] = {1,1,3,1,1,1,1,1,1,1,ThestalosCond},       -- Thestalos
 
 [95993388] = {6,1,5,1,7,4,1,1,1,1,LandrobeCond},        -- Landrobe
 [22382087] = {5,1,6,1,8,3,1,1,1,1,GarumCond},           -- Garum
@@ -510,7 +510,8 @@ function SummonIdea(c,mode)
   if mode == 1 then
     return TributeSummonsM(0,1)>0 
     and HasIDNotNegated(AIDeck(),59463312,true)
-    and TributeFodder()<2
+    and (TributeFodder()==0
+    or TributeFodder()<2 and TributeSummonsM(1,1)==0) 
     and DualityCheck()
   end
   if mode == 2 then
@@ -522,6 +523,7 @@ end
 function SummonEidos(c,mode)
   if mode == 1 then
     return TributeSummonsM(2,1)>0
+    and TributeSummonsM(1,1)==0
     and TributeFodder()==1
     or TributeSummonsM(1,1)>0
     and TributeFodder()==0
@@ -536,7 +538,7 @@ function UseEidos(c,mode)
   and CardsMatchingFilter(AIDeck(),VassalFilter,95457011)>0
   and OPTCheck(95457011)
   and TributeFodder()<2)
-  and not NormalSummonCheck()
+  and (NormalSummonCount()<2 and HasID(AIDeck(),59463312,true) or not NormalSummonCheck())
   then
     OPTSet(59463312)
     return true
@@ -584,6 +586,7 @@ function UseOriginalGrave(c,mode)
     and (TributeSummonsM(1,1)>0
     and TributeFodder()==0
     or TributeSummonsM(2,1)>0
+    and TributeSummonsM(1,1)==0
     and TributeFodder()<2)
     then
       OPTSet(54241725)
@@ -659,7 +662,7 @@ function UseLandrobe(c)
   return CardsMatchingFilter(OppMon(),LandrobeFilter)>0
   and not NormalSummonCheck()
   and (TributeSummonsM(1,1)>0 and TributeFodder()==0
-  or TributeSummonsM(2,1)>0 and TributeFodder()==1)
+  or TributeSummonsM(1,1)==0 and TributeSummonsM(2,1)>0 and TributeFodder()==1)
 end
 function UseGarum(c)
   return TributeSummonsM(0,1)==0
@@ -668,6 +671,7 @@ end
 function UseErebus(c)
   if FilterLocation(c,LOCATION_GRAVE) then
     return TributeSummonsM(0,1)==0
+    and not NormalSummonCheck()
     or HasID(AIHand(),54241725,true)
     and not HasID(UseLists(AIMon(),AIGrave()),54241725,true)
   end
@@ -820,7 +824,8 @@ function MegaMonarchInit(cards)
       local c = SetST[i]
       if c.id == 79844764 and not HasID(AIST(),79844764,true) 
       and (MonarchST>1 or HasID(AIHand(),96570609,true))
-      or c.id == 54241725 and not HasID(AIST(),54241725,true) and MonarchST>1
+      or c.id == 54241725 and not HasID(AIST(),54241725,true) 
+      and (MonarchST>1 or CardsMatchingFilter(AIGrave(),MonarchFilter)>2)
       or c.id == 05318639
       or c.id == 32807846
       then
@@ -908,7 +913,11 @@ function AitherTarget(cards,c)
     end
   end
   if LocCheck(cards,LOCATION_DECK) then
-    return Add(cards,PRIO_TOGRAVE)
+    if FilterType(cards[1],TYPE_SPELL+TYPE_TRAP) then
+      return Add(cards,PRIO_TOGRAVE)
+    else
+      return Add(cards)
+    end
   end
   return Add(cards)
 end
@@ -955,18 +964,40 @@ end
 function DominionTarget(cards)
   return Add(cards,PRIO_TOFIELD) -- WIP
 end
+GlobalOriginalTargets = {}
+function OriginalFilter(c)
+  local check = true
+  if ChainCheck(54241725) then
+    for i=1,#GlobalOriginalTargets do
+      if CardsEqual(GlobalOriginalTargets[1],c) then
+        check=false
+      end
+    end
+  end
+  return check
+end
 function OriginalTarget(cards,c,min)
   if GlobalCardMode==1 then
     GlobalCardMode=nil
-    return Add(cards,PRIO_TODECK,FilterID,c.id)
+    local result = Add(cards,PRIO_TODECK,min,FilterID,c.id)
+    GlobalOriginalTargets = {cards[1],cards[2]}
+    return result
   end
   if FilterLocation(c,LOCATION_GRAVE) then
-    return Add(cards,PRIO_BANISH,min)
+    return Add(cards,PRIO_BANISH,min,OriginalFilter)
   end
-  return Add(cards,PRIO_TODECK,min)
+  local result = Add(cards,PRIO_TODECK,min)
+  GlobalOriginalTargets = {cards[1],cards[2]}
+  return result
 end
 function FoolishTargetM(cards)
   return Add(cards,PRIO_TOGRAVE) --for now
+end
+function MegaThestalosFilter(c)
+  return c.level*200>=AI.GetPlayerLP(2)
+end
+function MegaThestalosTarget(cards)
+  return BestTargets(cards,1,TARGET_TOGRAVE,MegaThestalosFilter)
 end
 function MegaMonarchCard(cards,min,max,id,c)
   if not c and GlobalStormforth==Duel.GetTurnCount()
@@ -981,8 +1012,8 @@ function MegaMonarchCard(cards,min,max,id,c)
   if id == 23064604 then
     return ErebusTarget(cards,c)
   end
-  if id == 69230391 then -- Mega Thestalos
-    return BestTargets(cards,1,TARGET_TOGRAVE)
+  if id == 69230391 then
+    return MegaThestalosTarget(cards)
   end
   if id == 95993388 then
     return LandrobeTarget(cards)

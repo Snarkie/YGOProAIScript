@@ -1,4 +1,4 @@
-Version = "0.31c"
+Version = "0.31d"
 Experimental = true
 
 --[[
@@ -77,7 +77,7 @@ require("ai.decks.HeraldicBeast")
 require("ai.decks.Gadget")
 require("ai.decks.Bujin")
 require("ai.decks.Mermail")
-require("ai.decks.Shadoll")
+require("ai.decks.Shaddoll")
 require("ai.decks.Satellarknight")
 require("ai.decks.ChaosDragon")
 require("ai.decks.HAT")

@@ -6,7 +6,7 @@ function OnAIGoingFirstSecond(name)
   player_ai = 0
   if name=="AI_Harpie"
   or name=="AI_Blackwing"
-  or name=="AI_ClownShaddoll"
+  or name=="AI_Shaddoll"
   then
     player_ai = 1
     result = 0
@@ -1070,6 +1070,10 @@ function FilterPrivate(c)
   return not FilterPublic(c)
 end
 function FilterSet(c,code)
+  if c == nil then
+    print("Warning: FilterSet null card")
+    PrintCallingFunction()
+  end
   if c.GetCode then 
     return c:IsSetCard(code)
   else

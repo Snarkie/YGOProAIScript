@@ -145,7 +145,7 @@ local d = DeckCheck()
 local SelectChainFunctions = {
 PriorityChain,FireFistOnChain,HeraldicOnSelectChain,
 GadgetOnSelectChain,BujinOnSelectChain,MermailOnSelectChain,
-ShadollOnSelectChain,SatellarknightOnSelectChain,
+SatellarknightOnSelectChain,
 ChaosDragonOnSelectChain,HATChain,QliphortChain,
 NobleChain,NekrozChain,BAChain,DarkWorldChain,
 ConstellarChain,BlackwingChain,HarpieChain,

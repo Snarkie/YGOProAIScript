@@ -287,8 +287,8 @@ NSBL={
 21954587,22446869,37104630,00706925, -- Mermail AbyssMegalo, Mermail Abyssteus, Atlantean Heavy Infantry, Atlantean Marksman
 58471134,22076135,37781520,74311226, -- Mermail Apysspike, Mermail Abyssturge, Mermail Abyssleed, Atlantean Dragoons
 78868119,26400609,23899727,74298287, -- Deep Sea Diva, Tidal, Dragon Ruler of Waterfalls Mermail Abysslinde, Mermail Abyssdine
-30328508,77723643,37445295,04939890, -- Shadoll Lizard, Shadoll Dragon, Shadoll Falcon, Shadoll Hedgehog
-85103922,12697630,03717252,24062258, -- Artifact Moralltach, Artifact Beagalltach, Shadoll Beast, Secret Sect Druid Dru
+30328508,77723643,37445295,04939890, -- Shaddoll Lizard, Shaddoll Dragon, Shaddoll Falcon, Shaddoll Hedgehog
+85103922,12697630,03717252,24062258, -- Artifact Moralltach, Artifact Beagalltach, Shaddoll Beast, Secret Sect Druid Dru
 75878039,02273734,38667773,63274863, -- Satellarknights Deneb,Altair,Vega,Sirius
 38331564,91110378,69293721,99365553, -- Star Seraphs Scepter,Sovereign,Mermail Abyssgunde, Lightpulsar
 77558536,22624373,95503687,16404809, -- LS Raiden, Lyla, Lumina, Kuribandit
@@ -440,7 +440,7 @@ end
 SetBL={
   61314842,92365601,84220251, -- Advanced Heraldry Art, Rank-Up Magic - Limited Barian's Force, Heraldry Reborn
   73906480,96947648,74845897, -- Bujincarnation, Salvage, Rekindling
-  54447022,44394295,55742055, -- Soul Charge, Shadoll Fusion, Table
+  54447022,44394295,55742055, -- Soul Charge, Shaddoll Fusion, Table
   07452945,14745409,23562407, -- Noble Arms Destiny, Gallatin, Caliburn
   46008667,83438826,66970385, -- Excaliburn, Arfeudutyr, Chapter
   92512625,51124303,14735698, -- Advice, Nekroz Kaleidomirror, Exomirror
@@ -458,8 +458,8 @@ function RepositionBlacklist(id)
   return 0
 end
 RepoBL={
-  37445295,04939890,30328508, -- Shadoll Falcon,Hedgehog,Lizard
-  77723643,03717252,21502796, -- Shadoll Dragon, Beast,Ryko
+  37445295,04939890,30328508, -- Shaddoll Falcon,Hedgehog,Lizard
+  77723643,03717252,21502796, -- Shaddoll Dragon, Beast,Ryko
   23899727,88241506,15914410, -- Mermail Abysslinde, Blue-Eyes Maiden, Mechquipped Angineer
   23232295,85909450,83531441, -- Lead Yoke, HPPD, Dante
 }
@@ -566,6 +566,13 @@ function IgnoreList(c) -- cards to ignore with removal effects
   and id~=46008667      -- except Excaliburn
   and faceup
   and MacroCheck(2)
+  then 
+    return true
+  end
+  if id==67237709 --Kozmotown
+  and faceup
+  and MacroCheck(2)
+  --and HasID(OppDeck(),67237709,true) -- TODO: find non-cheating check
   then 
     return true
   end
@@ -817,10 +824,10 @@ ScriptedCards ={
 34707034,60202749,26400609,96947648,  -- Abyss-squall, Abyss-sphere, Tidal, Salvage
 74371660,50789693,00440556,21044178,  -- Mermail Abyssgaios, Armored Kappa, Bahamut Shark, Abyss Dweller
 15914410,59170782,70583986,65749035,  -- Mechquipped Angineer, Mermail Abysstrite, Dewloren, Gugnir
-30328508,77723643,37445295,04939890,  -- Shadoll Lizard, Shadoll Dragon, Shadoll Falcon, Shadoll Hedgehog
-44394295,29223325,03717252,24062258,  -- Shadoll Fusion, Artifact Ignition, Shadoll Beast, Secret Sect Druid Dru
+30328508,77723643,37445295,04939890,  -- Shaddoll Lizard, Shaddoll Dragon, Shaddoll Falcon, Shaddoll Hedgehog
+44394295,29223325,03717252,24062258,  -- Shaddoll Fusion, Artifact Ignition, Shaddoll Beast, Secret Sect Druid Dru
 04904633,12444060,01845204,77505534,  -- Facing the Shadows, Artifact Sanctum, Instant Fusion, Facing the Shadows
-29669359,82633039,20366274,94977269,  -- Volcasaurus, Skyblaster Castel, El-Shadoll Construct, El-Shadoll Winda
+29669359,82633039,20366274,94977269,  -- Volcasaurus, Skyblaster Castel, El-Shaddoll Construct, El-Shaddoll Winda
 04779823,31924889,00581014,33698022,  -- Michael, Arcanite Magician, Emeral, Moonlight Rose
 54447022,74845897,34507039,14087893,  -- Soul Charge, Rekindling, Wiretap, Book of Moon
 19665973,18964575,37576645,21954587,  -- Battle Fader, Swift Scarecrow, Reckless Greed, Mermail AbyssMegalo

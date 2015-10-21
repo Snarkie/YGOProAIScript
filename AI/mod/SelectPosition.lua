@@ -89,7 +89,7 @@ function OnSelectPosition(id, available)
   end
   local positionfunctions={
   FireFistOnSelectPosition,HeraldicOnSelectPosition,GadgetOnSelectPosition,
-  BujinOnSelectPosition,MermailOnSelectPosition,ShadollOnSelectPosition,
+  BujinOnSelectPosition,MermailOnSelectPosition,
   SatellarknightOnSelectPosition,ChaosDragonOnSelectPosition,HATPosition,
   QliphortPosition,NoblePosition,NekrozPosition,BAPosition,
   DarkWorldPosition,ConstellarPosition,BlackwingPosition,

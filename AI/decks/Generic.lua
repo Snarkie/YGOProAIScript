@@ -801,7 +801,7 @@ function VolcasaurusFilter(c,lp)
   and Affected(c,TYPE_MONSTER,5)
   and DestroyFilter(c)
   and DestroyCountCheck(c,TYPE_MONSTER,false)
-  and bit32.band(c.position,POS_FACEUP)>0
+  and FilterPosition(c,POS_FACEUP)
   and (lp==nil or c.text_attack and c.text_attack>=AI.GetPlayerLP(2))
 end
 function SummonVolcasaurus(c)
@@ -817,16 +817,18 @@ function SummonVolcaGaiaFinish(mode)
   if not BattlePhaseCheck() then return false end
   if mode == 1 and HasID(AIExtra(),29669359,true) and HasID(AIExtra(),91949988,true) 
   then
-    local result = 0
+    local result = -1
     local index = 0
     for i=1,#cards do
       local c = cards[i]
-      if VolcasaurusFilter(c) and c.text_attack>result then
+      if VolcasaurusFilter(c) and c.text_attack>=result then
         result=c.text_attack
         index = i
       end
     end
-    table.remove(cards,index)
+    if result>-1 then
+      table.remove(cards,index)
+    end
     local result2 = 0
     if #cards == 0 then
       result2 = 2600
@@ -838,7 +840,7 @@ function SummonVolcaGaiaFinish(mode)
         end
       end
     end
-    return result>0 and result + result2 >= AI.GetPlayerLP(2)
+    return result>=0 and result + result2 >= AI.GetPlayerLP(2)
   elseif mode == 2 and HasID(AIMon(),29669359,true) and HasID(AIExtra(),91949988,true) 
   then
     local result = 0
@@ -1339,6 +1341,36 @@ function UseGalaxyCyclone(mode)
   end
   return DestroyCheck(OppST(),false,false,false,FilterPosition,POS_FACEUP)>0
 end
+
+function MichaelFilter(c)
+  return c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
+end
+function SummonMichael(c)
+  return c and (CardsMatchingFilter(UseLists({OppMon(),OppST()}),MichaelFilter)>0 
+  and AI.GetPlayerLP(1)>1000 and NotNegated(c)  
+  or Negated (c) and OppGetStrongestAttDef()<2600)
+  and MP2Check(c) and HasID(AIExtra(),04779823,true)
+end
+function UseMichael()
+  return CardsMatchingFilter(UseLists({OppMon(),OppST()}),MichaelFilter)>0
+end
+
+function ArcaniteFilter(c)
+  return c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
+  and c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0
+end
+function SummonArcanite()
+  return CardsMatchingFilter(UseLists({OppMon(),OppST()}),ArcaniteFilter)>1 
+  and MP2Check() and HasID(AIExtra(),31924889,true)
+end
+function UseArcanite()
+  return CardsMatchingFilter(UseLists({OppMon(),OppST()}),ArcaniteFilter)>0
+end
+
+function UseSoulCharge()
+  return #AIMon()==0 and AI.GetPlayerLP(1)>1000 
+  and CardsMatchingFilter (AIGrave(),function(c) return bit32.band(c.type,TYPE_MONSTER)>2 end)
+end
 ----
 
 function SummonNegateFilter(c)
@@ -1776,6 +1808,142 @@ function ChainTreacherous(c)
   return CardsMatchingFilter(OppMon(),TreacherousFilter,TYPE_TRAP)>1
   and UnchainableCheck(99590524)
 end
+
+function CompulseFilter(c)
+  return c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
+  and c:is_affected_by(EFFECT_IMMUNE_EFFECT)==0
+end
+function CompulseFilter2(c)
+  return CompulseFilter(c) and not ToHandBlacklist(c.id) 
+  and (c.level>4 or bit32.band(c.type,TYPE_FUSION+TYPE_SYNCHRO+TYPE_RITUAL+TYPE_XYZ)>0)
+end
+function ChainCompulse()
+  local targets = CardsMatchingFilter(OppMon(),CompulseFilter)
+  local targets2 = CardsMatchingFilter(OppMon(),CompulseFilter2)
+  if RemovalCheck(94192409) and targets>0 then
+    return true
+  end
+  if not UnchainableCheck(94192409) then
+    return false
+  end
+  if targets2 > 0 then
+    return true
+  end
+  if Duel.GetCurrentPhase()==PHASE_BATTLE and targets>0 then
+    local source=Duel.GetAttacker()
+    local target=Duel.GetAttackTarget()
+    if source and target then
+      if source:IsControler(1-player_ai) and target:IsControler(player_ai) 
+      and (target:IsPosition(POS_DEFENCE) and source:GetAttack()>target:GetDefence() 
+      or target:IsPosition(POS_ATTACK) and source:GetAttack()>=target:GetAttack())
+      and not source:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET)
+      and not source:IsHasEffect(EFFECT_IMMUNE_EFFECT)
+      then
+        GlobalCardMode = 1
+        GlobalTargetSet(source,OppMon())
+        return true
+      end
+    end
+  end
+  return false
+end
+
+function MSTFilter(c)
+  return c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0 
+  and c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0 
+  and not (DestroyBlacklist(c)
+  and (bit32.band(c.position, POS_FACEUP)>0 
+  or bit32.band(c.status,STATUS_IS_PUBLIC)>0))
+end
+function MSTEndPhaseFilter(c)
+  return MSTFilter(c) and bit32.band(c.status,STATUS_SET_TURN)>0
+end
+function ChainMST(c)
+  local targets=CardsMatchingFilter(OppST(),MSTFilter)
+  local targets2=CardsMatchingFilter(UseLists({OppMon(),OppST()}),MoralltachFilter)
+  local targets3=CardsMatchingFilter(UseLists({OppMon(),OppST()}),SanctumFilter)
+  local targets4=CardsMatchingFilter(OppST(),MSTEndPhaseFilter)
+  local e = Duel.GetChainInfo(Duel.GetCurrentChain(),CHAININFO_TRIGGERING_EFFECT)
+  if RemovalCheckCard(c) then
+    if e and e:GetHandler():IsCode(12697630) then
+      return false
+    end
+    if SignCheck(AIST()) and not RemovalCheck(19337371) then
+      GlobalCardMode = 1
+      GlobalTargetSet(FindID(19337371,AIST()))
+      return true
+    end
+    if targets2 > 0 and ArtifactCheck()
+    then
+      return true
+    end
+    if targets > 0 then
+      return true
+    end
+  end
+  if not UnchainableCheck(05318639) then
+    return false
+  end
+  if targets3 > 0 and ArtifactCheck() then
+    return true
+  end
+  if Duel.GetCurrentPhase()==PHASE_BATTLE then
+    local source=Duel.GetAttacker()
+    local target=Duel.GetAttackTarget()
+    if source and source:IsControler(1-player_ai) then
+      if targets2 > 0 and ArtifactCheck() then
+        return true
+      end
+    end
+  end
+  if Duel.GetCurrentPhase()==PHASE_END and Duel.GetTurnPlayer()==1-player_ai 
+  and #AIST()>0 and SignCheck(AIST()) and LadyCount(AIHand())<2 
+  then
+    GlobalCardMode = 1
+    GlobalTargetSet(FindID(19337371,AIST()))
+    return true
+  end
+  if Duel.GetCurrentPhase()==PHASE_END then
+    if targets2 > 0 and ArtifactCheck() then
+      return true
+    end
+    if targets4 > 0 then
+      local cards = SubGroup(OppST(),MSTEndPhaseFilter)
+      GlobalCardMode = 1
+      GlobalTargetSet(cards[math.random(#cards)],OppST())
+      return true
+    end
+  end
+  if e then
+    local c = e:GetHandler()
+    if (c:IsType(TYPE_CONTINUOUS+TYPE_EQUIP+TYPE_FIELD) 
+    or (c:IsType(TYPE_PENDULUM) and c:IsType(TYPE_SPELL) 
+    and (ScaleCheck(2)==true or not e:IsHasType(EFFECT_TYPE_ACTIVATE))))
+    and c:IsControler(1-player_ai)
+    and targets>0
+    and c:IsLocation(LOCATION_ONFIELD)
+    and not c:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET)
+    and not c:IsHasEffect(EFFECT_INDESTRUCTABLE_EFFECT)
+    and not c:IsHasEffect(EFFECT_IMMUNE_EFFECT)
+    and (not DestroyBlacklist(c) or c:GetCode()==19337371 
+    or c:GetCode()==05851097 and Duel.GetCurrentChain()>1)
+    then
+      GlobalCardMode = 1
+      GlobalTargetSet(c,OppST())
+      return true
+    end
+  end
+  if HasPriorityTarget(OppST(),true) and Duel.GetCurrentChain()==0 then
+    return true
+  end
+  if ScytheCheck() and ArtifactCheck(nil,true) then
+    return true
+  end
+  return false
+end
+function ChainPanzerDragon(c)
+  return DestroyCheck(OppField())>0
+end
 function PriorityChain(cards) -- chain these before anything else
   if HasIDNotNegated(cards,58120309,ChainNegation) then -- Starlight Road
     return {1,CurrentIndex}
@@ -1907,6 +2075,12 @@ function PriorityChain(cards) -- chain these before anything else
   return nil
 end
 function GenericChain(cards)
+  if HasID(cards,05318639,ChainMST) then
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,94192409) and ChainCompulse() then
+    return {1,CurrentIndex}
+  end
   if HasIDNotNegated(cards,10406322,UseAlsei) then
     return {1,CurrentIndex}
   end
@@ -1914,6 +2088,15 @@ function GenericChain(cards)
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,55713623,ChainShrink) then
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,33698022) then -- Moonlight Rose
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,72959823,ChainPanzerDragon) then
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,73176465,false,nil,LOCATION_GRAVE) then -- Felis
     return {1,CurrentIndex}
   end
   return nil
@@ -2029,6 +2212,84 @@ function RafflesiaTarget(cards,min)
   end
   return BestTargets(cards,min,TARGET_DESTROY)
 end
+function EmeralTarget(cards,count)
+  if LocCheck(cards,LOCATION_OVERLAY) then
+    return Add(cards,PRIO_TOGRAVE)
+  end
+  if count>0 then
+    return Add(cards,PRIO_EXTRA,count)
+  end
+  return Add(cards,PRIO_TOFIELD)
+end
+function SkyblasterTarget(cards,count)
+  return BestTargets(cards,count)
+end
+function VolcasaurusTarget(cards)
+  return BestTargets(cards,1,true)
+end
+function MichaelTarget(cards,c)
+  local result = {}
+  if FilterLocation(c,LOCATION_MZONE) then
+    result = BestTargets(cards)
+  else
+    for i=1,#cards do
+      result[i]=i
+    end
+  end
+  return result
+end
+function ArcaniteTarget(cards)
+  return BestTargets(cards,1,true)
+end
+function PanzerDragonTarget(cards)
+  return BestTargets(cards,1,true)
+end
+function CompulseTarget(cards)
+  local result = nil
+  if GlobalCardMode == 1 then
+    result=GlobalTargetGet(cards,true)
+  end
+  GlobalCardMode = nil
+  if result == nil then result = BestTargets(cards,1,TARGET_TOHAND) end
+  return result
+end
+function MSTTarget(cards)
+  result = nil
+  if GlobalCardMode == 1 then
+    result=GlobalTargetGet(cards,true)
+  end
+  GlobalCardMode=nil
+  if result==nil then result=BestTargets(cards,1,TARGET_DESTROY,TargetCheck) end
+  if cards[1].prio then TargetSet(cards[1]) else TargetSet(cards[result[1]]) end
+  return result
+end
+
+function SoulChargeTarget(cards,min,max)
+  local result={}
+  local count = max
+  if AI.GetPlayerLP(1)>=7000 then
+    count = math.min(3,max)
+  elseif AI.GetPlayerLP(1)>=4000 then
+    count = math.min(2,max)
+  else
+    count = 1
+  end
+  if DeckCheck(DECK_TELLARKNIGHT) or DeckCheck(DECK_HAT) then
+    result = Add(cards,PRIO_TOFIELD,count)
+  else
+    for i=1,#cards do
+      cards[i].index=i
+    end
+    table.sort(cards,function(a,b) return a.attack>b.attack end)
+    for i=1,count do
+      result[i]=cards[i].index
+    end
+  end
+  return result
+end
+function MathTarget(cards)
+  return Add(cards,PRIO_TOGRAVE)
+end
 function GenericCard(cards,min,max,id,c)
   if c then
     id = c.id
@@ -2081,6 +2342,39 @@ function GenericCard(cards,min,max,id,c)
   if id == 05133471 then -- Galaxy Cyclone
     return BestTargets(cards)
   end
+  if id == 54447022 then
+    return SoulChargeTarget(cards,min,max)
+  end
+  if id == 05318639 then
+    return MSTTarget(cards)
+  end
+  if id == 94192409 then
+    return CompulseTarget(cards)
+  end
+  if id == 00581014 then
+    return EmeralTarget(cards,min)
+  end
+  if id == 82633039 then
+    return SkyblasterTarget(cards,min)
+  end
+  if id == 29669359 then
+    return VolcasaurusTarget(cards)
+  end
+  if id == 04779823 then
+    return MichaelTarget(cards,c)
+  end
+  if id == 31924889 then
+    return ArcaniteTarget(cards)
+  end
+  if id == 72959823 then
+    return PanzerDragonTarget(cards)
+  end
+  if id == 41386308 then
+    return MathTarget(cards)
+  end
+  if id == 73176465 then -- Felis
+    return BestTargets(cards,1,TARGET_DESTROY)
+  end
   return nil
 end
 
@@ -2098,15 +2392,33 @@ function GenericEffectYesNo(id,card)
   if id == 56832966 and ChainUtopiaLightning(card) then
     result = 1
   end
+  if id == 33698022 then -- Moonlight Rose
+    retult = 1
+  end
+  if id == 72959823 and ChainPanzerDragon(Card) then
+    result = 1
+  end
+  if id == 73176465 and grave then -- Felis
+    result = 1
+  end
   return result
 end
-
+GenericAtt={
+}
+GenericDef={
+  31924889, -- Arcanite Magician
+  73176465, -- Felis
+  06511113, -- Rafflesia
+}
 function GenericPosition(id,available)
   result = nil
-  if id == 06511113 then
-    result = POS_FACEUP_DEFENCE
+  for i=1,#GenericAtt do
+    if GenericAtt[i]==id then result=POS_FACEUP_ATTACK end
   end
-  if id == 78156759 then
+  for i=1,#GenericDef do
+    if GenericDef[i]==id then result=POS_FACEUP_DEFENCE end
+  end
+  if id == 78156759 then -- Zenmaines
     local c = FindID(78156759,AIExtra())
     if ZenmainesCheck(c,OppMon())
     and Duel.GetTurnPlayer()==player_ai

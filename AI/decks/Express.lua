@@ -54,7 +54,7 @@ end
 function SpSumSuperiorDora()
 	return true
 end
-function ExpressUseShadollFusion()
+function ExpressUseShaddollFusion()
 	return CardsMatchingFilter(AIMon(),FilterRank,10)<1
 		and (CardsMatchingFilter(AIHand(),FilterSet,0x9d)>1
 		or (HasID(AIHand(),24919805,true) and Has(AIHand(),23434538,true)))
@@ -94,7 +94,7 @@ function ExpressInit(cards)
 	if HasID(Act,76136345,nil,nil,LOCATION_HAND) and #AIHand()>1 and not HasID(AIST(),76136345,true) then
 		return {COMMAND_ACTIVATE,CurrentIndex}
 	end
-	if HasID(Act,44394295) and CardsMatchingFilter(OppMon(),ShadollFusionFilter)>0 then
+	if HasID(Act,44394295) and CardsMatchingFilter(OppMon(),ShaddollFusionFilter)>0 then
 		GlobalCardMode = 1
 		return {COMMAND_ACTIVATE,CurrentIndex}
 	end
@@ -106,7 +106,7 @@ function ExpressInit(cards)
 	if HasID(Sum,24919805) and FieldCheck(10)>0 and HasID(AIST(),13647631,true) then
 		return {COMMAND_SUMMON,CurrentIndex}
 	end
-	if HasID(Act,44394295) and ExpressUseShadollFusion() then
+	if HasID(Act,44394295) and ExpressUseShaddollFusion() then
 		GlobalCardMode = 1
 		return {COMMAND_ACTIVATE,CurrentIndex}
 	end
@@ -439,7 +439,7 @@ function BattrainCond(loc,c)
 end
 function ExpressNagaCond(loc,c)
 	if loc == PRIO_TOFIELD then
-		return CardsMatchingFilter(OppMon(),ShadollFusionFilter)>0
+		return CardsMatchingFilter(OppMon(),ShaddollFusionFilter)>0
 			or (HasID(AIHand(),24919805,true) and HasID(AIHand(),23434538,true))
 	end
 	return true

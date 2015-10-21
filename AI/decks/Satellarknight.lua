@@ -544,7 +544,7 @@ function ChainChaliceAtk()
   local source = Duel.GetAttacker()
 	local target = Duel.GetAttackTarget()
   if source and target then
-    if source:IsControler(player_ai) then
+    if source:IsControler(player_ai)    then
       target = Duel.GetAttacker()
       source = Duel.GetAttackTarget()
     end
@@ -554,6 +554,7 @@ function ChainChaliceAtk()
     and source:GetAttack() <= target:GetAttack()+QliphortAttackBonus(target:GetCode(),target:GetLevel())+400 
     and source:IsPosition(POS_FACEUP_ATTACK) and target:IsPosition(POS_FACEUP_ATTACK) and target:IsControler(player_ai)
     and (not target:IsHasEffect(EFFECT_IMMUNE_EFFECT) or target:IsSetCard(0xaa) and target:GetCode()~=27279764)
+    and UnchainableCheck(25789292)
     then
       GlobalTargetSet(target,AIMon())
       return true

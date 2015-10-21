@@ -5,6 +5,13 @@ end
 function TraptrixFilter(c)
   return bit32.band(c.type,TYPE_MONSTER)>0 and IsSetCode(c.setcode,0x108a)
 end
+function ArtifactFilter(c)
+  return bit32.band(c.attribute,ATTRIBUTE_LIGHT)>0 and bit32.band(c.type,TYPE_MONSTER)>0
+end
+function SetArtifacts()
+  return (Duel.GetTurnCount()==1 or Duel.GetCurrentPhase()==PHASE_MAIN2)
+  and #AIST()<4
+end
 function HandCount(cards)
   local result = 0
   for i=1,#cards do
@@ -314,6 +321,33 @@ function HATInit(cards)
   end
   return nil
 end
+
+function SanctumTargetField(cards)
+  return Add(cards,PRIO_TOFIELD)
+end
+function SanctumTargetGrave(cards)
+  return BestTargets(cards,1,true)
+end
+
+function BeagalltachTarget(cards)
+  local result={}
+  local targets=CardsMatchingFilter(UseLists({OppMon(),OppST()}),MoralltachFilter)
+  local Scythe=false
+  for i=1,#cards do
+    if cards[i].id == 20292186 and ScytheCheck()
+    and #result<math.min(targets,2) and not Scythe
+    then
+      Scythe = true
+      result[#result+1]=i
+    end
+    if cards[i].id == 85103922 and #result<math.min(targets,2) then
+      result[#result+1]=i
+    end
+  end
+  if #result==0 then result=BestTargets(cards,1,TARGET_DESTROY) end
+  return result
+end
+
 function MyrmeleoTarget(cards)
   if GlobalCardMode == 1 then
     GlobalCardMode = nil
@@ -381,6 +415,24 @@ function GiantHandTarget(cards,min)
   end
 end
 
+function IgnitionTarget(cards)
+  local result = {}
+  if GlobalCardMode == 2 then
+    result=GlobalTargetGet(cards,true)
+  elseif GlobalCardMode == 1 then
+    result = BestTargets(cards,1,true)
+  else
+    for i=1,#cards do
+      if cards[i].id == 85103922 and #result<1 then
+        result[#result+1]=i
+      end
+    end
+  end 
+  GlobalCardMode=nil
+  if #result == 0 then result = {math.random(#cards)} end
+  if cards[1].prio then TargetSet(cards[1]) else TargetSet(cards[result[1]]) end
+  return result
+end
 function HATCard(cards,min,max,id,c)
   if c then
     id = c.id
@@ -408,6 +460,21 @@ function HATCard(cards,min,max,id,c)
   end
   if id == 73964868 then 
     return PleiadesTarget(cards)
+  end
+  if id == 12697630 then
+    return BeagalltachTarget(cards)
+  end
+  if id == 12444060 and bit32.band(c.location,LOCATION_ONFIELD)>0 then
+    return SanctumTargetField(cards)
+  end
+  if id == 12444060 and bit32.band(c.location,LOCATION_GRAVE)>0 then
+    return SanctumTargetGrave(cards)
+  end
+  if id == 85103922 then -- Moralltach
+    return BestTargets(cards,1,TARGET_DESTROY)
+  end
+  if id == 29223325 then
+    return IgnitionTarget(cards)
   end
   return nil
 end
@@ -524,7 +591,7 @@ function MoonFilter2(c,p)
   and not FilterType(c,TYPE_TOKEN)
 end
 function MoonFilter3(c)
-  return MoonFilter(c) and ShadollFusionFilter(c)
+  return MoonFilter(c) and ShaddollFusionFilter(c)
 end
 function MoonOppFilter(c)
   return MoonFilter(c) and bit32.band(c.type,TYPE_FLIP)==0
@@ -532,7 +599,7 @@ end
 function MoonPriorityFilter(c)
   return MoonFilter(c) and MoonWhitelist(c)
 end
-function ChainBoM()
+function ChainBoM(c)
   local targets1 = CardsMatchingFilter(OppMon(),MoonOppFilter)
   local targets2 = CardsMatchingFilter(OppMon(),MoonPriorityFilter)
   local e=Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
@@ -540,7 +607,7 @@ function ChainBoM()
   if e then
     c = e:GetHandler()
   end
-  if RemovalCheck(14087893) and not c:IsCode(12697630) and targets1>0 then
+  if RemovalCheckCard(c) and not c:IsCode(12697630) and targets1>0 then
     return true
   end
   if not UnchainableCheck(14087893) then
@@ -682,8 +749,190 @@ function ChainTrapHole()
   end
   return true
 end
+function SanctumFilter(c)
+  return PriorityTarget(c,true,nil,FilterPosition,POS_FACEUP)
+end
+function ChainSanctum()
+  if RemovalCheck(12444060) and (HasID(AIDeck(),85103922,true) or HasID(AIDeck(),12697630,true) and HasID(AIST(),85103922,true) and WindaCheck())then
+    GlobalCardMode = 1
+    return true
+  end
+  if not UnchainableCheck(12444060) then
+    return false
+  end
+  local targets = CardsMatchingFilter(UseLists({OppMon(),OppST()}),SanctumFilter)
+  local targets2=CardsMatchingFilter(UseLists({OppMon(),OppST()}),MoralltachFilter)
+  local check = HasID(AIDeck(),85103922,true) or HasID(AIDeck(),12697630,true) 
+  and HasID(AIST(),85103922,true) and WindaCheck()
+  if Duel.GetTurnPlayer()==1-player_ai and targets>0 and check
+  then
+    GlobalCardMode = 1
+    return true
+  end
+  if Duel.GetTurnPlayer()==1-player_ai and targets2>0 and check then
+    if Duel.GetCurrentPhase()==PHASE_BATTLE then
+      local source = Duel.GetAttacker()
+      if source and source:IsControler(1-player_ai) then
+        GlobalCardMode = 1
+        return true
+      end
+    end
+    if Duel.GetCurrentPhase()==PHASE_END and targets2>0 and check then
+      GlobalCardMode = 1
+      return true
+    end
+  end
+  local check = HasID(AIDeck(),20292186,true) or HasID(AIDeck(),12697630,true) 
+  and HasID(AIST(),20292186,true) and WindaCheck()
+  if ScytheCheck() and check then
+    GlobalCardMode = 1
+    return true
+  end
+  return nil
+end
+
+function ArtifactCheck(sanctum,scythe)
+  local MoralltachCheck = HasID(AIST(),85103922,true) and Duel.GetTurnPlayer()==1-player_ai
+  local BeagalltachCheck = HasID(AIST(),12697630,true) and (HasID(AIST(),85103922,true) 
+  or sanctum and HasID(AIDeck(),85103922,true))
+  and WindaCheck() and Duel.GetTurnPlayer()==1-player_ai
+  local BeagalltachCheckScythe = HasID(AIST(),12697630,true) and (HasID(AIST(),20292186,true) 
+  or sanctum and HasID(AIDeck(),20292186,true))
+  and WindaCheck() and Duel.GetTurnPlayer()==1-player_ai
+  local CheckScythe = HasID(AIST(),20292186,true) and Duel.GetTurnPlayer()==1-player_ai
+  if scythe then
+    if BeagalltachCheckScythe then
+      if sanctum then
+        GlobalCardMode = 2
+      else 
+        GlobalCardMode = 1
+      end
+      GlobalTargetSet(FindID(12697630,AIST()),AIST())
+      return true
+    end
+    if CheckScythe then
+      if sanctum then
+        GlobalCardMode = 2
+      else 
+        GlobalCardMode = 1
+      end
+      GlobalTargetSet(FindID(20292186,AIST()),AIST())
+      return true
+    end
+  else
+    if BeagalltachCheck then
+      if sanctum then
+        GlobalCardMode = 2
+      else 
+        GlobalCardMode = 1
+      end
+      GlobalTargetSet(FindID(12697630,AIST()),AIST())
+      return true
+    end
+    if MoralltachCheck then
+      if sanctum then
+        GlobalCardMode = 2
+      else 
+        GlobalCardMode = 1
+      end
+      GlobalTargetSet(FindID(85103922,AIST()),AIST())
+      return true
+    end
+  end
+  return false
+end
+
+function ChainIgnition(c)
+  local targets=CardsMatchingFilter(OppST(),MSTFilter)
+  local targets2=CardsMatchingFilter(UseLists({OppMon(),OppST()}),MoralltachFilter)
+  local targets3=CardsMatchingFilter(UseLists({OppMon(),OppST()}),SanctumFilter)
+  local targets4=CardsMatchingFilter(OppST(),MSTEndPhaseFilter)
+  local e = Duel.GetChainInfo(Duel.GetCurrentChain(),CHAININFO_TRIGGERING_EFFECT)
+  local loc = 0
+  if FilterLocation(c,LOCATION_HAND) then loc = 1 end
+  if RemovalCheck(12444060) then
+    if e and e:GetHandler():IsCode(12697630) then
+      return false
+    end
+    if targets2 > 0 and ArtifactCheck(true)
+    then
+      return true
+    end
+    if targets > 0 and Duel.GetLocationCount(player_ai,LOCATION_SZONE)>loc then
+      return true
+    end
+  end
+  if not UnchainableCheck(12444060) then
+    return false
+  end
+  if targets3 > 0 and ArtifactCheck(true) then
+    return true
+  end
+  if Duel.GetCurrentPhase()==PHASE_BATTLE then
+    local source=Duel.GetAttacker()
+    local target=Duel.GetAttackTarget()
+    if source and source:IsControler(1-player_ai) then
+      if targets2 > 0 and ArtifactCheck(true) then
+        return true
+      end
+    end
+  end
+  if Duel.GetCurrentPhase()==PHASE_END then
+    if targets2 > 0 and ArtifactCheck(true) then
+      return true
+    end
+    if targets4 > 0 and Duel.GetLocationCount(player_ai,LOCATION_SZONE)>loc then
+      local cards = SubGroup(OppST(),MSTEndPhaseFilter)
+      GlobalTargetSet(cards[math.random(#cards)],OppST())
+      GlobalCardMode = 2
+      return true
+    end
+  end
+  if e then
+    local c = e:GetHandler()
+    if (c:IsType(TYPE_CONTINUOUS+TYPE_EQUIP+TYPE_FIELD) 
+    or (c:IsType(TYPE_PENDULUM) and c:IsType(TYPE_SPELL) 
+    and (ScaleCheck(2)==true or not e:IsHasType(EFFECT_TYPE_ACTIVATE))))
+    and c:IsControler(1-player_ai)
+    and targets>0
+    and c:IsLocation(LOCATION_ONFIELD)
+    and not c:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET)
+    and not c:IsHasEffect(EFFECT_INDESTRUCTABLE_EFFECT)
+    and not c:IsHasEffect(EFFECT_IMMUNE_EFFECT)
+    and (not DestroyBlacklist(c) or c:GetCode()==19337371 
+    or c:GetCode()==05851097 and Duel.GetCurrentChain()>1)
+    and Duel.GetLocationCount(player_ai,LOCATION_SZONE)>loc
+    then
+      GlobalTargetSet(c,OppST())
+      GlobalCardMode = 2
+      return true
+    end
+  end
+  if HasPriorityTarget(OppST(),true) 
+  and Duel.GetLocationCount(player_ai,LOCATION_SZONE)>loc
+  and Duel.GetCurrentChain()
+  then
+    return true
+  end
+  if ScytheCheck() and ArtifactCheck(true,true) then
+    return true
+  end
+  return false
+end
+function SanctumYesNo()
+  return DestroyCheck(OppField())>0
+end
 function HATChain(cards)
-  if HasIDNotNegated(cards,73964868,nil,nil,nil,nil,ChainPleiades) then
+  if HasID(cards,12444060,false,nil,LOCATION_ONFIELD) and ChainSanctum() then
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,12444060,false,nil,LOCATION_GRAVE) and SanctumYesNo() then
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,29223325) and ChainIgnition(cards[CurrentIndex]) then
+    return {1,CurrentIndex}
+  end
+  if HasIDNotNegated(cards,73964868,ChainPleiades) then
     return {1,CurrentIndex}
   end
   if HasID(cards,91812341) then -- Traptrix Myrmeleo
@@ -717,10 +966,10 @@ function HATChain(cards)
     return {1,CurrentIndex}
   end
 
-  if HasID(cards,97077563,nil,nil,nil,nil,ChainCotH) then
+  if HasID(cards,97077563,ChainCotH) then
     return {1,CurrentIndex}
   end
-  if HasID(cards,14087893) and ChainBoM() then
+  if HasID(cards,14087893,ChainBoM) then
     return {1,CurrentIndex}
   end
   return nil
@@ -736,13 +985,20 @@ function HATEffectYesNo(id,card)
   if id == 63746411 and ChainGiantHand() then
     result = 1
   end
+  if id == 12444060 and SanctumYesNo() then
+    result = 1
+  end
+  if id == 85103922 then -- Moralltach
+    result = 1
+  end
   return result
 end
 HATAtt={
   91812341,45803070,91499077, -- Traptrix Myrmeleo, Dionaea, Gagaga Samurai
-  20292186 -- Artifact Scythe
+  2029218, 85103922, -- Artifact Scythe, Moralltach
 }
 HATDef={
+  12697630, -- Beagalltach
 }
 function HATPosition(id,available)
   result = nil

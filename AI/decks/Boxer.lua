@@ -424,7 +424,8 @@ function SummonScrapBoxer(c,mode)
   return false
 end
 function UseScrapBoxer(c)
-  return DestroyCheck(OppField())>0 
+  return DeckCheck(AI_BOXER)
+  and DestroyCheck(OppField())>0 
   and (HasID(AIMon(),83994433,true,OPTCheck) 
   or HasIDNotNegated(AIMon(),23232295,true,HasMaterials)
   or HasID(AIMon(),71921856,true,HasMaterials)

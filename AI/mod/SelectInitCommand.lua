@@ -293,14 +293,6 @@ if not DeckCheck(DECK_BUJIN) then
   end
 end  
 if not ExtraCheck then 
-  DeckCommand = ShadollOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
-  if DeckCommand ~= nil and (d == 0 
-  or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
-  then
-    return DeckCommand[1],DeckCommand[2]
-  end
-end
-if not ExtraCheck then 
   DeckCommand = HATInit(cards)
   if DeckCommand ~= nil and (d == 0 
   or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))

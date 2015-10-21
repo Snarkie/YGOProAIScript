@@ -65,7 +65,7 @@ end
 
   local SelectCardFunctions={
   FireFistCard,HeraldicOnSelectCard,GadgetOnSelectCard,
-  BujinOnSelectCard,MermailOnSelectCard,ShadollOnSelectCard,
+  BujinOnSelectCard,MermailOnSelectCard,
   SatellarknightOnSelectCard,ChaosDragonOnSelectCard,HATCard,
   QliphortCard,NobleCard,NekrozCard,BACard,DarkWorldCard,
   GenericCard,ConstellarCard,BlackwingCard,HarpieCard,HEROCard,

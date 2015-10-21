@@ -91,7 +91,7 @@ function TributeCheck(amount)
   return result
 end
 function SkillDrainCheck()
-  return HasIDNotNegated(UseLists({AIST(),OppST()}),82732705,true,nil,nil,nil,FilterPosition,POS_FACEUP)
+  return HasIDNotNegated(AllST(),82732705,true,FilterPosition,POS_FACEUP)
 end
 
 function ToolCond(loc,c)
@@ -698,6 +698,7 @@ function ChainSoulTransition(c)
   and (not (ExpectedDamage(1)>=AI.GetPlayerLP(1))
   or HasID(AIMon(),91907707,true)
   or #AIMon()>1)
+  and Duel.GetTurnPlayer()==1-player_ai
   then
     GlobalTargetSet(aimon)
     GlobalCardMode = 1

@@ -53,6 +53,9 @@ function CaiusCond(loc,c)
   if loc == PRIO_BANISH then
     return FilterLocation(c,LOCATION_GRAVE)
   end
+  if loc == PRIO_TOFIELD then
+    return not HasID(AIHand(),c.id,true)
+  end
   return true
 end
 function FaderCond(loc,c)
@@ -329,12 +332,13 @@ function SummonScrapDragon()
   or PriorityCheck(AIField(),PRIO_TOGRAVE,2)>4)
 end
 function UseScrapDragon()
-  return DestroyCheck(OppField())>0 and (HasID(AIMon(),34408491,true) 
+  return DestroyCheck(OppField())>0 
+  and (HasID(AIMon(),34408491,true) 
   or (PriorityCheck(AIField(),PRIO_TOGRAVE)>4 
   and (MP2Check() or HasPriorityTarget(OppField(),true) 
   or OppHasStrongestMonster() or HasID(AIMon(),12538374,true))) 
-  or (HasID(AIMon(),99365553,true) and LightpulsarCond(PRIO_TOFIELD)))
-  or OppHasStrongestMonster() and #AICards()>1
+  or (HasID(AIMon(),99365553,true) and LightpulsarCond(PRIO_TOFIELD))
+  or OppHasStrongestMonster() and #AIField()>1)
 end
 function SummonBLS()
   return OverExtendCheck() and #OppMon()>0 and ChaosSummonCheck()>4

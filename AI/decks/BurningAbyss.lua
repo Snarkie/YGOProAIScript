@@ -949,6 +949,14 @@ function ChainBeatrice(c)
     then
       return true
     end
+    local aimon,oppmon=GetBattlingMons()
+    if aimon and oppmon and WinsBattle(oppmon,aimon)
+    and Duel.GetTurnPlayer()==1-player_ai
+    and (NotNegated(c) or PriorityCheck(c.xyz_materials,PRIO_TOGRAVE)>3)
+    and aimon:GetCode()==27552504
+    then
+      return true
+    end
   end
   return false
 end
@@ -986,6 +994,14 @@ function ChainPilgrim(c)
     and UnchainableCheck(18386170)
     and PriorityCheck(AIHand(),PRIO_TOGRAVE)>3
     and NotNegated(c)
+    then
+      return true
+    end
+    local aimon,oppmon=GetBattlingMons()
+    if aimon and oppmon and WinsBattle(oppmon,aimon)
+    and Duel.GetTurnPlayer()==1-player_ai
+    and NotNegated(c)
+    and aimon:GetCode()==18386170
     then
       return true
     end

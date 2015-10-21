@@ -19,7 +19,7 @@ function OnSelectEffectYesNo(id,triggeringCard)
   if result then return result end
   local YesNoFunctions = {
   FireFistOnSelectEffectYesNo,MermailOnSelectEffectYesNo,
-  ShadollOnSelectEffectYesNo,GadgetOnSelectEffectYesNo,
+  GadgetOnSelectEffectYesNo,
   HeraldicOnSelectEffectYesNo,SatellarknightOnSelectEffectYesNo,
   ChaosDragonOnSelectEffectYesNo,HATEffectYesNo,QliphortEffectYesNo,
   NobleEffectYesNo,NekrozEffectYesNo,BAEffectYesNo,DarkWorldEffectYesNo,

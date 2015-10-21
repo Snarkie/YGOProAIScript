@@ -19,7 +19,6 @@ DECK_HERALDIC     = NewDeck("Heraldic Beast"  ,82293134) -- Heraldic Beast Leo
 DECK_GADGET       = NewDeck("Gadget"          ,05556499) -- Machina Fortress
 DECK_BUJIN        = NewDeck("Bujin"           ,32339440) -- Bujin Yamato
 DECK_MERMAIL      = NewDeck("Mermail"         ,21954587) -- Mermail Abyssmegalo
-DECK_SHADOLL      = NewDeck("Shaddoll"        ,44394295) -- Shaddoll Fusion
 DECK_TELLARKNIGHT = NewDeck("Satellarknight"  ,75878039) -- Satellarknight Deneb
 DECK_HAT          = NewDeck("HAT"             ,45803070) -- Traptrix Dionaea
 DECK_QLIPHORT     = NewDeck("Qliphort"        ,65518099) -- Qliphort Tool
@@ -233,29 +232,28 @@ AddPriority({
 
 
 
-AddPriority({
+--[[AddPriority({ -- TODO: check&remove
 -- Shaddoll
-[37445295] = {6,3,3,1,7,1,6,1,1,1,FalconCond},        -- Shadoll Falcon
-[04939890] = {5,2,2,1,5,4,5,4,1,1,HedgehogCond},      -- Shadoll Hedgehog
-[30328508] = {4,1,5,1,9,1,9,1,1,1,LizardCond},        -- Shadoll Lizard/Squamata
-[77723643] = {3,1,4,1,7,1,7,1,1,1,DragonCond},        -- Shadoll Dragon
-[03717252] = {2,1,6,1,5,1,8,1,1,1,BeastCond},         -- Shadoll Beast
+[37445295] = {6,3,3,1,7,1,6,1,1,1,FalconCond},        -- Shaddoll Falcon
+[04939890] = {5,2,2,1,5,4,5,4,1,1,HedgehogCond},      -- Shaddoll Hedgehog
+[30328508] = {4,1,5,1,9,1,9,1,1,1,LizardCond},        -- Shaddoll Lizard/Squamata
+[77723643] = {3,1,4,1,7,1,7,1,1,1,DragonCond},        -- Shaddoll Dragon
+[03717252] = {2,1,6,1,5,1,8,1,1,1,BeastCond},         -- Shaddoll Beast
 [24062258] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Secret Sect Druid Dru
 [73176465] = {1,1,1,1,6,5,1,1,1,1,FelisCond},         -- Lightsworn Felis
 [41386308] = {1,1,1,1,1,1,1,1,1,1,MathCond},          -- Mathematician
 
 [05318639] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Mystical Space Typhoon
-[44394295] = {9,5,1,1,1,1,1,1,1,1,ShadollFusionCond}, -- Shadoll Fusion
-[06417578] = {8,6,1,1,1,1,1,1,1,1,ElFusionCond},      -- El-Shadoll Fusion
-[60226558] = {7,4,1,1,1,1,1,1,1,1,NephFusionCond},    -- Nepheshadoll Fusion
-[77505534] = {3,1,1,1,1,1,1,1,1,1,nil},               -- Facing the Shadows
-[04904633] = {4,2,1,1,9,1,9,1,1,1,RootsCond},         -- Shadoll Roots
+[44394295] = {9,5,1,1,1,1,1,1,1,1,ShaddollFusionCond}, -- Shaddoll Fusion
+[06417578] = {8,6,1,1,1,1,1,1,1,1,ElFusionCond},      -- El-Shaddoll Fusion
+
+[04904633] = {4,2,1,1,9,1,9,1,1,1,CoreCond},          -- Shaddoll Core
 
 
-[20366274] = {1,1,6,4,2,1,2,1,1,1,ConstructCond},     -- El-Shadoll Construct
-[94977269] = {1,1,7,3,2,1,2,1,1,1,WindaCond},         -- El-Shadoll Winda
-[74822425] = {1,1,1,1,1,1,1,1,1,1,ShekinagaCond},     -- El-Shadoll Shekinaga
-[48424886] = {1,1,1,1,1,1,1,1,1,1,EgrystalCond},      -- El-Shadoll Egrystal
+[20366274] = {1,1,6,4,2,1,2,1,1,1,ConstructCond},     -- El-Shaddoll Construct
+[94977269] = {1,1,7,3,2,1,2,1,1,1,WindaCond},         -- El-Shaddoll Winda
+[74822425] = {1,1,1,1,1,1,1,1,1,1,ShekinagaCond},     -- El-Shaddoll Shekinaga
+
 [82044279] = {1,1,1,1,1,1,1,1,1,1,ClearWingCond},     -- Clear Wing Synchro Dragon
 [72959823] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Panzer Dragon
 [29669359] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Number 61: Volcasaurus
@@ -264,7 +262,7 @@ AddPriority({
 [33698022] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Moonlight Rose Dragon
 [31924889] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Arcanite Magician
 [08561192] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Leoh, Keeper of the Sacred Tree
-})
+})]]
 
 
 AddPriority({
