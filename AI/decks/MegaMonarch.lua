@@ -509,7 +509,7 @@ end
 function SummonIdea(c,mode)
   if mode == 1 then
     return TributeSummonsM(0,1)>0 
-    and HasIDNotNegated(AIDeck(),59463312,true)
+    and HasIDNotNegated(AIDeck(),59463312,true,OPTCheck,59463312)
     and (TributeFodder()==0
     or TributeFodder()<2 and TributeSummonsM(1,1)==0) 
     and DualityCheck()
@@ -893,7 +893,7 @@ function ErebusTarget(cards,c)
   or LocCheck(cards,LOCATION_HAND)
   and cards[1].owner==1
   then
-    return Add(cards,PRIO_TOGRAVE)
+    return Add(cards,PRIO_TOGRAVE,1,FilterLocation,LOCATION_DECK)
   end
   if not OppHasStrongestMonster() 
   and not HasPriorityTarget(OppField(),false)
@@ -914,7 +914,7 @@ function AitherTarget(cards,c)
   end
   if LocCheck(cards,LOCATION_DECK) then
     if FilterType(cards[1],TYPE_SPELL+TYPE_TRAP) then
-      return Add(cards,PRIO_TOGRAVE)
+      return Add(cards,PRIO_TOGRAVE,1,FilterLocation,LOCATION_DECK)
     else
       return Add(cards)
     end
@@ -969,7 +969,7 @@ function OriginalFilter(c)
   local check = true
   if ChainCheck(54241725) then
     for i=1,#GlobalOriginalTargets do
-      if CardsEqual(GlobalOriginalTargets[1],c) then
+      if CardsEqual(GlobalOriginalTargets[i],c) then
         check=false
       end
     end
@@ -983,6 +983,17 @@ function OriginalTarget(cards,c,min)
     GlobalOriginalTargets = {cards[1],cards[2]}
     return result
   end
+  --[[if FilterLocation(c,LOCATION_ONFIELD) -- TODO: not working at the moment
+  and CardsMatchingFilter(AIGrave(),MonarchFilter)>2
+  and HasID(AIGrave(),c.id,true,OPTCheck,c.id)
+  and not HasID(AIMon(),c.id,true)
+  and Duel.GetLocationCount(player_ai,LOCATION_MZONE)>0
+  and DualityCheck()
+  then
+    local result = Add(cards,PRIO_TODECK,min,FilterID,c.id)
+    GlobalOriginalTargets = {cards[1],cards[2]}
+    return result
+  end]]
   if FilterLocation(c,LOCATION_GRAVE) then
     return Add(cards,PRIO_BANISH,min,OriginalFilter)
   end
@@ -1051,6 +1062,9 @@ function MegaMonarchCard(cards,min,max,id,c)
   if id == 81439173 then
     return FoolishTargetM(cards)
   end
+  if id == 54241725 then
+    return OriginalTarget(cards,c,min)
+  end
   return nil
 end
 GlobalAither = nil
@@ -1110,7 +1124,9 @@ function ChainOriginal(c)
     end
   end
   if FilterLocation(c,LOCATION_GRAVE) then
-    if RemovalCheckCard(c) then
+    if RemovalCheckCard(c) 
+    and not ChainCheck(54241725)
+    then
       OPTSet(54241725)
       return true
     end

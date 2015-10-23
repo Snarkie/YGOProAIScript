@@ -129,7 +129,7 @@ function SummonMachinaFortress(card)
 end
 
 function SummonTinGoldfish()
-  return GadgetCount(AIHand())>0 and FieldCheck(4)==0 and DeckCheck(DECK_GADGET)
+  return GadgetCount(AIHand())>0 and FieldCheck(4)==0 --and DeckCheck(DECK_GADGET)
 end
 function SummonGearframe()
   return HasID(AIHand(),94656263,true) or FieldCheck(4)==1

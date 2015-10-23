@@ -420,7 +420,7 @@ SSBL={
 85909450,86848580,79979666, -- HPPD, Zerofyne, Bubbleman
 13959634,55863245,06511113, -- Moulinglacia, Child Dragon, Rafflesia
 18326736,58069384,10443957, -- Planetellarknight Ptolemaios, Cyber Dragon Nova, Infinity
-27552504,18386170, -- Beatrice, Pilgrim
+27552504,18386170,65305468, -- Beatrice, Pilgrim, F0
 }
 
 
@@ -462,6 +462,7 @@ RepoBL={
   77723643,03717252,21502796, -- Shaddoll Dragon, Beast,Ryko
   23899727,88241506,15914410, -- Mermail Abysslinde, Blue-Eyes Maiden, Mechquipped Angineer
   23232295,85909450,83531441, -- Lead Yoke, HPPD, Dante
+  65305468, --F0
 }
 ---------------------------------------------------------
 -- Checks if the specified card ID is in this "blacklist"
@@ -679,7 +680,7 @@ Unchainable={
 83555666,88197162,24348807,21143940, --  Ring of Destruction, Soul Transition, Lose a turn, Mask Change
 84536654,50608164,06511113,30575681, -- Form Change, Koga, Rafflesia, Treacherous, Bedwyr
 27552504,18386170,60743819,20036055, -- Beatrice, Pilgrim, Fiend Griefing, Traveler
-36553319, -- Farfa
+36553319,65305468, -- Farfa, F0
 }
 function isUnchainableTogether(CardId)
   for i=1,#Unchainable do
@@ -896,7 +897,7 @@ ScriptedCards ={
 18326736,58069384,10443957,03819470, -- Planetellarknight Ptolemaios, Cyber Dragon Nova, Infinity, Seven Tools
 29401950,06511113,99590524,81992475, -- Bottomless, Rafflesia, Treacherous, BA Barbar
 27552504,18386170,60743819,20036055, -- Beatrice, Pilgrim, Fiend Griefing, Traveler
-40605147, -- Solemn Notice
+40605147,65305468, -- Solemn Notice, F0
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do

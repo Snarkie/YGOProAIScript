@@ -599,7 +599,7 @@ end
 function MoonPriorityFilter(c)
   return MoonFilter(c) and MoonWhitelist(c)
 end
-function ChainBoM(c)
+function ChainBoM(card)
   local targets1 = CardsMatchingFilter(OppMon(),MoonOppFilter)
   local targets2 = CardsMatchingFilter(OppMon(),MoonPriorityFilter)
   local e=Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
@@ -607,7 +607,7 @@ function ChainBoM(c)
   if e then
     c = e:GetHandler()
   end
-  if RemovalCheckCard(c) and not c:IsCode(12697630) and targets1>0 then
+  if RemovalCheckCard(card) and not c:IsCode(12697630) and targets1>0 then
     return true
   end
   if not UnchainableCheck(14087893) then
@@ -724,6 +724,7 @@ function BottomlessFilter(c,type)
   and Affected(c,type,4)
   and (type~=TYPE_TRAP or not TraptrixFilter(c))
   and c.attack>=1500
+  and CurrentOwner(c)==2
 end
 function ChainBottomless()
   if not AI.GetLastSummonedCards then -- TODO: only for backwards compatibility, remove later

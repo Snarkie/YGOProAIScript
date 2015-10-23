@@ -54,6 +54,11 @@ function AttackTargetSelection(cards,attacker)
       return BestAttackTarget(cards,attacker,false,BattleDamageFilter,attacker)
     end
     
+    -- F0
+    if id == 65305468 then              
+      return BestTargets(cards,1,TARGET_CONTROL,F0Filter)
+    end
+    
     -- BLS
     if id == 72989439 and CanWinBattle(attacker,cards,true) then                 
       return BestAttackTarget(cards,attacker)
@@ -292,6 +297,11 @@ function OnSelectBattleCommand(cards,activatable)
     return Attack(CurrentIndex)
   end
   
+  -- F0
+  if HasID(cards,65305468,F0Check,targets) then 
+    return Attack(CurrentIndex)
+  end
+  
   -- Lightpulsar Dragon
   if HasID(cards,99365553) and LightpulsarCheck() then 
     return Attack(CurrentIndex)
@@ -494,6 +504,7 @@ function AttackYubel(c,source)
   return Negated(c)
   or ArmadesCheck(source)
   or StareaterCheck(source)
+  or not Affected(source,TYPE_MONSTER,c.level)
 end
 function AttackMaiden(c,source)
   return Negated(c)
@@ -508,6 +519,7 @@ function AttackMole(c,source)
   or ArmadesCheck(source)
   or StareaterCheck(source)
   or CardsMatchingFilter(AIMon(),FilterAttackMin,1500)>1
+  or not Affected(source,TYPE_MONSTER,c.level)
 end
 function AttackMetaion(c,source)
   return Negated(c)
@@ -519,12 +531,20 @@ function AttackCatastor(c,source)
   or ArmadesCheck(source)
   or StareaterCheck(source)
   or FilterAttribute(source,ATTRIBUTE_DARK)
+  or not Affected(source,TYPE_MONSTER,c.level)
 end
 function AttackConstruct(c,source)
   return Negated(c)
   or ArmadesCheck(source)
   or StareaterCheck(source)
   or not FilterSummon(source,SUMMON_TYPE_SPECIAL)
+  or not Affected(source,TYPE_MONSTER,c.level)
+end
+function AttackF0(c,source)
+  return Negated(c)
+  or ArmadesCheck(source)
+  or StareaterCheck(source) 
+  or not Affected(source,TYPE_MONSTER,c.level)
 end
 function SelectAttackConditions(c,source) 
   if c.id == 95929069 then
@@ -550,6 +570,9 @@ function SelectAttackConditions(c,source)
   end
   if c.id == 20366274 then
     return AttackConstruct(c,source)
+  end
+  if c.id == 65305468 then
+    return AttackF0(c,source)
   end
   return true
 end

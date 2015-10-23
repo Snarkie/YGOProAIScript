@@ -1560,9 +1560,12 @@ function ChainFiendish(card)
   return false
 end
 function ChainSkillDrain(card)
+  if AI.GetPlayerLP(1)<=1000 then
+    return false
+  end
   local c = ChainCardNegation(card,false,false,FilterType,TYPE_MONSTER)
   if c then
-    GlobalTargetSet(c,OppMon())
+    --GlobalTargetSet(c,OppMon())
     return true
   end
   if Duel.GetCurrentPhase() == PHASE_BATTLE then
@@ -1999,7 +2002,7 @@ function PriorityChain(cards) -- chain these before anything else
   if HasIDNotNegated(cards,34507039,ChainNegation) then -- Wiretap
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,03819470,ChainNegation) then -- Seven Tools
+  if HasIDNotNegated(cards,03819470,ChainNegation) and AI.GetPlayerLP(1)>1000 then -- Seven Tools
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,49010598,ChainNegation) then -- Divine Wrath
@@ -2017,16 +2020,16 @@ function PriorityChain(cards) -- chain these before anything else
   if HasIDNotNegated(cards,50323155,ChainNegation) then -- Black Horn of Heaven
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,40605147,ChainNegation) then -- Solemn Notice
+  if HasIDNotNegated(cards,40605147,ChainNegation) and AI.GetPlayerLP(1)>1500 then -- Solemn Notice
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,84749824,ChainNegation) then -- Solemn Warning
+  if HasIDNotNegated(cards,84749824,ChainNegation) and AI.GetPlayerLP(1)>2000 then -- Solemn Warning
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,41420027,ChainNegation) then -- Solemn Judgment
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,92512625,ChainNegation) then -- Solemn Advice
+  if HasIDNotNegated(cards,92512625,ChainNegation) and AI.GetPlayerLP(1)>3000 then -- Solemn Advice
     return {1,CurrentIndex}
   end
 

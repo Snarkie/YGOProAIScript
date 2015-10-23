@@ -322,7 +322,7 @@ function DarkWorldInit(cards)
   local Rep = cards.repositionable_cards
   local SetMon = cards.monster_setable_cards
   local SetST = cards.st_setable_cards
-  if HasIDNotNegated(Act,41142615) -- Cheerful Coffin, test
+  if HasIDNotNegated(Act,41142615) -- TODO: Cheerful Coffin, test
   and CardsMatchingFilter(AIHand(),DarkWorldMonsterFilter)>2 
   then
     return {COMMAND_ACTIVATE,CurrentIndex}

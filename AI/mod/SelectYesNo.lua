@@ -59,6 +59,10 @@ function OnSelectYesNo(description_id)
   if description_id == 1101042113 then -- Harpie Dancer
     return DancerYesNo()
   end
+  if description_id == 1044887489 then -- F0 protect
+    GlobalActivatedCardID = 65305468
+    return 1
+  end
 	return -1
 end
 

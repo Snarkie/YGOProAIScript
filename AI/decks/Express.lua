@@ -302,7 +302,6 @@ function ChainSkillDrain(card)
 	end
 	local c = ChainCardNegation(card,false,false,FilterType,TYPE_MONSTER)
 	if c then
-		GlobalTargetSet(c,OppMon())
 		return true
 	end
 	if Duel.GetCurrentPhase() == PHASE_BATTLE then

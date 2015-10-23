@@ -19,6 +19,50 @@ function BAFloater(c,check)
       or c.id == 84764038 and (not check or OPTCheck(84764038) and CardsMatchingFilter(AIDeck(),ScarmDeckFilter)>0 and CardsMatchingFilter(AIGrave(),ScarmGraveFilter)==0)
       or c.id == 83531441 and (not check or CardsMatchingFilter(AIGrave(),BAMonsterFilter,83531441)>0)
 end
+
+function BAPriority()
+AddPriority({
+-- TODO: test
+[89631139] = {1,1,1,1,1,1,1,1,1,1,nil},         -- BEWD
+
+-- Burning Abyss
+[57143342] = {7,2,7,3,7,1,1,1,2,1,CirCond},      -- BA Cir
+[73213494] = {3,2,3,1,3,3,1,1,6,1,CalcabCond},   -- BA Calcab
+[47728740] = {2,2,3,1,3,3,1,1,6,1,AlichCond},    -- BA Alich
+[20758643] = {6,2,8,2,8,2,1,1,5,1,GraffCond},    -- BA Graff
+[10802915] = {8,2,3,2,2,1,4,1,8,3,TourGuideCond},-- Tour Guide
+[84764038] = {5,2,5,4,5,2,6,1,4,2,ScarmCond},    -- BA Scarm
+[00734741] = {4,2,6,3,3,3,1,1,6,1,RubicCond},    -- BA Rubic
+[36553319] = {4,2,4,1,4,3,1,1,6,1,FarfaCond},    -- BA Farfa
+[09342162] = {3,2,6,1,6,3,1,1,6,1,CagnaCond},    -- BA Cagna
+[62957424] = {3,2,3,1,3,3,1,1,6,1,LibicCond},    -- BA Libic
+[81992475] = {9,2,9,1,9,1,1,1,6,1,BarbarCond},   -- BA Barbar
+[35330871] = {8,2,1,1,2,2,1,1,5,1,MalacodaCond}, -- BA Malacoda
+
+[73680966] = {5,1,1,1,1,1,1,1,1,1,TBOTECond},    -- The Beginning of the End
+[62835876] = {9,1,1,1,5,1,1,1,1,1,GECond},       -- BA Good&Evil
+[36006208] = {8,2,1,1,4,1,1,1,1,1,FireLakeCond}, -- BA Fire Lake
+[20036055] = {4,2,1,1,3,1,1,1,1,1,},             -- BA Traveler
+[63356631] = {1,1,1,1,1,1,1,1,1,1,PWWBCond},     -- PWWB
+[71587526] = {1,1,1,1,1,1,1,1,1,1,KarmaCutCond}, -- Karma Cut
+
+[00601193] = {1,1,10,1,1,1,1,1,1,1,VirgilCond},  -- BA Virgil
+[72167543] = {1,1,1,1,1,1,1,1,1,1},              -- Downerd Magician
+[81330115] = {1,1,1,1,1,1,1,1,1,1},              -- Acid Golem of Destruction
+[31320433] = {1,1,1,1,1,1,1,1,1,1},              -- Nightmare Shark
+[47805931] = {1,1,1,1,1,1,1,1,1,1},              -- Giga-Brillant
+[75367227] = {1,1,1,1,1,1,1,1,1,1},              -- Ghostrick Alucard
+[68836428] = {1,1,1,1,1,1,1,1,1,1},              -- Tri-Edge Levia
+[52558805] = {1,1,1,1,1,1,1,1,1,1},              -- Temptempo the Percussion Djinn
+[78156759] = {1,1,1,1,1,1,1,1,1,1},              -- Wind-Up Zenmaines
+[83531441] = {1,1,9,1,5,2,1,1,5,1,DanteCond},    -- BA Dante
+[16259549] = {1,1,1,1,1,1,1,1,1,1},              -- Fortune Tune
+[26563200] = {1,1,1,1,1,1,1,1,1,1},              -- Muzurythm the String Djinn
+[27552504] = {1,1,1,1,1,1,1,1,1,1},              -- Beatrice, the Eternal Lady
+[18386170] = {1,1,1,1,1,1,1,1,1,1},              -- Dante, Pilgrim of the Burning Abyss
+[65305468] = {1,1,1,1,1,1,1,1,1,1},              -- Number F0 Utopic Future
+})
+end
 function ScarmGraveFilter(c)
   return c.id == 84764038 and c.turnid == Duel.GetTurnCount()
 end
@@ -429,6 +473,26 @@ function SummonBeatrice(c,mode)
     return true
   end
 end
+function SummonF0(c) 
+  if (F0Check(c,OppMon(),2500) 
+  and CardsMatchingFilter(AIMon(),FilterID,83531441)>1
+  or F0Check(c,OppMon())
+  and CardsMatchingFilter(AIMon(),DisabledDanteFilter)>1
+  and CardsMatchingFilter(AIMon(),BASelfDestructFilter)<2
+  and OppHasStrongestMonster())
+  and BattlePhaseCheck()
+  then
+    GlobalSSCardID = c.id
+    return true
+  end
+  return false
+end
+function RepoF0(c)
+  return FilterPosition(c,POS_DEFENCE)
+  and NotNegated(c)
+  or FilterPosition(c,POS_FACEUP_ATTACK)
+  and Negated(c)
+end
 function BAInit(cards)
   GlobalPreparation = nil
   local Act = cards.activatable_cards
@@ -456,6 +520,9 @@ function BAInit(cards)
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSum,83531441) and SummonDanteBA() then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(SpSum,65305468,SummonF0) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSum,27552504,SummonBeatrice,1) then
@@ -621,6 +688,9 @@ function BAInit(cards)
   if HasID(Rep,83531441,RepoDante) then
     return {COMMAND_CHANGE_POS,CurrentIndex}
   end
+  if HasID(Rep,65305468,RepoF0) then
+    return {COMMAND_CHANGE_POS,CurrentIndex}
+  end
   return nil
 end
 function FireLakeTarget(cards,min,max)
@@ -748,12 +818,37 @@ end
 function TravelerTarget(cards,max)
   return Add(cards,PRIO_TOFIELD,max)
 end
+function F0SummonTarget(cards,min)
+  GlobalSSCardID = nil
+  return Add(cards,PRIO_TOGRAVE,min,DisabledDanteFilter)
+end
+function F0Target(cards)
+  GlobalActivatedCardID = nil
+  return Add(cards,PRIO_TOGRAVE)
+end
+function F0Filter(c,atk)
+  return Affected(c,TYPE_MONSTER,1)
+  and not FilterAffected(c,EFFECT_CANNOT_BE_BATTLE_TARGET)
+  and (not atk or c.attack>atk and not Targetable(c,TYPE_MONSTER))
+end
+function F0Check(c,targets,atk)
+  return NotNegated(c) 
+  and CardsMatchingFilter(targets,F0Filter,atk)>0
+  and (FilterLocation(c,LOCATION_EXTRA) 
+  or Duel.GetLocationCount(player_ai,LOCATION_MZONE)>0)
+end
 function BACard(cards,min,max,id,c)
   if not c and GlobalSSCardID == 27552504 then
     return BeatriceSummonTarget(cards)
   end
   if not c and GlobalSSCardID == 72167543 then
     return DownerdSummonTarget(cards)
+  end
+  if not c and GlobalSSCardID == 65305468 then
+    return F0SummonTarget(cards,min)
+  end
+  if GlobalActivatedCardID == 65305468 then
+    return F0Target(cards)
   end
   if c then
     id = c.id
@@ -1078,6 +1173,19 @@ function ChainTraveler(c)
     return true
   end
 end
+function ChainF0(c)
+  local aimon,oppmon = GetBattlingMons()
+  if aimon and oppmon 
+  and NotNegated(c)
+  then
+    if Duel.GetTurnPlayer()==player_ai then
+      return true
+    else
+      return FilterAttackMin(oppmon,OppGetStrongestAttack())
+    end
+  end
+  return false
+end
 function BAChain(cards)
   if HasID(cards,20036055,ChainTraveler) then
     return {1,CurrentIndex}
@@ -1137,11 +1245,17 @@ function BAChain(cards)
   if HasID(cards,60743819,ChainFiendGriefing) then
     return {1,CurrentIndex}
   end
+  if HasID(cards,65305468,ChainF0) then
+    return {1,CurrentIndex}
+  end
   return nil
 end
 
 function BAEffectYesNo(id,card)
   local result = nil
+  if id == 65305468 and ChainF0(card) then
+    result = 1
+  end
   if id == 18386170 and ChainPilgrim(card) then
     result = 1
   end
@@ -1192,7 +1306,7 @@ BAAtt={
   72167543, -- Downerd
   81330115,31320433,47805931, -- Acid, Nightmare Shark, Giga-Brillant
   75367227,68836428,52558805, -- Alucard, Levia, Temtempo
-  18386170, -- Pilgrim
+  18386170,65305468, -- Pilgrim, F0
 }
 BAVary={
   57143342,73213494,09342162, -- Cir, Calcab, Cagna

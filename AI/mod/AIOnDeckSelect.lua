@@ -115,47 +115,8 @@ function PrioritySetup()
   QliphortPriority()
   SatellarknightPriority()
   HEROPriority()
-  
-AddPriority({
--- test
-[89631139] = {1,1,1,1,1,1,1,1,1,1,nil},         -- BEWD
+  BAPriority()
 
--- Burning Abyss
-[57143342] = {7,2,7,3,7,1,1,1,2,1,CirCond},      -- BA Cir
-[73213494] = {3,2,3,1,3,3,1,1,6,1,CalcabCond},   -- BA Calcab
-[47728740] = {2,2,3,1,3,3,1,1,6,1,AlichCond},    -- BA Alich
-[20758643] = {6,2,8,2,8,2,1,1,5,1,GraffCond},    -- BA Graff
-[10802915] = {8,2,3,2,2,1,4,1,8,3,TourGuideCond},-- Tour Guide
-[84764038] = {5,2,5,4,5,2,6,1,4,2,ScarmCond},    -- BA Scarm
-[00734741] = {4,2,6,3,3,3,1,1,6,1,RubicCond},    -- BA Rubic
-[36553319] = {4,2,4,1,4,3,1,1,6,1,FarfaCond},    -- BA Farfa
-[09342162] = {3,2,6,1,6,3,1,1,6,1,CagnaCond},    -- BA Cagna
-[62957424] = {3,2,3,1,3,3,1,1,6,1,LibicCond},    -- BA Libic
-[81992475] = {9,2,9,1,9,1,1,1,6,1,BarbarCond},   -- BA Barbar
-[35330871] = {8,2,1,1,2,2,1,1,5,1,MalacodaCond}, -- BA Malacoda
-
-[73680966] = {5,1,1,1,1,1,1,1,1,1,TBOTECond},    -- The Beginning of the End
-[62835876] = {9,1,1,1,5,1,1,1,1,1,GECond},       -- BA Good&Evil
-[36006208] = {8,2,1,1,4,1,1,1,1,1,FireLakeCond}, -- BA Fire Lake
-[20036055] = {4,2,1,1,3,1,1,1,1,1,},             -- BA Traveler
-[63356631] = {1,1,1,1,1,1,1,1,1,1,PWWBCond},     -- PWWB
-[71587526] = {1,1,1,1,1,1,1,1,1,1,KarmaCutCond}, -- Karma Cut
-
-[00601193] = {1,1,10,1,1,1,1,1,1,1,VirgilCond},  -- BA Virgil
-[72167543] = {1,1,1,1,1,1,1,1,1,1},              -- Downerd Magician
-[81330115] = {1,1,1,1,1,1,1,1,1,1},              -- Acid Golem of Destruction
-[31320433] = {1,1,1,1,1,1,1,1,1,1},              -- Nightmare Shark
-[47805931] = {1,1,1,1,1,1,1,1,1,1},              -- Giga-Brillant
-[75367227] = {1,1,1,1,1,1,1,1,1,1},              -- Ghostrick Alucard
-[68836428] = {1,1,1,1,1,1,1,1,1,1},              -- Tri-Edge Levia
-[52558805] = {1,1,1,1,1,1,1,1,1,1},              -- Temptempo the Percussion Djinn
-[78156759] = {1,1,1,1,1,1,1,1,1,1},              -- Wind-Up Zenmaines
-[83531441] = {1,1,9,1,5,2,1,1,5,1,DanteCond},    -- BA Dante
-[16259549] = {1,1,1,1,1,1,1,1,1,1},              -- Fortune Tune
-[26563200] = {1,1,1,1,1,1,1,1,1,1},              -- Muzurythm the String Djinn
-[27552504] = {1,1,1,1,1,1,1,1,1,1},              -- Beatrice, the Eternal Lady
-[18386170] = {1,1,1,1,1,1,1,1,1,1},              -- Dante, Pilgrim of the Burning Abyss
-})
 AddPriority({
 -- Nekroz: 
 
