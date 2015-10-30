@@ -459,7 +459,7 @@ function OnSelectBattleCommand(cards,activatable)
 ---
 -- activate cards 
 ---
-  
+  GlobalBPEnd = true
   if HasID(activatable,60202749) and UseSphereBP() then
     return 2,CurrentIndex
   end
@@ -475,6 +475,19 @@ function OnSelectBattleCommand(cards,activatable)
   if HasID(activatable,83555666,ChainRoD) then -- Ring of Destruction
     return 2,CurrentIndex
   end
+  local result,result2 = nil,nil
+  local d = DeckCheck()
+  if d and d.Chain then
+    result,result2 = d.Chain(activatable,nil)
+  end
+  if result ~= nil then
+    if type(result)=="table" then
+      return 2,result[2]
+    else
+      return 2,result2
+    end
+  end
+  GlobalBPEnd = false
   -------------------------------------
   -- If it gets this far, don't attack.
   -------------------------------------

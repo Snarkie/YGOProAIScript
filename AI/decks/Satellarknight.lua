@@ -437,7 +437,11 @@ function DelterosTarget(cards,c)
   end
 end
 function NodenTarget(cards)
-  if HasID(cards,38331564) then
+  if GlobalNordenFilter then
+    local filter = GlobalNordenFilter
+    GlobalNordenFilter = nil
+    return Add(cards,PRIO_TOFIELD,1,filter)
+  elseif HasID(cards,38331564) then
     return {CurrentIndex}
   else
     return Add(cards,PRIO_TOFIELD,1,FilterLevel,4)
@@ -496,7 +500,7 @@ function SatellarknightOnSelectCard(cards, minTargets, maxTargets,triggeringID,t
     return GlobalTargetGet(cards,true)
   end
   if ID == 93568288 then
-    return BestTargets(cards)
+    return BestTargets(cards,1,TARGET_BANISH)
   end
   if ID == 21501505 then
     return BestTargets(cards)

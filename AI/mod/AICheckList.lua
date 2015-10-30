@@ -315,7 +315,7 @@ NSBL={
 69884162,25259669,63060238,50720316, -- Neos Alius, Goblindbergh, Blazeman,Shadow Mist
 79979666,21565445,47826112,13073850, -- Bubbleman, Atlantean Neptabyss, Poseidra, Qli Stealth
 51194046,18326736,58069384,10443957, -- Qli Monolith, Planetellarknight Ptolemaios, Cyber Dragon Nova, Infinity
-81992475 -- BA Barbar
+81992475,59438930 -- BA Barbar, Ghost Ogre
 }
 function NormalSummonBlacklist(CardId) 
   for i=1,#NSBL do
@@ -897,7 +897,7 @@ ScriptedCards ={
 18326736,58069384,10443957,03819470, -- Planetellarknight Ptolemaios, Cyber Dragon Nova, Infinity, Seven Tools
 29401950,06511113,99590524,81992475, -- Bottomless, Rafflesia, Treacherous, BA Barbar
 27552504,18386170,60743819,20036055, -- Beatrice, Pilgrim, Fiend Griefing, Traveler
-40605147,65305468, -- Solemn Notice, F0
+40605147,65305468,59438930, -- Solemn Notice, F0, Ghost Ogre
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do

@@ -7,6 +7,8 @@ function OnAIGoingFirstSecond(name)
   if name=="AI_Harpie"
   or name=="AI_Blackwing"
   or name=="AI_Shaddoll"
+  or name=="AI_Kozmo"
+  or name=="zz_TestAI" --TODO: test
   then
     player_ai = 1
     result = 0
@@ -53,6 +55,13 @@ function EnableCheats()
     Duel.Recover(player_ai,LP_RECOVER,REASON_RULE) 
   end)
   Duel.RegisterEffect(e1,player_ai)
+  local e2=Effect.GlobalEffect()
+	e2:SetType(EFFECT_TYPE_FIELD)
+	e2:SetCode(EFFECT_SET_SUMMON_COUNT_LIMIT)
+	e2:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
+	e2:SetTargetRange(1,0)
+	e2:SetValue(1+EXTRA_SUMMON)
+	Duel.RegisterEffect(e2,player_ai)
 end
 -- get the AI script owner from card script controler
 function get_owner_by_controler(controler)
@@ -103,7 +112,10 @@ function HasID(cards,id,skipglobal,desc,loc,pos,filter,opt)
       and FilterCheck(c,filter,opt)
       then
         if not skipglobal then CurrentIndex = i end
-        result = true      
+        result = i   
+        if id == 07409792 then
+          print("HasID found it: "..result)  
+        end
       end
     end
   end
@@ -149,7 +161,7 @@ function HasIDNotNegated(cards,id,skipglobal,desc,loc,pos,filter,opt)
         and NotNegated(c)
         then
           if not skipglobal then CurrentIndex = i end
-          result = true  
+          result = i  
         end
         if (FilterType(c,TYPE_SPELL) 
         and not FilterType(c,TYPE_QUICKPLAY)
@@ -161,7 +173,7 @@ function HasIDNotNegated(cards,id,skipglobal,desc,loc,pos,filter,opt)
         and NotNegated(c)
         then
           if not skipglobal then CurrentIndex = i end
-          result = true 
+          result = i 
         end
       end
     end
@@ -475,6 +487,19 @@ function RemovalCheckCard(target,category,cardtype,targeted,chainlink,filter,opt
           return card
         end
       end
+      if e and CheckNegated(j) and (cardtype==nil
+      or e and e:GetHandler():IsType(cardtype))
+      then
+        local id = e:GetHandler():GetCode()
+        if id == 10443957
+        or id == 12744567
+        or id == 48739166
+        and tg and CardsEqual(target,GetCardFromScript(tg:GetFirst()))
+        and cat[i]==CATEGORY_TOGRAVE
+        then
+          return target
+        end
+      end
     end
   end
   return false
@@ -513,6 +538,18 @@ function NegateCheckCard(target,type,chainlink,filter,opt)
     then
       if target==nil then 
         return g
+      else
+        local id = e:GetHandler():GetCode()
+        if id == 82732705 -- Skill Drain
+        then
+          return FilterAffected(target,TYPE_TRAP)
+          and FilterPosition(target,POS_FACEUP)
+        end
+        if id == 86848580 -- Zerofyne
+        then
+          return Affected(target,TYPE_MONSTER,4)
+          and FilterPosition(target,POS_FACEUP)
+        end
       end
       if g and target then
         local card=false
@@ -570,7 +607,7 @@ function BestTargets(cards,count,target,filter,opt,immuneCheck,source)
   local result = {}
   local AIMon=AIMon()
   local DestroyCheck = false
-  if target == true then 
+  if not target or target == true then 
     target=TARGET_DESTROY 
   end
   if target == TARGET_BATTLE then 
@@ -605,7 +642,7 @@ function BestTargets(cards,count,target,filter,opt,immuneCheck,source)
       or c:is_affected_by(EFFECT_IMMUNE_EFFECT)>0 
       or bit32.band(c.status,STATUS_LEAVE_CONFIRMED)>0
       then
-        c.prio = 1
+        c.prio = 0
       else    
         if bit32.band(c.position, POS_FACEUP)>0 then
           c.prio = 4
@@ -614,24 +651,32 @@ function BestTargets(cards,count,target,filter,opt,immuneCheck,source)
         end
       end
     end
-    if PriorityTarget(c) then
-      c.prio = c.prio+2
+    if c.prio>0 then
+      if PriorityTarget(c) then
+        c.prio = c.prio+2
+      end
+      if c.level>4 then
+        c.prio = c.prio+1
+      end
+      if bit32.band(c.position, POS_FACEUP_ATTACK)>0 then
+        c.prio = c.prio+1
+      end
     end
-    if c.level>4 then
-      c.prio = c.prio+1
-    end
-    if bit32.band(c.position, POS_FACEUP_ATTACK)>0 then
-      c.prio = c.prio+1
+    if IgnoreList(c) 
+    or (target == TARGET_TOHAND 
+    and FilterType(c,TYPE_SPELL+TYPE_TRAP) 
+    and FilterPosition(c,POS_FACEUP))
+    then
+      c.prio = 1
     end
     if (bit32.band(c.position, POS_FACEUP)>0 or bit32.band(c.status,STATUS_IS_PUBLIC)>0)
-    and (target == TARGET_TOHAND and (ToHandBlacklist(c.id)  
-    or FilterType(c,TYPE_SPELL+TYPE_TRAP) and FilterPosition(c,POS_FACEUP))
+    and (target == TARGET_TOHAND and ToHandBlacklist(c.id)
     or target == TARGET_DESTROY and DestroyBlacklist(c)
     or target == TARGET_FACEDOWN and bit32.band(c.type,TYPE_FLIP)>0)
     then
       c.prio = -1
     end
-    if FilterType(c,TYPE_PENDULUM) and HasIDNotNegated(OppST(),05851097,true,nil,nil,POS_FACEUP) then
+    if FilterType(c,TYPE_PENDULUM) and HasIDNotNegated(AIST(),05851097,true,nil,nil,POS_FACEUP) then
       c.prio = -1
     end
     if immuneCheck and source and not Affected(c,source.type,source.level) then
@@ -642,9 +687,6 @@ function BestTargets(cards,count,target,filter,opt,immuneCheck,source)
     end
     if target == TARGET_PROTECT then 
       c.prio = -1 * c.prio
-    end
-    if IgnoreList(c) then
-      c.prio = 0
     end
     if filter and (opt == nil and not filter(c) or opt and not filter(c,opt)) then
       c.prio = c.prio-9999
@@ -901,14 +943,14 @@ end
 function Negated(c)
   return not NotNegated(c)
 end
-function DestroyFilter(c,nontarget,skipblacklist)
-  return not FilterAffected(c,EFFECT_INDESTRUCTABLE_EFFECT)
+function DestroyFilter(c,nontarget,skipblacklist,skipignore)
+  return (not FilterAffected(c,EFFECT_INDESTRUCTABLE_EFFECT) or skipignore)
   and not FilterStatus(c,STATUS_LEAVE_CONFIRMED)
   and (nontarget==true or not FilterAffected(c,EFFECT_CANNOT_BE_EFFECT_TARGET))
   and (skipblacklist or not (DestroyBlacklist(c)
   and FilterPublic(c)))
 end
-function DestroyFilterIgnore(c,nontarget,skipblacklist)
+function DestroyFilterIgnore(c,nontarget,skipblacklist,skipignore)
   return DestroyFilter(c,skipblacklist)
   and not IgnoreList(c)
 end
@@ -916,7 +958,7 @@ end
 function DestroyCheck(cards,nontarget,skipignore,skipblacklist,filter,opt)
   return CardsMatchingFilter(cards,
   function(c) 
-    return DestroyFilter(c,nontarget,skipblacklist) 
+    return DestroyFilter(c,nontarget,skipblacklist,skipignore) 
     and (skipignore or not IgnoreList(c))
     and FilterCheck(c,filter,opt)
   end)
@@ -1104,6 +1146,11 @@ function FilterRevivable(c,skipcond)
   return FilterType(c,TYPE_MONSTER)
   and (not FilterStatus(c,STATUS_REVIVE_LIMIT) or FilterStatus(c,STATUS_PROC_COMPLETE))
   and (skipcond or not FilterAffected(c,EFFECT_SPSUMMON_CONDITION))
+end
+function FilterTuner(c,level)
+  return FilterType(c,TYPE_MONSTER)
+  and FilterType(c,TYPE_TUNER)
+  and (not level or FilterLevel(c,level))
 end
 --[[function ScaleCheck(p)
   local cards=AIST()
@@ -1611,7 +1658,7 @@ function StareaterCheck(c,filter,opt)
 end
 
 AttBL={
--- obsolete?!?
+-- TODO: obsolete?!?
 78371393,04779091,31764700, -- Yubel 1,2 and 3
 54366836,88241506,23998625, -- Lion Heart, Maiden with the Eyes of Blue, Heart-eartH
 80344569,68535320,95929069, -- Grand Mole, Fire Hand, Ice Hand
@@ -1693,7 +1740,20 @@ end
 function BattleDamageFilter(c,source)
   return BattleDamage(c,source)>0
 end
-
+function StrongerAttackerCheck(card,cards)
+  card=GetCardFromScript(card)
+  ApplyATKBoosts({card})
+  ApplyATKBoosts(cards)
+  for i=1,#cards do
+    local c = cards[i]
+    if CanAttack(c)
+    and c.attack>card.attack
+    then
+      return false
+    end
+  end
+  return true
+end
 CrashList={
 83531441,00601193,23649496, -- Dante, Virgil,Plain-Coat
 23693634,34230233, -- Colossal Fighter, Grapha
@@ -1706,6 +1766,7 @@ function CrashCheck(c)
   for i=1,#cards do
     if cards[i].id == 83994433 and NotNegated(cards[i]) and FilterPosition(cards[i],POS_FACEUP)
     and GlobalStardustSparkActivation[cards[i].cardid]~=Duel.GetTurnCount()
+    and StrongerAttackerCheck(c,AIMon())
     then
       return Targetable(c,TYPE_MONSTER) and Affected(c,TYPE_MONSTER,8)
     end
@@ -1713,22 +1774,41 @@ function CrashCheck(c)
   if FilterAffected(c,EFFECT_INDESTRUCTABLE_BATTLE)then
     return true
   end
-  if not DestroyCountCheck(c,TYPE_MONSTER,true) then
+  if not DestroyCountCheck(c,TYPE_MONSTER,true) 
+  and StrongerAttackerCheck(c,AIMon())
+  then
     return true
   end
   if FilterType(c,TYPE_PENDULUM) and ScaleCheck(1)==true then
     return true
   end
-  if c.id == 99365553 and HasID(AIGrave(),88264978,true) then
+  if KozmoShip(c) and DualityCheck() and MacroCheck() 
+  and StrongerAttackerCheck(c,AIMon())
+  then --TODO: IIW?
+    return true
+  end
+  if c.id == 00006783 and AI.GetPlayerLP(1)>2000
+  and StrongerAttackerCheck(c,AIMon())
+  then
+    return true -- Wickedwitch
+  end
+  if c.id == 99365553 and HasID(AIGrave(),88264978,true) 
+  then
     return true -- Lightpulsar
   end
-  if c.id == 99234526 and HasID(AIDeck(),61901281,true) then
+  if c.id == 99234526 and HasID(AIDeck(),61901281,true)
+  and StrongerAttackerCheck(c,AIMon())
+  then
     return true -- Wyverbuster
   end
-  if c.id == 61901281 and HasID(AIDeck(),99234526,true) then
+  if c.id == 61901281 and HasID(AIDeck(),99234526,true)
+  and StrongerAttackerCheck(c,AIMon())
+  then
     return true -- Collapserpent
   end
-  if c.id == 05556499 and #OppField()>1 then
+  if c.id == 05556499 and #OppField()>1 
+  and StrongerAttackerCheck(c,AIMon())
+  then
     return true -- Machina Fortress
   end
   if c.id == 94283662 and UseTrance(3) then
@@ -1737,14 +1817,20 @@ function CrashCheck(c)
   if c.id == 71921856 and HasMaterials(c) then
     return true -- Nova Caesar
   end
-  if CurrentMonOwner(c.cardid) ~= c.owner then
+  if CurrentMonOwner(c.cardid) ~= c.owner 
+  and StrongerAttackerCheck(c,AIMon())
+  then
     return true
   end
-  if #AIMon()-#OppMon()>1 and OppGetStrongestAttack()==AIGetStrongestAttack() then
+  if #AIMon()-#OppMon()>1 and OppGetStrongestAttack()==AIGetStrongestAttack()
+  and StrongerAttackerCheck(c,AIMon())
+  then
     return true
   end
   for i=1,#CrashList do
-    if CrashList[i]==c.id then
+    if CrashList[i]==c.id 
+    and StrongerAttackerCheck(c,AIMon())
+    then
       return true
     end
   end
@@ -2189,7 +2275,10 @@ function TurnEndCheck()
 end
 
 function BattlePhaseCheck()
-  return Duel.GetCurrentPhase()==PHASE_MAIN1 and GlobalBPAllowed
+  return (Duel.GetCurrentPhase()==PHASE_DRAW
+  or Duel.GetCurrentPhase()==PHASE_STANDBY
+  or Duel.GetCurrentPhase()==PHASE_MAIN1)  
+  and GlobalBPAllowed
 end
 -- returns the zone a card occupies
 function Sequence(c)
@@ -2339,4 +2428,17 @@ function ChainCheck(id,player,link,filter,opt)
   end
   if result == 0 then result = false end
   return result
+end
+function MatchupCheck(id) -- TODO: make AI consider matchups
+  return false
+end
+function SpaceCheck(loc,p)
+  if not loc then loc=LOCATION_MZONE end
+  if not p then p=1 end
+  if p == 1 then
+    p = player_ai
+  else
+    p = 1-player_ai
+  end
+  return Duel.GetLocationCount(p,loc)
 end

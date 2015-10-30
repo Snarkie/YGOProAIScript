@@ -755,9 +755,9 @@ function ExaBeetleTarget(cards)
         return {i}
       end
     end
-    return BestTargets(cards)
+    return BestTargets(cards,1,TARGET_TOGRAVE)
   else  
-    return BestTargets(cards)
+    return BestTargets(cards,1,TARGET_TOGRAVE)
   end
 end
 function NekrozGungnirTarget(cards)
@@ -770,7 +770,7 @@ function NekrozGungnirTarget(cards)
 end
 function ArmorTarget(cards)
   if FilterPosition(cards[1],POS_FACEDOWN) then
-    return BestTargets(cards,1,PRIO_BANISH,ArmorFilter)
+    return BestTargets(cards,1,TARGET_BANISH,ArmorFilter)
   else
     local result = GlobalTargetGet(cards,true)
     return result
@@ -818,7 +818,7 @@ function ClausTarget(cards)
     GlobalCardMode = nil
     return GlobalTargetGet(cards,true)
   end
-  return BestTargets(cards)
+  return BestTargets(cards,1,TARGET_TOGRAVE)
 end
 function BrioTarget(cards,max)
   if FilterLocation(cards[1],LOCATION_DECK) then
@@ -834,7 +834,7 @@ function TrishTarget(cards)
   if FilterLocation(cards[1],LOCATION_HAND) then
     return {math.random(#cards)}
   end
-  return BestTargets(cards,1,PRIO_BANISH)
+  return BestTargets(cards,1,TARGET_BANISH)
 end
 function ZubabaTarget(cards)
   if FilterLocation(cards[1],LOCATION_OVERLAY) then
@@ -958,7 +958,7 @@ function NekrozCard(cards,min,max,id,c)
     return Add(cards,1,PRIO_TOGRAVE)
   end
   if id == 63465535 then -- Underground Arachnid (for Phantom of Chaos)
-    return BestTargets(cards)
+    return BestTargets(cards,1,TARGET_TOGRAVE)
   end
   if id == 45986603 then -- Snatch Steal
     return BestTargets(cards,1,TARGET_CONTROL)

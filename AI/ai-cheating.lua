@@ -3,6 +3,7 @@
 
 -- Configure these to your liking
 EXTRA_DRAW = 1
+EXTRA_SUMMON = 1
 LP_RECOVER = 1000
 
 require("ai.ai")

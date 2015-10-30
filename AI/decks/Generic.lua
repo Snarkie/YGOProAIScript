@@ -32,7 +32,7 @@ function Activate(index)
   end
   return {COMMAND_ACTIVATE,index}
 end
-function SetMon(index)
+function Set(index)
   if index == nil then
     index = CurrentIndex
   end
@@ -49,6 +49,12 @@ function Repo(index)
     index = CurrentIndex
   end
   return {COMMAND_CHANGE_POS,index}
+end
+function Chain(index)
+  if index == nil then
+    index = CurrentIndex
+  end
+  return {1,index}
 end
 function SummonExtraDeck(cards,prio)
   local Act = cards.activatable_cards
@@ -336,10 +342,13 @@ function SummonExtraDeck(cards,prio)
   end
 
 -- Rank 5
-  if HasID(SpSum,73964868) and SummonPleiades(SpSum[CurrentIndex]) then
+  if HasID(SpSum,58069384,SummonNova) then
     return XYZSummon()
   end
-  if HasID(SpSum,29669359) and SummonVolcasaurus(SpSum[CurrentIndex]) then
+  if HasID(SpSum,73964868,SummonPleiades) then
+    return XYZSummon()
+  end
+  if HasID(SpSum,29669359,SummonVolcasaurus) then
     return XYZSummon()
   end
 
@@ -396,7 +405,7 @@ function SummonExtraDeck(cards,prio)
     GlobalCardMode = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasIDNotNegated(SpSum,21044178) and SummonDweller() then
+  if HasIDNotNegated(SpSum,21044178,SummonDweller,true) then
     return XYZSummon()
   end
   if HasIDNotNegated(SpSum,00581014) and SummonEmeral() then
@@ -471,7 +480,13 @@ function SummonExtraDeck(cards,prio)
     GlobalDuality = Duel.GetTurnCount()
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+  if HasID(Act,73176465) and UseFelis() then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   return nil
+end
+function UseFelis()
+  return Duel.GetCurrentPhase()==PHASE_MAIN2 and DestroyCheck(OppMon())>0
 end
 function SummonAcidGolem(c)
   return Negated(c) 
@@ -516,6 +531,10 @@ function SummonPtolemaios(c)
 end
 function UsePtolemaios(c)
   return InfinityCheck() and FilterMaterials(c,3)
+end
+function SummonNova(c)
+  return HasIDNotNegated(AIExtra(),10443957,true)
+  and UseInfinity(FindID(10443957,AIExtra()))
 end
 function SummonInfinity(c)
   return HasID(AIMon(),58069384,true)
@@ -926,8 +945,11 @@ end
 function DwellerFilter(c)
   return FilterAttribute(c,ATTRIBUTE_WATER) and FilterLevel(c,4)
 end
-function SummonDweller()
-  return MP2Check(2200) and CardsMatchingFilter(AIMon(),DwellerFilter)>0 and OppGetStrongestAttDef()<2200
+function SummonDweller(c,check)
+  return MP2Check(2200) 
+  and CardsMatchingFilter(AIMon(),DwellerFilter)>0 
+  and OppGetStrongestAttDef()<2200
+  and (not check or MatchupCheck(c.id))
 end
 function PleiadesFilter(c)
   return Targetable(c,TYPE_MONSTER)
@@ -1269,6 +1291,10 @@ function ChainOmega(source)
   if cards and #cards>0 then
     return true
   end
+  cards = NegateCheckList(AIMon(),TYPE_SPELL+TYPE_TRAP,nil,ConstellarMonsterFilter)
+  if cards and #cards>0 then
+    return true
+  end
   return false
 end
 function SummonOmega(c)
@@ -1435,13 +1461,15 @@ function SetNegated(ChainLink)
   end
   GlobalNegatedChainLinks[ChainLink] = true
 end
-function ChainNegation(card)
+function ChainNegation(card,skipnegate)
 -- for negating the last chain link via trigger effect
   local e,c,id 
   if EffectCheck(1-player_ai)~=nil then
     e,c,id = EffectCheck()
     if EffectNegateFilter(c,card) then
-      SetNegated()
+      if not skipnegate then
+        SetNegated()
+      end
       return true
     end
   else
@@ -2032,7 +2060,9 @@ function PriorityChain(cards) -- chain these before anything else
   if HasIDNotNegated(cards,92512625,ChainNegation) and AI.GetPlayerLP(1)>3000 then -- Solemn Advice
     return {1,CurrentIndex}
   end
-
+  if HasIDNotNegated(cards,59438930,ChainNegation,true) then -- Ghost Ogre
+    return {1,CurrentIndex}
+  end
   if HasIDNotNegated(cards,82732705,ChainSkillDrain) then
     return {1,CurrentIndex}
   end
@@ -2150,7 +2180,11 @@ function GiantGrinderTarget(cards,c)
   return BestTargets(cards,1,TARGET_DESTROY,GiantGrinderFilter,c,true,c)
 end
 function InstantFusionTarget(cards)
-  if GlobalCardMode == 1 then
+  if GlobalIFTarget then
+    local id = GlobalIFTarget
+    GlobalIFTarget = nil
+    result = FindID(id,cards,true)
+  elseif GlobalCardMode == 1 then
     GlobalCardMode = nil
     result = FindID(72959823,cards,true)
   else
@@ -2163,7 +2197,7 @@ function BrionacTarget(cards,c)
   if LocCheck(cards,LOCATION_HAND) then
     return Add(cards,PRIO_TOGRAVE)
   end
-  return BestTargets(cards,1,PRIO_TOHAND)
+  return BestTargets(cards,1,TARGET_TOHAND)
 end
 function ShrinkTarget(cards)
   if GlobalCardMode==1 then
@@ -2177,11 +2211,11 @@ function VulcanTarget(cards)
     if DeckCheck(DECK_FIREFIST) then
       result=FireFormationCost(cards,1)
     elseif BounceTargets(AIField())>0 then
-      result=BestTargets(cards,1,PRIO_TOHAND,BounceFilter)
+      result=BestTargets(cards,1,TARGET_TOHAND,BounceFilter)
     end
   end
   if result == nil then 
-    result=BestTargets(cards,1,PRIO_TOHAND) 
+    result=BestTargets(cards,1,TARGET_TOHAND) 
   end
   return result
 end
@@ -2233,7 +2267,7 @@ end
 function MichaelTarget(cards,c)
   local result = {}
   if FilterLocation(c,LOCATION_MZONE) then
-    result = BestTargets(cards)
+    result = BestTargets(cards,1,TARGET_BANISH)
   else
     for i=1,#cards do
       result[i]=i

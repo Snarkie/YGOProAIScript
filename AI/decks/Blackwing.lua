@@ -156,6 +156,7 @@ function KalutCond(loc,c)
     and (Duel.GetTurnPlayer()==1-player_ai
     or Duel.GetCurrentPhase()==PHASE_END
     or HasID(AIMon(),58820853,true))
+    and CardsMatchingFilter(AICards(),BlackwingFilter)>0
   end
   return true
 end
@@ -717,7 +718,7 @@ function DDCrowTarget(cards)
     GlobalCardMode=nil
     return GlobalTargetGet(cards,true)
   end
-  return BestTargets(cards,1,PRIO_BANISH)
+  return BestTargets(cards,1,TARGET_BANISH)
 end
 function BlackwingCard(cards,min,max,id,c)
   if c then

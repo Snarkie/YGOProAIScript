@@ -798,7 +798,7 @@ function TragTarget(cards)
       end
     end
   else
-    result = BestTargets(cards)
+    result = BestTargets(cards,1,TARGET_CONTROL)
   end
   GlobalCardMode=nil
   if #result~=1 then result={math.random(#cards)} end

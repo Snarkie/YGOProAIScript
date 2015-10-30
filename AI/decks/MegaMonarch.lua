@@ -895,13 +895,22 @@ function ErebusTarget(cards,c)
   then
     return Add(cards,PRIO_TOGRAVE,1,FilterLocation,LOCATION_DECK)
   end
-  if not OppHasStrongestMonster() 
-  and not HasPriorityTarget(OppField(),false)
-  and #OppHand()>0
+  if LocCheck(cards,LOCATION_HAND) 
+  and cards[1].owner==2
   then
     return RandomTargets(cards,1,FilterLocation,LOCATION_HAND)
   end
-  return BestTargets(cards,1,TARGET_TODECK,FilterLocation,LOCATION_ONFIELD)
+  if LocCheck(cards,LOCATION_GRAVE)
+  and cards[1].owner==2
+  then
+    return BestTargets(cards,1,TARGET_TODECK)
+  end
+  if LocCheck(cards,LOCATION_ONFIELD)
+  and CurrentOwner(cards[1])==2 
+  then
+    return BestTargets(cards,1,TARGET_TODECK)
+  end
+  return BestTargets(cards,1,TARGET_TODECK)
 end
 function AitherTarget(cards,c)
   if FilterLocation(c,LOCATION_HAND) then
@@ -1344,7 +1353,26 @@ end
 ]]
 function MegaMonarchOption(options)
   for i=1,#options do
-    if options[i]==983460962 then -- Return select lvl 8
+    if options[i]==23064604*16+3 -- Erebus
+    and not HasPriorityTarget(OppField(),false)
+    and not OppHasStrongestMonster()
+    then
+      return i
+    end
+    if options[i]==23064604*16+4 
+    and (HasPriorityTarget(OppField(),false)
+    or OppHasStrongestMonster()
+    or #OppHand()==0)
+    then
+      return i
+    end
+    if options[i]==23064604*16+5
+    and #OppHand()==0
+    and #OppField()==0
+    then
+      return i
+    end
+    if options[i]==983460962 then -- Return, select lvl 8
       return i
     end
     if GlobalSummonedCard 

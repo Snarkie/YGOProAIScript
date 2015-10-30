@@ -15,6 +15,9 @@
 GlobalChain = 0
 function OnSelectChain(cards,only_chains_by_player,forced)
   if not player_ai then player_ai = 1 end -- probably puzzle mode, so player goes first
+  if GlobalBPAllowed == nil and Duel.GetTurnCount()>1 then
+    GlobalBPAllowed = true
+  end
   if Duel.GetCurrentChain()<=GlobalChain then
     GlobalTargetList = {} -- reset variables for new chain
     GlobalNegatedChainLinks = {}

@@ -733,7 +733,7 @@ function MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(SpSummonable,74371660) and SummonGaios() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasID(SpSummonable,21044178) and SummonDweller() then
+  if HasID(SpSummonable,21044178,SummonDweller) and DeckCheck(DECK_MERMAIL) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
    if HasID(SpSummonable,00440556) and SummonBahamut() then

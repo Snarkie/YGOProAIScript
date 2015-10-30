@@ -710,13 +710,13 @@ function PWWBTarget(cards)
   if LocCheck(cards,LOCATION_HAND) then
     return Add(cards,PRIO_TOGRAVE)
   end
-  return BestTargets(cards)
+  return BestTargets(cards,1,TARGET_TODECK)
 end
 function KarmaCutTarget(cards)
   if LocCheck(cards,LOCATION_HAND) then
     return Add(cards,PRIO_TOGRAVE)
   end
-  return BestTargets(cards)
+  return BestTargets(cards,1,TARGET_BANISH)
 end
 function VirgilTarget(cards)
   if LocCheck(cards,LOCATION_HAND) then
@@ -726,7 +726,7 @@ function VirgilTarget(cards)
 end
 function MalacodaTarget(cards,c)
   if FilterLocation(c,LOCATION_GRAVE) then
-    return BestTargets(cards)
+    return BestTargets(cards,1,TARGET_TOGRAVE)
   end
   if LocCheck(cards,LOCATION_HAND) then
     return Add(cards,PRIO_TOGRAVE)
@@ -878,7 +878,7 @@ function BACard(cards,min,max,id,c)
     return BestTargets(cards,1,TARGET_TOHAND)
   end
   if id == 47728740 then
-    return BestTargets(cards)
+    return BestTargets(cards,1,TARGET_TOGRAVE)
   end
   if id == 84764038 then
     return Add(cards)
@@ -896,7 +896,7 @@ function BACard(cards,min,max,id,c)
     return VirgilTarget(cards)
   end
   if id == 36553319 then
-    return BestTargets(cards) 
+    return BestTargets(cards,1,TARGET_BANISH) 
   end
   if id == 09342162 then
     return Add(cards,PRIO_TOGRAVE)

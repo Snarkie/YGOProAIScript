@@ -902,7 +902,7 @@ function DullahanTarget(cards)
     GlobalCardMode = nil
     return GlobalTargetGet(cards,true)
   end
-  return BestTargets(cards)
+  return BestTargets(cards,1,TARGET_TOGRAVE)
 end
 function PhoenixTarget(cards)
   if LocCheck(cards,LOCATION_OVERLAY) then  

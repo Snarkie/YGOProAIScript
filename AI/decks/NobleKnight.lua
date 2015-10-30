@@ -752,7 +752,12 @@ function ChainBedwyr()
   end
   if HasID(AIST(),14745409,true,FilterPosition,POS_FACEUP) then
     local gallatin=FindID(14745409,AIST())
-    local atk = 1000-((Duel.GetTurnCount()-GlobalGallatinTurn[gallatin.cardid])*200)
+    local drop = 0
+    local turn = GlobalGallatinTurn[gallatin.cardid]
+    if turn then
+      drop = Duel.GetTurnCount()-turn*200
+    end
+    local atk = 1000-drop
     local aimon,oppmon=GetBattlingMons()
     if atk>0
     and Duel.GetTurnPlayer()==1-player_ai 

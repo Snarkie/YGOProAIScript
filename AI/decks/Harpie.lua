@@ -499,7 +499,7 @@ function HarpieInit(cards)
   local SetMon = cards.monster_setable_cards
   local SetST = cards.st_setable_cards
   if HasIDNotNegated(SpSum,07409792) then 
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex} --TODO: test
+    --return {COMMAND_SPECIAL_SUMMON,CurrentIndex} --TODO: test
   end
   if HasID(SetST,19337371,SetSign,Sum) then
     return {COMMAND_SET_ST,CurrentIndex}
@@ -647,7 +647,7 @@ function HHGTarget(cards)
   if HasID(cards,75782277) and DestroyCheck(OppST(),false,true)==0 then
     return {CurrentIndex}
   end
-  return BestTargets(cards)
+  return BestTargets(cards,1,TARGET_DESTROY)
 end
 function ZephyrosTarget(cards)
   if GlobalCardMode == 1 then

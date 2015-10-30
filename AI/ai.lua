@@ -1,5 +1,5 @@
-Version = "0.32"
-Experimental = false
+Version = "0.32a"
+Experimental = true
 
 --[[
   AI Script for YGOPro Percy:
@@ -46,6 +46,12 @@ Experimental = false
   SOFTWARE.
 
 ]]
+
+GlobalCheating = 0
+EXTRA_DRAW = 0
+EXTRA_SUMMON = 0
+LP_RECOVER = 0
+
 function requireoptional(module)
   if not pcall(require,module) then
     --print("file missing or syntax error: "..module)
@@ -94,6 +100,7 @@ require("ai.decks.ExodiaLib")
 require("ai.decks.Boxer")
 require("ai.decks.Monarch")
 require("ai.decks.MegaMonarch")
+require("ai.decks.Kozmo")
 requireoptional("ai.decks.Spellbook")
 requireoptional("ai.decks.X-Saber")
 requireoptional("ai.decks.Cth")
