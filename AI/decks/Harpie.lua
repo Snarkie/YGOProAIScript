@@ -498,9 +498,6 @@ function HarpieInit(cards)
   local Rep = cards.repositionable_cards
   local SetMon = cards.monster_setable_cards
   local SetST = cards.st_setable_cards
-  if HasIDNotNegated(SpSum,07409792) then 
-    --return {COMMAND_SPECIAL_SUMMON,CurrentIndex} --TODO: test
-  end
   if HasID(SetST,19337371,SetSign,Sum) then
     return {COMMAND_SET_ST,CurrentIndex}
   end

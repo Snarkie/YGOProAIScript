@@ -762,12 +762,19 @@ function GauntletLauncherTarget(cards)
     return BestTargets(cards,1,TARGET_DESTROY)
   end
 end
+function PtolemyFilter(c)
+  return Affected(c,TYPE_MONSTER,6)
+  and Targetable(c,TYPE_MONSTER)
+  and not ToHandBlacklist(c.id)
+end
 function PtolemyTarget(cards)
   if LocCheck(cards,LOCATION_OVERLAY) then
     return Add(cards,PRIO_TOGRAVE)
-  else
-    return Add(cards,PRIO_TOHAND)
   end
+  if LocCheck(cards,LOCATION_GRAVE) then
+    return Add(cards,PRIO_TOHAND,1,FilterOwner,1)
+  end
+  return BestTargets(cards,1,TARGET_TOHAND,PtolemyFilter)
 end
 function LightpulsarTarget(cards)
   if GlobalCardMode == 4 then

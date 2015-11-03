@@ -30,11 +30,6 @@ function OnDeclareAttribute(count, choices)
   result = 0
 	local returnCount = 0
 	
-	--print("OnDeclareAttribute count: "..count)	
-	for i=1,#choices do
-		--print(i, choices[i])
-	end
-	
 	-- Example implementation: Just return the first valid attribute(s) you come across
 	while returnCount < count do
 		result = result + choices[returnCount+1] --add attribute

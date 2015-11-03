@@ -477,9 +477,6 @@ function BoxerInit(cards)
   local SetMon = cards.monster_setable_cards
   local SetST = cards.st_setable_cards
   GlobalYokeOverride = nil
-  if HasID(Act,81439173) then -- TODO: test
-    return COMMAND_ACTIVATE,CurrentIndex
-  end
   if HasID(Act,32807846,UseRotaBoxer,cards) then
     return COMMAND_ACTIVATE,CurrentIndex
   end

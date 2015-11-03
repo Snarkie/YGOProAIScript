@@ -947,6 +947,9 @@ function MonarchCard(cards,min,max,id,c)
   if id == 46895036 then
     return DullahanTarget(cards)
   end
+  if id == 47297616 then -- LADD
+    return Add(cards,PRIO_TOFIELD)
+  end
   return nil
 end
 function ChainTreeborn(c)

@@ -468,7 +468,7 @@ end
 function SummonDiva2()
   return OverExtendCheck() 
   and OppGetStrongestAttDef()<2300 
-  and SummonArmades()
+  and SummonArmades(FindID(88033975,AIExtra()))
   and Duel.GetCurrentPhase() == PHASE_MAIN1 
   and GlobalBPAllowed
   and Duel.GetLocationCount(player_ai,LOCATION_MZONE)>1
@@ -521,9 +521,9 @@ function SummonSharkKnightMermail(cards)
   end
   return false
 end
-function SummonArmadesMermail()
-  return Duel.GetCurrentPhase() == PHASE_MAIN1 and Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack") < 2300 
-  and Duel.GetTurnCount()>1
+function SummonArmadesMermail(c)
+  return BattlePhaseCheck()
+  and CanWinBattle(c,OppMon())
 end
 function MermailOpenFieldCheck()
   return (#AIMon()==0 and #OppMon()==0 and not HasID(UseLists({AIHand(),AIST()}),60202749,true) 

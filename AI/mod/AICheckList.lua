@@ -914,7 +914,7 @@ function UpdateList(list,addlist)
         addlist[#addlist+1]=list[i]
       end
     else
-      print("warning: invalid Blacklist for "..DeckCheck().Name)
+      print("Warning: invalid Blacklist for "..DeckCheck().Name)
       list=nil
     end
   end

@@ -38,7 +38,7 @@ function Set(index)
   end
   return {COMMAND_SET_MONSTER,index}
 end
-function SetST(index)
+function SetSpell(index)
   if index == nil then
     index = CurrentIndex
   end
@@ -85,7 +85,7 @@ function SummonExtraDeck(cards,prio)
   if HasIDNotNegated(Act,57774843) and UseFieldNuke(1) then       -- Judgment Dragon
     return {COMMAND_ACTIVATE,CurrentIndex}
   end  
-  if HasIDNotNegated(Act,39765958) and UseJeweledRDA(Act[CurrentIndex],0) then 
+  if HasIDNotNegated(Act,39765958,UseJeweledRDA,0) then 
     return {COMMAND_ACTIVATE,CurrentIndex}                                -- Hot Red Dragon Archfiend
   end
   if HasIDNotNegated(Act,53129443) and UseDarkHole() then
@@ -137,7 +137,7 @@ function SummonExtraDeck(cards,prio)
   if HasIDNotNegated(SpSum,91949988) and SummonVolcaGaiaFinish(2) then  
     return XYZSummon()
   end
-  if HasIDNotNegated(SpSum,88120966) and SummonGiantGrinderFinish(SpSum[CurrentIndex]) then
+  if HasIDNotNegated(SpSum,88120966,SummonGiantGrinderFinish) then
     return XYZSummon()
   end
   if HasIDNotNegated(SpSum,46772449) and SummonBelzebuth() then          
@@ -164,10 +164,10 @@ function SummonExtraDeck(cards,prio)
   if HasIDNotNegated(SpSum,31437713) and SummonHeartlanddracoFinish() then
     return XYZSummon()
   end
-  if HasIDNotNegated(SpSum,56832966) and SummonUtopiaLightningFinish(SpSum[CurrentIndex],2) then
+  if HasIDNotNegated(SpSum,56832966,SummonUtopiaLightningFinish,2) then
     return XYZSummon()
   end
-  if HasIDNotNegated(SpSum,84013237) and SummonUtopiaLightningFinish(SpSum[CurrentIndex],1) then
+  if HasIDNotNegated(SpSum,84013237,SummonUtopiaLightningFinish,1) then
     return XYZSummon()
   end
 ---- 
@@ -185,13 +185,13 @@ function SummonExtraDeck(cards,prio)
   if HasIDNotNegated(Act,80117527) and UseBigEye() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasIDNotNegated(Act,88120966) and UseGiantGrinder(Act[CurrentIndex]) then
+  if HasIDNotNegated(Act,88120966,UseGiantGrinder) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasIDNotNegated(Act,22110647,false,353770352) and UseDracossack1(Act[CurrentIndex]) then
+  if HasIDNotNegated(Act,22110647,false,353770352,UseDracossack1) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasIDNotNegated(Act,22110647,false,353770353) and UseDracossack2(Act[CurrentIndex]) then
+  if HasIDNotNegated(Act,22110647,false,353770353,UseDracossack2) then
     GlobalCardMode=2
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -218,11 +218,11 @@ function SummonExtraDeck(cards,prio)
     OPTSet(82633039)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasIDNotNegated(Act,10406322) and UseAlsei(Act[CurrentIndex]) then
+  if HasIDNotNegated(Act,10406322,UseAlsei) then
     GlobalActivatedCardID = 10406322
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasIDNotNegated(Act,73964868,nil,nil,nil,nil,ChainPleiades)  then
+  if HasIDNotNegated(Act,73964868,ChainPleiades)  then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Act,61344030) then -- Paladynamo
@@ -245,7 +245,7 @@ function SummonExtraDeck(cards,prio)
  end
  
  -- summon Gaia Dragon after removal effects
-   if HasIDNotNegated(SpSum,91949988) and SummonGaiaDragonFinish(SpSum[CurrentIndex]) then
+   if HasIDNotNegated(SpSum,91949988,SummonGaiaDragonFinish) then
     return XYZSummon()
   end
   
@@ -254,14 +254,14 @@ function SummonExtraDeck(cards,prio)
 ---- 
 
 -- Synchro
-  if HasID(SpSum,08561192) and SummonLeoh(SpSum[CurrentIndex]) then
+  if HasID(SpSum,08561192,SummonLeoh) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasID(SpSum,39765958) and SummonJeweledRDA(SpSum[CurrentIndex]) then
+  if HasID(SpSum,39765958,SummonJeweledRDA) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
 
-  if HasID(SpSum,83994433) and SummonStardustSpark(SpSum[CurrentIndex]) then
+  if HasID(SpSum,83994433,SummonStardustSpark) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSum,44508094,SummonStardust) then
@@ -270,10 +270,10 @@ function SummonExtraDeck(cards,prio)
   if HasID(SpSum,23693634,SummonColossal) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasID(SpSum,04779823) and SummonMichael(SpSum[CurrentIndex]) then
+  if HasID(SpSum,04779823,SummonMichael) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasID(SpSum,82044279) and SummonClearWing(SpSum[CurrentIndex]) then
+  if HasID(SpSum,82044279,SummonClearWing) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
 
@@ -289,10 +289,10 @@ function SummonExtraDeck(cards,prio)
   if HasID(SpSum,50321796,SummonBrionac) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasID(SpSum,33198837) and SummonNaturiaBeast(SpSum[CurrentIndex]) then
+  if HasID(SpSum,33198837,SummonNaturiaBeast) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasID(SpSum,88033975) and SummonArmades(SpSum[CurrentIndex]) then
+  if HasID(SpSum,88033975,SummonArmades) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSum,90953320,SummonLibrarian) then
@@ -305,16 +305,16 @@ function SummonExtraDeck(cards,prio)
 -- XYZ
 
 -- Rank 8
-  if HasIDNotNegated(SpSum,01639384) and SummonFelgrand(SpSum[CurrentIndex]) then
+  if HasIDNotNegated(SpSum,01639384,SummonFelgrand) then
     return XYZSummon()
   end
-  if HasIDNotNegated(SpSum,88120966) and SummonGiantGrinder(SpSum[CurrentIndex]) then
+  if HasIDNotNegated(SpSum,88120966,SummonGiantGrinder) then
     return XYZSummon()
   end
-  if HasIDNotNegated(SpSum,10406322) and SummonAlsei(SpSum[CurrentIndex]) then
+  if HasIDNotNegated(SpSum,10406322,SummonAlsei) then
     return XYZSummon()
   end
-  if HasID(SpSum,73445448) and SummonZombiestein(SpSum[CurrentIndex]) then
+  if HasID(SpSum,73445448,SummonZombiestein) then
     return XYZSummon()
   end
   
@@ -323,7 +323,7 @@ function SummonExtraDeck(cards,prio)
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSum,80117527)}
   end
 
-  if HasIDNotNegated(SpSum,22110647) and SummonDracossack(SpSum[CurrentIndex]) then
+  if HasIDNotNegated(SpSum,22110647,SummonDracossack) then
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSum,22110647)}
   end
   
@@ -331,13 +331,13 @@ function SummonExtraDeck(cards,prio)
   if HasID(SpSum,10443957,SummonInfinity) then
     return XYZSummon()
   end
-  if HasID(SpSum,38495396) and SummonPtolemy(SpSum[CurrentIndex]) then
+  if HasID(SpSum,38495396,SummonPtolemy) then
     return XYZSummon()
   end
   if HasIDNotNegated(SpSum,15561463) and SummonGauntletLauncher() then
     return XYZSummon()
   end
-  if HasID(SpSum,91949988) and SummonGaiaDragon(SpSum[CurrentIndex]) then
+  if HasID(SpSum,91949988,SummonGaiaDragon) then
     return XYZSummon()
   end
 
@@ -368,10 +368,10 @@ function SummonExtraDeck(cards,prio)
   if HasIDNotNegated(SpSum,82633039) and SummonSkyblaster() then           -- Skyblaster
     return XYZSummon()
   end
-  if HasID(SpSum,26329679) and SummonOmega(SpSum[CurrentIndex]) then 
+  if HasID(SpSum,26329679,SummonOmega) then 
     return XYZSummon()
   end
-  if HasID(SpSum,16195942) and SummonRebellion(SpSum[CurrentIndex]) then 
+  if HasID(SpSum,16195942,SummonRebellion) then 
     return XYZSummon()
   end
   if HasIDNotNegated(SpSum,61344030) and SummonPaladynamo() then
@@ -398,7 +398,7 @@ function SummonExtraDeck(cards,prio)
   if HasIDNotNegated(Act,34086406,false,545382497) and UseLavalvalChain() then   
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(SpSum,11398059) and SummonImpKing(SpSum[CurrentIndex]) then
+  if HasID(SpSum,11398059,SummonImpKing) then
     return XYZSummon()
   end
   if HasIDNotNegated(Act,11398059) then
@@ -414,7 +414,7 @@ function SummonExtraDeck(cards,prio)
   if HasIDNotNegated(Act,00581014,false,9296225) and UseEmeral() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(SpSum,21501505) and SummonCairngorgon(SpSum[CurrentIndex]) then
+  if HasID(SpSum,21501505,SummonCairngorgon) then
     return XYZSummon()
   end
   if HasIDNotNegated(SpSum,93568288) and SummonRhapsody() then
@@ -435,11 +435,11 @@ function SummonExtraDeck(cards,prio)
   end
   
 -- Rank 3
-  if HasIDNotNegated(SpSum,78156759) and SummonZenmaines(SpSum[CurrentIndex]) then
+  if HasIDNotNegated(SpSum,78156759,SummonZenmaines) then
     GlobalDWSS=2
     return XYZSummon()
   end
-  if HasID(Rep,78156759) and RepoZenmaines(Rep[CurrentIndex]) then
+  if HasID(Rep,78156759,RepoZenmaines) then
     return {COMMAND_CHANGE_POS,CurrentIndex}
   end
   if HasIDNotNegated(SpSum,15914410) and SummonMechquipped() then
@@ -517,11 +517,12 @@ function SummonRafflesia(c)
   or OppGetStrongestAttack()<c.attack 
   and #SubGroup(OppST(),FilterPosition,POS_FACEDOWN)>2)
 end
-function InfinityCheck()
+function InfinityCheck(count)
+  if not count then count = 3 end
   return HasID(AIExtra(),58069384,true)
   and HasIDNotNegated(AIExtra(),10443957,true)
   and (HasIDNotNegated(AIExtra(),18326736,true)
-  and FieldCheck(4)==3
+  and FieldCheck(4)==count
   or HasIDNotNegated(AIMon(),18326736,true,FilterMaterials,3))
   and DualityCheck()
 end
@@ -717,9 +718,9 @@ end
 function SummonNaturiaBeast(c)
   return OppGetStrongestAttDef()<2200 and MP2Check(c)
 end
-function SummonArmades()
-  return Duel.GetCurrentPhase() == PHASE_MAIN1 and OppGetStrongestAttDef()<2300 
-  and GlobalBPAllowed
+function SummonArmades(c)
+  return BattlePhaseCheck()
+  and CanWinBattle(c,OppMon())
 end
 function SummonStardustSpark(c)
   return NotNegated(c) and MP2Check(c) 
@@ -1789,12 +1790,7 @@ function ChainRafflesia(source,mode)
       return true
     end
   elseif mode == 2 then
-    local summoned 
-    if AI.GetLastSummonedCards then -- TODO: only for backwards compatibility, remove later
-      summoned = AI.GetLastSummonedCards()
-    else
-      summoned = OppMon()
-    end
+    local summoned = AI.GetLastSummonedCards()
     if HasID(AIDeck(),29401950,true)
     and (Duel.CheckEvent(EVENT_SUMMON_SUCCESS)
     or Duel.CheckEvent(EVENT_SPSUMMON_SUCCESS)
@@ -2411,6 +2407,9 @@ function GenericCard(cards,min,max,id,c)
   end
   if id == 73176465 then -- Felis
     return BestTargets(cards,1,TARGET_DESTROY)
+  end
+  if id == 99590524 then -- Treacherous
+    return BestTargets(cards,min,TARGET_DESTROY)
   end
   return nil
 end

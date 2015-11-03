@@ -522,7 +522,7 @@ end
 function AttackMaiden(c,source)
   return Negated(c)
   or ArmadesCheck(source)
-  or FilterPosition(source,POS_DEFENCE)
+  or FilterPosition(c,POS_DEFENCE)
   or CardsMatchingFilter(AIMon(),FilterAttackMin,3000)>0
   or DualityCheck(2)
 end

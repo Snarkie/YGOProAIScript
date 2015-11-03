@@ -22,8 +22,6 @@ end
 
 function BAPriority()
 AddPriority({
--- TODO: test
-[89631139] = {1,1,1,1,1,1,1,1,1,1,nil},         -- BEWD
 
 -- Burning Abyss
 [57143342] = {7,2,7,3,7,1,1,1,2,1,CirCond},      -- BA Cir

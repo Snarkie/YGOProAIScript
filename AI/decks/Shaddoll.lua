@@ -31,8 +31,7 @@ function ShaddollStartup(deck)
   
 end
 
-ShaddollIdentifier = 06417578 -- El-Fusion --{44394295,77505534} -- Shaddoll Fusion, Shadow Games
--- TODO: backwards compatibility, change identifier
+ShaddollIdentifier = 06417578 -- El-Fusion 
 
 DECK_SHADDOLL = NewDeck("Shaddoll",ShaddollIdentifier,ShaddollStartup) 
 
@@ -46,7 +45,6 @@ ShaddollActivateBlacklist={
 17016362, -- Trapeze Magician
 }
 ShaddollSummonBlacklist={
-07409792, -- Dynatherium --TODO: test
 67696066, -- Performage Trick Clown
 68819554, -- Performage Damage Juggler
 31292357, -- Performage Hat Tricker
@@ -509,7 +507,7 @@ function SummonFalcon(c)
   return (SummonMichael(FindID(04779823,AIExtra())) 
   and CardsMatchingFilter(AIMon(),FalconFilter2)>0 
   or SummonArcanite() and CardsMatchingFilter(AIMon(),FalconFilter3)>0 
-  or SummonArmades() and FieldCheck(3)>0)
+  or SummonArmades(FindID(88033975,AIExtra())) and FieldCheck(3)>0)
   and (WindaCheck() or not SpecialSummonCheck(player_ai))
   and not HasID(AIMon(),c.id,true)
 end
@@ -529,7 +527,8 @@ function SetDragon()
   and not HasID(AIMon(),37445295,true) and OverExtendCheck()
 end
 function SummonHedgehog()
-  return HasID(AIMon(),37445295,true,nil,nil,POS_FACEUP) and SummonArmades()
+  return HasID(AIMon(),37445295,true,nil,nil,POS_FACEUP) 
+  and SummonArmades(FindID(88033975,AIExtra()))
 end
 function SetHedgehog()
   return TurnEndCheck() and not HasID(AIMon(),04939890,true) 
@@ -783,26 +782,18 @@ function TrishulaCheckFilter(card,params)
   if CardsEqual(card,params[1]) or CardsEqual(card,params[2]) then
     return false
   end
-  print("Trishula Filter")
   local cards = UseLists({card},params)
   local tuner = 0
   local lvl = 0
   local norden = nil
-  print("cards to check: ")
-  for i=1,#cards do
-    print(cards[i].id)
-  end
   for i=1,#cards do
     local c=cards[i]
-    print("checking: "..c.id)
     if FilterPosition(c,POS_FACEUP) 
     or not FilterLocation(c,LOCATION_ONFIELD)
     then
       lvl = lvl+c.level
-      print("level: "..c.level..", total level: "..lvl)
       if FilterType(c,TYPE_TUNER) then
         tuner = tuner + 1
-        print("is tuner. Total tuners: "..tuner)
       end
       if FilterLocation(c,LOCATION_GRAVE) then
         norden={}
@@ -820,9 +811,7 @@ function TrishulaCheckFilter(card,params)
   return false
 end
 function TrishulaCheck(c)
-  print("Trishula Check")
   if not c then
-    print("Checking for Norden")
     c = FindID(17412721,AIExtra(),nil,NotNegated)
     if c == nil 
     or not (DualityCheck()
@@ -830,7 +819,6 @@ function TrishulaCheck(c)
     and HasID(AICards(),01845204,true,OPTCheck,01845204)
     and SpaceCheck()>1)
     then
-      print("cannot Norden, cancel")
       return false
     end
   end
@@ -838,19 +826,14 @@ function TrishulaCheck(c)
   or not (DualityCheck()) 
   or not WindaCheck() and SpecialSummonCheck()
   then
-    print("don't want to summon Trishula, abort")
     return false
   end
-  print("Checking: "..c.id)
   local cards = AIMon()
   local cards2 = AIMon()
   if c.id==17412721 then
-    print("Norden, modifying lists")
     if not NormalSummonCheck() then
-      print("can still normal summon, add hand")
       cards=AICards()
     end
-    print("add grave")
     cards2=AIGrave()
   end
   local i=HasID(AIHand(),31292357,true)
@@ -872,7 +855,6 @@ function TrishulaCheck(c)
     and not CardsEqual(c2,c)
     and CardsMatchingFilter(cards2,TrishulaCheckFilter,{c,c2})>0 
     then
-      print("found possible combination")
       result = true
     end
   end
@@ -945,7 +927,6 @@ function ShaddollInit(cards)
   end
   for i=1,#Sum do
     if TrishulaCheck(Sum[i]) then
-      print("summoning to enable Trish")
       return Summon(i)
     end
   end

@@ -1001,9 +1001,6 @@ function NobleInit(cards)
   local Rep = cards.repositionable_cards
   local SetMon = cards.monster_setable_cards
   local SetST = cards.st_setable_cards
-  if HasID(Act,00691925) then -- TODO: just for testing
-    return Activate()
-  end
   if HasID(AIMon(),73289035,true,nil,nil,nil,TsukuyomiFilter) 
   and #SetST>0 and #AIHand()>1 and TsukuyomiHandCheck() then
     return {COMMAND_SET_ST,1}

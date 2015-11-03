@@ -8,7 +8,6 @@ function OnAIGoingFirstSecond(name)
   or name=="AI_Blackwing"
   or name=="AI_Shaddoll"
   or name=="AI_Kozmo"
-  or name=="zz_TestAI" --TODO: test
   then
     player_ai = 1
     result = 0
@@ -113,9 +112,6 @@ function HasID(cards,id,skipglobal,desc,loc,pos,filter,opt)
       then
         if not skipglobal then CurrentIndex = i end
         result = i   
-        if id == 07409792 then
-          print("HasID found it: "..result)  
-        end
       end
     end
   end
@@ -441,11 +437,27 @@ function RemovalCheck(id,category)
   end
   return false
 end
+-- these categorys don't exist, so I'm just making them up. 
+-- Negative numbers to avoid conflicts with potential new official categorys
+CATEGORY_CUSTOM_FACEDOWN  =-0x1 -- Book of Moon & friends
+CATEGORY_CUSTOM_ATTACH    =-0x2 -- 101, CyDra Infinity
+custom_facedown={
+14087893, -- Book of Moon
+25341652, -- Maestroke
+67050396, -- Goodwitch
+94997874, -- Tarotray
+}
+custom_attach={
+10443957, -- Infinity
+12744567, -- C101
+48739166, -- 101
+}
 function RemovalCheckCard(target,category,cardtype,targeted,chainlink,filter,opt)
   if Duel.GetCurrentChain() == 0 then return false end
   local cat={CATEGORY_DESTROY,CATEGORY_REMOVE,
   CATEGORY_TOGRAVE,CATEGORY_TOHAND,
-  CATEGORY_TODECK,CATEGORY_CONTROL}
+  CATEGORY_TODECK,CATEGORY_CONTROL,
+  CATEGORY_CUSTOM_FACEDOWN,CATEGORY_CUSTOM_ATTACH}
   if target and not FilterCheck(target,filter,opt)
   then
     return false
@@ -491,13 +503,34 @@ function RemovalCheckCard(target,category,cardtype,targeted,chainlink,filter,opt
       or e and e:GetHandler():IsType(cardtype))
       then
         local id = e:GetHandler():GetCode()
-        if id == 10443957
-        or id == 12744567
-        or id == 48739166
-        and tg and CardsEqual(target,GetCardFromScript(tg:GetFirst()))
-        and cat[i]==CATEGORY_TOGRAVE
-        then
-          return target
+        for j=1,#custom_attach do
+          if cat[i]==CATEGORY_CUSTOM_ATTACH
+          and id == custom_attach[j]
+          then
+            if target and tg 
+            and CardsEqual(target,tg:GetFirst()) 
+            then
+              return target
+            end
+            if not target then
+              return tg
+            end
+          end
+        end
+        for j=1,#custom_facedown do
+          if cat[i]==CATEGORY_CUSTOM_FACEDOWN
+          and id == custom_facedown[j]
+          and FilterPosition(target,POS_FACEUP)
+          then
+            if target and tg 
+            and CardsEqual(target,tg:GetFirst()) 
+            then
+              return target
+            end
+            if not target then
+              return tg
+            end
+          end
         end
       end
     end
@@ -860,8 +893,10 @@ function Shuffle(t)
 end
 -- returns true, if the source is expected to win a battle against the target
 function WinsBattle(source,target)
-  return source and target 
-  and FilterLocation(source,LOCATION_MZONE)
+  if not (source and target) then return false end
+  source=GetScriptFromCard(source)
+  target=GetScriptFromCard(target)
+  return FilterLocation(source,LOCATION_MZONE)
   and FilterLocation(target,LOCATION_MZONE)
   and (target:IsPosition(POS_FACEUP_ATTACK) 
   and source:GetAttack() >= target:GetAttack()
@@ -1060,6 +1095,12 @@ end
 function ExcludeID(c,id)
   return c.id~=id
 end
+function FilterCard(c1,c2)
+  return CardsEqual(c1,c2)
+end
+function ExcludeCard(c1,c2)
+  return not CardsEqual(c1,c2)
+end
 function FilterOriginalID(c,id)
   return c.original_id==id
 end
@@ -1074,6 +1115,10 @@ function FilterPosition(c,pos)
   end
 end
 function FilterLocation(c,loc)
+  if c == nil then
+    print("Warning: FilterLocation null card")
+    PrintCallingFunction()
+  end
   if c.GetCode then
     return c:IsLocation(loc)
   else
@@ -1167,7 +1212,16 @@ end
   end
   return result
 end]]
-
+function FilterController(c,player)
+  if not player then player = 1 end
+  c=GetCardFromScript(c)
+  return CurrentOwner(c)==player
+end
+function FilterOwner(c,player)
+  if not player then player = 1 end
+  c=GetCardFromScript(c)
+  return c.owner==player
+end
 
 GlobalTargetList = {}
 -- function to prevent multiple cards to target the same card in the same chain
@@ -1437,23 +1491,18 @@ PriorityGraveTargetList=
 }
 function PriorityTarget(c,destroycheck,loc,filter,opt) -- preferred target for removal
   local result = false
-  --print("Priority target check: "..c.id)
-  --PrintCallingFunction()
   if loc == nil then loc = LOCATION_ONFIELD end
   if loc == LOCATION_ONFIELD then
-    --print("on field")
     if FilterType(c,TYPE_MONSTER) 
     and (bit32.band(c.type,TYPE_FUSION+TYPE_RITUAL+TYPE_XYZ+TYPE_SYNCHRO)>0 
     or c.level>4 and c.attack>2000
     or c.attack>=2500)
     and not (FiendishCheck(c) and AIGetStrongestAttack()>c.attack)
     then
-      --print("strong monster")
       result = true
     end
     for i=1,#PriorityTargetList do
       if PriorityTargetList[i]==c.id then
-        --print("on list")
         result = true
       end
     end
@@ -1463,17 +1512,12 @@ function PriorityTarget(c,destroycheck,loc,filter,opt) -- preferred target for r
       and FilterType(c,TYPE_PENDULUM)
       and DestroyFilter(c) end)>1 
     then
-      --print("pendulum scales")
       result = true
     end
-    --print("check attack blacklist")
-    --print(AttackBlacklistCheck(c))
     result = (result or not AttackBlacklistCheck(c))
   elseif loc == LOCATION_GRAVE then
-    --print("in grave")
     for i=1,#PriorityGraveTargetList do
       if PriorityGraveTargetList[i]==c.id then
-        --print("grave priority target")
         result = true
       end
     end
@@ -1481,7 +1525,6 @@ function PriorityTarget(c,destroycheck,loc,filter,opt) -- preferred target for r
   if result and (not destroycheck or DestroyFilter(c)) 
   and FilterPublic(c) and (filter == nil or (opt==nil and filter(c) or filter(c,opt)))
   then
-    --print("returning true")
     return true
   end
   return false
@@ -1748,6 +1791,7 @@ function StrongerAttackerCheck(card,cards)
     local c = cards[i]
     if CanAttack(c)
     and c.attack>card.attack
+    and not CardsEqual(c,card)
     then
       return false
     end
@@ -1927,12 +1971,7 @@ function AvailableAttacks(c)
   end
   local cardscript=GetScriptFromCard(c)
   local aiscript=GetCardFromScript(c)
-  local result=0
-  if aiscript.extra_attack_count then -- TODO: backwards compatibility
-    result = 1+aiscript.extra_attack_count
-  else
-    result = 2
-  end
+  local result= 1+aiscript.extra_attack_count
   return result-cardscript:GetAttackedCount()
 end
 function CanChangePos(c)
@@ -2054,147 +2093,35 @@ function CanFinishGame(c,target,atk,bonus,malus)
   end
   return false
 end
-
--- old, inaccurate way to convert card script cards 
--- to AI script. Still used for cards not on the field
-function GetCardFromScriptOld(c,cards)
-  local id = c:GetCode()
-  local id2 = c:GetOriginalCode()
-  local pos = c:GetPosition()
-  local owner = c:GetOwner()
-  local controller = c:GetControler()
-  local loc = c:GetLocation()
-  local result = nil
-  local atk = 0
-  local def = 0
-  if FilterType(c,TYPE_MONSTER) then
-    atk = c:GetAttack()
-    def = c:GetDefence()
-  end
-  if cards == nil then
-    cards = All()
-  end
-  if owner == player_ai then
-    owner = 1
-  else
-    owner = 2
-  end
-  if controller == player_ai then
-    controller = 1
-  else
-    controller = 2
-  end
-  for i=1,#cards do
-    c=cards[i]
-    if c.id == id and c.original_id == id2
-    and c.position == pos and c.location == loc
-    and c.owner == owner and CurrentOwner(c) == controller
-    and c.attack == atk and c.defense == def 
-    then
-      result = c
-    end
-  end
-  if result then 
-    return result
-  end
-  return nil
-end
--- accurate function to convert card script cards 
--- to AI script, only 100% accurate for cards on the field
 function GetCardFromScript(c,cards)
   if c==nil then 
     print("Warning: Requesting null card conversion")
     PrintCallingFunction()
     return nil 
   end
-  if AI.GetCardObjectFromScript then 
-    if c.GetCode then
-      return AI.GetCardObjectFromScript(c)
-    elseif c.id then
-      return c
-    end
-    print("Warning: invalid type to convert to card")
-    PrintCallingFunction()
-    return nil
-  else -- TODO: only for backwards compatibility, remove later
-    if c.id then
-      return c
-    end
-    PrintCallingFunction()
-    local seq = c:GetSequence()+1
-    if c:IsLocation(LOCATION_MZONE) then
-      if c:IsControler(player_ai) then
-        cards = AI.GetAIMonsterZones()
-      else
-        cards = AI.GetOppMonsterZones()
-      end
-    elseif c:IsLocation(LOCATION_SZONE) then
-      if c:IsControler(player_ai) then
-        cards = AI.GetAISpellTrapZones()
-      else
-        cards = AI.GetOppSpellTrapZones()
-      end
-    else
-      return GetCardFromScriptOld(c,cards)
-    end
-    return cards[seq] 
+  if c.GetCode then
+    return AI.GetCardObjectFromScript(c)
+  elseif c.id then
+    return c
   end
+  print("Warning: invalid type to convert to card")
+  PrintCallingFunction()
+  return nil
 end
--- the other way around, get a card script object
--- from an AI script card.
 function GetScriptFromCard(c)
   if c == nil then
     print("Warning: Requesting null card conversion")
     PrintCallingFunction()
     return nil
   end
-  if AI.GetScriptFromCardObject then 
-    if c.GetCode then
-      return c
-    elseif c.id then
-      return AI.GetScriptFromCardObject(c)
-    end
-     print("Warning: invalid type to convert to card")
-     PrintCallingFunction()
-    return nil
-  else -- TODO: only for backwards compatibility, remove later
-    local result = nil
-    if c then 
-      if c.GetCode then
-        return c
-      end
-      local seq = Sequence(c)
-      local type = c.type
-      local loc = c.location
-      local p
-      local g
-      if CurrentOwner(c) == 1 then
-        p = player_ai
-      else
-        p = 1-player_ai
-      end
-      g = Duel.GetFieldGroup(p,LOCATION_ONFIELD,LOCATION_ONFIELD)
-      if FilterStatus(c,STATUS_SUMMONING) then
-        return nil -- TODO: fix this when summon limbo is supported
-      end
-      if g then
-        g:ForEach(function(card) 
-          if card:GetSequence()==seq 
-          and card:IsType(type) 
-          and card:GetControler()==p 
-          and card:IsLocation(loc)
-          then
-            result = card
-          end
-        end)
-      end
-    end
-    if result == nil then
-      print("Warning: ScriptFromCard invalid return")
-      PrintCallingFunction()
-    end
-    return result
+  if c.GetCode then
+    return c
+  elseif c.id then
+    return AI.GetScriptFromCardObject(c)
   end
+   print("Warning: invalid type to convert to card")
+   PrintCallingFunction()
+   return nil
 end
 function Surrender()
   AI.Chat("I give up!")
@@ -2442,3 +2369,4 @@ function SpaceCheck(loc,p)
   end
   return Duel.GetLocationCount(p,loc)
 end
+

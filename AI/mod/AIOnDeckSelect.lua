@@ -30,7 +30,7 @@ DECK_DARKWORLD    = NewDeck("Dark World"      ,34230233) -- DW Grapha
 DECK_CONSTELLAR   = NewDeck("Constellar"      ,78358521) -- Constellar Sombre
 DECK_BLACKWING    = NewDeck("Blackwing"       ,91351370) -- Black Whirlwind
 DECK_HARPIE       = NewDeck("Harpie"          ,19337371) -- Hysteric Sign
-DECK_HERO         = NewDeck("HERO"            ,50720316) -- Shadow Mist
+
 
 function IdentifierCheck(deck)
   if deck == nil or deck.Identifier == nil then return false end
@@ -114,8 +114,45 @@ function PrioritySetup()
   ChaosDragonPriority()
   QliphortPriority()
   SatellarknightPriority()
-  HEROPriority()
+  --HEROPriority()
   BAPriority()
+
+AddPriority({
+-- HERO
+
+[69884162] = {3,1,1,1,1,1,1,1,1,1,AliusCond},   -- Neos Alius
+[63060238] = {1,1,1,1,1,1,1,1,1,1,BlazeCond},   -- Blazeman
+[50720316] = {7,1,7,1,1,1,1,1,1,1,MistCond},    -- Shadow Mist
+[00423585] = {4,1,1,1,1,1,1,1,1,1,MonkCond},    -- Summoner Monk
+[79979666] = {8,1,8,1,1,1,1,1,1,1,BubbleCond},  -- Bubbleman
+
+[00213326] = {1,1,1,1,8,1,1,1,1,1,nil},         -- E-Call
+[08949584] = {1,1,1,1,6,1,1,1,1,1,nil},         -- AHL
+[18511384] = {1,1,1,1,3,1,1,1,1,1,nil},         -- Fusion Recovery
+[24094653] = {1,1,1,1,3,1,1,1,1,1,nil},         -- Polymerization
+[45906428] = {1,1,1,1,3,1,1,1,1,1,nil},         -- Miracle Fusion
+[55428811] = {1,1,1,1,3,1,1,1,1,1,nil},         -- Fifth Hope
+[21143940] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Mask Change
+[87819421] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Mask Charge
+[87819421] = {1,1,1,1,9,1,1,1,1,1,nil},         -- Upstart
+[84536654] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Form Change
+[84536654] = {1,1,1,1,2,1,1,1,1,1,nil},         -- Forbidden Lance
+[12580477] = {1,1,1,1,2,1,1,1,1,1,nil},         -- Raigeki
+[57728570] = {1,1,1,1,1,1,1,1,1,1,nil},         -- CCV
+[83555666] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Ring of Destruction
+
+[95486586] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Core
+[03642509] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Great Tornado
+[22093873] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Divine Wind
+[01945387] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Nova Master
+[22061412] = {1,1,1,1,1,1,1,1,1,1,nil},         -- The Shining
+[29095552] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Acid
+[33574806] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Escuridao
+[40854197] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Absolute Zero
+[50608164] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Koga
+[58481572] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Dark Law
+[16304628] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Gaia
+})
 
 AddPriority({
 -- Nekroz: 
@@ -193,27 +230,12 @@ AddPriority({
 
 
 
---[[AddPriority({ -- TODO: check&remove
--- Shaddoll
-[37445295] = {6,3,3,1,7,1,6,1,1,1,FalconCond},        -- Shaddoll Falcon
-[04939890] = {5,2,2,1,5,4,5,4,1,1,HedgehogCond},      -- Shaddoll Hedgehog
-[30328508] = {4,1,5,1,9,1,9,1,1,1,LizardCond},        -- Shaddoll Lizard/Squamata
-[77723643] = {3,1,4,1,7,1,7,1,1,1,DragonCond},        -- Shaddoll Dragon
-[03717252] = {2,1,6,1,5,1,8,1,1,1,BeastCond},         -- Shaddoll Beast
-[24062258] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Secret Sect Druid Dru
+AddPriority({ 
+-- Stuff
 [73176465] = {1,1,1,1,6,5,1,1,1,1,FelisCond},         -- Lightsworn Felis
 [41386308] = {1,1,1,1,1,1,1,1,1,1,MathCond},          -- Mathematician
 
 [05318639] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Mystical Space Typhoon
-[44394295] = {9,5,1,1,1,1,1,1,1,1,ShaddollFusionCond}, -- Shaddoll Fusion
-[06417578] = {8,6,1,1,1,1,1,1,1,1,ElFusionCond},      -- El-Shaddoll Fusion
-
-[04904633] = {4,2,1,1,9,1,9,1,1,1,CoreCond},          -- Shaddoll Core
-
-
-[20366274] = {1,1,6,4,2,1,2,1,1,1,ConstructCond},     -- El-Shaddoll Construct
-[94977269] = {1,1,7,3,2,1,2,1,1,1,WindaCond},         -- El-Shaddoll Winda
-[74822425] = {1,1,1,1,1,1,1,1,1,1,ShekinagaCond},     -- El-Shaddoll Shekinaga
 
 [82044279] = {1,1,1,1,1,1,1,1,1,1,ClearWingCond},     -- Clear Wing Synchro Dragon
 [72959823] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Panzer Dragon
@@ -223,7 +245,7 @@ AddPriority({
 [33698022] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Moonlight Rose Dragon
 [31924889] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Arcanite Magician
 [08561192] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Leoh, Keeper of the Sacred Tree
-})]]
+})
 
 
 AddPriority({

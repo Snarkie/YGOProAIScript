@@ -429,6 +429,11 @@ function DracossackTarget(cards)
 end
 function TinGoldfishTarget(cards)
   local result = nil
+  if LocCheck(cards,LOCATION_HAND) and GlobalGoblindberghTarget then
+    result = Add(cards,PRIO_TOFIELD,1,FilterID,GlobalGoblindberghTarget)
+    GlobalGoblindberghTarget = nil
+    return result
+  end
   for i=1,#cards do
     local id = cards[i].id
     if id == 86445415 or id == 41172955 or id == 13839120 then

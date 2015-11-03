@@ -27,6 +27,16 @@ function OnSelectOption(options)
     end
   end
   
+  for i=1,#options do -- Ptolemy M7
+    if options[i]==38495396*16+2 
+    and HasPriorityTarget(OppMon(),false,nil,PtolemyFilter)
+    then
+      return i
+    elseif options[i]==38495396*16+3 then
+      return i
+    end
+  end
+  
 	result = 0
    ------------------------------------------------------    
    -- Return random result if it isn't specified below.

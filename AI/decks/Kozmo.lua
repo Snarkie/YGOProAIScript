@@ -9,7 +9,7 @@ function KozmoStartup(deck)
   deck.BattleCommand        = KozmoBattleCommand
   deck.AttackTarget         = KozmoAttackTarget
   deck.AttackBoost          = KozmoAttackBoost
-  deck.Tribute				      = KozmoTribute
+  deck.Tribute              = KozmoTribute
   deck.Option               = KozmoOption
   deck.ChainOrder           = KozmoChainOrder
   --[[
@@ -22,7 +22,7 @@ function KozmoStartup(deck)
   deck.ActivateBlacklist    = KozmoActivateBlacklist
   deck.SummonBlacklist      = KozmoSummonBlacklist
   deck.RepositionBlacklist  = KozmoRepoBlacklist
-  deck.SetBlacklist		      = KozmoSetBlacklist
+  deck.SetBlacklist         = KozmoSetBlacklist
   deck.Unchainable          = KozmoUnchainable
   --[[
   
@@ -81,6 +81,10 @@ KozmoUnchainable={
 23434538, -- Maxx "C"
 43898403, -- Twin Twister
 67723438, -- Emergency Teleport
+00006781, -- Dark Destroyer
+20849090, -- Forerunner
+00006784, -- Dog Fighter
+94454495, -- Sliprider
 }
 function KozmoFilter(c,exclude)
   local check = true
@@ -146,8 +150,11 @@ function FarmgirlCond(loc,c)
   end
   if loc == PRIO_TOFIELD then
     return Duel.GetTurnPlayer()==player_ai
-    and CanDealBattleDamage(c,OppMon())
+    and (CanDealBattleDamage(c,OppMon())
+    or not OppHasStrongestMonster())
+    and (OPTCheck(c.id) or CardsMatchingFilter(AIMon(),KozmoRider)==0)
     and not GlobalSummonNegated
+    and not HasID(AIMon(),31061682,true)
   end
   return true
 end
@@ -214,7 +221,7 @@ function SummonStrawman(c)
 end
 function UseEtele(c)
   if HasIDNotNegated(AIST(),67237709,true,nil,nil,POS_FACEUP,OPTCheck)
-  and CardsMatchingFilter(AIHand(),KozmoRider)==0
+  and CardsMatchingFilter(AICards(),KozmoRider)==0
   and CardsMatchingFilter(AIDeck(),
     function(c)return KozmoRider(c) and FilterLevelMax(c,3) end)>0
   and not NormalSummonCheck()
@@ -233,6 +240,7 @@ function UseFarmgirl(c,mode)
     --or not BattlePhaseCheck())
     and CardsMatchingFilter(AIHand(),KozmoShip)>0
     then
+      OPTSet(c)
       return true
     end
   end
@@ -253,6 +261,7 @@ function UseStrawman(c,mode)
     --or not BattlePhaseCheck())
     and CardsMatchingFilter(AIHand(),KozmoShip)>0
     then
+      OPTSet(c)
       return true
     end
   end
@@ -270,6 +279,7 @@ function UseGoodwitch(c,mode)
     --or not BattlePhaseCheck())
     and CardsMatchingFilter(AIHand(),KozmoShip)>0
     then
+      OPTSet(c)
       return true
     end
   end
@@ -405,7 +415,7 @@ function StrawmanTarget(cards)
   if LocCheck(cards,LOCATION_HAND) then
     return Add(cards,PRIO_TOFIELD)
   end
-  return Add(cards,PRIO_TOFIELD)
+  return Add(cards,PRIO_TOFIELD,1,KozmoShip)
 end
 function KozmotownTarget(cards,min,max)
   if LocCheck(cards,LOCATION_HAND) then
@@ -519,6 +529,7 @@ function ChainWickedwitch(c,mode)
       then
         return false
       end
+      OPTSet(c.id)
       return true
     end
     if not UnchainableCheck(c.id) then return false end
@@ -530,6 +541,7 @@ function ChainWickedwitch(c,mode)
       or HasIDNotNegated(AIHand(),00006781,true))
       and Duel.GetTurnPlayer()==1-player_ai
       then
+        OPTSet(c.id)
         return true
       end
       if Duel.GetTurnPlayer()==player_ai 
@@ -538,6 +550,7 @@ function ChainWickedwitch(c,mode)
       and(CardsMatchingFilter(AIHand(),CanWinBattle,OppMon())>0
       or #OppMon()==0)
       then
+        OPTSet(c.id)
         return true
       end
     end
@@ -546,6 +559,7 @@ function ChainWickedwitch(c,mode)
 end
 function ChainGoodwitch(c)
   if RemovalCheckCard(c) or NegateCheckCard(c) then
+    OPTSet(c.id)
     return true
   end
   if not UnchainableCheck(c.id) then return false end
@@ -557,6 +571,7 @@ function ChainGoodwitch(c)
     or HasIDNotNegated(AIHand(),00006781,true))
     and Duel.GetTurnPlayer()==1-player_ai
     then
+      OPTSet(c.id)
       return true
     end
     if Duel.GetTurnPlayer()==player_ai 
@@ -564,7 +579,8 @@ function ChainGoodwitch(c)
     and (AvailableAttacks(c)==0 or not CanWinBattle(c,OppMon()))
     and(CardsMatchingFilter(AIHand(),CanWinBattle,OppMon())>0
     or #OppMon()==0)
-    then
+    then  
+      OPTSet(c.id)
       return true
     end
   end
@@ -573,6 +589,7 @@ end
 function ChainFarmgirl(c)
   if RemovalCheckCard(c) or NegateCheckCard(c) 
   then
+    OPTSet(c.id)
     return true
   end
   if Duel.GetCurrentPhase()==PHASE_DAMAGE 
@@ -591,6 +608,7 @@ function ChainFarmgirl(c)
     or HasIDNotNegated(AIHand(),00006783,true))
     and Duel.GetTurnPlayer()==1-player_ai
     then
+      OPTSet(c.id)
       return true
     end
     if Duel.GetTurnPlayer()==player_ai 
@@ -600,6 +618,7 @@ function ChainFarmgirl(c)
     and (CardsMatchingFilter(AIHand(),CanWinBattle,OppMon())>0
     or #OppMon()==0)
     then
+      OPTSet(c.id)
       return true
     end
   end
@@ -609,6 +628,7 @@ function ChainFarmgirl(c)
     and card.summonturn==Duel.GetTurnCount() 
     and Duel.CheckTiming(TIMING_END_PHASE)
     then
+      OPTSet(c.id)
       return true
     end
   end
@@ -616,6 +636,7 @@ function ChainFarmgirl(c)
 end
 function ChainStrawman(c,mode)
   if RemovalCheckCard(c) or NegateCheckCard(c) then
+    OPTSet(c.id)
     return true
   end
   if not UnchainableCheck(c.id) then return false end
@@ -628,6 +649,7 @@ function ChainStrawman(c,mode)
     or HasIDNotNegated(AIHand(),00006783,true))
     and Duel.GetTurnPlayer()==1-player_ai
     then
+      OPTSet(c.id)
       return true
     end
     if Duel.GetTurnPlayer()==player_ai 
@@ -636,6 +658,7 @@ function ChainStrawman(c,mode)
     and(CardsMatchingFilter(AIHand(),CanWinBattle,OppMon())>0
     or #OppMon()==0)
     then
+      OPTSet(c.id)
       return true
     end
   end
@@ -645,6 +668,7 @@ function ChainStrawman(c,mode)
     and card.summonturn==Duel.GetTurnCount() 
     and Duel.CheckTiming(TIMING_END_PHASE)
     then
+      OPTSet(c.id)
       return true
     end
   end
@@ -661,7 +685,7 @@ function ChainEtele(c)
   and CanDealBattleDamage(FindID(31061682,AIDeck()),OppMon())
   and GlobalBPEnd and not aimon
   and UnchainableCheck(c.id)
-  and not HasIDNotNegated(AIMon(),31061682,true,function(c) return AvailableAttacks()>0 end)
+  and not HasIDNotNegated(AIMon(),31061682,true,function(c) return AvailableAttacks(c)>0 end)
   then
     return true
   end

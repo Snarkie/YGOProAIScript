@@ -865,7 +865,6 @@ end
   ---------------------------------------------
   -- AI should activate: Chthonian Alliance, 
   -- only if player has face up monsters with same name 
-  -- TODO: For now we will check for same id's
   ---------------------------------------------
   for i=1,#ActivatableCards do  
     if ActivatableCards[i].id == 46910446 then -- Chthonian Alliance 
@@ -1535,6 +1534,7 @@ end
           GlobalSSCardAttack = SpSummonableCards[i].attack
 		  GlobalSSCardType = bit32.band(SpSummonableCards[i].type,TYPE_XYZ)
 		  GlobalSSCardID = SpSummonableCards[i].id
+       --print("generic XYZ summon")
 		   return COMMAND_SPECIAL_SUMMON,i
            end
          end

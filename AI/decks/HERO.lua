@@ -1,111 +1,56 @@
-function MistCond(loc,c)
-  if loc == PRIO_TOFIELD then
-    return OPTCheck(50720316) and CardsMatchingFilter(AIDeck(),FilterSet,0xa5)>0
-  elseif loc == PRIO_TOGRAVE then
-    return OPTCheck(50720316) and CardsMatchingFilter(AIDeck(),HEROFilter,50720316)>0
-  end
-  return true
-end
-function BubbleFilter(c)
-  return FilterPosition(c,POS_FACEUP)
-  and (c.id == 32807846 or c.id == 00213326
-  or c.id == 08949584
-  or FilterLocation(c,LOCATION_HAND) and c.id == 79979666)
-end
-function BubblemanCheck(mode)
-  local count = #AICards()
-  local check = (mode == 2 or Duel.GetTurnPlayer()==player_ai and Duel.GetCurrentPhase()~=PHASE_END 
-  and (DualityCheck() or not NormalSummonCheck()))
-  if count == 0 and check
-  then
-    return true
-  end
-  if count == 1 and BubbleFilter(AICards()[1]) and check then
-    return true
-  end
-  return false
-end
-function BubbleCond(loc,c)
-  if loc == PRIO_TOHAND then
-    return BubblemanCheck(1)
-  elseif loc == PRIO_TOFIELD then
-    return BubblemanCheck(2)
-  end
-  return true
+function HEROStartup(deck)
+  deck.Init                 = HEROInit
+  
+  deck.Position             = HEROPosition
+  deck.Material             = HEROMaterial
+  
+  deck.ActivateBlacklist    = HEROActivateBlacklist
+  deck.SummonBlacklist      = HEROSummonBlacklist
+  deck.RepoummonBlacklist   = HERORepoBlacklist
+  deck.PriorityList         = HEROPriorityList
 end
 
-function HEROPriority()
-AddPriority({
+HEROIdentifier = 50720316 -- Shadow Mist
 
--- HERO
+DECK_HERO = NewDeck("HERO",HEROIdentifier,HEROStartup) 
 
-[69884162] = {1,1,1,1,1,1,1,1,1,1,AliusCond},   -- Neos Alius
-[25259669] = {1,1,1,1,1,1,1,1,1,1,GoblinCond},  -- Goblindbergh
-[63060238] = {1,1,1,1,1,1,1,1,1,1,BlazeCond},   -- Blazeman
-[50720316] = {7,1,7,1,1,1,1,1,1,1,MistCond},    -- Shadow Mist
-[18063928] = {1,1,1,1,1,1,1,1,1,1,GoldfishCond},-- Tin Goldfish
-[00423585] = {1,1,1,1,1,1,1,1,1,1,MonkCond},    -- Summoner Monk
-[79979666] = {8,1,8,1,1,1,1,1,1,1,BubbleCond},  -- Bubbleman
-
-[00213326] = {1,1,1,1,8,1,1,1,1,1,nil},         -- E-Call
-[08949584] = {1,1,1,1,6,1,1,1,1,1,nil},         -- AHL
-[18511384] = {1,1,1,1,3,1,1,1,1,1,nil},         -- Fusion Recovery
-[24094653] = {1,1,1,1,3,1,1,1,1,1,nil},         -- Polymerization
-[45906428] = {1,1,1,1,3,1,1,1,1,1,nil},         -- Miracle Fusion
-[55428811] = {1,1,1,1,3,1,1,1,1,1,nil},         -- Fifth Hope
-[21143940] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Mask Change
-[87819421] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Mask Charge
-[84536654] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Form Change
-[84536654] = {1,1,1,1,2,1,1,1,1,1,nil},         -- Forbidden Lance
-[12580477] = {1,1,1,1,2,1,1,1,1,1,nil},         -- Raigeki
-[57728570] = {1,1,1,1,1,1,1,1,1,1,nil},         -- CCV
-[83555666] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Ring of Destruction
-
-[95486586] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Core
-[03642509] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Great Tornado
-[22093873] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Divine Wind
-[01945387] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Nova Master
-[22061412] = {1,1,1,1,1,1,1,1,1,1,nil},         -- The Shining
-[29095552] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Acid
-[33574806] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Escuridao
-[40854197] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Absolute Zero
-[50608164] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Koga
-[58481572] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Dark Law
-[16304628] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Gaia
-
-
-})
-end
-function HEROChainOrder(cards)
-  result = {}
-	--print("OnSelectChainOrder card list:")
-	--for i=1,#cards do
-		--print(i, cards[i].id)
-	--end
-  if HasID(cards,58481572,true) and HasID(cards,50720316,true) then
-    for i=1,#cards do
-      if cards[i].id == 58481572 then
-        for j=1,#cards do
-          if cards[j].id == 50720316 then
-            result[i]=j
-            result[j]=i
-          end
-        end
-      else
-        result[i]=i
-      end
-    end
-    return result
-  end
-  return nil
-end
+HEROActivateBlacklist={
+70368879, -- Upstart
+00213326, -- Ecall
+32807846, -- RotA
+87819421, -- Mask Charge
+--05318639, -- MST
+}
+HEROSummonBlacklist={
+58069384, -- Nova
+56638325, -- Delteros
+84013237, -- Utopia
+21501505, -- Cairngorgon
+82633039, -- Castel
+18326736, -- Ptolemaios
+06511113, -- Rafflesia
+}
+HERORepoBlacklist={
+50720316 -- Shadow Mist
+}
 function HEROFilter(c,exclude)
+  c = GetCardFromScript(c)
   local id = c.id
   if exclude and type(exclude)=="table" then 
     id = c.cardid
     exclude = exclude.cardid
   end
   return IsSetCode(c.setcode,0x8) and (exclude == nil or id~=exclude)
+end
+function ChangeFilter(c,exclude)
+  local id = c.id
+  if exclude and type(exclude)=="table" then 
+    id = c.cardid
+    exclude = exclude.cardid
+  end
+  return IsSetCode(c.setcode,0xa5) 
+  and FilterType(c,TYPE_QUICKPLAY)
+  and (exclude == nil or id~=exclude)
 end
 function EHEROFilter(c,exclude)
   return IsSetCode(c.setcode,0x3008) and HEROFilter(c,exclude)
@@ -130,6 +75,109 @@ function OmniHEROFilter(c,exclude) -- the Omni heroes, fusions which require 1 H
   end
   return false
 end
+
+function MistCond(loc,c)
+  if loc == PRIO_TOFIELD then
+    return OPTCheck(50720316) and CardsMatchingFilter(AIDeck(),ChangeFilter)>0
+  elseif loc == PRIO_TOGRAVE then
+    return OPTCheck(50720316) and CardsMatchingFilter(AIDeck(),HEROFilter,50720316)>0
+  end
+  return true
+end
+function BubbleFilter(c)
+  return FilterPosition(c,POS_FACEUP)
+  and (c.id == 32807846 or c.id == 00213326
+  or c.id == 08949584)
+  or FilterLocation(c,LOCATION_HAND) and c.id == 79979666
+end
+function BubblemanCheck(mode)
+  local count = #AICards()
+  local check = (mode == 2 
+  or Duel.GetTurnPlayer()==player_ai 
+  and Duel.GetCurrentPhase()~=PHASE_END 
+  and (DualityCheck() or not NormalSummonCheck()))
+  if count == 0 and check
+  then
+    return true
+  end
+  if count == 1 and BubbleFilter(AICards()[1]) and check then
+    return true
+  end
+  return false
+end
+function BubbleCond(loc,c)
+  if loc == PRIO_TOHAND then
+    if CardsMatchingFilter(AIHand(),FilterType,TYPE_MONSTER)<2 then
+      return 5
+    end
+    return BubblemanCheck(1)
+  elseif loc == PRIO_TOFIELD then
+    return BubblemanCheck(2)
+  end
+  return true
+end
+
+
+HEROPriorityList={
+-- HERO
+
+[69884162] = {3,1,1,1,1,1,1,1,1,1,AliusCond},   -- Neos Alius
+[25259669] = {4,1,1,1,1,1,1,1,1,1,GoblinCond},  -- Goblindbergh
+[63060238] = {1,1,1,1,1,1,1,1,1,1,BlazeCond},   -- Blazeman
+[50720316] = {7,1,7,1,1,1,1,1,1,1,MistCond},    -- Shadow Mist
+[18063928] = {5,1,1,1,1,1,1,1,1,1,GoldfishCond},-- Tin Goldfish
+[00423585] = {4,1,1,1,1,1,1,1,1,1,MonkCond},    -- Summoner Monk
+[79979666] = {8,1,8,1,1,1,1,1,1,1,BubbleCond},  -- Bubbleman
+
+[00213326] = {1,1,1,1,8,1,1,1,1,1,nil},         -- E-Call
+[08949584] = {1,1,1,1,6,1,1,1,1,1,nil},         -- AHL
+[18511384] = {1,1,1,1,4,1,1,1,1,1,nil},         -- Fusion Recovery
+[24094653] = {1,1,1,1,4,1,1,1,1,1,nil},         -- Polymerization
+[45906428] = {1,1,1,1,4,1,1,1,1,1,nil},         -- Miracle Fusion
+[55428811] = {1,1,1,1,4,1,1,1,1,1,nil},         -- Fifth Hope
+[21143940] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Mask Change
+[87819421] = {1,1,1,1,3,1,1,1,1,1,nil},         -- Mask Charge
+[70368879] = {1,1,1,1,9,1,1,1,1,1,nil},         -- Upstart
+[84536654] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Form Change
+[84536654] = {1,1,1,1,4,1,1,1,1,1,nil},         -- Forbidden Lance
+[12580477] = {1,1,1,1,2,1,1,1,1,1,nil},         -- Raigeki
+[05318639] = {1,1,1,1,3,1,1,1,1,1,nil},         -- MST
+[14087893] = {1,1,1,1,2,1,1,1,1,1,nil},         -- Book of Moon
+
+[95486586] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Core
+[03642509] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Great Tornado
+[22093873] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Divine Wind
+[01945387] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Nova Master
+[22061412] = {1,1,1,1,1,1,1,1,1,1,nil},         -- The Shining
+[29095552] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Acid
+[33574806] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Escuridao
+[40854197] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Absolute Zero
+[50608164] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Koga
+[58481572] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Dark Law
+[16304628] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Gaia
+}
+
+--})
+function HEROChainOrder(cards)
+  result = {}
+  if HasID(cards,58481572,true) and HasID(cards,50720316,true) then
+    for i=1,#cards do
+      if cards[i].id == 58481572 then
+        for j=1,#cards do
+          if cards[j].id == 50720316 then
+            result[i]=j
+            result[j]=i
+          end
+        end
+      else
+        result[i]=i
+      end
+    end
+    return result
+  end
+  return nil
+end
+
 function FusionMaterialCheck(fusion,cards)
   if OmniHEROFilter(fusion) then
     for i=1,#cards do
@@ -153,7 +201,8 @@ function SummonCount(sum) -- checks, how many level 4s the AI can probably bring
   local ahl = 0
   local rota = CardsMatchingFilter(cards,FilterID,32807846)
   local ecall = CardsMatchingFilter(cards,FilterID,00213326)
-  local stspace = Duel.GetLocationCount(player_ai,LOCATION_SZONE)
+  local stspace = SpaceCheck(LOCATION_SZONE)
+  local mspace = SpaceCheck()
   --print("checking possible summons")
   if not sum then sum = AIHand() end
   if #AIMon()==0 and HasIDNotNegated(AICards(),08949584,true,UseAHL) then
@@ -188,7 +237,7 @@ function SummonCount(sum) -- checks, how many level 4s the AI can probably bring
       --print("live double Monk, +1")
       result = result+1 
     end
-    --if 
+    --if TODO ?
     
     
     if (HasIDNotNegated(sum,18063928,true)
@@ -212,7 +261,11 @@ function SummonCount(sum) -- checks, how many level 4s the AI can probably bring
   or (rota>0 or ecall>0) and HasID(AIDeck(),79979666,true))
   and CardsMatchingFilter(AIHand(),FilterType,TYPE_SPELL+TYPE_TRAP)<=stspace
   then
+    --print("live Bubbleman, +1")
+    result = result+1
   end
+  --print("can summon: "..result..",adjusting for available space")
+  result = math.min(result,mspace)
   --print("AI can get "..result.." lvl4s on the board.")
   return result
 end
@@ -229,11 +282,7 @@ function UsePoly(c)
   return false
 end
 
-function SummonHERO(c,mode)
-end
-function UseRotaHero(c)
-  return true
-end
+
 GlobalWaveMotionTurn={}
 function WaveMotionDamage()
   local result = 0
@@ -274,33 +323,128 @@ function MistCheck(cards)
   return HasIDNotNegated(cards,50720316,true,OPTCheck,50720316)
   and CardsMatchingFilter(AIDeck(),FilterSet,0xa5)>0
 end
-function UseAHL(c)
-  return MistCheck(AIDeck()) or HasIDNotNegated(AIDeck(),79979666,true,BubblemanCheck,c)
-  and DualityCheck()
-end
-function UseRotaHero(c)
-  if MistCheck(AIHand()) and not (HasID(AIHand(),18063928,true) or HasID(AIHand(),25259669,true)) 
-  and HasID(AIDeck(),25259669,true) and not NormalSummonCheck()
-  then
-    GlobalRotaTarget = 25259669
-    return true
+function UseAHL(c,mode)
+  if not mode then
+    return DualityCheck()
+    and #AIMon()==0
   end
-  if MistCheck(AIDeck()) and (HasID(AIHand(),18063928,true) or HasID(AIHand(),25259669,true))
-  and not (HasID(AICards(),50720316,true) or NormalSummonCheck())
-  then
-    GlobalRotaTarget = 50720316
-    return true
+  if mode == 1 then
+    return MistCheck(AIDeck())
+    or HasIDNotNegated(AIDeck(),79979666,true,BubblemanCheck,c)
+  end
+  if mode == 2 then
+    local count = SummonCount()
+    return count>2 and count<5
+    and (not HasIDNotNegated(AIHand(),00423585,true)
+    or CardsMatchingFilter(AIHand(),FilterType,TYPE_SPELL)>2)
+  end
+end
+function UseRotaHero(c,mode)
+  if mode == 1 then
+    if MistCheck(AIHand()) and not (HasID(AIHand(),18063928,true) or HasID(AIHand(),25259669,true)) 
+    and HasID(AIDeck(),25259669,true) and not NormalSummonCheck()
+    then
+      GlobalRotaTarget = 25259669
+      return true
+    end
+    if HasIDNotNegated(AIHand(),00423585,true) and not NormalSummonCheck()
+    and CardsMatchingFilter(AIHand(),FilterType,TYPE_SPELL)>1
+    and FieldCheck(4)==0
+    then
+      GlobalRotaTarget = 25259669
+      return true
+    end
+    if MistCheck(AIDeck()) and (HasID(AIHand(),18063928,true) or HasID(AIHand(),25259669,true))
+    and not (HasID(AICards(),50720316,true) or NormalSummonCheck())
+    then
+      GlobalRotaTarget = 50720316
+      return true
+    end
+  end
+  if mode == 2 then
+    if #AIHand()==0
+    and SummonBubbleCheck()
+    then
+      if NormalSummonCheck() then
+        GlobalRotaTarget = 79979666
+      end
+      return true
+    end
+  end
+  if mode == 3 then
+    if HasID(AICards(),21143940,true)
+    and not HasID(AICards(),50720316,true)
+    and not HasID(AICards(),58481572,true)
+    and not NormalSummonCheck()
+    then
+      GlobalRotaTarget = 50720316
+      return true
+    end
+  end
+  if mode == 4 then
+    if CardsMatchingFilter(AIDeck(),SummonHERO,1)>0 
+    and not NormalSummonCheck()
+    then
+      return true
+    end
+  end
+  if mode == 5 then
+    if HandCheck(4)==0 and FieldCheck(4)==0
+    and not NormalSummonCheck()
+    then
+      return true
+    end
   end
   return false
 end
-function UseEcall(c)
-  if MistCheck(AIDeck()) and (HasID(AIHand(),18063928,true) or HasID(AIHand(),25259669,true)
-  or HasIDNotNegated(AICards(),32807846,true))
-  and not (HasID(AICards(),50720316,true) or NormalSummonCheck())
-  then
-    --print("Has Special Summoner, using Ecall")
-    GlobalEcallTarget = 50720316
-    return true
+function UseEcall(c,mode)
+  if mode == 1 then
+    if MistCheck(AIDeck()) 
+    and (HasID(AIHand(),18063928,true) 
+    or HasID(AIHand(),25259669,true)
+    or HasIDNotNegated(AICards(),32807846,true))
+    and not (HasID(AICards(),50720316,true) 
+    or NormalSummonCheck())
+    and not (HasIDNotNegated(AICards(),00423585,true)
+    and CardsMatchingFilter(AIHand(),FilterType,TYPE_SPELL)>0 )
+    then
+      GlobalEcallTarget = 50720316
+      return true
+    end
+  end
+  if mode == 2 then
+    if #AIHand()==0
+    and SummonBubbleCheck()
+    then
+      if NormalSummonCheck() then
+        GlobalEcallTarget = 79979666
+      end
+      return true
+    end
+  end
+  if mode == 3 then
+    if HasID(AICards(),21143940,true)
+    and not HasID(AICards(),50720316,true)
+    and not HasID(AICards(),58481572,true)
+    and not NormalSummonCheck()
+    then
+      GlobalEcallTarget = 50720316
+      return true
+    end
+  end
+  if mode == 4 then
+    if CardsMatchingFilter(AIDeck(),SummonHERO,1)>0 
+    and not NormalSummonCheck()
+    then
+      return true
+    end
+  end
+  if mode == 5 then
+    if HandCheck(4)==0 and FieldCheck(4)==0
+    and not NormalSummonCheck()
+    then
+      return true
+    end
   end
   return false
 end
@@ -319,7 +463,7 @@ function SummonBubble(c,mode)
   if mode == 2 then
     return CardsMatchingFilter(AIMon(),AcidFilter)==0 
     and DestroyCheck(OppST())>2
-    and HasIDNotNegated(AICards(),21143940,true)
+    and HasID(AICards(),21143940,true)
     and HasIDNotNegated(AIExtra(),29095552,true)
     and DualityCheck()
   end
@@ -336,14 +480,45 @@ function SummonAlius(c,mode)
   return true
 end
 function UseMonk(c,mode)
+  if not mode then
+    return CardsMatchingFilter(AIHand(),FilterType,TYPE_SPELL)>0
+    and SpaceCheck()>1
+    and DualityCheck()
+    and NotNegated(c)
+  end
   if mode == 1 then
     if MistCheck(AIDeck())
     and CardsMatchingFilter(AIHand(),FilterType,TYPE_SPELL)>0
     and not ((HasID(AIMon(),50720316,true) or HasID(AIHand(),50720316,true) 
     and not NormalSummonCheck()) and HasID(AICards(),21143940,true))
     and DualityCheck()
+    and NotNegated(c)
     then
       GlobalMonkTarget = 50720316
+      return true
+    end
+  end
+  if mode == 2 then
+    if FieldCheck(4)<4 
+    and HasID(AIDeck(),00423585,true)  
+    and CardsMatchingFilter(AIHand(),FilterType,TYPE_SPELL)>1
+    and SpaceCheck()>1
+    and DualityCheck()
+    and NotNegated(c)
+    then
+      GlobalMonkTarget = 00423585
+      return true
+    end
+  end
+  if mode == 3 then
+    if FieldCheck(4)<4 
+    and CardsMatchingFilter(AIHand(),function(c) 
+      return FilterType(c,TYPE_SPELL) and not FilterID(c,21143940) end)>0
+    and SpaceCheck()>0
+    and DualityCheck()
+    and NotNegated(c)
+    then
+      GlobalMonkTarget = 00423585
       return true
     end
   end
@@ -356,8 +531,30 @@ function SummonGoblindbergh(c,mode)
   if mode == 1 then
     if MistCheck(AIHand()) and not NormalSummonCheck()
     and DualityCheck()
+    and NotNegated(c)
     then
       GlobalGoblindberghTarget = 50720316
+      return true
+    end
+  end
+  if mode == 2 then
+    if not NormalSummonCheck()
+    and HasID(AIHand(),00423585,true,SummonMonk)
+    and DualityCheck()
+    and NotNegated(c)
+    then
+      GlobalGoblindberghTarget = 00423585
+      return true
+    end
+  end
+  if mode == 3 then
+    if not NormalSummonCheck()
+    and CardsMatchingFilter(AIHand(),FilterLevel,4)>1
+    and DualityCheck()
+    and NotNegated(c)
+    and FieldCheck(4)==0
+    and OverExtendCheck(3)
+    then
       return true
     end
   end
@@ -366,6 +563,179 @@ end
 function SummonTinGoldfishHERO(c,mode)
   return SummonGoblindbergh(c,mode)
 end
+function CanSummonDarkLaw()
+  return HasID(AICards(),21143940,true)
+  and HasID(AIMon(),50720316,true,FilterPosition,POS_FACEUP)
+  and HasIDNotNegated(AIExtra(),58481572,true)
+  and DualityCheck()
+end
+function DarkLawXYZCheck(count)
+  if not count then count = 2 end
+  return FieldCheck(4)>count 
+  or not CanSummonDarkLaw()
+  or HasIDNotNegated(AIMon(),58481572,true)
+end
+function SummonRafflesiaHERO(c)
+  return DarkLawXYZCheck()
+  and SummonRafflesia(c)
+end
+function SummonPtolemaeusHERO(c)
+  return DarkLawXYZCheck(3) and InfinityCheck(4)
+  or not CanSummonDarkLaw() and InfinityCheck()
+end
+function SummonCairngorgonHERO(c)
+  return DarkLawXYZCheck()
+  and SummonCairngorgon(c)
+end
+function SummonCastelHERO(c)
+  return DarkLawXYZCheck()
+  and SummonSkyblaster(c)
+end
+function SummonUtopiaHERO(c,mode)
+  if mode == 1 then
+    return SummonUtopiaLightningFinish(c,1)
+  end
+  if mode == 2 then
+    -- TODO
+  end
+end
+
+function UseUpstart(c,mode)
+  if mode == 1 then
+    --print(SummonBubbleCheck())
+    return not (HasIDNotNegated(AICards(),00423585,true)
+    or SummonBubbleCheck() or not NormalSummonCheck())
+  end
+  if mode == 2 then
+    return true
+  end
+  return false
+end
+function SummonShadowMist(c,mode)
+  if mode == 1 
+  and HasID(AICards(),21143940,true) 
+  and not HasID(AIMon(),50720316,true)
+  then
+    return true
+  end
+  return false
+end
+function RepoShadowMist(c)
+  if FilterPosition(c,POS_FACEDOWN_DEFENCE)
+  and HasID(AICards(),21143940,true)
+  then
+    return true
+  end
+  if FilterPosition(c,POS_FACEUP_ATTACK)
+  and (not HasID(AICards(),21143940,true)
+  or #OppMon>0 and not CanWinBattle(c,OppMon()))
+  then
+    return true
+  end
+  return false
+end
+function HasBubble(c,ahl)
+  local filter = ExcludeCard
+  if not c then filter = nil end
+  return HasID(AIHand(),79979666,true,filter,c)
+  or HasID(AIDeck(),79979666,true)
+  and (HasID(AICards(),00213326,true,filter,c) 
+  or HasID(AICards(),32807846,true,filter,c)
+  or ahl and HasID(AICards(),08949584,true,filter,c))
+end
+function BubbleCheckFilter(c)
+  return (FilterType(c,TYPE_MONSTER)
+  and c.level == 4
+  or c.id == 00213326
+  or c.id == 32807846)
+  and HasBubble(c)
+end
+function NotBubbleFilter(c)
+  return FilterType(c,TYPE_MONSTER)
+  and FilterLevel(c,4)
+  and c.id~=79979666
+end
+function SummonBubbleCheck()
+  --print("bubble check")
+  local count=2
+  local summons = 1
+  if NormalSummonCheck() then 
+    --print("alreadys normal summoned, reducing count")
+    count=1 
+  end
+  if not HasBubble() then 
+    --print("no bubble available, abort")
+    return false 
+  end
+  if CardsMatchingFilter(AIHand(),FilterType,TYPE_SPELL+TYPE_TRAP)>SpaceCheck(LOCATION_SZONE)
+  then 
+    --print("not enough S/T space, abort")
+    return false
+  end
+  if NormalSummonCheck() 
+  and CardsMatchingFilter(AIHand(),NotBubbleFilter)>0
+  or CardsMatchingFilter(AIHand(),NotBubbleFilter)>1
+  then 
+    --print("too many monsters in hand, abort")
+    return false 
+  end
+  if not NormalSummonCheck() 
+  and CardsMatchingFilter(UseLists(AIHand(),AIST()),BubbleCheckFilter)>0 
+  then 
+    --print("bubble + another monster available, summons +1")
+    summons = 2 
+  end
+  if FieldCheck(4)+summons<=4 
+  and (FieldCheck(4)+summons>2
+  or FieldCheck(4)+summons>1 
+  and not CanSummonDarkLaw())
+  then  
+    --print("bubble okay")
+    return true
+  end
+  --print("don't summon bubble")
+  return false
+end
+function SetShadowMist(c)
+  return #AIMon()==0
+end
+function SummonHERO(c,mode)
+  if mode == 1 then
+    if c.level == 4
+    and (FieldCheck(4)==1 
+    and not CanSummonDarkLaw()
+    or FieldCheck(4)==2 
+    and CanSummonDarkLaw())
+    and DualityCheck()
+    then
+      return true
+    end
+  end
+  if mode == 2 then
+    if c.level == 4
+    and NotBubbleFilter(c)
+    and SummonBubbleCheck()
+    then
+      return true
+    end
+  end
+end
+function UseMaskCharge(c,mode)
+  if mode == 1 then
+    return true
+  end
+end
+function UseMSTHero(card)
+  local filter = function(c) return FilterID(c,card.id) and NotNegated(c) end
+  if HasBubble(nil,true)
+  and DestroyCheck(OppST(),nil,true)>=CardsMatchingFilter(AICards(),filter)
+  and #AICards()-CardsMatchingFilter(AICards(),filter)==1
+  and UnchainableCheck(card.id)
+  then
+    return true
+  end
+  return UseMST(card)
+end
 function HEROInit(cards)
   local Act = cards.activatable_cards
   local Sum = cards.summonable_cards
@@ -373,7 +743,12 @@ function HEROInit(cards)
   local Rep = cards.repositionable_cards
   local SetMon = cards.monster_setable_cards
   local SetST = cards.st_setable_cards
-  --SummonCount(Sum)
+  if HasID(Act,05318639,UseMSTHero) then
+    return Activate()
+  end
+  if HasID(SpSum,84013237,SummonUtopiaHERO,1) then
+    return XYZSummon()
+  end
   if HasID(SpSum,79979666,SummonBubble,1) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
@@ -386,13 +761,31 @@ function HEROInit(cards)
   if HasID(Sum,79979666,SummonBubble,2) then
     return {COMMAND_SUMMON,CurrentIndex}
   end
-  if HasIDNotNegated(Act,08949584,UseAHL) then
+  if HasID(SpSum,79979666,SummonBubble,3) then
+    return {COMMAND_SUMMON,CurrentIndex}
+  end
+  if HasID(Rep,50720316,RepoShadowMist) then
+    return Repo()
+  end
+  if HasIDNotNegated(Act,00213326,UseEcall,5) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasIDNotNegated(Act,00213326,UseEcall) then
+  if HasIDNotNegated(Act,32807846,UseRotaHero,5) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasIDNotNegated(Act,32807846,UseRotaHero) then
+  if HasIDNotNegated(Act,87819421,UseMaskCharge,1) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Act,70368879,UseUpstart,1) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Act,08949584,UseAHL,2) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Act,00213326,UseEcall,1) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Act,32807846,UseRotaHero,1) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Act,38992735,UseWaveMotionCannon) then
@@ -404,27 +797,105 @@ function HEROInit(cards)
   if HasIDNotNegated(Act,72345736,UseSixSamUnited) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+  if HasIDNotNegated(Sum,18063928,SummonTinGoldfishHERO,2) then
+    return {COMMAND_SUMMON,CurrentIndex}
+  end
+  if HasIDNotNegated(Sum,25259669,SummonGoblindbergh,2) then
+    return {COMMAND_SUMMON,CurrentIndex}
+  end
   if HasIDNotNegated(Sum,18063928,SummonTinGoldfishHERO,1) then
     return {COMMAND_SUMMON,CurrentIndex}
   end
   if HasIDNotNegated(Sum,25259669,SummonGoblindbergh,1) then
     return {COMMAND_SUMMON,CurrentIndex}
   end
-  if HasID(Sum,69884162,nil,nil,LOCATION_HAND,SummonAlius,1) then
-    return {COMMAND_SUMMON,CurrentIndex}
+  if HasIDNotNegated(Act,00423585,UseMonk,2) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Act,00423585,UseMonk,1) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Act,00423585,UseMonk,3) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Sum,00423585,SummonMonk,1) then
     return {COMMAND_SUMMON,CurrentIndex}
   end
-  --print(FusionMaterialCheck(AICards(),40854197))
+  if HasID(Sum,69884162,SummonAlius,1) then
+    return {COMMAND_SUMMON,CurrentIndex}
+  end
   if HasIDNotNegated(Act,24094653,UsePoly) then -- Polymerization
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasIDNotNegated(Act,32807846,UseRotaHero) then
+  if HasIDNotNegated(Act,00213326,UseEcall,2) then
     return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Act,32807846,UseRotaHero,2) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  for i=1,#Sum do
+    if SummonHERO(Sum[i],2) then
+      return Summon(i)
+    end
+  end
+  if SummonBubbleCheck() then
+    if HasID(SpSum,79979666) then
+      return SpSummon()
+    end
+    if #SetST>0 then
+      return SetSpell(1)
+    end
+  end
+  --if HasIDNotNegated(Act,32807846,UseRotaHero,1) then?
+    --return {COMMAND_ACTIVATE,CurrentIndex}
+  --end
+
+  if HasID(SpSum,18326736,SummonPtolemaeusHERO) then
+    return XYZSummon(nil,18326736)
+  end
+  if HasID(SpSum,82633039,SummonCastelHERO) then
+    return XYZSummon()
+  end
+  if HasID(SpSum,06511113,SummonRafflesiaHERO) then
+    return XYZSummon()
+  end
+  if HasID(SpSum,21501505,SummonCairngorgonHERO) then
+    return XYZSummon()
+  end
+  if HasIDNotNegated(Act,00213326,UseEcall,3) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Act,32807846,UseRotaHero,3) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Act,08949584,UseAHL,1) then
+    return Activate()
+  end
+  if HasIDNotNegated(Act,70368879,UseUpstart,2) then
+    return Activate()
+  end
+  if HasID(Sum,50720316,SummonShadowMist,1) then
+    return Summon()
+  end
+  if HasIDNotNegated(Sum,18063928,SummonTinGoldfishHERO,3) then
+    return {COMMAND_SUMMON,CurrentIndex}
+  end
+  if HasIDNotNegated(Sum,25259669,SummonGoblindbergh,3) then
+    return {COMMAND_SUMMON,CurrentIndex}
+  end
+  for i=1,#Sum do
+    if SummonHERO(Sum[i],1) then
+      return Summon(i)
+    end
+  end
+  if HasIDNotNegated(Act,00213326,UseEcall,4) then
+    return Activate()
+  end
+  if HasIDNotNegated(Act,32807846,UseRotaHero,4) then
+    return Activate()
+  end
+  if HasID(SetMon,50720316,SetShadowMist) then
+    return Set()
   end
   return nil
 end
@@ -499,6 +970,9 @@ function KogaTarget(cards)
   end
   return GlobalTargetGet(cards,true)
 end
+function MaskChargeTarget(cards,min)
+  return Add(cards,PRIO_TOHAND,min)
+end
 function HEROCard(cards,min,max,id,c)
   if id == 00423585 then
     return MonkTarget(cards)
@@ -520,6 +994,9 @@ function HEROCard(cards,min,max,id,c)
   end
   if id == 50720316 then
     return MistTarget(cards)
+  end
+  if id == 87819421 then
+    return MaskChargeTarget(cards,min)
   end
   return nil
 end
@@ -637,8 +1114,13 @@ function ChainCCV(card)
   end
   return false
 end
-function SummonDarkLaw(c,darkheroes)
-  local g = RemovalCheckList(darkheroes)
+function MaskChangeFilter(c,attribute)
+  return HEROFilter(c)
+  and FilterPosition(c,POS_FACEUP)
+  and (not attribute or FilterAttribute(c,attribute))
+end
+function SummonDarkLaw(card,darkheroes)
+  local g = RemovalCheckList(darkheroes,nil,nil,true)
   if g then 
     --print("dark hero about to be removed, chaining")
     BestTargets(g,1,TARGET_PROTECT)
@@ -648,23 +1130,53 @@ function SummonDarkLaw(c,darkheroes)
   end
   for i=1,Duel.GetCurrentChain() do
 	local e = Duel.GetChainInfo(i,CHAININFO_TRIGGERING_EFFECT)
-    if (e and bit32.band(e:GetCategory(),CATEGORY_SEARCH)>0
-	and bit32.band(e:GetCategory(),CATEGORY_TOHAND)>0
-    or Duel.GetOperationInfo(i,CATEGORY_DRAW)
-    or Duel.GetOperationInfo(i,CATEGORY_TOGRAVE)
-    or Duel.GetOperationInfo(i,CATEGORY_DECKDES))
-    and Duel.GetChainInfo(i,CHAININFO_TRIGGERING_PLAYER)==1-player_ai
+    if e and Duel.GetChainInfo(i,CHAININFO_TRIGGERING_PLAYER)==1-player_ai
     and not HasIDNotNegated(AIMon(),58481572,true,FilterPosition,POS_FACEUP)
     then
-      --print("search, draw or dump effect activated, chaining")
-      GlobalTargetSet(darkheroes[1])
+      local c = e:GetHandler()
+      if bit32.band(e:GetCategory(),CATEGORY_SEARCH)>0
+      and bit32.band(e:GetCategory(),CATEGORY_TOHAND)>0
+      or Duel.GetOperationInfo(i,CATEGORY_DRAW)
+      or Duel.GetOperationInfo(i,CATEGORY_TOGRAVE)
+      or Duel.GetOperationInfo(i,CATEGORY_DECKDES)
+      then
+        --print("search, draw or dump effect activated, chaining")
+        GlobalTargetSet(darkheroes[1])
+        GlobalCardMode = 1
+        return true
+      end
+      if Duel.GetOperationInfo(i,CATEGORY_SPECIAL_SUMMON)
+      and FilterType(c,TYPE_SPELL+TYPE_TRAP) 
+      and (FilterType(c,TYPE_RITUAL)
+      or FilterSet(c,0x46))
+      then
+        --print("ritual or fusion summon, chaining")
+        GlobalTargetSet(darkheroes[1])
+        GlobalCardMode = 1
+        return true
+      end
+    end
+  end
+  if Duel.GetCurrentPhase()==PHASE_BATTLE 
+  and Duel.GetTurnPlayer()==1-player_ai
+  and UnchainableCheck(21143940)
+  then
+    local aimon,oppmon = GetBattlingMons()
+    if WinsBattle(oppmon,aimon) 
+    and MaskChangeFilter(aimon,ATTRIBUTE_DARK)
+    and oppmon:GetAttack()<2400
+    then
+      --print("dark hero about to be destroyed in battle, chaining")
+      GlobalTargetSet(aimon)
       GlobalCardMode = 1
       return true
     end
   end
-  if Duel.GetCurrentPhase()==PHASE_END and Duel.GetTurnPlayer==1-player_ai 
-  and HasID(darkheroes,50720316,true,OPTCheck)
-  and not MacroCheck()
+  if Duel.CheckTiming(TIMING_END_PHASE)
+  and Duel.GetTurnPlayer()==1-player_ai 
+  and HasID(darkheroes,50720316,true,OPTCheck,50720316)
+  and MacroCheck()
+  and Duel.GetCurrentChain()==0
   then
     --print("end phase, can trigger Shadow Mist, chaining")
     GlobalTargetSet(FindID(50720316,darkheroes))
@@ -839,6 +1351,19 @@ function HEROOption(options)
   return nil
 end
 
+function HEROMaterial(cards,min,max,id)
+  local filter = nil
+  if HasID(cards,50720316,true) and HasID(AICards(),21143940,true)
+  and HasIDNotNegated(AIExtra(),58481572,true)
+  then
+    filter = function(c) return not FilterID(c,50720316) end
+  end
+  if id == 18326736 then -- Ptolemaios
+    return Add(cards,PRIO_TOGRAVE,math.max(min,math.min(3,max)),filter)
+  end
+  return Add(cards,PRIO_TOGRAVE,min,filter)
+end
+
 HEROAtt={
 69884162, -- Neos Alius
 95486586, -- Core
@@ -853,6 +1378,8 @@ HEROAtt={
 58481572, -- Dark Law
 16304628, -- Gaia
 }
+HEROVary={
+}
 HERODef={
 18063928, -- Tin Goldfish
 25259669, -- Goblindbergh
@@ -866,12 +1393,18 @@ function HEROPosition(id,available)
   for i=1,#HEROAtt do
     if HEROAtt[i]==id 
     then 
-      if Duel.GetCurrentPhase()==PHASE_BATTLE
-      and Duel.GetTurnPlayer()~=player_ai
-      then
-        result=POS_FACEUP_DEFENCE
-      else
+      result=POS_FACEUP_ATTACK
+    end
+  end  
+  for i=1,#HEROVary do
+    if HEROVary[i]==id 
+    then 
+      if (BattlePhaseCheck() or Duel.GetCurrentPhase()==PHASE_BATTLE)
+      and Duel.GetTurnPlayer()==player_ai 
+      then 
         result=POS_FACEUP_ATTACK
+      else 
+        result=POS_FACEUP_DEFENCE 
       end
     end
   end

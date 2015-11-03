@@ -59,7 +59,7 @@ end
     if type(result) == "table" then
       return result
     else
-      print("WARNING: returning invalid card selection: "..triggeringID)
+      print("Warning: returning invalid card selection: "..triggeringID)
     end
   end
 
@@ -77,7 +77,7 @@ end
       if type(result) == "table" then
         return result
       else
-        print("WARNING: returning invalid card selection: "..triggeringID)
+        print("Warning: returning invalid card selection: "..triggeringID)
       end
     end
   end

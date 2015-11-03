@@ -727,9 +727,6 @@ function BottomlessFilter(c,type)
   and CurrentOwner(c)==2
 end
 function ChainBottomless()
-  if not AI.GetLastSummonedCards then -- TODO: only for backwards compatibility, remove later
-    return UnchainableCheck(29401950) 
-  end
   local targets = SubGroup(AI.GetLastSummonedCards(),BottomlessFilter,TYPE_TRAP)
   if UnchainableCheck(29401950) 
   and #targets>0

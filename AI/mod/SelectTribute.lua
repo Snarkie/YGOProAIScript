@@ -53,6 +53,12 @@ function OnSelectTribute(cards,minTributes, maxTributes)
 end
 --from OnSelectCard
 function OnSelectMaterial(cards,min,max,id)
+  local result = nil
+  local d = DeckCheck()
+  if d and d.Material then
+    result = d.Material(cards,min,max,id) 
+  end
+  if result ~= nil then return result end
   if id == 18326736 then -- Ptolemaios
     return Add(cards,PRIO_TOGRAVE,math.max(min,math.min(3,max)))
   end
