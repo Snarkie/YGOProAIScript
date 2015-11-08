@@ -35,7 +35,6 @@ function set_player_turn(init)
 	if not playersetupcomplete
   then
     playersetupcomplete = true
-    SaveState()
     GlobalPreviousLP=AI.GetPlayerLP(1)
 	end
 end
@@ -1465,6 +1464,11 @@ function Affected(c,type,level)
     and id ~=27279764 and id ~=40061558) -- Towers, Skybase
     or lvl<=level ) 
   end
+  if immune and FilterSet(c,0xd4) -- Burgessttoma
+  then
+    return not FilterType(c,TYPE_MONSTER)
+    or bit32.band(type,TYPE_MONSTER)==0 
+  end
   if immune and FilterSet(c,0x108a) -- Traptrix
   and id ~= 06511113 -- Rafflesia
   then
@@ -2258,20 +2262,16 @@ end
 -- checks, if cards like CotH still have a target.
 function CardTargetCheck(c,target)
   if c==nil then return nil end
-  if c.id then
-    c=GetCard(c)
-  end
+  c=GetScriptFromCard(c)
   if c==nil then return nil end
   local result = 0
   if not c:IsPosition(POS_FACEUP) then return nil end
   if target then
-    if target.id then
-      target=GetCard(target)
-    end
+    target=GetScriptFromCard(target)
     return c:IsHasCardTarget(target)
   end
   for i=1,#Field() do
-    local tc=GetCard(Field()[i])
+    local tc=GetScriptFromCard(Field()[i])
     if tc and c:IsHasCardTarget(tc) then
       result = result +1
     end
@@ -2292,23 +2292,6 @@ end
 function FiendishChainCheck(c)
   return c.id==50078509 and FilterPosition(c,POS_FACEUP)
   and CardTargetCheck(c)==0
-end
-
--- stores all card script cards for later usage
-SavedCards={}
-function SaveCards()
-  if #Field()==0 then return end
-  for i=1,#Field() do
-    local c=Field()[i]
-    if SavedCards[c.cardid]==nil then
-      SavedCards[c.cardid]=GetScriptFromCard(c)
-    end
-  end
-  return
-end
--- gets stored cardscript card from AI card
-function GetCard(c)
-  return SavedCards[c.cardid]
 end
 
 --returns the total ATK of all cards in a list, limeted by a max count.
@@ -2370,3 +2353,14 @@ function SpaceCheck(loc,p)
   return Duel.GetLocationCount(p,loc)
 end
 
+function GetHighestAttDef(cards,filter,opt)
+  local result = -1
+  for i=1,#cards do
+    local c = cards[i]
+    if FilterCheck(c,filter,opt) then
+      if c.attack>result then result = c.attack end
+      if c.defense>result then result = c.defense end
+    end
+  end
+  return result
+end

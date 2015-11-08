@@ -419,13 +419,18 @@ function UseDarkflare()
   return false--PriorityCheck(AIHand(),PRIO_TOGRAVE,1,RaceFilter,RACE_DRAGON)>4 and #OppGrave()>0
 end
 function SummonMini()
-  return HasID(AIMon(),77558536,true) and FieldCheck(4)==1 and ExtraDeckCheck(TYPE_SYNCHRO,8)>0 and #OppMon()>0 --and OppHasStrongestMonster()
-  or OppHasStrongestMonster() and (FieldCheck(4)==1 or TragCheck(4)) and ExtraDeckCheck(TYPE_XYZ,4)>0
-  or HasID(AIMon(),33420078,true) and OppHasStrongestMonster() and FieldCheck(4)==0 and ExtraDeckCheck(TYPE_SYNCHRO,6)>0
-  or HasID(AIHand(),99365553,true) and PriorityCheck(AIField(),PRIO_TOGRAVE)<4 and not NormalSummonCheck(player_ai) and OverExtendCheck() and #OppMon()>0
+  return HasID(AIMon(),77558536,true) and FieldCheck(4)==1 
+  and ExtraDeckCheck(TYPE_SYNCHRO,8)>0 and #OppMon()>0 --and OppHasStrongestMonster()
+  or OppHasStrongestMonster() and ExtraDeckCheck(TYPE_XYZ,4)>0
+  and (FieldCheck(4)==1 or TragCheck(4))
+  or HasID(AIMon(),33420078,true) and OppHasStrongestMonster() 
+  and FieldCheck(4)==0 and ExtraDeckCheck(TYPE_SYNCHRO,6)>0
+  or HasID(AIHand(),99365553,true) and PriorityCheck(AIField(),PRIO_TOGRAVE)<4 
+  and not NormalSummonCheck(player_ai) and OverExtendCheck() and #OppMon()>0
   or HasID(AIHand(),88264978,true) and UseREDMD() and OverExtendCheck()
   or HasID(AIMon(),76774528,true) and DestroyCheck(OppField())>0 
   or HasID(AIHand(),09748752,true) and not NormalSummonCheck(player_ai) and UseCaius()
+  or FieldCheck(4)==1 and HasID(AIExtra(),30100551,true,SummonMinerva,1)
 end
 function SummonCollapserpent()
   return PriorityCheck(AIGrave(),PRIO_BANISH,1,FilterAttribute,ATTRIBUTE_LIGHT)>4 and SummonMini()
@@ -511,6 +516,16 @@ function SummonCaius(c,mode)
   end
   return false
 end
+function SummonMinerva(c,mode)
+  if mode == 1
+  then
+    return #AIDeck()>10
+  end
+  return false
+end
+function UseMinerva(c,mode)
+  return true
+end
 function ChaosDragonOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local Activatable = cards.activatable_cards
   local Summonable = cards.summonable_cards
@@ -521,6 +536,9 @@ function ChaosDragonOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   GlobalScepterOverride = 0
   if HasID(Activatable,32807846) and DeckCheck(DECK_CHAOSDRAGON) then
     return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasID(Activatable,30100551,UseMinerva) then
+    return Activate()
   end
   if HasID(Activatable,94886282) then
     return {COMMAND_ACTIVATE,CurrentIndex}
@@ -640,7 +658,9 @@ function ChaosDragonOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
     GlobalSSCardID = 99234526
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  
+  if HasID(SpSummonable,30100551,SummonMinerva,1) then
+    return SpSummon()
+  end
   if HasIDNotNegated(Summonable,09748752,SummonCaius,2) then
     return {COMMAND_SUMMON,CurrentIndex}
   end
@@ -849,6 +869,10 @@ function CaiusTarget(cards)
   end
   return BestTargets(cards,1,TARGET_BANISH)
 end
+function MinervaTarget(cards,max)
+  local count = math.max(1,math.min(DestroyCheck(OppField(),true,true),max))
+  return BestTargets(cards,count,TARGET_DESTROY)
+end
 function ChaosDragonOnSelectCard(cards, minTargets, maxTargets,triggeringID,triggeringCard)
   local ID 
   local result=nil
@@ -946,6 +970,9 @@ function ChaosDragonOnSelectCard(cards, minTargets, maxTargets,triggeringID,trig
   if ID == 09748752 then 
     return CaiusTarget(cards)
   end
+  if ID == 30100551 then 
+    return MinervaTarget(cards,maxTargets)
+  end
   return nil
 end
 function ChainTrag()
@@ -954,7 +981,13 @@ function ChainTrag()
   if #c>0 then c=c[1] end
   return true
 end
+function ChainMinerva(c)
+  return #AIDeck()>10
+end
 function ChaosDragonOnSelectChain(cards,only_chains_by_player)
+  if HasID(cards,30100551,ChainMinerva) then
+    return {1,CurrentIndex}
+  end
   if HasIDNotNegated(cards,34408491) then -- Beelze
     return {1,CurrentIndex}
   end
@@ -1011,6 +1044,9 @@ function ChaosDragonOnSelectEffectYesNo(id,card)
   and NotNegated(card) 
   then
     result = 1
+  end
+  if id == 30100551 and ChainMinerva(card) then
+    return 1
   end
   if id == 44330098 and ChainGorz(card) then
     result = 1

@@ -417,20 +417,10 @@ function LavalvalChainTarget(cards)
     return {math.random(#cards)}
 end
 function ImpKingTarget(cards)
-    local result = nil
-    if GlobalCardMode == 1 then
-      GlobalCardMode = nil
-      result = HeraldicToGrave(cards,1)
-    else
-      if NeedsCard(94656263,cards,AIHand()) then
-        result = {CurrentIndex}
-      end
-      if NeedsCard(53573406,cards,AIHand()) then
-        result = {CurrentIndex}
-      end
-    end
-    if result then return result end
-    return {math.random(#cards)}
+  if LocCheck(cards,LOCATION_OVERLAY) then
+    return Add(cards,PRIO_TOGRAVE)
+  end
+  return Add(cards)
 end
 function PlainCoatTarget(cards,min)
     local result = nil
@@ -857,7 +847,7 @@ function LanceFilter(card)
   return Targetable(card,TYPE_SPELL)
   and Affected(card,TYPE_SPELL)
   and FilterType(card,TYPE_MONSTER)
-  and FilterPosition(card,POS_FACEUP)
+  and FilterPosition(card,POS_FACEUP_ATTACK)
   and FilterLocation(card,LOCATION_MZONE)
 end
 function ChainLance()
@@ -868,13 +858,12 @@ function ChainLance()
     if RemovalCheckCard(c,nil,TYPE_SPELL+TYPE_TRAP,nil,nil,LanceFilter)
     and UnchainableCheck(27243130)
     then
-
-    if not(aimon and oppmon 
-    and CardsEqual(aimon,c) 
-    and not AttackBoostCheck(-800)) 
-    then
-      targets[#targets+1]=c
-    end
+      if not(aimon and oppmon 
+      and CardsEqual(aimon,c) 
+      and not AttackBoostCheck(-800)) 
+      then
+        targets[#targets+1]=c
+      end
     end
   end
   if #targets>0 then
@@ -883,7 +872,9 @@ function ChainLance()
     return true
   end
   if Duel.GetCurrentPhase() == PHASE_DAMAGE and aimon and oppmon then
-    if AttackBoostCheck(0,800)
+    local c = GetCardFromScript(aimon)
+    ApplyATKBoosts({c})
+    if AttackBoostCheck(c.bonus,800)
     and LanceFilter(oppmon)
     and UnchainableCheck(27243130)
     then

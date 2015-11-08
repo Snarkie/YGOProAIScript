@@ -49,6 +49,32 @@ local AIST = AI.GetAISpellTrapZones()
   return list
 end
 
+function AIPendulum()
+local list = {}
+local AIST = AI.GetAISpellTrapZones()
+ for i=7,8 do
+   if AIST[i] ~= false then
+     list[#list+1]=AIST[i]
+     end
+   end
+  return list
+end
+
+function OppPendulum()
+local list = {}
+local AIST = AI.GetOppSpellTrapZones()
+ for i=7,8 do
+   if AIST[i] ~= false then
+     list[#list+1]=AIST[i]
+     end
+   end
+  return list
+end
+
+function AllPendulum()
+  return UseLists(AIPendulum(),OppPendulum())
+end
+
 function OppST()
 local list = {}
 local OppST = AI.GetOppSpellTrapZones()
@@ -1757,6 +1783,7 @@ function ApplyATKBoosts(Cards)
   for i=1,#Cards do
     if HasID(AIHand(),68601507,true) and bit32.band(Cards[i].setcode,0x88)>0
     and bit32.band(Cards[i].race,RACE_BEASTWARRIOR)>0 and Cards[i].owner==1 
+    and MacroCheck()
     then
       Cards[i].bonus = Cards[i].base_attack * 2 - Cards[i].attack 
       Cards[i].attack = Cards[i].base_attack * 2
@@ -1782,6 +1809,7 @@ function ApplyATKBoosts(Cards)
   for i=1,#Cards do
     if HasID(AIHand(),37742478,true) and CurrentOwner(Cards[i])==1
     and bit32.band(Cards[i].attribute,ATTRIBUTE_LIGHT)>0 
+    and MacroCheck()
     then
       local OppAtt = Get_Card_Att_Def(OppMon(),"attack",">",nil,"attack")
       Cards[i].attack = Cards[i].attack + OppAtt
@@ -1881,6 +1909,19 @@ function ApplyATKBoosts(Cards)
     d.AttackBoost(Cards)
   end
   
+  -- Moon Mirror Shield
+  for i=1,#Cards do
+    local c = Cards[i]
+    local equips = c:get_equipped_cards()
+    if HasIDNotNegated(equips,19508728,true) then
+      local list = OppMon()
+      if CurrentOwner(c)==2 then
+        list = AIMon()
+      end
+      c.attack=GetHighestAttDef(list)+100
+    end
+  end
+  
   -- unknown face-down monsters
   for i=1,#Cards do
     local c = Cards[i]
@@ -1974,55 +2015,6 @@ function Sort_List_By(Cards, Level, Attribute, Race, Oper, Type)
   return result
 end
 
-----------------------------------------
--- Saves the current state of the field.
-----------------------------------------
-function SaveState()
-  GlobalOppST   = AI.GetOppSpellTrapZones()
-  GlobalOppMon  = AI.GetOppMonsterZones()
-  --GlobalOppHand = AI.GetOppHand()
-end
-
-
---------------------------------------------
--- Backs up the currently saved field state.
---------------------------------------------
-function BackupState()
-  GlobalOppST2   = GlobalOppST
-  GlobalOppMon2  = GlobalOppMon
-  --GlobalOppHand2 = GlobalOppHand
-end
-
-
-----------------------------------------------------------
--- Compares the current field state with the latest backup
--- state, and returns the card that has changed the
--- field state in some way, or 0 if nothing has changed.
-----------------------------------------------------------
-function GetPlayedCard()
-  BackupState()
-  SaveState()
-  for i=1,#GlobalOppST do
-  if GlobalOppST2 ~= nil then
-    if CardsEqual(GlobalOppST[i], GlobalOppST2[i]) ~= 1 then
-      if GlobalOppST[i] ~= false then
-        return GlobalOppST[i]
-      end
-    end
-  end
-  end
-  for i=1,#GlobalOppMon do
-  if GlobalOppMon2 ~= nil then 
-    if CardsEqual(GlobalOppMon[i], GlobalOppMon2[i]) ~= 1 then
-      if GlobalOppMon[i] ~= false then
-        return GlobalOppMon[i]
-      end
-    end
-  end
-  end
-  return 0
-end
-
 
 ----------------------------------------------------------
 -- Compares each field of 2 specified cards. Returns True
@@ -2034,6 +2026,11 @@ function CardsEqual(Card1, Card2)
   end
   if Card2 and Card2.GetCode then
     Card2=GetCardFromScript(Card2)
+  end
+  if type(Card1)~="table" or type(Card2)~="table" then
+    print("Warning: CardsEqual invalid cards")
+    PrintCallingFunction()
+    return false
   end
   return Card1 and Card2 and Card1.cardid==Card2.cardid
 end

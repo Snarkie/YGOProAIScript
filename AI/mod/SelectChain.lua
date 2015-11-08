@@ -62,29 +62,7 @@ function OnSelectChain(cards,only_chains_by_player,forced)
 	  end
     end
   end
-  SaveCards() 
 
-  ---------------------------------------------------------
-  -- Compare the current field's state with the previously
-  -- saved field state, and get the card  that the opponent
-  -- has played or modified. If the opponent did summon,
-  -- modify or activate something, this variable will be
-  -- non-zero.
-  ---------------------------------------------------------
-  local OppCard = GetPlayedCard()
-  local OppCardType = 0
-  local OppCardOwner = 0
-
-  --------------------------------------------------
-  -- Nil values give me debug nightmares so here's a
-  -- "catch" routine to determine a type value of a
-  -- non-existant card.
-  --------------------------------------------------
-  if OppCard ~= 0 then
-    OppCardType = OppCard.type
-    OppCardOwner = OppCard.owner
-  end
-  
   ---------------------------------------------
   -- Don't activate anything if the AI controls
   -- a face-up Light and Darkness Dragon.
@@ -203,26 +181,6 @@ result = 0
   -----------------------------------------------------
   if ChainAllowed == 1 then
   
-  
-  ------------------------------------------
-  -- If the opponent activated a Trap card,
-  -- the AI should chain "Royal Decree" and 
-  -- "Trap Stun" first.
-  ------------------------------------------
-   --[[ for i=1,#cards do
-      if cards[i].id == 51452091 then
-        if Get_Card_Count_ID(AIST(),51452091, POS_FACEUP) == 0 and Get_Card_Count_ID(AIST(),59616123, POS_FACEUP) == 0 then
-		if OppCard ~= nil and OppCardOwner == 2 then
-          if bit32.band(OppCard.type,TYPE_TRAP) > 0 and OppCard.position == POS_FACEUP then
-             GlobalActivatedCardID = cards[i].id
-            return 1,i
-           end
-         end
-       end
-     end
-   end]]--
-    
-
   -------------------------------------------------
   -- Activate Torrential Tribute if the opponent
   -- controls at least 2 more monsters than the AI.

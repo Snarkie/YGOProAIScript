@@ -164,6 +164,9 @@ function SummonExtraDeck(cards,prio)
   if HasIDNotNegated(SpSum,31437713) and SummonHeartlanddracoFinish() then
     return XYZSummon()
   end
+  if HasIDNotNegated(SpSum,56840427,SummonUtopiaRay,1) then
+    return XYZSummon()
+  end
   if HasIDNotNegated(SpSum,56832966,SummonUtopiaLightningFinish,2) then
     return XYZSummon()
   end
@@ -353,19 +356,25 @@ function SummonExtraDeck(cards,prio)
   end
 
 -- Rank 4
+  if HasIDNotNegated(SpSum,56832966,SummonUtopiaLightning,1) then
+    return XYZSummon()
+  end
   if HasID(SpSum,18326736,SummonPtolemaios) then
     return XYZSummon(nil,18326736)
   end
-  if HasID(SpSum,94380860,SummonRagnaZero) then            -- Ragna Zero
+  if HasID(SpSum,84013237,SummonUtopia,1) then
+    return XYZSummon()
+  end 
+  if HasID(SpSum,94380860,SummonRagnaZero) then
     return XYZSummon()
   end  
-  if HasIDNotNegated(SpSum,22653490,SummonChidori,1) then              -- Chidori
+  if HasIDNotNegated(SpSum,22653490,SummonChidori,1) then 
     return XYZSummon()
   end
-  if HasIDNotNegated(SpSum,48739166) and SummonSharkKnight() then          -- SHArk Knight
+  if HasIDNotNegated(SpSum,48739166) and SummonSharkKnight() then 
     return XYZSummon()
   end
-  if HasIDNotNegated(SpSum,82633039) and SummonSkyblaster() then           -- Skyblaster
+  if HasIDNotNegated(SpSum,82633039) and SummonSkyblaster() then 
     return XYZSummon()
   end
   if HasID(SpSum,26329679,SummonOmega) then 
@@ -377,7 +386,10 @@ function SummonExtraDeck(cards,prio)
   if HasIDNotNegated(SpSum,61344030) and SummonPaladynamo() then
     return XYZSummon()
   end
-  if HasIDNotNegated(SpSum,22653490,SummonChidori,2) then              -- Chidori
+  if HasID(SpSum,84013237,SummonUtopia,2) then
+    return XYZSummon()
+  end 
+  if HasIDNotNegated(SpSum,22653490,SummonChidori,2) then 
     return XYZSummon()
   end
   if HasIDNotNegated(SpSum,06511113,SummonRafflesia) then
@@ -392,7 +404,7 @@ function SummonExtraDeck(cards,prio)
   if HasIDNotNegated(Act,91499077) and UseGagagaSamurai() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasIDNotNegated(SpSum,34086406) and SummonLavalvalChain() then -- Lavalval Chain
+  if HasIDNotNegated(SpSum,34086406) and SummonLavalvalChain() then
     return XYZSummon()
   end
   if HasIDNotNegated(Act,34086406,false,545382497) and UseLavalvalChain() then   
@@ -420,7 +432,10 @@ function SummonExtraDeck(cards,prio)
   if HasIDNotNegated(SpSum,93568288) and SummonRhapsody() then
     return XYZSummon()
   end
-  if HasIDNotNegated(SpSum,12014404) and SummonCowboyAtt() then -- Cowboy
+  if HasID(SpSum,84013237,SummonUtopia,3) then
+    return XYZSummon()
+  end 
+  if HasIDNotNegated(SpSum,12014404) and SummonCowboyAtt() then
     return XYZSummon()
   end
   if HasIDNotNegated(Rep,12014404,nil,nil,POS_DEFENCE,UseCowboyAtt) then
@@ -430,7 +445,7 @@ function SummonExtraDeck(cards,prio)
     Global1PTGunman = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasIDNotNegated(SpSum,12014404) and SummonCowboyDef(2) then -- Cowboy
+  if HasIDNotNegated(SpSum,12014404) and SummonCowboyDef(2) then 
     return XYZSummon()
   end
   
@@ -483,7 +498,30 @@ function SummonExtraDeck(cards,prio)
   if HasID(Act,73176465) and UseFelis() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+  if HasID(Act,19508728,UseMoonMirror) then
+    return Activate()
+  end
+  for i=1,#Rep do
+    local c=Rep[i]
+    local equips = c:get_equipped_cards()
+    if HasIDNotNegated(equips,19508728,true)
+    and FilterPosition(c,POS_DEFENCE)
+    then
+      return Repo()
+    end
+  end
   return nil
+end
+function MoonMirrorFilter(c)
+  return Affected(c,TYPE_SPELL)
+  and Targetable(c,TYPE_SPELL)
+  and CanAttack(c)
+  and BattlePhaseCheck(c)
+  and CurrentOwner(c)==1
+end
+function UseMoonMirror(c)
+  return OppHasStrongestMonster()
+  and CardsMatchingFilter(AIMon(),MoonMirrorFilter)
 end
 function UseFelis()
   return Duel.GetCurrentPhase()==PHASE_MAIN2 and DestroyCheck(OppMon())>0
@@ -699,7 +737,13 @@ function SummonRagnaZero(card)
   end
   return false
 end
-function SummonImpKing(c)
+function SummonImpKing(c,mode)
+  if mode == 1 then
+    return MP2Check(c) 
+    and CardsMatchingFilter(AIDeck(),FilterRace,RACE_REPTILE)>0
+    and NotNegated(c)
+    and OppGetStrongestAttDef() < 2300
+  end
   return MP2Check(c) 
   and (CardsMatchingFilter(AIDeck(),FilterRace,RACE_REPTILE)>0
   and NotNegated(c)
@@ -1254,7 +1298,8 @@ function SummonUtopiaLightningFinish(c,mode)
       end
     else
       if HasID(AIExtra(),56832966,true)
-      and HasID(AIMon(),84013237,true)
+      and (HasID(AIMon(),84013237,true)
+      or HasID(AIMon(),56840427,true))
       and CardsMatchingFilter(OppMon(),LightningFinishFilter,c)>0 
       then
         return true
@@ -1263,6 +1308,66 @@ function SummonUtopiaLightningFinish(c,mode)
   end
   return false
 end
+function LightningFilter(c,source)
+  if NotNegated(source) then source.attack=5000 end
+  return CanWinBattle(source,{c})
+end
+function LightningPrioFilter(c,source)
+  return LightningFilter(c,source) 
+  and NotNegated(source)
+  and (c.id == 27279764
+  or CardsMatchingFilter(AIMon(),function(card) 
+    return SelectAttackConditions(c,card) 
+    and not FilterID(card,56832966)
+   end)==0
+  or FilterPrivate(c)
+  or FilterAttackMin(c,2500) 
+  and not Targetable(c,TYPE_MONSTER)
+  or CanFinishGame(source,c))
+end
+function SummonUtopiaLightning(c,mode)
+  if mode == 1 
+  and HasID(AIMon(),84013237,true) 
+  or HasID(AIMon(),56840427,true)
+  then
+    return true
+  end
+  if mode == 2 
+  and CardsMatchingFilter(OppMon(),LightningPrioFilter,c)>0
+  and BattlePhaseCheck()
+  then
+    return true
+  end
+  if mode == 3 and OppHasStrongestMonster() 
+  and CardsMatchingFilter(OppMon(),LightningFilter,c)>0
+  and BattlePhaseCheck()
+  then
+    return true
+  end
+end
+function SummonUtopiaRay(c,mode)
+  local c = FindID(56832966,AIExtra()) 
+  if mode == 1 and c and HasID(AIMon(),84013237,true) then
+    return true
+  end
+  return false
+end
+function SummonUtopia(c,mode)
+  local c = FindID(56832966,AIExtra()) 
+  if mode == 1 and c and SummonUtopiaLightning(c,2) then
+    return true
+  end
+  if mode == 2 and c and SummonUtopiaLightning(c,3) then
+    return true
+  end
+  if mode == 3 and CanWinBattle(c,OppMon()) 
+  and not c and MP2Check(2500)
+  then
+    return true
+  end
+  return false
+end
+
 function GaiaFilter(c)
   return (FilterRank(c,5) or FilterRank(c,6))
   and c.attack<2600 and c.xyz_material_count==0
@@ -2327,6 +2432,9 @@ function GenericCard(cards,min,max,id,c)
   if c then
     id = c.id
   end 
+  if id == 19508728 then -- Moon Mirror Shield
+    return BestTargets(cards,1,TARGET_DESTROY,MoonMirrorFilter)
+  end
   if id == 06511113 then
     return RafflesiaTarget(cards,min)
   end 

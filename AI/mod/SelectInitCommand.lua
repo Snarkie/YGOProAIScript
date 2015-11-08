@@ -91,7 +91,6 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
   GlobalAIIsAttacking = nil
   ResetOncePerTurnGlobals()
   GlobalBPAllowed = to_bp_allowed
-  SaveCards()
   SurrenderCheck()
 
   ---------------------------------------

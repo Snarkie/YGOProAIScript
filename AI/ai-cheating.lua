@@ -14,5 +14,4 @@ function OnStartOfDuel()
   AI.Chat("AI script version "..Version)
   AI.Chat("You selected a cheating AI")
 	AI.Chat("The AI will recover "..LP_RECOVER.." LP and draw "..EXTRA_DRAW.." additional cards each turn")
-  SaveState()
 end

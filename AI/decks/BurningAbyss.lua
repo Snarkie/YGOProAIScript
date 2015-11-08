@@ -43,6 +43,7 @@ AddPriority({
 [20036055] = {4,2,1,1,3,1,1,1,1,1,},             -- BA Traveler
 [63356631] = {1,1,1,1,1,1,1,1,1,1,PWWBCond},     -- PWWB
 [71587526] = {1,1,1,1,1,1,1,1,1,1,KarmaCutCond}, -- Karma Cut
+[00006780] = {1,1,1,1,1,1,1,1,1,1},              -- Painful Escape
 
 [00601193] = {1,1,10,1,1,1,1,1,1,1,VirgilCond},  -- BA Virgil
 [72167543] = {1,1,1,1,1,1,1,1,1,1},              -- Downerd Magician
@@ -213,7 +214,8 @@ function BarbarFinish(cards)
 end
 function BarbarCond(loc,c)
   if loc == PRIO_TOHAND then
-    return BarbarDamage()>=AI.GetPlayerLP(2)
+    return BarbarDamage()>=AI.GetPlayerLP(2) 
+    and not FilterLocation(c,LOCATION_DECK)
   end
   if loc == PRIO_TOFIELD then
     return BarbarDamage()>=AI.GetPlayerLP(2)
@@ -491,6 +493,21 @@ function RepoF0(c)
   or FilterPosition(c,POS_FACEUP_ATTACK)
   and Negated(c)
 end
+function UsePainfulEscape(c)
+  local cards = UseLists(AIDeck(),AIGrave())
+  local targets = {}
+  for i=1,#AIMon() do
+    local c = AIMon()[i]
+    if CardsMatchingFilter(cards,PainfulEscapeFilter,c)>0 then
+      targets[#targets+1]=c
+    end
+  end
+  if PriorityCheck(targets,PRIO_TOGRAVE,1)>4
+  then
+    return true
+  end
+  return false
+end
 function BAInit(cards)
   GlobalPreparation = nil
   local Act = cards.activatable_cards
@@ -623,8 +640,11 @@ function BAInit(cards)
   if HasID(Sum,47728740) and SummonBA() then
     return {COMMAND_SUMMON,CurrentIndex}
   end
-  if HasID(Sum,00734741) and SummonBA() then
+  if HasID(Sum,00006780,UsePainfulEscape) then
     return {COMMAND_SUMMON,CurrentIndex}
+  end
+  if HasID(Act,00734741) and SummonBA() then
+    return Activate()
   end
   if HasID(Act,84764038,false,nil,LOCATION_HAND) and SSScarm(Act[CurrentIndex]) then
     OPTSet(84764038)
@@ -835,6 +855,16 @@ function F0Check(c,targets,atk)
   and (FilterLocation(c,LOCATION_EXTRA) 
   or Duel.GetLocationCount(player_ai,LOCATION_MZONE)>0)
 end
+function PainfulEscapeTarget(cards)
+  if GlobalCardMode == 1 then
+    GlobalCardMode = nil
+    return GlobalTargetGet(cards,true)
+  end
+  if LocCheck(cards,LOCATION_MZONE) then
+    return Add(cards,PRIO_TOGRAVE)
+  end
+  return Add(cards)
+end
 function BACard(cards,min,max,id,c)
   if not c and GlobalSSCardID == 27552504 then
     return BeatriceSummonTarget(cards)
@@ -925,6 +955,9 @@ function BACard(cards,min,max,id,c)
   end
   if id == 16195942 then -- Dark Rebellion Dragon
     return BestTargets(cards,min)
+  end
+  if id == 00006780 then
+    return PainfulEscapeTarget(cards)
   end
   return nil
 end
@@ -1184,6 +1217,64 @@ function ChainF0(c)
   end
   return false
 end
+function PainfulEscapeFilter(c,source)
+  return FilterAttribute(c,source.attribute)
+  and FilterRace(c,source.race)
+  and FilterLevel(c,source.level)
+  and not FilterID(c,source.id)
+end
+function ChainPainfulEscape(c)
+  local cards = UseLists(AIDeck(),AIGrave())
+  local targets = {}
+  for i=1,#AIMon() do
+    local c = AIMon()[i]
+    if CardsMatchingFilter(cards,PainfulEscapeFilter,c)>0 then
+      targets[#targets+1]=c
+    end
+  end
+  for i=1,#targets do
+    local c = targets[i]
+    if RemovalCheckCard(c)
+    or NegateCheckCard(c) 
+    and Duel.GetCurrentChain()>0
+    then
+      GlobalCardMode = 1
+      GlobalTargetSet(c)
+      return true
+    end
+  end
+  if RemovalCheckCard(c) then
+    return true
+  end
+  if Duel.GetCurrentPhase()==PHASE_BATTLE
+  and Duel.GetTurnPlayer()==1-player_ai
+  then
+    local aimon,oppmon = GetBattlingMons()
+    if aimon and oppmon 
+    and WinsBattle(oppmon,aimon)
+    and ListHasCard(targets,GetCardFromScript(aimon))
+    then
+      GlobalCardMode = 1
+      GlobalTargetSet(c)
+      return true
+    end
+  end
+  if Duel.CheckTiming(TIMING_END_PHASE)
+  and Duel.GetTurnPlayer()==1-player_ai
+  and Duel.GetCurrentChain()==0
+  and PriorityCheck(targets,PRIO_TOGRAVE,1)>4
+  then
+    return true
+  end
+  local i = HasID(targets,36553319,true,OPTCheck,36553319)
+  if i and HasPriorityTarget(OppMon(),false,nil,FarfaFilter)
+  then
+    GlobalCardMode = 1
+    GlobalTargetSet(targets[i])
+    return true
+  end
+  return false
+end
 function BAChain(cards)
   if HasID(cards,20036055,ChainTraveler) then
     return {1,CurrentIndex}
@@ -1237,7 +1328,10 @@ function BAChain(cards)
   if HasID(cards,71587526) and ChainKarmaCut() then
     return {1,CurrentIndex}
   end
-  if HasID(cards,63356631) and ChainPWWB() then
+  if HasID(cards,00006780,ChainPainfulEscape) then
+    return Chain()
+  end
+  if HasID(cards,65305468,ChainF0) then
     return {1,CurrentIndex}
   end
   if HasID(cards,60743819,ChainFiendGriefing) then

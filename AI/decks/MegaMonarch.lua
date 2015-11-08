@@ -538,7 +538,7 @@ function UseEidos(c,mode)
   and CardsMatchingFilter(AIDeck(),VassalFilter,95457011)>0
   and OPTCheck(95457011)
   and TributeFodder()<2)
-  and (NormalSummonCount()<2 and HasID(AIDeck(),59463312,true) or not NormalSummonCheck())
+  and (NormalSummonCount()<2 and HasID(AIDeck(),59463312,true,OPTCheck(594633121)) or not NormalSummonCheck())
   then
     OPTSet(59463312)
     return true
@@ -711,6 +711,27 @@ function SummonThestalos(c,mode,check)
   end
   return false
 end
+function OneforoneFilter(c)
+  return c.level<5
+  or CardsMatchingFilter(AIHand(),FilterLevelMin,6)>1
+  or c.id == 23064604 and CardsMatchingFilter(AIHand(),MonarchST)>0
+end
+function UseOneforone(c,mode)
+  if mode == 1 
+  and (TributeSummonsM(1,1)>0
+  and TributeFodder()==0
+  or TributeSummonsM(2,1)>0
+  and HasIDNotNegated(AIDeck(),95457011,true)
+  and CardsMatchingFilter(AIDeck(),VassalFilter,95457011)>0
+  and OPTCheck(95457011)
+  and TributeFodder()<2)
+  and (NormalSummonCount()<2 and HasID(AIDeck(),59463312,true,OPTCheck(594633121)) or not NormalSummonCheck())
+  and CardsMatchingFilter(AIHand(),OneforoneFilter)>0
+  then
+    return true
+  end
+  return false
+end
 function MegaMonarchInit(cards)
   local Act = cards.activatable_cards
   local Sum = cards.summonable_cards
@@ -746,6 +767,9 @@ function MegaMonarchInit(cards)
     return COMMAND_ACTIVATE,CurrentIndex
   end
   if HasIDNotNegated(Act,22842126,UsePandeity,1) then
+    return COMMAND_ACTIVATE,CurrentIndex
+  end
+  if HasID(Act,02295440,UseOneforone,1) then
     return COMMAND_ACTIVATE,CurrentIndex
   end
   if HasID(Act,59463312,UseEidos,1) then
@@ -1018,6 +1042,12 @@ function MegaThestalosFilter(c)
 end
 function MegaThestalosTarget(cards)
   return BestTargets(cards,1,TARGET_TOGRAVE,MegaThestalosFilter)
+end
+function OneforoneTarget(cards)
+  if LocCheck(cards,LOCATION_HAND,true) then
+    return Add(cards,PRIO_TOGRAVE,1,OneforoneFilter)
+  end
+  return Add(cards,PRIO_TOFIELD)
 end
 function MegaMonarchCard(cards,min,max,id,c)
   if not c and GlobalStormforth==Duel.GetTurnCount()

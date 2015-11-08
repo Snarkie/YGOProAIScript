@@ -7,6 +7,7 @@ AddPriority({
 [02273734] = {6,4,7,1,3,1,6,1,1,1,AltairCond},        -- Satellarknight Altair
 [38667773] = {5,3,8,3,4,1,5,1,1,1,VegaCond},          -- Satellarknight Vega
 [63274863] = {7,2,6,2,6,1,1,1,1,1,SiriusCond},        -- Satellarknight Sirius
+[01050186] = {9,2,5,2,4,1,1,1,1,1,UnukCond},          -- Satellarknight Unukalhai
 [38331564] = {8,4,9,4,3,1,1,1,1,1,ScepterCond},       -- Star Seraph Scepter
 [91110378] = {7,3,4,0,4,1,1,1,1,1,SovereignCond},     -- Star Seraph Sovereign
 [37742478] = {6,4,5,0,1,1,1,1,1,1,HonestCond},        -- Honest
@@ -40,6 +41,15 @@ function DenebCond(loc)
     return OPTCheck(75878039)
   end
   if loc == PRIO_TOHAND or loc == PRIO_TOGRAVE then
+    return not HasAccess(75878039)
+  end
+  return true
+end
+function UnukCond(loc,c)
+  if loc == PRIO_TOFIELD then
+    return OPTCheck(01050186) and not HasAccess(75878039)
+  end
+  if loc == PRIO_TOHAND then
     return not HasAccess(75878039)
   end
   return true
@@ -466,6 +476,9 @@ function SatellarknightOnSelectCard(cards, minTargets, maxTargets,triggeringID,t
   if ID == 75878039 then
     return SatellarknightAdd(cards)
   end
+  if ID == 01050186 then
+    return SatellarknightAdd(cards,PRIO_TOGRAVE)
+  end
   if ID == 02273734 then
     return SatellarknightAdd(cards,PRIO_TOFIELD)
   end
@@ -531,10 +544,14 @@ function ChainCotH2()
   if RemovalCheck(97077563) and SatellarknightPriorityCheck(AIGrave(),PRIO_TOFIELD)>1 then
     return true
   end
-  if Duel.GetCurrentPhase()==PHASE_END and Duel.CheckTiming(TIMING_END_PHASE) and Duel.GetTurnPlayer() == 1-player_ai then
-    return OverExtendCheck() and SatellarknightPriorityCheck(AIGrave(),PRIO_TOFIELD)>4
-    and not (CardsMatchingFilter(AIGrave(),SatellarknightFilter)==1
-    and HasID(AIGrave(),75878039) and HasID(AIHand(),02273734))
+  if Duel.GetCurrentPhase()==PHASE_END 
+  and Duel.CheckTiming(TIMING_END_PHASE) 
+  and Duel.GetTurnPlayer() == 1-player_ai 
+  and OverExtendCheck() and SatellarknightPriorityCheck(AIGrave(),PRIO_TOFIELD)>4
+  and not (CardsMatchingFilter(AIGrave(),SatellarknightFilter)==1
+  and HasID(AIGrave(),75878039,true) and HasID(AIHand(),02273734,true))
+  then
+    return true
   end
 end
 function ChainChaliceAtk()
@@ -630,7 +647,7 @@ end
 
 SatellarknightAtt={
   42589641,63504681,82633039,21501505,
-  58069384,10443957,
+  58069384,10443957,75878039,01050186
 }
 SatellarknightDef={
   91110378,38667773,17412721,93568288,

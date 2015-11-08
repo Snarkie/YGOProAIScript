@@ -26,7 +26,6 @@ function OnSelectOption(options)
       return result
     end
   end
-  
   for i=1,#options do -- Ptolemy M7
     if options[i]==38495396*16+2 
     and HasPriorityTarget(OppMon(),false,nil,PtolemyFilter)

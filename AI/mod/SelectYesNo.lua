@@ -23,6 +23,7 @@ function OnSelectYesNo(description_id)
     result = d.YesNo(description_id)
   end
   if result~=nil then return result end
+
 	if description_id == 30 then
     local cards = nil
     local attacker = GetAttacker()
@@ -62,6 +63,13 @@ function OnSelectYesNo(description_id)
   if description_id == 1044887489 then -- F0 protect
     GlobalActivatedCardID = 65305468
     return 1
+  end
+  if description_id == 30100551*16 then -- Minerva
+    if DestroyCheck(OppField(),true,true)>0 then
+      return 1
+    else
+      return 0
+    end
   end
 	return -1
 end

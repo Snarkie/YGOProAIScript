@@ -19,12 +19,14 @@ AddPriority({
 [72930878] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Black Sonic
 
 [81983656] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Hawk Joe
-[69031175] = {1,1,7,1,3,1,1,1,1,1,nil},         -- Armor Master
+[69031175] = {1,1,5,1,3,1,1,1,1,1,nil},         -- Armor Master
 [73580471] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Black Rose
 [95040215] = {1,1,8,1,2,1,1,1,1,1,nil},         -- Nothung
 [98012938] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Vulcan
 [73347079] = {1,1,1,1,7,1,1,1,1,1,ForceStrixCond},-- Force Strix
 [76067258] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Master Key Beetle
+[16051717] = {1,1,9,6,1,1,1,1,1,1,RaikiriCond}, -- Raikiri
+
 
 -- Crow Tag Force
 
@@ -220,6 +222,12 @@ function CastelCond(loc,c)
   if loc == PRIO_TOGRAVE then
     return FilterLocation(c,LOCATION_MZONE)
     and c.xyz_material_count==0
+  end
+  return true
+end
+function RaikiriCond(loc,c)
+  if loc == PRIO_TOFIELD then
+    return DestroyCheck(OppField(),nil,nil,nil,RaikiriFilter)>0
   end
   return true
 end
@@ -472,6 +480,17 @@ function SummonVulcanBW(c)
   return DeckCheck(DECK_BLACKWING) and SummonVulcan(c)
   and BounceTargets(AIField())>0
 end
+function SummonRaikiri(c,cards)
+  return DestroyCheck(OppField(),nil,nil,nil,RaikiriFilter)>0
+  and (CardsMatchingFilter(cards,RaikiriSummonFilter(c))>0
+  or CardsMatchingFilter(AIMon(),BlackwingFilter)>2)
+end
+function UseRaikiri(c)
+  return DestroyCheck(OppField(),nil,nil,nil,RaikiriFilter)>0
+end
+function RaikiriSummonFilter(c)
+  return BlackwingFilter(c) and not FilterType(c,TYPE_SYNCHRO)
+end
 function BlackwingInit(cards)
   local Act = cards.activatable_cards
   local Sum = cards.summonable_cards
@@ -479,6 +498,23 @@ function BlackwingInit(cards)
   local Rep = cards.repositionable_cards
   local SetMon = cards.monster_setable_cards
   local SetST = cards.st_setable_cards
+  if HasIDNotNegated(Act,16051717,true)
+  and DestroyCheck(OppField())>CardsMatchingFilter(AIMon(),BlackwingFilter)-1
+  then
+    for i=1,#Sum do
+      if RaikiriSummonFilter(Sum[i]) then
+        return Summon(i)
+      end
+    end
+    for i=1,#SpSum do
+      if RaikiriSummonFilter(SpSum[i]) then
+        return SpSummon(i)
+      end
+    end
+  end
+  if HasIDNotNegated(Act,16051717,UseRaikiri)then
+    return Activate()
+  end
   if HasIDNotNegated(Act,91351370) and #Sum>0 then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -505,6 +541,9 @@ function BlackwingInit(cards)
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasIDNotNegated(SpSum,81983656) and SummonHawkJoe(1) then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasIDNotNegated(SpSum,16051717,SummonRaikiri,UseLists(Sum,SpSum)) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasIDNotNegated(SpSum,98012938) and SummonVulcanBW() then
@@ -720,9 +759,20 @@ function DDCrowTarget(cards)
   end
   return BestTargets(cards,1,TARGET_BANISH)
 end
+function RaikiriFilter(c)
+  return DestroyFilter(c)
+  and Affected(c,TYPE_MONSTER,7)
+end
+function RaikiriTarget(cards,max)
+  local count = math.max(1,math.min(CardsMatchingFilter(OppField(),RaikiriFilter),max))
+  return BestTargets(cards,count,TARGET_DESTROY)
+end
 function BlackwingCard(cards,min,max,id,c)
   if c then
     id = c.id
+  end
+  if id == 16051717 then
+    return RaikiriTarget(cards,max)
   end
   if id == 02009101 then 
     return BestTargets(cards,1,TARGET_OTHER)

@@ -31,7 +31,7 @@ function ShaddollStartup(deck)
   
 end
 
-ShaddollIdentifier = 06417578 -- El-Fusion 
+ShaddollIdentifier = 77505534 -- Shadow Games
 
 DECK_SHADDOLL = NewDeck("Shaddoll",ShaddollIdentifier,ShaddollStartup) 
 

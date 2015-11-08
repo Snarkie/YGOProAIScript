@@ -16,6 +16,7 @@ AddPriority({
 [79816536] = {9,4,1,1,1,1,1,1,1,1,SummonersCond},     -- Summoners Art
 [17639150] = {8,2,1,1,1,1,1,1,1,1,SacrificeCond},     -- Qliphort Sacrifice
 [25067275] = {1,1,1,1,1,1,1,1,1,1,SADCond},           -- Swords At Dawn
+[31222701] = {10,1,1,1,1,1,1,1,1,1,WaveringEyesCond}, -- Wavering Eyes
 
 [04450854] = {5,2,1,1,1,1,1,1,1,1,ApoCond},           -- Apoqliphort
 [05851097] = {3,1,1,1,0,0,1,1,1,1,nil},               -- Vanitys Emptiness
@@ -149,6 +150,17 @@ function StealthCond(loc,c)
   end
   if loc == PRIO_TOFIELD then
     return SkillDrainCheck()
+  end
+  return true
+end
+function WaveringEyesCondCond(loc,c)
+  if loc == PRIO_TOHAND then
+    local cards = UseLists(AIHand(),AllPendulum())
+    if CardsMatchingFilter(cards,FilterType,TYPE_PENDULUM)>1 
+    and HasID(AIDeck(),65518099,true)
+    then
+      return true
+    end
   end
   return true
 end
@@ -357,6 +369,41 @@ function UseSAD(sum)
   return UnchainableCheck(25067275) and CardsMatchingFilter(AIMon(),QliphortFilter)>0
   and (CardsMatchingFilter(sum,FilterLevel,7)>0 or CardsMatchingFilter(sum,FilterLevel,8)>0)
 end
+function SetScaleWaveringEyes(c)
+  local count = CardsMatchingFilter(AllPendulum(),WaveringEyesFilter,true) 
+  if HasIDNotNegated(AICards(),31222701,true,OPTCheck,31222701)
+  and FilterLocation(c,LOCATION_HAND)
+  and FilterType(c,TYPE_PENDULUM)
+  and (count<2 and HasID(AIDeck(),65518099,true)
+  and count+CardsMatchingFilter(AIHand(),FilterType,TYPE_PENDULUM)>1
+  or count==2 and CardsMatchingFilter(OppField(),WaveringEyesFilter2)>0
+  or count==3 and HasID(AIDeck(),31222701,true))
+  then
+    return true
+  end
+  return false
+end
+function WaveringEyesFilter(c)
+  return Affected(c,TYPE_SPELL)
+  and DestroyCheck(c)
+end
+function WaveringEyesFilter2(c)
+  return Affected(c,TYPE_SPELL)
+  and Targetable(c,TYPE_SPELL)
+  and not ListHasCard(OppPendulum(),c)
+end
+function UseWaveringEyes(c,mode)
+  if mode == 1 then
+    local count = CardsMatchingFilter(AllPendulum(),WaveringEyesFilter,true)
+    if count>1 and HasID(AIDeck(),65518099,true)
+    or count>2 and CardsMatchingFilter(OppField(),WaveringEyesFilter2)>0
+    or count>3 and HasID(AIDeck(),31222701,true)
+    then
+      return true
+    end
+  end
+  return false
+end
 function QliphortInit(cards)
   local Act = cards.activatable_cards
   local Sum = cards.summonable_cards
@@ -365,7 +412,7 @@ function QliphortInit(cards)
   local SetMon = cards.monster_setable_cards
   local SetST = cards.st_setable_cards
   GlobalQliphortNormalSummon = nil
-  if HasIDNotNegated(Act,65518099,false,nil,nil,nil,FilterLocation,LOCATION_SZONE) 
+  if HasIDNotNegated(Act,65518099,false,FilterLocation,LOCATION_SZONE) 
   and UseTool(Act[CurrentIndex]) and HasID(AIST(),43241495,true) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -390,9 +437,18 @@ function QliphortInit(cards)
     GlobalCardMode = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Act,65518099,false,nil,nil,nil,FilterLocation,LOCATION_HAND) 
+  if HasID(Act,65518099,false,FilterLocation,LOCATION_HAND) 
   and UseTool(Act[CurrentIndex]) then
     return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  for i=1,#Act do
+    if SetScaleWaveringEyes(Act[i]) then
+      return Activate(i)
+    end
+  end
+  if HasIDNotNegated(Act,31222701,UseWaveringEyes,1) then
+    OPTSet(31222701)
+    return Activate()
   end
   if HasID(Act,51194046) and UseMonolith() then
     return {COMMAND_ACTIVATE,CurrentIndex}
@@ -406,7 +462,7 @@ function QliphortInit(cards)
   if HasID(Act,91907707) and UseArchive() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasIDNotNegated(Act,65518099,false,nil,nil,nil,FilterLocation,LOCATION_SZONE) 
+  if HasIDNotNegated(Act,65518099,false,FilterLocation,LOCATION_SZONE) 
   and UseTool(Act[CurrentIndex]) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -556,6 +612,12 @@ function SADTarget(cards)
   end
   return Add(cards,PRIO_TOGRAVE)
 end
+function WaveringEyesTarget(cards)
+  if LocCheck(cards,LOCATION_DECK) then
+    return Add(cards)
+  end
+  return BestTargets(cards,1,PRIO_BANISH)
+end
 function QliphortCard(cards,min,max,id,c)
   if c then
     id = c.id
@@ -569,6 +631,9 @@ function QliphortCard(cards,min,max,id,c)
     end
     x = math.min(x,max)
     return Add(cards,PRIO_TOFIELD,x)
+  end
+  if id == 31222701 then
+    return WaveringEyesTarget(cards)
   end
   if id == 65518099 then -- Tool
     return Add(cards)
@@ -721,7 +786,46 @@ function ChainSAD(c)
   end
   return false
 end
+function ChainWaveringEyes(card)
+  if RemovalCheckCard(card)
+  and DestroyCheck(OppPendulum(),true)>0
+  then
+    return true
+  end
+  if not UnchainableCheck(31222701) then return false end
+  local targets = {}
+  for i=1,#AIST() do
+    local c = AIST()[i]
+    if RemovalCheckCard(i) then
+      targets[#targets+1]=c
+    end
+  end
+  if #targets>1
+  or #targets>0 and DestroyCheck(OppPendulum(),true)>0
+  then
+    return true
+  end
+  if DestroyCheck(AllPendulum(),true)>0 
+  and AI.GetPlayerLP(2)<=500
+  then
+    return true
+  end
+  if Duel.GetTurnPlayer()==1-player_ai 
+  and( DestroyCheck(OppPendulum(),true)>1 
+  or DestroyCheck(AllPendulum(),true)>2 
+  and CardsMatchingFilter(OppField(),WaveringEyesFilter2)>0 
+  or DestroyCheck(AllPendulum(),true)>3 
+  and HasID(AIDeck(),31222701,true))
+  then
+    return true
+  end
+  return false
+end
 function QliphortChain(cards)
+  if HasID(cards,31222701,ChainWaveringEyes) then
+    OPTSet(31222701)
+    return {1,CurrentIndex}
+  end
   if HasID(cards,88197162,ChainSoulTransition) then
     return {1,CurrentIndex}
   end

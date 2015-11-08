@@ -28,6 +28,11 @@ function AttackTargetSelection(cards,attacker)
   result = {}
   local atk = attacker.attack
   if NotNegated(attacker) then
+  
+    -- Utopia Lightning
+    if id == 56832966 and CanWinBattle(attacker,cards) then
+      return BestAttackTarget(cards,attacker,false,LightningPrioFilter,attacker)
+    end
     
     -- High Laundsallyn
     if id == 83519853 and CanWinBattle(attacker,cards,true) then                 
@@ -266,8 +271,39 @@ function OnSelectBattleCommand(cards,activatable)
   if result~=nil then
     return result,result2
   end
-  -- First, attack with monsters, that get beneficial effects from destroying stuff
-  --print("specific attackers")
+  
+  --print("for game")
+  -- can attack for game on a certain target
+  SortByATK(cards)
+  if #targets>0 and #cards>0 then
+    for i=1,#targets do
+      if CanFinishGame(cards[1],targets[i]) then
+        return Attack(1)
+      end
+    end
+  end
+  
+  --print("direct")
+  -- can attack directly
+  SortByATK(cards,true)
+  if #cards>0 then
+    for i=1,#cards do
+      if FilterAffected(cards[i],EFFECT_DIRECT_ATTACK) then
+        return Attack(i,true)
+      end
+    end
+  end
+  
+  -- attack with monsters, that get beneficial effects from destroying stuff
+  -- print("specific attackers")
+  
+  -- Utopia Lightning
+  if HasIDNotNegated(cards,56832966)
+  and (CanWinBattle(cards[CurrentIndex],targets) 
+  or #OppMon()==0)
+  then 
+    return Attack(CurrentIndex)
+  end
   
   -- BLS
   if HasIDNotNegated(cards,72989439) 
@@ -365,26 +401,6 @@ function OnSelectBattleCommand(cards,activatable)
   -- generic attacks
   --print("generic attackers")
 
-  --print("direct")
-  -- can attack directly
-  SortByATK(cards,true)
-  if #cards>0 then
-    for i=1,#cards do
-      if FilterAffected(cards[i],EFFECT_DIRECT_ATTACK) then
-        return Attack(i,true)
-      end
-    end
-  end
-  --print("for game")
-  -- can attack for game on a certain target
-  SortByATK(cards)
-  if #targets>0 and #cards>0 then
-    for i=1,#targets do
-      if CanFinishGame(cards[1],targets[i]) then
-        return Attack(1)
-      end
-    end
-  end
   --print("without boost")
   -- can destroy a monster without additional attack boosting cards
   SortByATK(cards,true)

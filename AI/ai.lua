@@ -1,4 +1,4 @@
-Version = "0.32b"
+Version = "0.32c"
 Experimental = true
 
 --[[
@@ -113,7 +113,6 @@ math.randomseed( require("os").time() )
 function OnStartOfDuel()
   AI.Chat("AI script version "..Version)
   --if Experimental then AI.Chat("This is an experimental AI version, it might contain bugs and misplays") end
-  SaveState()
   print("start of duel")
   -- display draws in debug console
   local e4=Effect.GlobalEffect()

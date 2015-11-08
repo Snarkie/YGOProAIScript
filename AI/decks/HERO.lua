@@ -628,7 +628,7 @@ function RepoShadowMist(c)
   end
   if FilterPosition(c,POS_FACEUP_ATTACK)
   and (not HasID(AICards(),21143940,true)
-  or #OppMon>0 and not CanWinBattle(c,OppMon()))
+  or #OppMon()>0 and not CanWinBattle(c,OppMon()))
   then
     return true
   end

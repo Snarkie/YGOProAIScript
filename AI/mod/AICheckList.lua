@@ -315,7 +315,7 @@ NSBL={
 69884162,25259669,63060238,50720316, -- Neos Alius, Goblindbergh, Blazeman,Shadow Mist
 79979666,21565445,47826112,13073850, -- Bubbleman, Atlantean Neptabyss, Poseidra, Qli Stealth
 51194046,18326736,58069384,10443957, -- Qli Monolith, Planetellarknight Ptolemaios, Cyber Dragon Nova, Infinity
-81992475,59438930 -- BA Barbar, Ghost Ogre
+81992475,59438930,01050186, -- BA Barbar, Ghost Ogre, Satellarknight Unukalhai
 }
 function NormalSummonBlacklist(CardId) 
   for i=1,#NSBL do
@@ -421,6 +421,7 @@ SSBL={
 13959634,55863245,06511113, -- Moulinglacia, Child Dragon, Rafflesia
 18326736,58069384,10443957, -- Planetellarknight Ptolemaios, Cyber Dragon Nova, Infinity
 27552504,18386170,65305468, -- Beatrice, Pilgrim, F0
+56840427,16051717,30100551, -- Utopia Ray, Raikiri, Minerva
 }
 
 
@@ -680,7 +681,7 @@ Unchainable={
 83555666,88197162,24348807,21143940, --  Ring of Destruction, Soul Transition, Lose a turn, Mask Change
 84536654,50608164,06511113,30575681, -- Form Change, Koga, Rafflesia, Treacherous, Bedwyr
 27552504,18386170,60743819,20036055, -- Beatrice, Pilgrim, Fiend Griefing, Traveler
-36553319,65305468, -- Farfa, F0
+36553319,65305468,00006780,31222701, -- Farfa, F0, Painful Escape, Wavering Eyes
 }
 function isUnchainableTogether(CardId)
   for i=1,#Unchainable do
@@ -897,7 +898,9 @@ ScriptedCards ={
 18326736,58069384,10443957,03819470, -- Planetellarknight Ptolemaios, Cyber Dragon Nova, Infinity, Seven Tools
 29401950,06511113,99590524,81992475, -- Bottomless, Rafflesia, Treacherous, BA Barbar
 27552504,18386170,60743819,20036055, -- Beatrice, Pilgrim, Fiend Griefing, Traveler
-40605147,65305468,59438930, -- Solemn Notice, F0, Ghost Ogre
+40605147,65305468,59438930,56840427, -- Solemn Notice, F0, Ghost Ogre, Utopia Ray
+16051717,30100551,00006780,31222701, -- Raikiri, Minerva, Painful Escape, Wavering Eyes
+01050186,19508728, -- Satellarknight Unukalhai, Moon Mirror Shield
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do

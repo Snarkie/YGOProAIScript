@@ -168,6 +168,7 @@ BoxerPriorityList={
 [05361647] = {4,1,7,1,9,2,1,1,1,1,GlassjawCond},  -- BB Glassjaw
 [35537251] = {5,1,6,1,3,2,1,1,1,1,ShadowCond},  -- BB Shadow
 [53573406] = {6,1,1,1,1,1,1,1,1,1,ChameleonCond},  -- Masked Chameleon
+[53573406] = {5,1,1,1,1,1,1,1,1,1,KageCond},  -- Kagetokage
 [68144350] = {7,3,3,1,7,3,1,1,1,1,SwitchitterCond},  -- BB Switchitter
 [32750341] = {4,1,3,1,5,2,1,1,1,1,SparrerCond},  -- BB Sparrer
 [79867938] = {8,1,5,1,2,2,1,1,1,1,HeadgearedCond},  -- BB Headgeared
@@ -303,6 +304,13 @@ end
 function SummonStarCestus(c)
   return NotNegated(c)
   and OppHasStrongestMonster()
+end
+function UseNovaCaesar(c)
+  local cards = SubGroup(AIGrave(),FilterLevel,4)
+  return NotNegated(c) 
+  and CardsMatchingFilter(cards,BoxerMonsterFilter,04549095)>0
+  and MP2Check(c)
+  and c.xyz_material_count<4
 end
 function SummonNovaCaesar(c)
   local cards = UseLists(SubGroup(AIMon(),FilterLevel,4),AIGrave())
@@ -538,6 +546,9 @@ function BoxerInit(cards)
     return XYZSummon()
   end
   if HasID(SpSum,71921856,SummonNovaCaesar) then
+    return XYZSummon()
+  end
+  if HasID(SpSum,11398095,SummonImpKing,1) then
     return XYZSummon()
   end
   for i=1,#Boxers do
@@ -824,7 +835,7 @@ function BoxerAttackTarget(cards,attacker)
   end
   if attacker.id == 79867938
   and HasID(AIHand(),13313278,true,ChainVeil)
-  and CardsMatchingFilter(cards,VeilFilter,cards[CurrentIndex])>0
+  and CardsMatchingFilter(cards,VeilFilter,attacker)>0
   then
     return BestAttackTarget(cards,attacker,false,VeilFilter,attacker)
   end
