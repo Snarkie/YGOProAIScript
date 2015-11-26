@@ -37,30 +37,31 @@ DECK_KOZMO = NewDeck("Kozmo",KozmoIdentifier,KozmoStartup)
 
 
 KozmoActivateBlacklist={
-00006781, -- Dark Destroyer
+55885348, -- Dark Destroyer
 20849090, -- Forerunner
-00006784, -- Dog Fighter
+29491334, -- Dog Fighter
 94454495, -- Sliprider
-00006783, -- Wickedwitch
+93302695, -- Wickedwitch
 67050396, -- Goodwitch
 31061682, -- Farmgirl
-00006782, -- Strawman
+56907986, -- Strawman
 67723438, -- Emergency Teleport
 67237709, -- Kozmotown
 43898403, -- Twin Twister
 23171610, -- Limiter Removal
 37520316, -- Mind Control
+58577036, -- Reasoning
 }
 KozmoSummonBlacklist={
-00006781, -- Dark Destroyer
+55885348, -- Dark Destroyer
 20849090, -- Forerunner
-00006784, -- Dog Fighter
+29491334, -- Dog Fighter
 94454495, -- Sliprider
-00006783, -- Wickedwitch
+93302695, -- Wickedwitch
 67050396, -- Goodwitch
 31061682, -- Farmgirl
 59438930, -- Ghost Ogre
-00006782, -- Strawman
+56907986, -- Strawman
 23434538, -- Maxx "C"
 44405066, -- Red-Eyes Flare Metal Dragon
 34945480, -- Outer God Azathot
@@ -69,21 +70,22 @@ KozmoSummonBlacklist={
 18326736, -- Planetellarknight Ptolemaeus
 }
 KozmoSetBlacklist={
+58577036, -- Reasoning
 }
 KozmoRepoBlacklist={
 }
 KozmoUnchainable={
-00006783, -- Wickedwitch
+93302695, -- Wickedwitch
 67050396, -- Goodwitch
 31061682, -- Farmgirl
 59438930, -- Ghost Ogre
-00006782, -- Strawman
+56907986, -- Strawman
 23434538, -- Maxx "C"
 43898403, -- Twin Twister
 67723438, -- Emergency Teleport
-00006781, -- Dark Destroyer
+55885348, -- Dark Destroyer
 20849090, -- Forerunner
-00006784, -- Dog Fighter
+29491334, -- Dog Fighter
 94454495, -- Sliprider
 }
 function KozmoFilter(c,exclude)
@@ -163,14 +165,14 @@ KozmoPriorityList={
 
 -- Kozmo
 
-[00006781] = {7,3,8,4,1,1,2,1,1,1,DestroyerCond},  -- Dark Destroyer
+[55885348] = {7,3,8,4,1,1,2,1,1,1,DestroyerCond},  -- Dark Destroyer
 [20849090] = {6,2,7,3,1,1,3,1,1,1,ForerunnerCond},  -- Forerunner
-[00006784] = {4,1,6,1,1,1,4,1,3,1,DogfighterCond},  -- Dog Fighter
+[29491334] = {4,1,6,1,1,1,4,1,3,1,DogfighterCond},  -- Dog Fighter
 [94454495] = {3,1,5,1,1,1,3,1,1,1,SlipriderCond},  -- Sliprider
-[00006783] = {5,1,4,1,1,1,2,1,2,1,WickedwitchCond},  -- Wickedwitch
+[93302695] = {5,1,4,1,1,1,2,1,2,1,WickedwitchCond},  -- Wickedwitch
 [67050396] = {1,1,3,1,1,1,4,1,1,1,GoodwitchCond},  -- Goodwitch
 [31061682] = {8,2,9,2,1,1,1,1,1,1,FarmgirlCond},  -- Farmgirl
-[00006782] = {2,1,2,1,1,1,3,1,1,1,StrawmanCond},  -- Strawman
+[56907986] = {2,1,2,1,1,1,3,1,1,1,StrawmanCond},  -- Strawman
 
 [37742478] = {1,1,1,1,1,1,1,1,1,1},  -- Honest
 [59438930] = {1,1,1,1,1,1,1,1,1,1},  -- Ghost Ogre
@@ -183,6 +185,7 @@ KozmoPriorityList={
 [67723438] = {1,1,1,1,1,1,1,1,1,1},  -- Emergency Teleport
 [67237709] = {9,1,1,1,1,1,1,1,1,1,KozmotownCond},  -- Kozmotown
 [43898403] = {1,1,1,1,1,1,1,1,1,1},  -- Twin Twister
+[58577036] = {1,1,1,1,1,1,1,1,1,1},  -- Reasoning
 
 [05851097] = {1,1,1,1,1,1,1,1,1,1},  -- Vanity
 [40605147] = {1,1,1,1,1,1,1,1,1,1},  -- Notice
@@ -220,7 +223,7 @@ function SummonStrawman(c)
   return true
 end
 function UseEtele(c)
-  if HasIDNotNegated(AIST(),67237709,true,nil,nil,POS_FACEUP,OPTCheck)
+  if HasIDNotNegated(AIST(),67237709,true,nil,nil,POS_FACEUP,FilterOPT)
   and CardsMatchingFilter(AICards(),KozmoRider)==0
   and CardsMatchingFilter(AIDeck(),
     function(c)return KozmoRider(c) and FilterLevelMax(c,3) end)>0
@@ -257,7 +260,7 @@ function UseStrawman(c,mode)
     if (#OppMon()>0 and not CanWinBattle(c,OppMon()) and OppHasStrongestMonster()
     or HasID(AIST(),67237709,true) 
     and not NormalSummonCheck()
-    or TurnEndCheck() and HasIDNotNegated(AIST(),67237709,true,nil,nil,POS_FACEUP,OPTCheck))
+    or TurnEndCheck() and HasIDNotNegated(AIST(),67237709,true,nil,nil,POS_FACEUP,FilterOPT))
     --or not BattlePhaseCheck())
     and CardsMatchingFilter(AIHand(),KozmoShip)>0
     then
@@ -275,7 +278,7 @@ function UseGoodwitch(c,mode)
     if (#OppMon()>0 and not CanWinBattle(c,OppMon()) and OppHasStrongestMonster()
     or HasID(AIST(),67237709,true) 
     and not NormalSummonCheck()
-    or TurnEndCheck() and HasIDNotNegated(AIST(),67237709,true,nil,nil,POS_FACEUP,OPTCheck))
+    or TurnEndCheck() and HasIDNotNegated(AIST(),67237709,true,nil,nil,POS_FACEUP,FilterOPT))
     --or not BattlePhaseCheck())
     and CardsMatchingFilter(AIHand(),KozmoShip)>0
     then
@@ -293,7 +296,7 @@ function UseWickedwitch(c,mode)
     if (#OppMon()>0 and not CanWinBattle(c,OppMon()) and OppHasStrongestMonster()
     or HasID(AIST(),67237709,true) 
     and not NormalSummonCheck()
-    or TurnEndCheck() and HasIDNotNegated(AIST(),67237709,true,nil,nil,POS_FACEUP,OPTCheck))
+    or TurnEndCheck() and HasIDNotNegated(AIST(),67237709,true,nil,nil,POS_FACEUP,FilterOPT))
     --or not BattlePhaseCheck())
     and CardsMatchingFilter(AIHand(),KozmoShip)>0
     then
@@ -301,6 +304,11 @@ function UseWickedwitch(c,mode)
     end
   end
   return false
+end
+function UseReasoning(c,mode)
+  if mode == 1 then
+    return #AIMon()==0 or OppHasStrongestMonster()
+  end
 end
 function KozmoInit(cards)
   local Act = cards.activatable_cards
@@ -324,37 +332,40 @@ function KozmoInit(cards)
   if HasIDNotNegated(Act,67237709,false,67237709*16,LOCATION_SZONE,UseKozmotown,1) then
     return Activate()
   end
+  if HasIDNotNegated(Act,58577036,UseReasoning,1) then
+    return Activate()
+  end
   if HasIDNotNegated(Act,67723438,UseEtele) then
     return Activate()
   end
   if HasID(Sum,31061682,SummonFarmgirl) then
     return Summon()
   end
-  if HasID(Sum,00006783,SummonWickedWitch) then
+  if HasID(Sum,93302695,SummonWickedWitch) then
     return Summon()
   end
   if HasID(Sum,67050396,SummonGoodWitch) then
     return Summon()
   end
-  if HasID(Sum,00006782,SummonStrawman) then
+  if HasID(Sum,56907986,SummonStrawman) then
     return Summon()
   end
-  if HasIDNotNegated(Act,00006782,false,00006782*16+1,UseStrawman,1) then
+  if HasIDNotNegated(Act,56907986,false,56907986*16+1,UseStrawman,1) then
     return Activate()
   end
-  if HasID(Act,00006782,false,00006782*16,UseStrawman,2) then
+  if HasID(Act,56907986,false,56907986*16,UseStrawman,2) then
     return Activate()
   end
-  if HasIDNotNegated(Act,67050396,false,67050396*16,UseGoodwitch,1) then
+  if HasIDNotNegated(Act,67050396,false,67050396*16,UseGoodwitch,2) then
     return Activate()
   end
-  if HasID(Act,67050396,false,67050396*16+1,UseGoodwitch,2) then
+  if HasIDNotNegated(Act,67050396,false,67050396*16+1,UseGoodwitch,1) then
     return Activate()
   end
-  if HasID(Act,00006783,false,00006783*16,UseWickedwitch,2) then
+  if HasIDNotNegated(Act,93302695,false,93302695*16,UseWickedwitch,2) then
     return Activate()
   end
-  if HasIDNotNegated(Act,00006783,false,00006783*16+1,UseWickedwitch,1) then
+  if HasIDNotNegated(Act,93302695,false,93302695*16+1,UseWickedwitch,1) then
     return Activate()
   end
   if HasID(Act,31061682,false,UseFarmgirl,1) then
@@ -446,19 +457,19 @@ function KozmoCard(cards,min,max,id,c)
   if id == 67723438 then
     return Eteletarget(cards)
   end
-  if id == 00006781 then
+  if id == 55885348 then
     return DestroyerTarget(cards)
   end 
   if id == 20849090 then
     return ForerunnerTarget(cards)
   end 
-  if id == 00006784 then
+  if id == 29491334 then
     return DogFighterTarget(cards)
   end 
   if id == 94454495 then
     return SlipriderTarget(cards)
   end 
-  if id == 00006783 then
+  if id == 93302695 then
     return WickedwitchTarget(cards)
   end 
   if id == 67050396 then
@@ -467,7 +478,7 @@ function KozmoCard(cards,min,max,id,c)
   if id == 31061682 then
     return FarmgirlTarget(cards)
   end 
-  if id == 00006782 then
+  if id == 56907986 then
     return StrawmanTarget(cards)
   end   
   if id == 67237709 then
@@ -538,7 +549,7 @@ function ChainWickedwitch(c,mode)
       if WinsBattle(oppmon,aimon) 
       and CardsEqual(c,aimon)
       and (CardsMatchingFilter(AIHand(),FilterAttackMin,oppmon:GetAttack())>0
-      or HasIDNotNegated(AIHand(),00006781,true))
+      or HasIDNotNegated(AIHand(),55885348,true))
       and Duel.GetTurnPlayer()==1-player_ai
       then
         OPTSet(c.id)
@@ -568,7 +579,7 @@ function ChainGoodwitch(c)
     if WinsBattle(oppmon,aimon) 
     and CardsEqual(c,aimon)
     and (CardsMatchingFilter(AIHand(),FilterAttackMin,oppmon:GetAttack())>0
-    or HasIDNotNegated(AIHand(),00006781,true))
+    or HasIDNotNegated(AIHand(),55885348,true))
     and Duel.GetTurnPlayer()==1-player_ai
     then
       OPTSet(c.id)
@@ -604,8 +615,8 @@ function ChainFarmgirl(c)
     if WinsBattle(oppmon,aimon) 
     and CardsEqual(c,aimon)
     and (CardsMatchingFilter(AIHand(),FilterAttackMin,oppmon:GetAttack())>0
-    or HasIDNotNegated(AIHand(),00006781,true)
-    or HasIDNotNegated(AIHand(),00006783,true))
+    or HasIDNotNegated(AIHand(),55885348,true)
+    or HasIDNotNegated(AIHand(),93302695,true))
     and Duel.GetTurnPlayer()==1-player_ai
     then
       OPTSet(c.id)
@@ -645,8 +656,8 @@ function ChainStrawman(c,mode)
     if WinsBattle(oppmon,aimon) 
     and CardsEqual(c,aimon)
     and (CardsMatchingFilter(AIHand(),FilterAttackMin,oppmon:GetAttack())>0
-    or HasIDNotNegated(AIHand(),00006781,true)
-    or HasIDNotNegated(AIHand(),00006783,true))
+    or HasIDNotNegated(AIHand(),55885348,true)
+    or HasIDNotNegated(AIHand(),93302695,true))
     and Duel.GetTurnPlayer()==1-player_ai
     then
       OPTSet(c.id)
@@ -695,28 +706,28 @@ function KozmoChain(cards)
   if HasIDNotNegated(cards,67723438,ChainEtele) then
     return Chain()
   end
-  if HasID(cards,00006781,ChainDestroyer) then
+  if HasID(cards,55885348,ChainDestroyer) then
     return Chain()
   end
   if HasID(cards,20849090,ChainForerunner) then
     return Chain()
   end
-  if HasID(cards,00006784,ChainDogFighter) then
+  if HasID(cards,29491334,ChainDogFighter) then
     return Chain()
   end
   if HasID(cards,94454495,ChainSliprider) then
     return Chain()
   end
-  if HasID(cards,00006783,false,6783*16,ChainWickedwitch,2) then
+  if HasID(cards,93302695,false,93302695*16,ChainWickedwitch,2) then
     return Chain()
   end
-  if HasID(cards,00006782,ChainStrawman) then
+  if HasID(cards,56907986,ChainStrawman) then
     return Chain()
   end
   if HasID(cards,67050396,ChainGoodwitch) then
     return Chain()
   end
-  if HasIDNotNegated(cards,00006783,false,6783*16+1,ChainWickedwitch,1) then
+  if HasIDNotNegated(cards,93302695,false,93302695*16+1,ChainWickedwitch,1) then
     return Chain()
   end
   if HasID(cards,31061682,ChainFarmgirl) then
@@ -729,28 +740,19 @@ function KozmoChain(cards)
   return nil
 end
 function KozmoEffectYesNo(id,card)
-  if id == 00006781 and ChainDestroyer(card) then
+  if id == 55885348 and ChainDestroyer(card) then
     return 1
   end
   if id == 20849090 and ChainForerunner(card) then
     return 1
   end
-  if id == 00006784 and ChainDogFighter(card) then
+  if id == 29491334 and ChainDogFighter(card) then
     return 1
   end
   if id == 94454495 and ChainSliprider(card) then
     return 1
   end
-  if id == 00006783 and ChainWickedwitch(card) then
-    return 1
-  end
-  if id == 67050396 and ChainGoodwitch(card) then
-    return 1
-  end
   if id == 31061682 and ChainFarmgirl(card) then
-    return 1
-  end
-  if id == 00006782 and ChainStrawman(card) then
     return 1
   end
   if id == 67237709 and ChainKozmotown(card) then
@@ -777,17 +779,17 @@ end
 function KozmoChainOrder(cards)
 end
 KozmoAtt={
-00006781, -- Dark Destroyer
+55885348, -- Dark Destroyer
 20849090, -- Forerunner
 94454495, -- Sliprider
 67050396, -- Goodwitch
 31061682, -- Farmgirl
 }
 KozmoVary={
-00006784, -- Dog Fighter
-00006785, -- Dog Fighter token
-00006783, -- Wickedwitch
-00006782, -- Strawman
+29491334, -- Dog Fighter
+29491335, -- Dog Fighter token
+93302695, -- Wickedwitch
+56907986, -- Strawman
 }
 KozmoDef={
 }

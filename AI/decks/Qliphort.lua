@@ -371,7 +371,7 @@ function UseSAD(sum)
 end
 function SetScaleWaveringEyes(c)
   local count = CardsMatchingFilter(AllPendulum(),WaveringEyesFilter,true) 
-  if HasIDNotNegated(AICards(),31222701,true,OPTCheck,31222701)
+  if HasIDNotNegated(AICards(),31222701,true,FilterOPT,true)
   and FilterLocation(c,LOCATION_HAND)
   and FilterType(c,TYPE_PENDULUM)
   and (count<2 and HasID(AIDeck(),65518099,true)
@@ -437,9 +437,8 @@ function QliphortInit(cards)
     GlobalCardMode = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Act,65518099,false,FilterLocation,LOCATION_HAND) 
-  and UseTool(Act[CurrentIndex]) then
-    return {COMMAND_ACTIVATE,CurrentIndex}
+  if HasID(Act,65518099,false,FilterLocation,LOCATION_HAND,UseTool) then
+    return Activate()
   end
   for i=1,#Act do
     if SetScaleWaveringEyes(Act[i]) then

@@ -874,7 +874,8 @@ function ChainLance()
   if Duel.GetCurrentPhase() == PHASE_DAMAGE and aimon and oppmon then
     local c = GetCardFromScript(aimon)
     ApplyATKBoosts({c})
-    if AttackBoostCheck(c.bonus,800)
+    if (AttackBoostCheck(c.bonus,800)
+    and not AttackBoostCheck(c.bonus))
     and LanceFilter(oppmon)
     and UnchainableCheck(27243130)
     then

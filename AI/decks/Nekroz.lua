@@ -1,3 +1,52 @@
+function NekrozPriority()
+AddPriority(
+{
+-- Nekroz: 
+[90307777] = {6,3,1,1,1,1,1,1,1,1,ShritCond},         -- Shrit, Caster of Nekroz
+[52738610] = {3,2,1,1,8,1,1,1,5,1,PrincessCond},      -- Nekroz Dance Princess
+[53180020] = {5,2,1,1,6,1,1,1,9,1,ExaCond},           -- Exa, Enforcer of the Nekroz
+[27796375] = {4,2,1,1,7,1,1,1,8,1,SorcererCond},      -- Great Sorcerer of the Nekroz
+
+[25857246] = {6,2,3,1,3,1,1,1,3,1,ValkCond},          -- The Nekroz of Valkyrus
+[99185129] = {12,2,4,1,5,1,1,1,2,1,ClausCond},        -- The Nekroz of Clausolas
+[89463537] = {8,1,7,1,4,1,1,1,6,1,UniCond},           -- The Nekroz of Unicore
+[26674724] = {9,3,4,1,4,1,1,1,4,1,BrioCond},          -- The Nekroz of Brionac
+[74122412] = {4,2,3,1,4,1,1,1,7,1,GungCond},          -- The Nekroz of Gungnir
+[52068432] = {7,2,6,1,3,1,1,1,5,1,TrishCond},         -- The Nekroz of Trishula
+[88240999] = {5,2,5,1,1,1,1,1,3,1,ArmorCond},         -- The Nekroz of Decisive Armor
+[52846880] = {6,2,4,1,1,1,1,1,4,1,NekrozCatastorCond},-- The Nekroz of Catastor
+
+[67696066] = {6,2,5,1,6,1,1,1,1,1,ClownCond},         -- Performage Trick Clown
+[68819554] = {3,1,2,1,5,1,1,1,1,1,JugglerCond},       -- Performage Damage Juggler
+[31292357] = {7,1,3,1,2,1,1,1,1,1,HatCond},           -- Performage Hat Tricker
+
+[29888389] = {1,1,1,1,1,1,1,1,1,1,ShadowCond},        -- Gishki Shadow
+[08903700] = {3,1,1,1,9,2,1,1,1,1,ReleaserCond},      -- Djinn Releaser of Rituals
+[95492061] = {10,1,1,1,5,1,1,1,1,1,ManjuCond},        -- Manju of the Ten Thousand Hands
+[23401839] = {9,1,1,1,6,1,1,1,1,1,SenjuCond},         -- Senju of the Thousand Hands
+[13974207] = {3,1,1,1,6,1,1,1,1,1,SekkaCond},         -- Denkou Sekka
+[30312361] = {2,1,1,1,7,1,1,1,1,1,nil},               -- Phantom of Chaos
+
+
+[96729612] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Preparation of Rites
+[14735698] = {10,3,1,1,3,1,1,1,1,1,ExoCond},          -- Nekroz Exomirror
+[51124303] = {11,2,1,1,3,1,1,1,1,1,KaleidoCond},      -- Nekroz Kaleidomirror
+[97211663] = {11,2,1,1,3,1,1,1,1,1,CycleCond},        -- Nekroz Cycle
+
+[35952884] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Shooting Quasar Dragon
+[24696097] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Shooting Star Dragon
+[79606837] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Herald of Rainbow Light
+[15240268] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Mist Bird Clausolas
+[95113856] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Phantom Fortress Enterblathnir
+[44505297] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Inzektor Exa-Beetle
+[08809344] = {1,1,1,1,6,3,1,1,1,1,NyarlaCond},        -- Outer God Nyarla
+[31563350] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Zubaba General
+[86346643] = {1,1,1,1,5,1,1,1,1,1,nil},               -- Rainbow Neos
+[63465535] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Underground Arachnid
+}
+)
+end
+
 function NekrozFilter(c,exclude)
   return IsSetCode(c.setcode,0xb4) and (exclude == nil or c.id~=exclude)
 end
@@ -100,6 +149,21 @@ end
 function SearchCheck()
   return (HasID(AIHand(),95492061,true) or HasID(AIHand(),23401839,true))
   and not NormalSummonCheck()
+end
+function ExaCond(loc,c)
+  return true
+end
+function SorcererCond(loc,c)
+  return true
+end
+function ShadowCond(loc,c)
+  return true
+end
+function ShadowCond(loc,c)
+  return true
+end
+function NekrozCatastorCond(loc,c)
+  return true
 end
 function ClausCond(loc,c)
   if loc == PRIO_TOHAND then
@@ -1291,11 +1355,12 @@ NekrozAtt={
 89463537,26674724,74122412, -- Unicore, Brionac, Gungnir
 52068432,88240999,24696097, -- Trishula, Decisive Armor, Shooting Star
 95113856,44505297,52738610, -- Enterblathnir, Exa-Beetle, Dance Princess
-25857246, -- Valk
+25857246,53180020,52846880, -- Valk, Exa, Catastor
+67696066,68819554,27796375, -- Trick Clown, Damage Juggler, Sorcerer
 }
 NekrozDef={
 90307777,99185129,08903700, -- Shrit, Claus, Releaser
-08809344, -- Nyarla
+08809344,31292357,29888389, -- Nyarla, Hat Tricker, Shadow
 }
 function NekrozPosition(id,available)
   result = nil

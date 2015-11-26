@@ -3,10 +3,11 @@ function HEROStartup(deck)
   
   deck.Position             = HEROPosition
   deck.Material             = HEROMaterial
+  deck.YesNo                = HEROYesNo
   
   deck.ActivateBlacklist    = HEROActivateBlacklist
   deck.SummonBlacklist      = HEROSummonBlacklist
-  deck.RepoummonBlacklist   = HERORepoBlacklist
+  deck.RepoBlacklist        = HERORepoBlacklist
   deck.PriorityList         = HEROPriorityList
 end
 
@@ -116,7 +117,34 @@ function BubbleCond(loc,c)
   end
   return true
 end
-
+function DarkLawCond(loc,c)
+  if loc == PRIO_TOFIELD then
+    local bonus = 0
+    if HasID(AIHand(),50720316,true) 
+    and NormalSummonCheck()
+    then 
+      bonus = 1000
+    end
+    if SummonDarkLaw(nil,{c},1,bonus) then
+      return 7
+    end
+    return SummonDarkLaw(nil,{c},2)
+  end
+  return true
+end
+function AnkiCond(loc,c)
+  if loc == PRIO_TOFIELD then
+    local bonus = 0
+    if HasID(AIHand(),50720316,true) 
+    and NormalSummonCheck()
+    then 
+      bonus = 1000
+    end
+    return SummonAnki(nil,{c},1,bonus)
+    or SummonAnki(nil,{c},2)
+  end
+  return true
+end
 
 HEROPriorityList={
 -- HERO
@@ -139,7 +167,7 @@ HEROPriorityList={
 [87819421] = {1,1,1,1,3,1,1,1,1,1,nil},         -- Mask Charge
 [70368879] = {1,1,1,1,9,1,1,1,1,1,nil},         -- Upstart
 [84536654] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Form Change
-[84536654] = {1,1,1,1,4,1,1,1,1,1,nil},         -- Forbidden Lance
+[27243130] = {1,1,1,1,4,1,1,1,1,1,nil},         -- Forbidden Lance
 [12580477] = {1,1,1,1,2,1,1,1,1,1,nil},         -- Raigeki
 [05318639] = {1,1,1,1,3,1,1,1,1,1,nil},         -- MST
 [14087893] = {1,1,1,1,2,1,1,1,1,1,nil},         -- Book of Moon
@@ -153,8 +181,9 @@ HEROPriorityList={
 [33574806] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Escuridao
 [40854197] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Absolute Zero
 [50608164] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Koga
-[58481572] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Dark Law
+[58481572] = {1,1,5,1,1,1,1,1,1,1,DarkLawCond}, -- Dark Law
 [16304628] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Gaia
+[59642500] = {1,1,6,1,1,1,1,1,1,1,AnkiCond},    -- Anki
 }
 
 --})
@@ -320,7 +349,7 @@ function UseSixSamUnited(c)
   return c:get_counter(0x3003)>=2
 end
 function MistCheck(cards)
-  return HasIDNotNegated(cards,50720316,true,OPTCheck,50720316)
+  return HasIDNotNegated(cards,50720316,true,FilterOPT,true)
   and CardsMatchingFilter(AIDeck(),FilterSet,0xa5)>0
 end
 function UseAHL(c,mode)
@@ -470,14 +499,18 @@ function SummonBubble(c,mode)
   return false
 end
 function SummonAlius(c,mode)
-  --[[if mode == 1 then
+  if mode == 1 then
     return CardsMatchingFilter(AIMon(),KogaFilter)==0 
-    and SummonKoga(nil,{c})
+    and SummonKoga(nil,{c},1)
     and HasIDNotNegated(AICards(),21143940,true)
     and HasIDNotNegated(AIExtra(),50608164,true)
     and DualityCheck()
-  end]]
-  return true
+    and BattlePhaseCheck()
+  end
+  if mode == 2 then
+    return true
+  end
+  return false
 end
 function UseMonk(c,mode)
   if not mode then
@@ -574,18 +607,36 @@ function DarkLawXYZCheck(count)
   return FieldCheck(4)>count 
   or not CanSummonDarkLaw()
   or HasIDNotNegated(AIMon(),58481572,true)
+  or OppGetStrongestAttDef()>=2400
 end
 function SummonRafflesiaHERO(c)
   return DarkLawXYZCheck()
   and SummonRafflesia(c)
 end
 function SummonPtolemaeusHERO(c)
-  return DarkLawXYZCheck(3) and InfinityCheck(4)
+  if not DeckCheck(DECK_HERO) then return false end
+  if DarkLawXYZCheck(3) and InfinityCheck(4)
   or not CanSummonDarkLaw() and InfinityCheck()
+  then
+    GlobalPtolemaiosID = 10443957
+    return true
+  end
 end
-function SummonCairngorgonHERO(c)
-  return DarkLawXYZCheck()
+function SummonCairngorgonHERO(c,mode)
+  if mode == 1
+  and DarkLawXYZCheck()
   and SummonCairngorgon(c)
+  and BattlePhaseCheck()
+  then
+    return true
+  end
+  if mode == 2 
+  and DarkLawXYZCheck()
+  and SummonCairngorgon(c)
+  then
+    return true
+  end
+  return false
 end
 function SummonCastelHERO(c)
   return DarkLawXYZCheck()
@@ -596,11 +647,22 @@ function SummonUtopiaHERO(c,mode)
     return SummonUtopiaLightningFinish(c,1)
   end
   if mode == 2 then
-    -- TODO
+    return DarkLawXYZCheck()
+    and SummonUtopiaLightning(c,2)
+  end
+  if mode == 3 then
+    return DarkLawXYZCheck()
+    and SummonUtopiaLightning(c,3)
   end
 end
 
 function UseUpstart(c,mode)
+  if (CardsMatchingFilter(AIMon(),FinishGameFilter)>0
+  or #OppMon()==0 and ExpectedDamage()>AI.GetPlayerLP(2))
+  and BattlePhaseCheck()
+  then
+    return false
+  end
   if mode == 1 then
     --print(SummonBubbleCheck())
     return not (HasIDNotNegated(AICards(),00423585,true)
@@ -618,6 +680,13 @@ function SummonShadowMist(c,mode)
   then
     return true
   end
+  if mode == 2
+  and HasID(AICards(),21143940,true) 
+  and not HasID(AIMon(),50720316,true)
+  and SummonAnki(nil,{c},1)
+  then
+    return true
+  end
   return false
 end
 function RepoShadowMist(c)
@@ -626,9 +695,18 @@ function RepoShadowMist(c)
   then
     return true
   end
+  if FilterPosition(c,POS_FACEUP_DEFENCE)
+  and HasID(AICards(),21143940,true)
+  and BattlePhaseCheck()
+  and (CanWinBattle(c,OppMon())
+  or #OppMon()==0)
+  then
+    return true
+  end
   if FilterPosition(c,POS_FACEUP_ATTACK)
   and (not HasID(AICards(),21143940,true)
-  or #OppMon()>0 and not CanWinBattle(c,OppMon()))
+  or #OppMon()>0 and not CanWinBattle(c,OppMon())
+  or TurnEndCheck())
   then
     return true
   end
@@ -736,6 +814,52 @@ function UseMSTHero(card)
   end
   return UseMST(card)
 end
+function UseMaskChange(c)
+  if CanSummonDarkLaw() 
+  and not HasIDNotNegated(AIMon(),58481572,true)
+  and OppGetStrongestAttDef()<2400
+  and OppHasStrongestMonster()
+  and (BattlePhaseCheck() or OPTCheck(50720316))
+  then
+    GlobalTargetSet(FindID(50720316,darkheroes))
+    GlobalCardMode = 1
+    return true
+  end
+  if CanSummonDarkLaw() 
+  and not HasIDNotNegated(AIMon(),58481572,true)
+  and OppGetStrongestAttDef()<2400
+  and OppHasStrongestMonster()
+  and (BattlePhaseCheck() or OPTCheck(50720316))
+  then
+    GlobalTargetSet(FindID(50720316,darkheroes))
+    GlobalCardMode = 1
+    return true
+  end
+  return false
+end
+function UseCotHHERO(c,mode)
+  if mode == 1
+  and HasIDNotNegated(AIGrave(),50720316,true,FilterOPT,true)
+  and CardsMatchingFilter(AIDeck(),ChangeFilter)>0
+  and OverExtendCheck(3)
+  then
+    return true
+  end
+  if mode == 2
+  and (FieldCheck(4)==1 
+  and not CanSummonDarkLaw()
+  or FieldCheck(4)==2 
+  and CanSummonDarkLaw())
+  then
+    return true
+  end
+  if mode == 3
+  and TurnEndCheck()
+  and #AIMon()==0
+  then
+    return true
+  end
+end
 function HEROInit(cards)
   local Act = cards.activatable_cards
   local Sum = cards.summonable_cards
@@ -748,6 +872,12 @@ function HEROInit(cards)
   end
   if HasID(SpSum,84013237,SummonUtopiaHERO,1) then
     return XYZSummon()
+  end
+  if HasID(Sum,50720316,SummonShadowMist,2) then
+    return Summon()
+  end
+  if HasID(Sum,69884162,SummonAlius,1) then
+    return {COMMAND_SUMMON,CurrentIndex}
   end
   if HasID(SpSum,79979666,SummonBubble,1) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
@@ -766,6 +896,9 @@ function HEROInit(cards)
   end
   if HasID(Rep,50720316,RepoShadowMist) then
     return Repo()
+  end
+  if HasIDNotNegated(Act,97077563,UseCotHHERO,1) then
+    return Activate()
   end
   if HasIDNotNegated(Act,00213326,UseEcall,5) then
     return {COMMAND_ACTIVATE,CurrentIndex}
@@ -821,7 +954,7 @@ function HEROInit(cards)
   if HasIDNotNegated(Sum,00423585,SummonMonk,1) then
     return {COMMAND_SUMMON,CurrentIndex}
   end
-  if HasID(Sum,69884162,SummonAlius,1) then
+  if HasID(Sum,69884162,SummonAlius,2) then
     return {COMMAND_SUMMON,CurrentIndex}
   end
   if HasIDNotNegated(Act,24094653,UsePoly) then -- Polymerization
@@ -846,12 +979,23 @@ function HEROInit(cards)
       return SetSpell(1)
     end
   end
+  if HasIDNotNegated(Act,97077563,UseCotHHERO,2) then
+    return Activate()
+  end
   --if HasIDNotNegated(Act,32807846,UseRotaHero,1) then?
     --return {COMMAND_ACTIVATE,CurrentIndex}
   --end
-
+  if HasID(Act,21143940,UseMaskChange) then
+    return Activate()
+  end
   if HasID(SpSum,18326736,SummonPtolemaeusHERO) then
     return XYZSummon(nil,18326736)
+  end
+  if HasID(SpSum,84013237,SummonUtopiaHERO,2) then
+    return XYZSummon()
+  end
+  if HasID(SpSum,21501505,SummonCairngorgonHERO,1) then
+    return XYZSummon()
   end
   if HasID(SpSum,82633039,SummonCastelHERO) then
     return XYZSummon()
@@ -859,7 +1003,10 @@ function HEROInit(cards)
   if HasID(SpSum,06511113,SummonRafflesiaHERO) then
     return XYZSummon()
   end
-  if HasID(SpSum,21501505,SummonCairngorgonHERO) then
+  if HasID(SpSum,21501505,SummonCairngorgonHERO,2) then
+    return XYZSummon()
+  end
+  if HasID(SpSum,84013237,SummonUtopiaHERO,3) then
     return XYZSummon()
   end
   if HasIDNotNegated(Act,00213326,UseEcall,3) then
@@ -892,6 +1039,9 @@ function HEROInit(cards)
     return Activate()
   end
   if HasIDNotNegated(Act,32807846,UseRotaHero,4) then
+    return Activate()
+  end
+  if HasIDNotNegated(Act,97077563,UseCotHHERO,3) then
     return Activate()
   end
   if HasID(SetMon,50720316,SetShadowMist) then
@@ -935,12 +1085,18 @@ end
 function MistTarget(cards)
   return Add(cards)
 end
+GlobalMaskChangeId = nil
 function MaskChangeTarget(cards)
   if GlobalCardMode == 1 then
     GlobalCardMode = nil
     return GlobalTargetGet(cards,true)
   end
   if LocCheck(cards,LOCATION_EXTRA) then
+    local id = GlobalMaskChangeId
+    if id then
+      GlobalMaskChangeId=nil
+      return Add(cards,PRIO_TOFIELD,1,FilterID,id)
+    end
     return Add(cards,PRIO_TOFIELD)
   end
   return Add(cards,PRIO_TOGRAVE)
@@ -994,6 +1150,9 @@ function HEROCard(cards,min,max,id,c)
   end
   if id == 50720316 then
     return MistTarget(cards)
+  end
+  if id == 21143940 then
+    return MaskChangeTarget(cards,min)
   end
   if id == 87819421 then
     return MaskChargeTarget(cards,min)
@@ -1119,21 +1278,44 @@ function MaskChangeFilter(c,attribute)
   and FilterPosition(c,POS_FACEUP)
   and (not attribute or FilterAttribute(c,attribute))
 end
-function SummonDarkLaw(card,darkheroes)
+function SummonDarkLaw(c,darkheroes,mode,bonus)
+  local card = FindID(58481572,AIExtra())
+  if not card then return false end
+  if c or not bonus then bonus = 0 end
+  --print("checking for Dark Law summon")
   local g = RemovalCheckList(darkheroes,nil,nil,true)
-  if g then 
+  if g and mode == 2 then 
     --print("dark hero about to be removed, chaining")
     BestTargets(g,1,TARGET_PROTECT)
+    GlobalMaskChangeId = 58481572
     GlobalTargetSet(g[1])
     GlobalCardMode = 1
+    return true
+  end
+  if (c and Duel.GetCurrentPhase()==PHASE_BATTLE 
+  and Duel.GetTurnPlayer()==player_ai
+  or not c and BattlePhaseCheck())
+  and CanFinishGame(card,nil,nil,bonus)
+  and #OppMon()==0
+  and mode == 1
+  and ExpectedDamage(2)==0
+  then
+    --print("Dark Law can attack for game, chaining")
+    if c then
+      Add(darkheroes,PRIO_TOGRAVE,1,FilterID,50720316)
+      GlobalMaskChangeId = 58481572
+      GlobalTargetSet(darkheroes[1])
+      GlobalCardMode = 1
+    end
     return true
   end
   for i=1,Duel.GetCurrentChain() do
 	local e = Duel.GetChainInfo(i,CHAININFO_TRIGGERING_EFFECT)
     if e and Duel.GetChainInfo(i,CHAININFO_TRIGGERING_PLAYER)==1-player_ai
     and not HasIDNotNegated(AIMon(),58481572,true,FilterPosition,POS_FACEUP)
+    and mode == 2
     then
-      local c = e:GetHandler()
+      local ec = e:GetHandler()
       if bit32.band(e:GetCategory(),CATEGORY_SEARCH)>0
       and bit32.band(e:GetCategory(),CATEGORY_TOHAND)>0
       or Duel.GetOperationInfo(i,CATEGORY_DRAW)
@@ -1141,18 +1323,25 @@ function SummonDarkLaw(card,darkheroes)
       or Duel.GetOperationInfo(i,CATEGORY_DECKDES)
       then
         --print("search, draw or dump effect activated, chaining")
-        GlobalTargetSet(darkheroes[1])
-        GlobalCardMode = 1
+        if c then
+          GlobalMaskChangeId = 58481572
+          GlobalTargetSet(darkheroes[1])
+          GlobalCardMode = 1
+        end
         return true
       end
       if Duel.GetOperationInfo(i,CATEGORY_SPECIAL_SUMMON)
-      and FilterType(c,TYPE_SPELL+TYPE_TRAP) 
-      and (FilterType(c,TYPE_RITUAL)
-      or FilterSet(c,0x46))
+      and FilterType(ec,TYPE_SPELL+TYPE_TRAP) 
+      and (FilterType(ec,TYPE_RITUAL)
+      or FilterSet(ec,0x46))
+      and not ec:IsCode(01845204) -- Instant Fusion
       then
         --print("ritual or fusion summon, chaining")
-        GlobalTargetSet(darkheroes[1])
-        GlobalCardMode = 1
+        if c then
+          GlobalMaskChangeId = 58481572
+          GlobalTargetSet(darkheroes[1])
+          GlobalCardMode = 1
+        end
         return true
       end
     end
@@ -1160,6 +1349,7 @@ function SummonDarkLaw(card,darkheroes)
   if Duel.GetCurrentPhase()==PHASE_BATTLE 
   and Duel.GetTurnPlayer()==1-player_ai
   and UnchainableCheck(21143940)
+  and mode == 2
   then
     local aimon,oppmon = GetBattlingMons()
     if WinsBattle(oppmon,aimon) 
@@ -1167,38 +1357,89 @@ function SummonDarkLaw(card,darkheroes)
     and oppmon:GetAttack()<2400
     then
       --print("dark hero about to be destroyed in battle, chaining")
-      GlobalTargetSet(aimon)
-      GlobalCardMode = 1
+      if c then
+        GlobalMaskChangeId = 58481572
+        GlobalTargetSet(aimon)
+        GlobalCardMode = 1
+      end
       return true
     end
   end
+  local filter = function(tc)
+    return CanWinBattle(tc,OppMon())
+    and CanAttack(tc)
+  end
+  if (c and Duel.GetCurrentPhase()==PHASE_BATTLE 
+  and Duel.GetTurnPlayer()==player_ai
+  or not c and BattlePhaseCheck())
+  and CanWinBattle(card,OppMon())
+  and mode == 2
+  and #OppMon()>0
+  and CardsMatchingFilter(AIMon(),filter)==0
+  and (OppHasStrongestMonster() or HasID(AIMon(),50720316,true,FilterOPT,true))
+  then
+    --print("Dark Law can destroy something, chaining")
+    if c then
+      Add(darkheroes,PRIO_TOGRAVE,1,FilterID,50720316)
+      GlobalMaskChangeId = 58481572
+      GlobalTargetSet(darkheroes[1])
+      GlobalCardMode = 1
+    end
+    return true
+  end
   if Duel.CheckTiming(TIMING_END_PHASE)
   and Duel.GetTurnPlayer()==1-player_ai 
-  and HasID(darkheroes,50720316,true,OPTCheck,50720316)
+  and HasID(darkheroes,50720316,true,FilterOPT,true)
   and MacroCheck()
   and Duel.GetCurrentChain()==0
+  and mode == 2
   then
     --print("end phase, can trigger Shadow Mist, chaining")
-    GlobalTargetSet(FindID(50720316,darkheroes))
-    GlobalCardMode = 1
+    if c then
+      Add(darkheroes,PRIO_TOGRAVE,1,FilterID,50720316)
+      GlobalMaskChangeId = 58481572
+      GlobalTargetSet(darkheroes[1])
+      GlobalCardMode = 1
+    end
     return true
   end
   return false
 end
-function SummonAcid(c,waterheroes)
+function SummonAcid(c,waterheroes,mode)
+  local card = FindID(29095552,AIExtra())
+  if not card then return false end
   local g = RemovalCheckList(waterheroes)
-  if g then 
+  if g and mode == 2 then 
     --print("water hero about to be removed, chaining")
-    BestTargets(g,1,TARGET_PROTECT)
-    GlobalTargetSet(g[1])
-    GlobalCardMode = 1
+    if c then
+      BestTargets(g,1,TARGET_PROTECT)
+      GlobalTargetSet(g[1])
+      GlobalCardMode = 1
+    end
     return true
   end
-  if DestroyCheck(OppST())>2 then
+  if DestroyCheck(OppST())>2 and mode == 2 then
     --print("opponent has lots of S/T, can summon Acid, chaining")
-    BestTargets(waterheroes,1,TARGET_TOGRAVE)
-    GlobalTargetSet(waterheroes[1])
-    GlobalCardMode = 1
+    if c then
+      BestTargets(waterheroes,1,TARGET_TOGRAVE)
+      GlobalTargetSet(waterheroes[1])
+      GlobalCardMode = 1
+    end
+    return true
+  end
+  if (c and Duel.GetCurrentPhase()==PHASE_BATTLE 
+  and Duel.GetTurnPlayer()==player_ai
+  and ExpectedDamage(2)==0
+  or not c and BattlePhaseCheck())
+  and CanFinishGame(card,nil,nil,bonus)
+  and #OppMon()==0
+  and mode == 1
+  then
+    --print("Acid can attack for game, chaining")
+    if c then
+      GlobalTargetSet(waterheroes[1])
+      GlobalCardMode = 1
+    end
     return true
   end
   return false
@@ -1219,23 +1460,119 @@ function KogaTargetFilter(c,atk)
   end
   return AI.GetPlayerLP(2)<=KogaAtk-OppAtk
 end
-function SummonKoga(c,lightheroes)
+function SummonKoga(c,lightheroes,mode)
+  local card = FindID(50608164,AIExtra())
+  if not card then return false end
   --print("checking for Koga summon")
   local g = RemovalCheckList(lightheroes)
-  if g then 
+  if g and mode == 2 then 
     --print("light hero about to be removed, chaining")
-    BestTargets(g,1,TARGET_PROTECT)
-    GlobalTargetSet(g[1])
-    GlobalCardMode = 1
+    if c then 
+      BestTargets(g,1,TARGET_PROTECT)
+      GlobalTargetSet(g[1])
+      GlobalCardMode = 1
+    end
     return true
   end
   SortByATK(lightheroes,true)
-  if Duel.GetCurrentPhase()==PHASE_BATTLE and Duel.GetTurnPlayer()==player_ai
+  if (c and Duel.GetCurrentPhase()==PHASE_BATTLE and Duel.GetTurnPlayer()==player_ai
+  or not c and BattlePhaseCheck())
   and CardsMatchingFilter(OppMon(),KogaTargetFilter,lightheroes[1].attack)>0 
+  and mode == 1
   then
     --print("Koga can attack for game, chaining")
-    GlobalTargetSet(lightheroes[1])
-    GlobalCardMode = 1
+    if c then
+      GlobalTargetSet(lightheroes[1])
+      GlobalCardMode = 1
+    end
+    return true
+  end
+  if (c and Duel.GetCurrentPhase()==PHASE_BATTLE 
+  and Duel.GetTurnPlayer()==player_ai
+  and ExpectedDamage(2)==0
+  or not c and BattlePhaseCheck())
+  and CanFinishGame(card,nil,nil,bonus)
+  and #OppMon()==0
+  and mode == 1
+  then
+    --print("Koga can attack for game, chaining")
+    if c then
+      GlobalTargetSet(lightheroes[1])
+      GlobalCardMode = 1
+    end
+    return true
+  end
+  return false
+end
+function SummonAnki(c,darkheroes,mode,bonus)
+  local card = FindID(59642500,AIExtra())
+  if not card then return false end
+  if c or not bonus then bonus = 0 end
+  local g = RemovalCheckList(darkheroes)
+  if g and mode == 2 then 
+    --print("dark hero about to be removed, chaining")
+    if c then 
+      GlobalMaskChangeId = 59642500
+      BestTargets(g,1,TARGET_PROTECT)
+      GlobalTargetSet(g[1])
+      GlobalCardMode = 1
+    end
+    return true
+  end
+  if (c and Duel.GetCurrentPhase()==PHASE_BATTLE 
+  and Duel.GetTurnPlayer()==player_ai
+  or not c and BattlePhaseCheck())
+  and CanFinishGame(card,nil,1400)
+  and #OppMon()>0
+  and mode == 1
+  then
+    --print("Anki can attack directly for game, chaining")
+    if c then
+      Add(darkheroes,PRIO_TOGRAVE,1,FilterID,50720316)
+      GlobalMaskChangeId = 59642500
+      GlobalTargetSet(darkheroes[1])
+      GlobalCardMode = 1
+    end
+    return true
+  end
+  if (c and Duel.GetCurrentPhase()==PHASE_BATTLE 
+  and Duel.GetTurnPlayer()==player_ai
+  and ExpectedDamage(2)==0
+  or not c and BattlePhaseCheck())
+  and CanFinishGame(card,nil,nil,bonus)
+  and #OppMon()==0
+  and mode == 1
+  then
+    --print("Anki can attack for game, chaining")
+    if c then
+      Add(darkheroes,PRIO_TOGRAVE,1,FilterID,50720316)
+      GlobalMaskChangeId = 59642500
+      GlobalTargetSet(darkheroes[1])
+      GlobalCardMode = 1
+    end
+    return true
+  end
+  local filter = function(tc)
+    return CanWinBattle(tc,OppMon())
+    and CanAttack(tc)
+  end
+  if (c and Duel.GetCurrentPhase()==PHASE_BATTLE 
+  and Duel.GetTurnPlayer()==player_ai
+  or not c and BattlePhaseCheck())
+  and CanWinBattle(card,OppMon(),true)
+  and mode == 2
+  and #OppMon()>0
+  and CardsMatchingFilter(AIMon(),filter)==0
+  and CardsMatchingFilter(AIDeck(),ChangeFilter)>0
+  and (OppHasStrongestMonster() or HasID(AIMon(),50720316,true,FilterOPT,true))
+  then
+    --print("Anki might get a search, chaining")
+    if c then
+      Add(darkheroes,PRIO_TOGRAVE,1,FilterID,50720316)
+      GlobalMaskChangeId = 59642500
+      GlobalTargetSet(darkheroes[1])
+      GlobalCardMode = 1
+    end
     return true
   end
   return false
@@ -1253,21 +1590,56 @@ function ChainMaskChange(c)
   local temp = SubGroup(heroes,FilterAttribute,ATTRIBUTE_DARK)
   if #temp>0 
   and HasIDNotNegated(mheroes,58481572,true)
-  and SummonDarkLaw(c,temp)
+  and SummonDarkLaw(c,temp,1)
   then
     return true
   end
-  temp = SubGroup(heroes,FilterAttribute,ATTRIBUTE_WATER)
-  if #temp>0
-  and HasIDNotNegated(mheroes,29095552,true)
-  and SummonAcid(c,temp)
+  temp = SubGroup(heroes,FilterAttribute,ATTRIBUTE_DARK)
+  if #temp>0 
+  and HasIDNotNegated(mheroes,58481572,true)
+  and SummonAnki(c,temp,1)
   then
     return true
   end
   temp = SubGroup(heroes,FilterAttribute,ATTRIBUTE_LIGHT)
   if #temp>0
   and HasIDNotNegated(mheroes,50608164,true)
-  and SummonKoga(c,temp)
+  and SummonKoga(c,temp,1)
+  then
+    return true
+  end
+  temp = SubGroup(heroes,FilterAttribute,ATTRIBUTE_WATER)
+  if #temp>0
+  and HasIDNotNegated(mheroes,29095552,true)
+  and SummonAcid(c,temp,1)
+  then
+    return true
+  end
+  temp = SubGroup(heroes,FilterAttribute,ATTRIBUTE_DARK)
+  if #temp>0 
+  and HasIDNotNegated(mheroes,58481572,true)
+  and SummonAnki(c,temp,2)
+  then
+    return true
+  end
+  temp = SubGroup(heroes,FilterAttribute,ATTRIBUTE_DARK)
+  if #temp>0 
+  and HasIDNotNegated(mheroes,58481572,true)
+  and SummonDarkLaw(c,temp,2)
+  then
+    return true
+  end
+  temp = SubGroup(heroes,FilterAttribute,ATTRIBUTE_WATER)
+  if #temp>0
+  and HasIDNotNegated(mheroes,29095552,true)
+  and SummonAcid(c,temp,2)
+  then
+    return true
+  end
+  temp = SubGroup(heroes,FilterAttribute,ATTRIBUTE_LIGHT)
+  if #temp>0
+  and HasIDNotNegated(mheroes,50608164,true)
+  and SummonKoga(c,temp,2)
   then
     return true
   end
@@ -1289,6 +1661,26 @@ function ChainKoga(cards)
     return true
   end
   return false
+end
+function ChainCotHHERO(c)
+  if HasIDNotNegated(AIGrave(),50720316,true,FilterOPT,true)
+  and CardsMatchingFilter(AIDeck(),ChangeFilter)>0
+  and Duel.CheckTiming(TIMING_END_PHASE)
+  and Duel.GetTurnPlayer()==1-player_ai
+  and UnchainableCheck(c.id)
+  then
+    GlobalCardMode = 1
+    GlobalTargetSet(FindID(50720316),AIGrave())
+    return true
+  end
+  if HasIDNotNegated(AICards(),21143940,true)
+  and #OppMon()==0
+  and ExpectedDamage()==0
+  and Duel.GetCurrentPhase()==PHASE_BATTLE
+  and Duel.GetTurnPlayer==player_ai
+  then
+    return true
+  end
 end
 function HEROChain(cards)
   if HasID(cards,83555666,ChainRoD) then -- Ring of Destruction
@@ -1315,6 +1707,9 @@ function HEROChain(cards)
     return {1,CurrentIndex}
   end
   if HasID(cards,50608164,ChainKoga) then
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,97077563,ChainCotHHERO) then
     return {1,CurrentIndex}
   end
   return nil
@@ -1351,6 +1746,18 @@ function HEROOption(options)
   return nil
 end
 
+function HEROYesNo(id)
+  local c = FindID(59642500,AIMon())
+  if id == 31 and c
+  and CanFinishGame(c,nil,1400)
+  then
+    return 1
+  else
+    return 0
+  end
+  return nil
+end
+
 function HEROMaterial(cards,min,max,id)
   local filter = nil
   if HasID(cards,50720316,true) and HasID(AICards(),21143940,true)
@@ -1377,6 +1784,7 @@ HEROAtt={
 50608164, -- Koga
 58481572, -- Dark Law
 16304628, -- Gaia
+59642500, -- Anki
 }
 HEROVary={
 }
@@ -1386,7 +1794,7 @@ HERODef={
 00423585, -- Summoner Monk
 79979666, -- Bubbleman
 63060238, -- Blazeman
-50720316, -- Shadow Mist
+--50720316, -- Shadow Mist
 }
 function HEROPosition(id,available)
   result = nil
@@ -1399,7 +1807,7 @@ function HEROPosition(id,available)
   for i=1,#HEROVary do
     if HEROVary[i]==id 
     then 
-      if (BattlePhaseCheck() or Duel.GetCurrentPhase()==PHASE_BATTLE)
+      if (BattlePhaseCheck())
       and Duel.GetTurnPlayer()==player_ai 
       then 
         result=POS_FACEUP_ATTACK
@@ -1411,6 +1819,16 @@ function HEROPosition(id,available)
   for i=1,#HERODef do
     if HERODef[i]==id 
     then 
+      result=POS_FACEUP_DEFENCE 
+    end
+  end
+  if id == 50720316 then
+    local c = FindID(50720316,AIAll())
+    if BattlePhaseCheck()  and (#OppMon()==0 
+    or CanWinBattle(c,OppMon())) and HasID(AICards(),21143940,true)
+    then
+      result=POS_FACEUP_ATTACK
+    else
       result=POS_FACEUP_DEFENCE 
     end
   end

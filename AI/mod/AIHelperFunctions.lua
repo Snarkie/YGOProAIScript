@@ -199,6 +199,11 @@ function UseLists(lists,opt,opt2)
   local cards
   local Result={}
   if lists then
+    if type(lists)~="table" then
+      print("Warning: UseLists invalid type")
+      PrintCallingFunction()
+      return Result
+    end
     if opt then
       for i=1,#lists do
         Result[#Result+1]=lists[i]
@@ -258,6 +263,16 @@ function AIMaterials()
   local result = {}
   for i=1,#AIMon() do
     local cards = AIMon()[i].xyz_materials
+    if cards and #cards>0 then
+      result = UseLists(result,cards)
+    end
+  end
+  return result
+end
+function OppMaterials()
+  local result = {}
+  for i=1,#OppMon() do
+    local cards = OppMon()[i].xyz_materials
     if cards and #cards>0 then
       result = UseLists(result,cards)
     end
@@ -778,6 +793,9 @@ function CurrentSTOwner(CardsID)
   return Result
 end
 function CurrentOwner(c,cards)
+  if not FilterLocation(c,LOCATION_ONFIELD) then
+    return c.owner
+  end
   if cards == nil then
     cards = AICards()
   end
@@ -1843,6 +1861,7 @@ function ApplyATKBoosts(Cards)
     local c = Cards[i]
     if c.id == 56832966 
     and c.xyz_material_count>1
+    and CardsMatchingFilter(c.xyz_materials,FilterSet,0x7f)>0
     and NotNegated(c)
     and #OppMon()>0
     then
@@ -2021,16 +2040,25 @@ end
 -- if both are equal, and False if any field is different.
 ----------------------------------------------------------
 function CardsEqual(Card1, Card2)
-  if Card1 and Card1.GetCode then
-    Card1=GetCardFromScript(Card1)
+  if not (Card1 and Card2) then
+    print("Warning: CardsEqual null cards")
+    PrintCallingFunction()
+    return false 
   end
-  if Card2 and Card2.GetCode then
-    Card2=GetCardFromScript(Card2)
-  end
-  if type(Card1)~="table" or type(Card2)~="table" then
+  local type1=type(Card1)
+  local type2=type(Card2)
+  if type1~="table" and type1~="userdata" 
+  or type2~="table" and type2~="userdata"
+  then
     print("Warning: CardsEqual invalid cards")
     PrintCallingFunction()
     return false
+  end
+  if Card1.GetCode then
+    Card1=GetCardFromScript(Card1)
+  end
+  if Card2.GetCode then
+    Card2=GetCardFromScript(Card2)
   end
   return Card1 and Card2 and Card1.cardid==Card2.cardid
 end

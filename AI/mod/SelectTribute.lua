@@ -60,7 +60,20 @@ function OnSelectMaterial(cards,min,max,id)
   end
   if result ~= nil then return result end
   if id == 18326736 then -- Ptolemaios
-    return Add(cards,PRIO_TOGRAVE,math.max(min,math.min(3,max)))
+    if GlobalPtolemaiosID == 10443957 -- Cyber Dragon Infinity
+    then 
+      GlobalPtolemaiosID = nil
+      return Add(cards,PRIO_TOGRAVE,math.max(min,math.min(3,max)))
+    end
+    if GlobalPtolemaiosID == 09272381 -- Constellarknight Diamond
+    then 
+      GlobalPtolemaiosID = nil
+      return Add(cards,PRIO_TOGRAVE,2)
+    end
+  end
+  if id == 09272381 -- Constellarknight Diamond
+  then
+    return Add(cards,PRIO_TOGRAVE,min)
   end
   return Add(cards,PRIO_TOGRAVE,min)
 end

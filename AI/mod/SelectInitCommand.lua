@@ -1102,7 +1102,10 @@ end
   ---------------------------------------------
   for i=1,#ActivatableCards do  
    if ActivatableCards[i].id == 83133491 then  -- Zero Gravity
-    if Get_Card_Count_ID(UseLists({AIMon(),AIST()}), 83133491, POS_FACEUP) ==  0 and AI.GetCurrentPhase() == PHASE_DAMAGE and GlobalIsAIsTurn == 0 then
+    if Get_Card_Count_ID(UseLists({AIMon(),AIST()}), 83133491, POS_FACEUP) ==  0 
+    and AI.GetCurrentPhase() == PHASE_DAMAGE 
+    and Duel.GetTurnPlayer() == 1-player_ai
+    then
 	   GlobalActivatedCardID = ActivatableCards[i].id
       return COMMAND_ACTIVATE,i
      end
@@ -1149,11 +1152,13 @@ end
    local AIHand = AIHand()
    local HandHighestATK = 0
    local Result = 0
-  if AI.GetCurrentPhase() == PHASE_BATTLE and GlobalIsAIsTurn == 0 and 
+  if AI.GetCurrentPhase() == PHASE_BATTLE and Duel.GetTurnPlayer() == 1-player_ai and 
      Get_Card_Count_Type(AIBanish(),TYPE_MONSTER,">",nil) >= 3 and Get_Card_Count(AIMon()) == 0 then 
    return 1,i
   end
- if AI.GetCurrentPhase() == PHASE_MAIN1 and Get_Card_Count_Type(AIBanish(),TYPE_MONSTER,">",nil) >= 3 and GlobalIsAIsTurn == 1 and Get_Card_Count(AIMon()) == 0 then	
+ if AI.GetCurrentPhase() == PHASE_MAIN1 
+ and Get_Card_Count_Type(AIBanish(),TYPE_MONSTER,">",nil) >= 3 
+ and Duel.GetTurnPlayer() == player_ai and Get_Card_Count(AIMon()) == 0 then	
   for x=1,#AIHand do
     if AIHand[x].attack > HandHighestATK then
        HandHighestATK = AIHand[x].attack       

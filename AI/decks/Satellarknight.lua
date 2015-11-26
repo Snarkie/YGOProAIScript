@@ -114,7 +114,7 @@ function HonestCond(loc)
   end
   return true
 end
-function NodenCond(loc)
+function NodenCond(loc,c)
   if loc == PRIO_TOFIELD then
     return Duel.GetCurrentChain()==0 and CardsMatchingFilter(AIGrave(),NodenFilter)>0
   end
@@ -183,19 +183,12 @@ end
 function SeraphCheck()
   return (HasID(AIMon(),38331564,true) and CardsMatchingFilter(UseLists({OppMon(),OppST()}),ScepterFilter)>0) or HasID(AIMon(),91110378,true)
 end
-function DelterosFilter(c)
-  return c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0
-  and bit32.band(c.status,STATUS_LEAVE_CONFIRMED)==0
-  and not (DestroyBlacklist(c)
-  and (bit32.band(c.position, POS_FACEUP)>0 
-  or bit32.band(c.status,STATUS_IS_PUBLIC)>0))
-end
 function UseDelteros()
-  return CardsMatchingFilter(UseLists({OppMon(),OppST()}),DelterosFilter)>0
+  return DestroyCheck(OppField())>0
 end
-function SummonDelteros()
+function SummonDelterosTellar()
   return (MP2Check(2500) or SeraphCheck()) 
-  and (UseDelteros() or HasID(UseLists({AIHand(),AIST()}),41510920,true))
+  and (UseDelteros() or HasID(AICards(),41510920,true))
 end
 function SummonTriveil()
   local result = 0
@@ -383,7 +376,7 @@ if DeckCheck(DECK_TELLARKNIGHT) then
     GlobalSSCardType = TYPE_XYZ
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasID(SpSummonable,56638325) and SummonDelteros() then
+  if HasID(SpSummonable,56638325) and SummonDelterosTellar() then
     GlobalSSCardID = 56638325
     GlobalSSCardType = TYPE_XYZ
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}

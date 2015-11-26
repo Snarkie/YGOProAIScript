@@ -420,7 +420,7 @@ end
 function SummonScrapBoxer(c,mode)
   if mode == 1 and NotNegated(c) and DestroyCheck(OppField())>0
   and (HasIDNotNegated(AIMon(),23232295,true,HasMaterials)
-  or HasIDNotNegated(AIMon(),83994433,true,OPTCheck))
+  or HasIDNotNegated(AIMon(),83994433,true,FilterOPT))
   then
     return true
   end
@@ -434,7 +434,7 @@ end
 function UseScrapBoxer(c)
   return DeckCheck(AI_BOXER)
   and DestroyCheck(OppField())>0 
-  and (HasID(AIMon(),83994433,true,OPTCheck) 
+  and (HasID(AIMon(),83994433,true,FilterOPT) 
   or HasIDNotNegated(AIMon(),23232295,true,HasMaterials)
   or HasID(AIMon(),71921856,true,HasMaterials)
   or (PriorityCheck(AIField(),PRIO_TOGRAVE)>4 
@@ -708,7 +708,7 @@ function ChainVeil(c)
 end
 function BoxerChain(cards)
   GlobalYokeOverride = nil
-  if HasIDNotNegated(cards,08316565,ChainNegation) then -- Jolt Counter
+  if HasIDNotNegated(cards,08316565,ChainNegation,2) then -- Jolt Counter
     return 1,CurrentIndex
   end
   if HasID(cards,05361647) then

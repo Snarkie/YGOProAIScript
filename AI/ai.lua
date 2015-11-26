@@ -1,4 +1,4 @@
-Version = "0.32c"
+Version = "0.32e"
 Experimental = true
 
 --[[
@@ -52,6 +52,8 @@ EXTRA_DRAW = 0
 EXTRA_SUMMON = 0
 LP_RECOVER = 0
 
+PRINT_DRAW = 1 -- for debugging
+
 function requireoptional(module)
   if not pcall(require,module) then
     --print("file missing or syntax error: "..module)
@@ -89,7 +91,7 @@ require("ai.decks.ChaosDragon")
 require("ai.decks.HAT")
 require("ai.decks.Qliphort")
 require("ai.decks.NobleKnight")
-require("ai.decks.Necloth")
+require("ai.decks.Nekroz")
 require("ai.decks.BurningAbyss")
 require("ai.decks.DarkWorld")
 require("ai.decks.Constellar")
@@ -114,20 +116,7 @@ function OnStartOfDuel()
   AI.Chat("AI script version "..Version)
   --if Experimental then AI.Chat("This is an experimental AI version, it might contain bugs and misplays") end
   print("start of duel")
-  -- display draws in debug console
-  local e4=Effect.GlobalEffect()
-  e4:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-  e4:SetCode(EVENT_DRAW)
-  e4:SetOperation(function(e,tp,eg,ep,ev,re,r,rp)
-    if eg and eg:GetCount()>0 then
-      eg:ForEach(function(c)
-        if c:GetOwner()==player_ai then
-          print("AI draws: "..c:GetCode())
-        end
-      end)
-    end
-	end)
-  Duel.RegisterEffect(e4,player_ai)
+  Startup()
 end
 
 

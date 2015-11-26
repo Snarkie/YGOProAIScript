@@ -480,10 +480,22 @@ function SummonVulcanBW(c)
   return DeckCheck(DECK_BLACKWING) and SummonVulcan(c)
   and BounceTargets(AIField())>0
 end
-function SummonRaikiri(c,cards)
-  return DestroyCheck(OppField(),nil,nil,nil,RaikiriFilter)>0
-  and (CardsMatchingFilter(cards,RaikiriSummonFilter(c))>0
-  or CardsMatchingFilter(AIMon(),BlackwingFilter)>2)
+function SummonRaikiri(c,params)
+  local mode = params[1]
+  local cards = params[2]
+  local targets = DestroyCheck(OppField(),nil,nil,nil,RaikiriFilter)
+  local bws = CardsMatchingFilter(cards,RaikiriSummonFilter) 
+  + CardsMatchingFilter(AIMon(),BlackwingFilter) -2
+  if mode == 1 and targets>1 and bws>1
+  then
+    return true
+  end
+  if mode == 2 and targets>0 and bws>0
+  and MP2Check(c.attack)
+  then
+    return true
+  end
+  return false
 end
 function UseRaikiri(c)
   return DestroyCheck(OppField(),nil,nil,nil,RaikiriFilter)>0
@@ -543,7 +555,7 @@ function BlackwingInit(cards)
   if HasIDNotNegated(SpSum,81983656) and SummonHawkJoe(1) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasIDNotNegated(SpSum,16051717,SummonRaikiri,UseLists(Sum,SpSum)) then
+  if HasIDNotNegated(SpSum,16051717,SummonRaikiri,{1,SpSum}) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasIDNotNegated(SpSum,98012938) and SummonVulcanBW() then
@@ -610,6 +622,9 @@ function BlackwingInit(cards)
     return {COMMAND_SUMMON,CurrentIndex}
   end
   if HasIDNotNegated(SpSum,95040215) and SummonNothung(2) then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasIDNotNegated(SpSum,16051717,SummonRaikiri,{2,SpSum}) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasIDNotNegated(SpSum,76067258) and SummonMKB() then

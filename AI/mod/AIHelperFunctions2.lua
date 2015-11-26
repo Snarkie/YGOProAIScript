@@ -30,6 +30,24 @@ function OnPlayerGoingFirstSecond(decision)
   Globals()
   return
 end
+function Startup()
+  if PRINT_DRAW and PRINT_DRAW == 1 then
+    -- display draws in debug console
+    local e4=Effect.GlobalEffect()
+    e4:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+    e4:SetCode(EVENT_DRAW)
+    e4:SetOperation(function(e,tp,eg,ep,ev,re,r,rp)
+      if eg and eg:GetCount()>0 then
+        eg:ForEach(function(c)
+          if c:GetOwner()==player_ai then
+            print("AI draws: "..GetName(c))
+          end
+        end)
+      end
+    end)
+    Duel.RegisterEffect(e4,player_ai)
+  end
+end
 -- Sets up some variables for using card script functions
 function set_player_turn(init)
 	if not playersetupcomplete
@@ -321,7 +339,7 @@ function RandomIndexFilter(cards,filter,opt)
 end
 -- check, if the AI can wait for an XYZ/Synchro summon until Main Phase 2
 function MP2Check(atk)
-  if atk and type(atk)=="table" then
+  if atk and (type(atk)=="table" or type(atk)=="userdata") then
     if atk.GetCode then
       atk=atk:GetAttack()
     else
@@ -828,13 +846,15 @@ OPT={}
 -- pass an id for hard OPT clauses, 
 -- pass the unique cardid for a simple OPT 
 function OPTCheck(id)
-  if type(id) == "table" and id.id then
+  if type(id)=="table" or type(id)=="userdata" then
+    id = GetCardFromScript(id)
     id = id.cardid
   end
   return OPTCount(id)==0 
 end
 function OPTCount(id)
-  if type(id) == "table" and id.id then
+  if type(id)=="table" or type(id)=="userdata"  then
+    id = GetCardFromScript(id)
     id = id.cardid
   end
   local result = OPT[id*100+Duel.GetTurnCount()]
@@ -844,7 +864,8 @@ function OPTCount(id)
   return result 
 end
 function OPTSet(id)
-  if type(id) == "table" and id.id then
+  if type(id)=="table" or type(id)=="userdata"  then
+    id = GetCardFromScript(id)
     id = id.cardid
   end
   local i = id*100+Duel.GetTurnCount()
@@ -1149,7 +1170,8 @@ function FilterAffected(c,effect)
   end
 end
 function FilterPublic(c)
-  return FilterStatus(c,STATUS_IS_PUBLIC) or FilterPosition(c,POS_FACEUP)
+  return FilterStatus(c,STATUS_IS_PUBLIC) 
+  or FilterPosition(c,POS_FACEUP)
   or FilterSummon(c,SUMMON_TYPE_SPECIAL) -- TODO: find better check
 end
 function FilterPrivate(c)
@@ -1168,6 +1190,9 @@ function FilterSet(c,code)
 end
 function FilterOPT(c,hard)
   if hard then 
+    if type(hard)=="number" then
+      return OPTCheck(hard)
+    end
     return OPTCheck(c.id)
   else
     return OPTCheck(c.cardid)
@@ -1240,10 +1265,13 @@ function PendulumCheck(c)
   return bit32.band(c.type,TYPE_PENDULUM)>0 and bit32.band(c.location,LOCATION_SZONE)>0
 end
 
-function EffectCheck(player)
+function EffectCheck(player,link)
   -- function to check, if an effect is used in the current chain
-  local p = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_PLAYER)
-  local e = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
+  if not link then 
+    link = Duel.GetCurrentChain()
+  end
+  local p = Duel.GetChainInfo(link, CHAININFO_TRIGGERING_PLAYER)
+  local e = Duel.GetChainInfo(link, CHAININFO_TRIGGERING_EFFECT)
   local c = nil
   local id = nil
   if e and p and (p == player or player == nil) then
@@ -1835,7 +1863,7 @@ function CrashCheck(c)
   then --TODO: IIW?
     return true
   end
-  if c.id == 00006783 and AI.GetPlayerLP(1)>2000
+  if c.id == 93302695 and AI.GetPlayerLP(1)>2000
   and StrongerAttackerCheck(c,AIMon())
   then
     return true -- Wickedwitch
@@ -2206,9 +2234,11 @@ function TurnEndCheck()
 end
 
 function BattlePhaseCheck()
-  return (Duel.GetCurrentPhase()==PHASE_DRAW
-  or Duel.GetCurrentPhase()==PHASE_STANDBY
-  or Duel.GetCurrentPhase()==PHASE_MAIN1)  
+  local p = Duel.GetCurrentPhase()
+  return (p==PHASE_DRAW
+  or p==PHASE_STANDBY
+  or p==PHASE_BATTLE)
+  or p==PHASE_MAIN1
   and GlobalBPAllowed
 end
 -- returns the zone a card occupies
@@ -2339,7 +2369,101 @@ function ChainCheck(id,player,link,filter,opt)
   if result == 0 then result = false end
   return result
 end
-function MatchupCheck(id) -- TODO: make AI consider matchups
+GlobalOppDeck = nil
+CheckedDecks={
+0x9d, -- Shaddoll
+0xb1, -- Burning Abyss
+0x6,  -- Dark World 
+0x74, -- Mermail
+0x77, -- Atlantean
+0x38, -- Lightsworn
+}
+function OppDeckCheck(setcode) -- check for certain archetypes, for specific counters
+  if GlobalOppDeck == nil then -- Abyss Dweller, Shaddoll Anoyatilis...
+    local cards = SubGroup(UseLists({OppField(),OppGrave(),OppExtra(),OppBanish()}),FilterPublic)
+    local filter = function(c,setcode) 
+      return c.owner==2 
+      and FilterSet(c,setcode) 
+    end
+    for i=1,#CheckedDecks do
+      local s = CheckedDecks[i]
+      if CardsMatchingFilter(cards,filter,s)>1 then
+        GlobalOppDeck = s
+        break
+      end
+    end
+  end
+  if setcode then 
+    if type(setcode)=="table" then
+      local result = false
+      for i=1,#setcode do
+        if IsSetCode(GlobalOppDeck,setcode[i]) then
+          result = true
+        end
+      end
+      return result
+    else
+      return IsSetCode(GlobalOppDeck,setcode)
+    end
+  else
+    return GlobalOppDeck
+  end
+end
+Attributes={
+ATTRIBUTE_EARTH,		-- 0x01
+ATTRIBUTE_WATER,		-- 0x02
+ATTRIBUTE_FIRE,		  -- 0x04
+ATTRIBUTE_WIND,		  -- 0x08
+ATTRIBUTE_LIGHT,		-- 0x10
+ATTRIBUTE_DARK,		  -- 0x20
+ATTRIBUTE_DEVINE,	  -- 0x40	
+}
+GlobalOppAttribute = nil
+function OppAttributeCheck(attribute) -- check for certain attributes, for specific counters
+  if GlobalOppAttribute == nil then   -- Constellarknight Diamond, SIM/LIM...
+    local cards = SubGroup(UseLists({OppField(),OppGrave(),OppExtra(),OppBanish(),OppMaterials()}),FilterPublic)
+    local filter = function(c,attribute) 
+      return c.owner==2 
+      and FilterAttribute(c,attribute) 
+    end
+    for i=1,#Attributes do
+      local a = Attributes[i]
+      if CardsMatchingFilter(cards,filter,a)>3 then
+        GlobalOppAttribute = a
+        break
+      end
+    end
+  end
+  if setcode then 
+    if type(setcode)=="table" then
+      local result = false
+      for i=1,#setcode do
+        if IsSetCode(GlobalOppDeck,setcode[i]) then
+          result = true
+        end
+      end
+      return result
+    else
+      return IsSetCode(GlobalOppDeck,setcode)
+    end
+  else
+    return GlobalOppDeck
+  end
+end
+function MatchupCheck(id) -- make AI consider matchups
+  local decks = {0x9d,0xb1,0x6,0x74,0x77} -- Shaddoll, BA, Dark World, Mermail, Atlantenan
+  if id == 21044178 -- Abyss Dweller
+  and OppDeckCheck(decks)
+  then 
+    return true
+  end
+  decks = {0x9d,0xb1,0x38} -- Shaddoll, BA, Lightsworn
+  if id == 09272381 -- Constellarknight Diamond
+  and (OppDeckCheck(decks)
+  or OppAttributeCheck({ATTRIBUTE_DARK}))
+  then
+    return true
+  end
   return false
 end
 function SpaceCheck(loc,p)
@@ -2364,3 +2488,416 @@ function GetHighestAttDef(cards,filter,opt)
   end
   return result
 end
+
+function GetName(c) -- wrapper for backwards compatibility
+  if not c then
+    print("Warning: null card name")
+    PrintCallingFunction()
+    return ""
+  end
+  c=GetCardFromScript(c)
+  if AI.GetCardName then
+    return AI.GetCardName(c.id)
+  end
+  return c.id
+end
+
+
+
+function SummonNegateFilter(c)
+  return (c.attack>1500 and AIGetStrongestAttack(true)<=c.attack) or FilterType(c,TYPE_FUSION+TYPE_RITUAL+TYPE_SYNCHRO+TYPE_XYZ) --or c.level>4
+end
+function EffectNegateFilter(c,card)
+  local id = c:GetCode()
+  if RemovalCheck(card.id) then
+    local cg = RemovalCheck()
+    if cg:GetCount()>1 then
+      return true
+    else
+      if FilterType(card,TYPE_MONSTER) then
+        return true
+      else
+        return false
+      end
+    end
+  end
+  if RemovalCheck() then
+    --WIP, don't negate stuff that destroys re-equipables
+  end
+  for i=1,#EffNegBL do
+    if id == EffNegBL[i] then
+      return false
+    end
+  end
+  if c:IsType(TYPE_EQUIP+TYPE_FIELD) then
+    return false
+  end
+  if (id == 53804307 or id == 26400609 -- Dragon Rulers
+  or id == 89399912 or id == 90411554)
+  and c:IsLocation(LOCATION_MZONE)
+  then
+    return false
+  end
+  if  id == 00423585 -- Summoner Monk
+  and not Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_SPECIAL_SUMMON) 
+  then
+    return false
+  end
+  return true
+end
+function CardNegateFilter(c,card,targeted,filter,opt)
+  return c and card and c:IsControler(1-player_ai) 
+  and c:IsLocation(LOCATION_ONFIELD) 
+  and c:IsPosition(POS_FACEUP)
+  and not NegateBlacklist(c:GetCode()) 
+  and (not targeted or Targetable(c,card.type))
+  and Affected(c,card.type,card.level)
+  and NotNegated(c) 
+  and FilterCheck(c,filter,opt)
+end
+
+GlobalNegatedChainLinks = {}
+function CheckNegated(ChainLink)
+  return not GlobalNegatedChainLinks[ChainLink]
+end
+function SetNegated(ChainLink)
+  if ChainLink == nil then
+    ChainLink = Duel.GetCurrentChain()
+  end
+  GlobalNegatedChainLinks[ChainLink] = true
+end
+function ChainNegation(card,prio)
+-- for negating the last chain link via trigger effect
+  print("checking for effect negation: "..GetName(card))
+  if not prio then
+    print("default prio")
+    prio = 4
+  end
+  print("prio: "..prio)
+  local check = GetNegatePriority(card)
+  print("result: "..check)
+  if check>=prio then
+    print("prio matches, negating")
+    if card.id~=59438930 then --Ghost Ogre
+      print("set negated")
+      SetNegated()
+    end
+    print("commence negation")
+    return true
+  end
+  return false
+end
+
+function ChainCardNegation(card,targeted,prio,filter,opt,skipnegate)
+-- for negating cards on the field that activated
+-- an effect anywhere in the current chain
+  print("checking for card negation")
+  if not prio then
+    print("default prio")
+    prio=4
+  end
+  if prio == true then
+    print("only removal prio")
+    prio=5
+  end
+  print("prio: "..prio)
+  for i=1,Duel.GetCurrentChain() do
+    print("checking chain link: "..i)
+    local check = GetNegatePriority(card,i,targeted)
+    print("result: "..check)
+    if check>=prio then
+      print("prio matches, negating")
+      if not skipnegate then
+        print("set negated")
+        SetNegated()
+      end
+      print("finding target")
+      local e = Duel.GetChainInfo(i, CHAININFO_TRIGGERING_EFFECT)
+      local c = nil
+      if e then
+        c=e:GetHandler()
+        if FilterCheck(c,filter,opt) then
+          print("found target: "..GetName(c))
+          print("commence negation")
+          return c,i
+        else
+          print("not matching filter, abort")
+        end
+      end
+    end
+  end
+  return false
+end
+
+
+function NegateMonk(c,e,source,link)
+  if not Duel.GetOperationInfo(link, CATEGORY_SPECIAL_SUMMON) then
+    return 0
+  end
+  return nil
+end
+
+function NegateDragonRuler(c,e,source,link)
+  if Duel.GetCurrentPhase()==PHASE_END then
+    return 0
+  end
+  return nil
+end
+
+NegatePriority={
+[70368879] = 0, -- Upstart
+[32807846] = 0, -- RotA
+[12538374] = 0, -- Treeborn
+[19748583] = 0, -- Gwen
+[98645731] = 0, -- Duality
+[81439173] = 0, -- Foolish
+[75500286] = 0, -- Gold Sarc
+
+[00423585] = NegateMonk,
+[53804307] = NegateDragonRuler,
+[26400609] = NegateDragonRuler,
+[89399912] = NegateDragonRuler,
+[90411554] = NegateDragonRuler,
+}
+function AdjustMonsterPrio(target,prio)
+  print("adjusting priority for: "..GetName(target))
+  if not FilterType(target,TYPE_MONSTER) then
+    print("not a monster, no change")
+    return prio
+  end
+  local atk = AIGetStrongestAttack()
+  if CurrentOwner(target)==1 then
+    print("AI monster")
+    atk=OppGetStrongestAttDef()
+  end
+  if FilterType(target,TYPE_FUSION+TYPE_RITUAL+TYPE_SYNCHRO+TYPE_XYZ) 
+  or target.level>4
+  then
+    print("extra deck, ritual or high level, +1")
+    prio=prio+1
+  end
+  if target.attack>=2000 then
+    print("high ATK, +1")
+    prio=prio+1
+  end
+  if target.attack<1200 then
+    print("low ATK, -1")
+    prio=prio-1
+  end
+  if target.attack<500 then
+    print("very low ATK, -1")
+    prio=prio-1
+  end
+  if atk>0 and target.attack>=atk then
+    print("stronger than opponent's cards, +1")
+    prio=prio+1
+  end
+  print("adjust end")
+  return prio
+end
+function GetNegatePriority(source,link,targeted)
+-- assign priorities, how dangerous an effect might be
+-- to decide, if it should be negated
+  print("checking negate priority")
+  if not link then
+    print("no chain link specified, using current chain")
+    link=Duel.GetCurrentChain()
+  end
+  local prio = 0
+  local targets = nil
+  local target = nil
+  local e,c,id = nil,nil,nil
+  local cardtype = nil
+  local level = 0
+  if source then
+    if FilterType(source,TYPE_MONSTER) then
+      print("source is a monster")
+      cardtype = TYPE_MONSTER
+      level = source.level
+    elseif FilterType(source,TYPE_SPELL) then
+      print("source is a spell")
+      cardtype = TYPE_SPELL
+    elseif FilterType(source,TYPE_TRAP) then
+      print("source is a trap")
+      cardtype = TYPE_TRAP
+    end
+  else
+    print("source not defined")
+  end
+  if EffectCheck(1-player_ai,link) then
+    e,c,id=EffectCheck(nil,link)
+    c=GetCardFromScript(c)
+    print("found effect in chain")
+    print("assigning priority for: "..GetName(c))
+   if source and not Affected(c,cardtype,level) then
+      print("unaffected, to -1")
+      return -1
+    end
+    if source and targeted and not Targetable(c,cardtype) then
+      print("untargetable, to -1")
+      return -1
+    end
+    if not CheckNegated(link) then
+      print("already negated, to -1")
+      return -1
+    end
+    if FilterLocation(c,LOCATION_ONFIELD) 
+    and FilterType(c,TYPE_SPELL+TYPE_TRAP)
+    and FilterType(c,TYPE_CONTINUOUS+TYPE_FIELD+TYPE_EQUIP+TYPE_PENDULUM)
+    then
+      print("is a continuous S/T on field, +1")
+      prio=prio+1
+    end
+    if FilterType(c,TYPE_MONSTER) 
+    and FilterLocation(c,LOCATION_ONFIELD)
+    then
+      print("is a monster on field, +2")
+      prio=prio+2
+      print("adjusting for that monster")
+      prio=AdjustMonsterPrio(c,prio)
+    end
+    if FilterLocation(c,LOCATION_HAND) then
+      print("in hand, +1")
+      prio=prio+1
+    end
+    targets = RemovalCheckList(AICards(),nil,nil,nil,link)
+    target = nil
+    if targets and #targets>0 then
+      print("removal")
+      target = targets[1]
+      if #targets>1 then
+        print("mass or untargeted removal, +10")
+        prio=prio+10
+      else
+        if not (source and CardsEqual(source,target))
+        or FilterType(c,TYPE_MONSTER)
+        and FilterLocation(c,LOCATION_ONFIELD)
+        or FilterType(source,TYPE_MONSTER)
+        and FilterLocation(source,LOCATION_ONFIELD)
+        then
+          print("not removing source or is a monster on field, +3")
+          prio=prio+3
+        end 
+        print("adjusting for target")
+        prio=AdjustMonsterPrio(target,prio)
+      end
+    end
+    targets = NegateCheckList(AICards(),nil,link)
+    if targets and #targets>0 then
+      print("negation")
+      target = targets[1]
+      if #targets>1 then
+        print("mass or untargeted negation, +6")
+        prio=prio+6
+      else
+        print("single negation, +2")
+        prio=prio+2
+        if ChainCheck(target.id,player_ai) then
+          print("probably negates an effect in same chain, +2")
+          prio=prio+2
+        end
+      end
+    end
+    if e:IsHasCategory(CATEGORY_DRAW) then
+      print("draw, +1")
+      prio=prio+1
+    end
+    if e:IsHasCategory(CATEGORY_SEARCH) then
+      print("search, +1")
+      prio=prio+1
+    end
+    if e:IsHasCategory(CATEGORY_TOHAND) then
+      print("tohand, +0")
+    end
+    if e:IsHasCategory(CATEGORY_TOGRAVE) then
+      print("tograve, +0")
+    end
+    if e:IsHasCategory(CATEGORY_DECKDES) then
+      print("mill, +0")
+    end
+    if e:IsHasCategory(CATEGORY_SPECIAL_SUMMON) then
+      print("special summon")
+      targets = Duel.GetChainInfo(link, CHAININFO_TARGET_CARDS)
+      if targets and targets:GetCount() then
+        print("targeted")
+        target=GetCardFromScript(targets:GetFirst())
+        if targets:GetCount()>1 then
+          print("multiple targets, +5")
+          prio=prio+5
+        else
+          print("single target, +1")
+          prio=prio+1
+          if not FilterLocation(target,LOCATION_MZONE) then
+            print("target not on field, assuming target will be summoned")
+            print("adjusting for target")
+            prio=AdjustMonsterPrio(target,prio)
+          end 
+        end
+      else
+        print("untargeted, +2")
+        prio=prio+2
+        if FilterType(c,TYPE_MONSTER) 
+        and CheckSSList(c) and not FilterLocation(c,LOCATION_MZONE) 
+        then
+          print("not on field, monster, checked list, assumed to summon itself")
+          target = c
+          print("adjusting for self")
+          prio=AdjustMonsterPrio(target,prio)
+        end
+      end
+    end
+  else
+    print("no effect")
+    local targets = SubGroup(OppMon(),FilterStatus,STATUS_SUMMONING)
+    if targets and #targets>0 then 
+      print("inherent summon")
+      target=targets[1]
+      c=target
+      id=c.id
+      if #targets > 1 and Duel.GetCurrentChain()<1 then
+        print("multiple monsters (Pendulum?), +10")
+        prio = prio + 10
+      end
+      if #targets == 1 and Duel.GetCurrentChain()<1 then
+        target=targets[1]
+        print("single monster, +3")
+        prio = prio + 3
+        print("adjusting for summoned monster")
+        prio=AdjustMonsterPrio(target,prio)
+      end
+    end
+  end
+  local check = NegatePriority[id]
+  if prio>-1 and check then
+    print("custom priority check")
+    if type(check) == "function" 
+    and check(c,e,source)
+    then
+      print("complex check, result: "..check(c,e,source))
+      prio=check(c,e,source)
+    else
+      print("just a number: "..check)
+      prio=check
+    end
+  end
+  print("final priority: "..prio)
+  return prio
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

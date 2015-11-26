@@ -503,6 +503,14 @@ function OnSelectBattleCommand(cards,activatable)
       return 2,result2
     end
   end
+  result = HEROChain(activatable)
+  if result then
+    if type(result)=="table" then
+      return 2,result[2]
+    else
+      return 2,result2
+    end
+  end
   GlobalBPEnd = false
   -------------------------------------
   -- If it gets this far, don't attack.
@@ -540,7 +548,7 @@ function AttackMaiden(c,source)
   or ArmadesCheck(source)
   or FilterPosition(c,POS_DEFENCE)
   or CardsMatchingFilter(AIMon(),FilterAttackMin,3000)>0
-  or DualityCheck(2)
+  or not DualityCheck(2)
 end
 function AttackMole(c,source)
   return Negated(c)

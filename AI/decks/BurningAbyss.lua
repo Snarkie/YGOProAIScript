@@ -43,7 +43,7 @@ AddPriority({
 [20036055] = {4,2,1,1,3,1,1,1,1,1,},             -- BA Traveler
 [63356631] = {1,1,1,1,1,1,1,1,1,1,PWWBCond},     -- PWWB
 [71587526] = {1,1,1,1,1,1,1,1,1,1,KarmaCutCond}, -- Karma Cut
-[00006780] = {1,1,1,1,1,1,1,1,1,1},              -- Painful Escape
+[20513882] = {1,1,1,1,1,1,1,1,1,1},              -- Painful Escape
 
 [00601193] = {1,1,10,1,1,1,1,1,1,1,VirgilCond},  -- BA Virgil
 [72167543] = {1,1,1,1,1,1,1,1,1,1},              -- Downerd Magician
@@ -208,7 +208,7 @@ function BarbarDamage()
 end
 function BarbarFinish(cards)
   if not cards then cards=AIDeck() end
-  return HasID(cards,81992475,true,OPTCheck,81992475)
+  return HasID(cards,81992475,true,FilterOPT,true)
   and BarbarDamage()>=AI.GetPlayerLP(2)
   and MacroCheck()
 end
@@ -473,7 +473,7 @@ function SummonBeatrice(c,mode)
     return true
   end
 end
-function SummonF0(c) 
+function SummonF0(c,mode) 
   if (F0Check(c,OppMon(),2500) 
   and CardsMatchingFilter(AIMon(),FilterID,83531441)>1
   or F0Check(c,OppMon())
@@ -481,6 +481,15 @@ function SummonF0(c)
   and CardsMatchingFilter(AIMon(),BASelfDestructFilter)<2
   and OppHasStrongestMonster())
   and BattlePhaseCheck()
+  and mode == 1
+  then
+    GlobalSSCardID = c.id
+    return true
+  end
+  if OppHasStrongestMonster()
+  and F0Check(c,OppMon())
+  and BattlePhaseCheck()
+  and mode == 2
   then
     GlobalSSCardID = c.id
     return true
@@ -537,7 +546,7 @@ function BAInit(cards)
   if HasID(SpSum,83531441) and SummonDanteBA() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasID(SpSum,65305468,SummonF0) then
+  if HasID(SpSum,65305468,SummonF0,1) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SpSum,27552504,SummonBeatrice,1) then
@@ -640,7 +649,7 @@ function BAInit(cards)
   if HasID(Sum,47728740) and SummonBA() then
     return {COMMAND_SUMMON,CurrentIndex}
   end
-  if HasID(Sum,00006780,UsePainfulEscape) then
+  if HasID(Sum,20513882,UsePainfulEscape) then
     return {COMMAND_SUMMON,CurrentIndex}
   end
   if HasID(Act,00734741) and SummonBA() then
@@ -657,6 +666,9 @@ function BAInit(cards)
   if HasID(Act,57143342,false,nil,LOCATION_HAND) and SSCir(Act[CurrentIndex]) then
     OPTSet(57143342)
     return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasID(SpSum,65305468,SummonF0,2) then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasID(SetMon,57143342) and SetCir() then
     return {COMMAND_SET_MONSTER,CurrentIndex}
@@ -822,6 +834,10 @@ end
 GlobalGriefingID = nil
 function FiendGriefingTarget(cards)
   if LocCheck(cards,LOCATION_GRAVE) then
+    if GlobalCardMode == 1 then
+      GlobalCardMode = nil
+      return GlobalTargetGet(cards,true)
+    end
     return BestTargets(cards,1,TARGET_TODECK)
   elseif LocCheck(cards,LOCATION_DECK) then
     if GlobalGriefingID then
@@ -956,7 +972,7 @@ function BACard(cards,min,max,id,c)
   if id == 16195942 then -- Dark Rebellion Dragon
     return BestTargets(cards,min)
   end
-  if id == 00006780 then
+  if id == 20513882 then
     return PainfulEscapeTarget(cards)
   end
   return nil
@@ -1036,8 +1052,8 @@ end
 function ChainFarfa()
   return CardsMatchingFilter(OppMon(),FarfaFilter)>0
 end
-function ChainLibic()
-  return CardsMatchingFilter(AIHand(),LibicFilter)>0
+function ChainLibic(c)
+  return CardsMatchingFilter(AIHand(),LibicFilter,c)>0
 end
 GlobalBeatriceID = nil
 function ChainBeatrice(c)
@@ -1055,8 +1071,8 @@ function ChainBeatrice(c)
       return true
     end
     if HasPriorityTarget(OppMon(),false,nil,FarfaFilter)
-    and (HasID(AIDeck(),36553319,true,OPTCheck,36553319) and NotNegated(c)
-    or HasID(c.xyz_materials,36553319,true,OPTCheck,36553319))
+    and (HasID(AIDeck(),36553319,true,FilterOPT,true) and NotNegated(c)
+    or HasID(c.xyz_materials,36553319,true,FilterOPT,true))
     and UnchainableCheck(27552504)
     then
       GlobalBeatriceID = 36553319
@@ -1101,7 +1117,7 @@ function ChainPilgrim(c)
       return true
     end
     if HasPriorityTarget(OppMon(),false,nil,FarfaFilter)
-    and HasID(AIHand(),36553319,true,OPTCheck,36553319) 
+    and HasID(AIHand(),36553319,true,FilterOPT,true) 
     and NotNegated(c)
     and UnchainableCheck(18386170)
     then
@@ -1149,7 +1165,7 @@ function ChainFiendGriefing(c)
     return true
   end
   if HasPriorityTarget(OppMon(),false,nil,FarfaFilter)
-  and HasID(AIDeck(),36553319,true,OPTCheck,36553319) 
+  and HasID(AIDeck(),36553319,true,FilterOPT,true) 
   and UnchainableCheck(60743819)
   then
     GlobalGriefingID = 36553319
@@ -1167,6 +1183,18 @@ function ChainFiendGriefing(c)
   and (Duel.GetCurrentPhase()==PHASE_MAIN1
   or Duel.GetCurrentPhase()==PHASE_MAIN2)
   then
+    return true
+  end
+  local card=CheckTarget(c,OppGrave(),true,FilterType,TYPE_MONSTER)
+  if card then
+    GlobalCardMode=1
+    GlobalTargetSet(card)
+    return true
+  end
+  local card=CheckSS(c,OppGrave(),true,LOCATION_GRAVE,FilterType,TYPE_MONSTER)
+  if card then
+    GlobalCardMode=1
+    GlobalTargetSet(card)
     return true
   end
   return false
@@ -1266,7 +1294,7 @@ function ChainPainfulEscape(c)
   then
     return true
   end
-  local i = HasID(targets,36553319,true,OPTCheck,36553319)
+  local i = HasID(targets,36553319,true,FilterOPT,true)
   if i and HasPriorityTarget(OppMon(),false,nil,FarfaFilter)
   then
     GlobalCardMode = 1
@@ -1308,7 +1336,7 @@ function BAChain(cards)
     OPTSet(09342162)
     return {1,CurrentIndex}
   end
-  if HasID(cards,62957424,false,nil,LOCATION_GRAVE) and ChainLibic() then -- Libic
+  if HasID(cards,62957424,false,nil,LOCATION_GRAVE,ChainLibic) then -- Libic
     OPTSet(62957424)
     return {1,CurrentIndex}
   end
@@ -1328,7 +1356,7 @@ function BAChain(cards)
   if HasID(cards,71587526) and ChainKarmaCut() then
     return {1,CurrentIndex}
   end
-  if HasID(cards,00006780,ChainPainfulEscape) then
+  if HasID(cards,20513882,ChainPainfulEscape) then
     return Chain()
   end
   if HasID(cards,65305468,ChainF0) then
@@ -1377,7 +1405,7 @@ function BAEffectYesNo(id,card)
     OPTSet(09342162)
     result = 1
   end
-  if id==62957424 and FilterLocation(card,LOCATION_GRAVE) and ChainLibic() then
+  if id==62957424 and FilterLocation(card,LOCATION_GRAVE) and ChainLibic(card) then
     OPTSet(62957424)
     result = 1
   end

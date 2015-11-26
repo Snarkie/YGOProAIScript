@@ -103,7 +103,7 @@ function CyberCond(loc,c)
 end
 function DancerCond(loc,c)
   if loc == PRIO_TOHAND then
-    if HasIDNotNegated(AICards(),15854426,true,OPTCheck)
+    if HasIDNotNegated(AICards(),15854426,true,FilterOPT)
     and not HasID(AIHand(),c.original_id,true)
     then
       return 10
@@ -111,7 +111,7 @@ function DancerCond(loc,c)
     return not HasID(AIHand(),c.original_id,true)
   end
   if loc == PRIO_TOFIELD then
-    if HasIDNotNegated(AICards(),15854426,true,OPTCheck)
+    if HasIDNotNegated(AICards(),15854426,true,FilterOPT)
     and not HasID(AIMon(),c.original_id,true)
     and OPTCheck(68815132)
     and GetMultiple(c.original_id)==0
@@ -215,10 +215,10 @@ function UseHHG(c,cards)
 end
 function DancerYesNo()
   if FieldCheck(4)==1 
-  and not (HasIDNotNegated(AIST(),15854426,true,OPTCheck)
+  and not (HasIDNotNegated(AIST(),15854426,true,FilterOPT)
   and DualityCheck())
   or FieldCheck(4)==0
-  and (HasIDNotNegated(AIST(),15854426,true,OPTCheck)
+  and (HasIDNotNegated(AIST(),15854426,true,FilterOPT)
   or HasIDNotNegated(AICards(),90219263,true)
   or HasIDNotNegated(AIHand(),90238142,true,UseChanneler))
   and DualityCheck()
@@ -233,7 +233,7 @@ end
 function UseDancer(c,mode)
   if mode == 1 and (HasIDNotNegated(AIST(),75782277,true)
   and DestroyCheck(OppST(),false,true)>0
-  or HasIDNotNegated(AIST(),15854426,true,OPTCheck)
+  or HasIDNotNegated(AIST(),15854426,true,FilterOPT)
   and DualityCheck()
   or HasID(AIMon(),90238142,true)
   and LadyCount(AIHand())>0
@@ -264,7 +264,7 @@ end
 function SummonDancer(c,mode)
   if mode == 1 and (HasIDNotNegated(AIST(),75782277,true)
   and DestroyCheck(OppST(),false,true)>0
-  or HasIDNotNegated(AIST(),15854426,true,OPTCheck)
+  or HasIDNotNegated(AIST(),15854426,true,FilterOPT)
   and DualityCheck())
   and OPTCheck(68815132)
   then

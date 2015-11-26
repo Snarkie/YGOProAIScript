@@ -31,38 +31,7 @@ function OnSelectChain(cards,only_chains_by_player,forced)
   DamageSet()
   ResetOncePerTurnGlobals()
   GlobalAIIsAttacking = nil
-  ----------------------------------------------
-  -- This switches the GlobalIsAIsTurn variable.
-  ----------------------------------------------
-  if GlobalAIPlaysFirst == 1 then
-    if GlobalIsAIsTurn == 1 then
-      if Duel.GetTurnCount() % 2 == 0 then
-        GlobalIsAIsTurn = 0
-        ResetOncePerTurnGlobals()
-	  end
-    end
-    if GlobalIsAIsTurn == 0 then
-      if Duel.GetTurnCount() % 2 == 1 then
-        GlobalIsAIsTurn = 1
-        ResetOncePerTurnGlobals()
-	  end
-    end
-  end
-  if GlobalAIPlaysFirst == 0 then
-    if GlobalIsAIsTurn == 1 then
-      if Duel.GetTurnCount() % 2 == 1 then
-        GlobalIsAIsTurn = 0
-        ResetOncePerTurnGlobals()
-	  end
-    end
-	if GlobalIsAIsTurn == 0 then
-      if Duel.GetTurnCount() % 2 == 0 then
-        GlobalIsAIsTurn = 1
-        ResetOncePerTurnGlobals()
-	  end
-    end
-  end
-
+  --GetNegatePriority()
   ---------------------------------------------
   -- Don't activate anything if the AI controls
   -- a face-up Light and Darkness Dragon.
@@ -148,7 +117,7 @@ result = 0
  ---------------------------------------------
  -- Cocoon of Evolution on field turn counter
  --------------------------------------------- 
- if Global1PTVariable ~= 1 and GlobalIsAIsTurn == 1 then
+ if Global1PTVariable ~= 1 and Duel.GetTurnPlayer() == player_ai then
   if Get_Card_Count_ID(UseLists({AIMon(),AIST()}), 40240595, POS_FACEUP) > 0 and Get_Card_Count_ID(UseLists({AIMon(),AIST()}),68144350,POS_FACEUP) > 0 and AI.GetCurrentPhase() == PHASE_END then -- Cocoon of Evolution, Petit Moth
     GlobalCocoonTurnCount = GlobalCocoonTurnCount +1
     Global1PTVariable = 1
@@ -284,7 +253,7 @@ result = 0
   -- only if player has any face up attack position monsters 
   -- with more attack points than AI's stronger attack pos monster
   --------------------------------------------- 
-  if GlobalIsAIsTurn == 0 and Global1PTWaboku ~= 1 then
+  if Duel.GetTurnPlayer() == 1-player_ai and Global1PTWaboku ~= 1 then
    for i=1,#cards do 
    if cards[i].id == 12607053 or cards[i].id == 14315573 then -- Waboku, Negate Attack
    if Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP,"attack") > Get_Card_Att_Def_Pos(AIMon()) or 
@@ -323,7 +292,10 @@ result = 0
    local AIHand = AIHand()
    local HandHighestATK = 0
    local Result = 0
-  if AI.GetCurrentPhase() == PHASE_BATTLE and GlobalIsAIsTurn == 0 and Get_Card_Count_Type(AIBanish(),TYPE_MONSTER,">",nil) >= 3 and Get_Card_Count(AIMon()) == 0 then 
+  if AI.GetCurrentPhase() == PHASE_BATTLE and Duel.GetTurnPlayer() == player_ai
+  and Get_Card_Count_Type(AIBanish(),TYPE_MONSTER,">",nil) >= 3 
+  and Get_Card_Count(AIMon()) == 0 
+  then 
    return 1,i
   end
  if AI.GetCurrentPhase() == PHASE_MAIN1 and Get_Card_Count_Type(AIBanish(),TYPE_MONSTER,">",nil) >= 3 and GlobalIsAIsTurn == 1 and Get_Card_Count(AIMon()) == 0 then	
@@ -346,7 +318,9 @@ end
   ---------------------------------------------
   for i=1,#cards do  
    if cards[i].id == 83133491 then  -- Zero Gravity
-    if Get_Card_Count_ID(UseLists({AIMon(),AIST()}), 83133491, POS_FACEUP) ==  0 and AI.GetCurrentPhase() == PHASE_DAMAGE and GlobalIsAIsTurn == 0 then
+    if Get_Card_Count_ID(UseLists({AIMon(),AIST()}), 83133491, POS_FACEUP) ==  0 
+    and AI.GetCurrentPhase() == PHASE_DAMAGE and Duel.GetTurnPlayer() == 1-player_ai
+    then
 	   GlobalActivatedCardID = cards[i].id
       return 1,i
      end

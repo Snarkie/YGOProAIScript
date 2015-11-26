@@ -116,6 +116,7 @@ function PrioritySetup()
   SatellarknightPriority()
   --HEROPriority()
   BAPriority()
+  --NekrozPriority()
 
 AddPriority({
 -- HERO
@@ -154,41 +155,6 @@ AddPriority({
 [16304628] = {1,1,1,1,1,1,1,1,1,1,nil},         -- Gaia
 })
 
-AddPriority({
--- Nekroz: 
-
-[90307777] = {6,3,1,1,1,1,1,1,1,1,ShritCond},         -- Shrit, Caster of Nekroz
-[52738610] = {3,2,1,1,7,1,1,1,8,1,PrincessCond},      -- Nekroz Dance Princess
-
-[25857246] = {6,2,3,1,3,1,1,1,3,1,ValkCond},          -- The Nekroz of Valkyrus
-[99185129] = {12,2,4,1,5,1,1,1,2,1,ClausCond},        -- The Nekroz of Clausolas
-[89463537] = {8,1,7,1,4,1,1,1,6,1,UniCond},           -- The Nekroz of Unicore
-[26674724] = {9,3,4,1,4,1,1,1,4,1,BrioCond},          -- The Nekroz of Brionac
-[74122412] = {4,2,3,1,4,1,1,1,7,1,GungCond},          -- The Nekroz of Gungnir
-[52068432] = {7,2,6,1,3,1,1,1,5,1,TrishCond},         -- The Nekroz of Trishula
-[88240999] = {5,2,5,1,1,1,1,1,3,1,ArmorCond},         -- The Nekroz of Decisive Armor
-[08903700] = {3,1,1,1,9,2,1,1,1,1,ReleaserCond},      -- Djinn Releaser of Rituals
-[95492061] = {10,1,1,1,5,1,1,1,1,1,ManjuCond},        -- Manju of the Ten Thousand Hands
-[23401839] = {9,1,1,1,6,1,1,1,1,1,SenjuCond},         -- Senju of the Thousand Hands
-[13974207] = {3,1,1,1,6,1,1,1,1,1,SekkaCond},         -- Denkou Sekka
-[30312361] = {2,1,1,1,7,1,1,1,1,1,nil},               -- Phantom of Chaos
-
-[96729612] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Preparation of Rites
-[14735698] = {10,3,1,1,3,1,1,1,1,1,ExoCond},          -- Nekroz Exomirror
-[51124303] = {11,2,1,1,3,1,1,1,1,1,KaleidoCond},      -- Nekroz Kaleidomirror
-[97211663] = {11,2,1,1,3,1,1,1,1,1,CycleCond},        -- Nekroz Cycle
-
-[35952884] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Shooting Quasar Dragon
-[24696097] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Shooting Star Dragon
-[79606837] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Herald of Rainbow Light
-[15240268] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Mist Bird Clausolas
-[95113856] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Phantom Fortress Enterblathnir
-[44505297] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Inzektor Exa-Beetle
-[08809344] = {1,1,1,1,6,3,1,1,1,1,NyarlaCond},        -- Outer God Nyarla
-[31563350] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Zubaba General
-[86346643] = {1,1,1,1,5,1,1,1,1,1,nil},               -- Rainbow Neos
-[63465535] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Underground Arachnid
-})
 
 AddPriority({
 -- Noble Knight:
@@ -383,6 +349,16 @@ function AssignPriority(cards,loc,filter,opt)
     if loc==PRIO_TOGRAVE and not MacroCheck() then
       c.prio=-1*c.prio
     end
+    if loc==PRIO_TOGRAVE and HasID(AIMon(),17412721,true) --Norden
+    then
+      local norden = FindID(17412721,AIMon())
+      if CardTargetCheck(norden,c) then
+        c.prio=12
+      end
+      if CardsEqual(norden,c) then
+        c.prio=11
+      end
+    end
     if not FilterCheck(c,filter,opt) then
       c.prio=c.prio-9999
     end
@@ -406,7 +382,7 @@ function Add(cards,loc,count,filter,opt)
   table.sort(cards,compare)
   --print("priority list:")
   for i=1,#cards do
-    --print(cards[i].original_id..", prio:"..cards[i].prio)
+    --print(GetName(cards[i])..", prio:"..cards[i].prio)
   end
   for i=1,count do
     result[i]=cards[i].index

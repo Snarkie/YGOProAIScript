@@ -681,7 +681,7 @@ Unchainable={
 83555666,88197162,24348807,21143940, --  Ring of Destruction, Soul Transition, Lose a turn, Mask Change
 84536654,50608164,06511113,30575681, -- Form Change, Koga, Rafflesia, Treacherous, Bedwyr
 27552504,18386170,60743819,20036055, -- Beatrice, Pilgrim, Fiend Griefing, Traveler
-36553319,65305468,00006780,31222701, -- Farfa, F0, Painful Escape, Wavering Eyes
+36553319,65305468,20513882,31222701, -- Farfa, F0, Painful Escape, Wavering Eyes
 }
 function isUnchainableTogether(CardId)
   for i=1,#Unchainable do
@@ -899,7 +899,7 @@ ScriptedCards ={
 29401950,06511113,99590524,81992475, -- Bottomless, Rafflesia, Treacherous, BA Barbar
 27552504,18386170,60743819,20036055, -- Beatrice, Pilgrim, Fiend Griefing, Traveler
 40605147,65305468,59438930,56840427, -- Solemn Notice, F0, Ghost Ogre, Utopia Ray
-16051717,30100551,00006780,31222701, -- Raikiri, Minerva, Painful Escape, Wavering Eyes
+16051717,30100551,20513882,31222701, -- Raikiri, Minerva, Painful Escape, Wavering Eyes
 01050186,19508728, -- Satellarknight Unukalhai, Moon Mirror Shield
 }
 function CardIsScripted(CardId)

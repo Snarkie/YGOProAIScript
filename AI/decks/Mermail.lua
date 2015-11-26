@@ -629,8 +629,9 @@ function UseMizuchi(c)
   and (BattlePhaseCheck() or HasIDNotNegated(AIMon(),74371660,true))
 end
 function SummonDragoons(c)
-  return HasIDNotNegated(AIMon(),21954587,true,OPTCheck)
+  return HasIDNotNegated(AIMon(),21954587,true,FilterOPT)
   and BattlePhaseCheck()
+  or FieldCheck(4)==1
 end
 function MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   local Activatable = cards.activatable_cards
@@ -654,6 +655,9 @@ function MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   end
   if HasIDNotNegated(SpSummonable,08561192,SummonLeoMermail) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(Activatable,21044178,UseDweller) then
+    return Activate()
   end
   if HasIDNotNegated(Activatable,21565445,UseNeptabyss) then
     return {COMMAND_ACTIVATE,CurrentIndex}
@@ -733,7 +737,7 @@ function MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(SpSummonable,74371660) and SummonGaios() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasID(SpSummonable,21044178,SummonDweller) and DeckCheck(DECK_MERMAIL) then
+  if HasID(SpSummonable,21044178,SummonDweller,2) and DeckCheck(DECK_MERMAIL) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
    if HasID(SpSummonable,00440556) and SummonBahamut() then
@@ -1160,8 +1164,72 @@ local effect = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EF
   end
   return false
 end
-function ChainDweller()
-  return true
+function UseDweller(c,mode)
+  if HasID(c.xyz_materials,74311226) then
+    return true
+  end
+  return false
+end
+function ChainDweller(c,mode)
+  if RemovalCheckCard(c) or NegateCheckCard(c) then
+    --print("Dweller removed, chaining")
+    return true
+  end
+  if Duel.GetTurnPlayer()==1-player_ai
+  and MatchupCheck(c.id)
+  then
+    --print("Dweller matchup, chaining asap")
+    return true
+  end
+  for i=1,Duel.GetCurrentChain() do
+    local e = Duel.GetChainInfo(i,CHAININFO_TRIGGERING_EFFECT)
+    if e and Duel.GetChainInfo(i,CHAININFO_TRIGGERING_PLAYER)==1-player_ai
+    then
+      local ec = e:GetHandler()
+      if Duel.GetOperationInfo(i,CATEGORY_TOGRAVE)
+      or Duel.GetOperationInfo(i,CATEGORY_DECKDES)
+      then
+        --print("dump or mill effect activated, chaining")
+        return true
+      end
+      if Duel.GetOperationInfo(i,CATEGORY_SPECIAL_SUMMON)
+      and FilterType(ec,TYPE_SPELL+TYPE_TRAP) 
+      and (FilterType(ec,TYPE_RITUAL)
+      or FilterSet(ec,0x46))
+      and not ec:IsCode(01845204) -- Instant Fusion
+      then
+        --print("ritual or fusion summon, chaining")
+        return true
+      end
+    end
+  end
+  for i=1,Duel.GetCurrentChain() do
+    local e = Duel.GetChainInfo(i,CHAININFO_TRIGGERING_EFFECT)
+    if e and Duel.GetChainInfo(i,CHAININFO_TRIGGERING_PLAYER)==player_ai
+    then
+      cat={CATEGORY_TOGRAVE,CATEGORY_DESTROY}
+      for j=1,2 do
+        local ex,cg=Duel.GetOperationInfo(i,car[j])
+        if ex then
+          local c = CardFromScript(cg:GetFirst())
+          if CurrentOwner(c)==2 then
+            --print(removal by AI, chaining")
+            return true
+          end
+        end
+      end
+    end
+  end
+  if Duel.GetCurrentPhase() == PHASE_BATTLE then
+    local aimon,oppmon = GetBattlingMons()
+    if WinsBattle(aimon,oppmon) 
+    or WinsBattle(oppmon,aimon) and CardsEqual(c,aimon)
+    then
+      --print("winning battle, chaining")
+      return true
+    end
+  end
+  return false
 end
 function MermailOnSelectChain(cards,only_chains_by_player)
   MermailTargets = {}
@@ -1217,7 +1285,7 @@ function MermailOnSelectChain(cards,only_chains_by_player)
   if HasIDNotNegated(cards,74371660) and ChainGaios() then
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,21044178) and ChainDweller() then
+  if HasIDNotNegated(cards,21044178,ChainDweller) then
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,21565445) then
@@ -1269,7 +1337,7 @@ end
 MermailAtt={
   21954587,15914410,70583986, -- Megalo,Mechquipped Angineer,Dewloren
   74311226,00706925,21565445, -- Dragoons, Marksman, Neptabyss (for Megalo)
-  37104630, -- Infantry (for Megalo)
+  37104630,21044178, -- Infantry (for Megalo), Dweller
 }
 MermailDef={
   59170782,50789693,--22446869,  -- Trite, Kappa,Teus

@@ -330,9 +330,6 @@ function ConstellarInit(cards)
   if HasID(Sum,78358521) and SummonConstellar(Sum[CurrentIndex]) then
     return {COMMAND_SUMMON,CurrentIndex}
   end
-  if HasIDNotNegated(SpSum,56638625) and SummonDelteros() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
-  end
   if HasIDNotNegated(Act,34086406,false,545382498) and UseChainConstellar(3) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end

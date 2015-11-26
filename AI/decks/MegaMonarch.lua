@@ -452,7 +452,7 @@ function TributeSummonsM(tributes,mode)
     if (tributes == 1 or tributes == 0)
     and (c.id==09748752 and SummonCaius(c,mode)
     or c.id==26205777 and SummonThestalos(c,mode)
-    or (c.level==6 or HasIDNotNegated(AICards(),84171830,true,OPTCheck))
+    or (c.level==6 or HasIDNotNegated(AICards(),84171830,true,FilterOPT))
     and (c.id==23064604 and SummonErebus(c,mode,true)
     or c.id==96570609 and SummonAither(c,mode,true)
     or c.id==69230391 and SummonMegaThestalos(c,mode,true)
@@ -509,7 +509,7 @@ end
 function SummonIdea(c,mode)
   if mode == 1 then
     return TributeSummonsM(0,1)>0 
-    and HasIDNotNegated(AIDeck(),59463312,true,OPTCheck,59463312)
+    and HasIDNotNegated(AIDeck(),59463312,true,FilterOPT,true)
     and (TributeFodder()==0
     or TributeFodder()<2 and TributeSummonsM(1,1)==0) 
     and DualityCheck()
@@ -538,7 +538,7 @@ function UseEidos(c,mode)
   and CardsMatchingFilter(AIDeck(),VassalFilter,95457011)>0
   and OPTCheck(95457011)
   and TributeFodder()<2)
-  and (NormalSummonCount()<2 and HasID(AIDeck(),59463312,true,OPTCheck(594633121)) or not NormalSummonCheck())
+  and (NormalSummonCount()<2 and HasID(AIDeck(),59463312,true,FilterOPT,594633121) or not NormalSummonCheck())
   then
     OPTSet(59463312)
     return true
@@ -725,7 +725,7 @@ function UseOneforone(c,mode)
   and CardsMatchingFilter(AIDeck(),VassalFilter,95457011)>0
   and OPTCheck(95457011)
   and TributeFodder()<2)
-  and (NormalSummonCount()<2 and HasID(AIDeck(),59463312,true,OPTCheck(594633121)) or not NormalSummonCheck())
+  and (NormalSummonCount()<2 and HasID(AIDeck(),59463312,true,FilterOPT,594633121) or not NormalSummonCheck())
   and CardsMatchingFilter(AIHand(),OneforoneFilter)>0
   then
     return true
@@ -1018,7 +1018,7 @@ function OriginalTarget(cards,c,min)
   end
   --[[if FilterLocation(c,LOCATION_ONFIELD) -- TODO: not working at the moment
   and CardsMatchingFilter(AIGrave(),MonarchFilter)>2
-  and HasID(AIGrave(),c.id,true,OPTCheck,c.id)
+  and HasID(AIGrave(),c.id,true,FilterOPT)
   and not HasID(AIMon(),c.id,true)
   and Duel.GetLocationCount(player_ai,LOCATION_MZONE)>0
   and DualityCheck()
@@ -1114,7 +1114,7 @@ function ChainAither(c)
   if FilterLocation(c,LOCATION_HAND) then
     if (((Duel.CheckTiming(TIMING_MAIN_END)
     and Duel.GetCurrentPhase(PHASE_MAIN1)
-    and HasIDNotNegated(AIST(),79844764,true,OPTCheck)
+    and HasIDNotNegated(AIST(),79844764,true,FilterOPT,true)
     or GlobalStormforth==Duel.GetTurnCount())
     and CardsMatchingFilter(OppMon(),StormforthFilter)>0
     and TributesAvailable(true)>1)
