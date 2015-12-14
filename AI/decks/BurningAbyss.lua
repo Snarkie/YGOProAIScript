@@ -1251,7 +1251,7 @@ function PainfulEscapeFilter(c,source)
   and FilterLevel(c,source.level)
   and not FilterID(c,source.id)
 end
-function ChainPainfulEscape(c)
+function ChainPainfulEscape(card)
   local cards = UseLists(AIDeck(),AIGrave())
   local targets = {}
   for i=1,#AIMon() do
@@ -1271,7 +1271,7 @@ function ChainPainfulEscape(c)
       return true
     end
   end
-  if RemovalCheckCard(c) then
+  if RemovalCheckCard(card) then
     return true
   end
   if Duel.GetCurrentPhase()==PHASE_BATTLE
@@ -1283,7 +1283,7 @@ function ChainPainfulEscape(c)
     and ListHasCard(targets,GetCardFromScript(aimon))
     then
       GlobalCardMode = 1
-      GlobalTargetSet(c)
+      GlobalTargetSet(aimon)
       return true
     end
   end

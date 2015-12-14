@@ -793,6 +793,7 @@ function CurrentSTOwner(CardsID)
   return Result
 end
 function CurrentOwner(c,cards)
+  c=GetCardFromScript(c)
   if not FilterLocation(c,LOCATION_ONFIELD) then
     return c.owner
   end

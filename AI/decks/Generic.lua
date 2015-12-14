@@ -2057,24 +2057,11 @@ function ChainMST(c)
       return true
     end
   end
-  if e then
-    local c = e:GetHandler()
-    if (c:IsType(TYPE_CONTINUOUS+TYPE_EQUIP+TYPE_FIELD) 
-    or (c:IsType(TYPE_PENDULUM) and c:IsType(TYPE_SPELL) 
-    and (ScaleCheck(2)==true or not e:IsHasType(EFFECT_TYPE_ACTIVATE))))
-    and c:IsControler(1-player_ai)
-    and targets>0
-    and c:IsLocation(LOCATION_ONFIELD)
-    and not c:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET)
-    and not c:IsHasEffect(EFFECT_INDESTRUCTABLE_EFFECT)
-    and not c:IsHasEffect(EFFECT_IMMUNE_EFFECT)
-    and (not DestroyBlacklist(c) or c:GetCode()==19337371 
-    or c:GetCode()==05851097 and Duel.GetCurrentChain()>1)
-    then
-      GlobalCardMode = 1
-      GlobalTargetSet(c,OppST())
-      return true
-    end
+  local target = RemoveOnActivation(nil,MSTFilter)
+  if target then
+    GlobalCardMode = 1
+    GlobalTargetSet(target)
+    return true
   end
   if HasPriorityTarget(OppST(),true) and Duel.GetCurrentChain()==0 then
     return true

@@ -98,7 +98,7 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
   -- a face-up Light and Darkness Dragon.
   ---------------------------------------
   
-  if Get_Card_Count_ID(AIMon(), 47297616, POS_FACEUP) > 0 then
+  if LADDCheck(atk) then
     return COMMAND_TO_NEXT_PHASE,1
   end
   

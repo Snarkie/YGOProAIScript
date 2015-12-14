@@ -223,7 +223,8 @@ function FusionMaterialCheck(fusion,cards)
   end
   return false
 end
-function SummonCount(sum) -- checks, how many level 4s the AI can probably bring out this turn
+function SummonCount(sum) 
+-- checks, how many level 4s the AI can probably bring out this turn
   local cards = SubGroup(AICards(),NotNegated)
   local result = 0
   local normal = not NormalSummonCheck()
@@ -232,30 +233,26 @@ function SummonCount(sum) -- checks, how many level 4s the AI can probably bring
   local ecall = CardsMatchingFilter(cards,FilterID,00213326)
   local stspace = SpaceCheck(LOCATION_SZONE)
   local mspace = SpaceCheck()
-  --print("checking possible summons")
   if not sum then sum = AIHand() end
   if #AIMon()==0 and HasIDNotNegated(AICards(),08949584,true,UseAHL) then
-    --print("live AHL, +1")
     result = result+1
     ahl = 1
   end
   if normal then
     if CardsMatchingFilter(sum,FilterLevel,4)>0 
     then
-      --print("can normal summon something, +1")
       result = result+1
     elseif CardsMatchingFilter(SubGroup(AIDeck(),HEROFilter),FilterLevel,4)>0 and ecall>0 
     then
-      --print("can normal summon something using ecall, +1")
+      result = result+1
     elseif CardsMatchingFilter(SubGroup(AIDeck(),FilterRace,RACE_WARRIOR),FilterLevel,4)>0 and rota>0
     then
-      --print("can normal summon something using rota, +1")
+      result = result+1
     end
     if HasIDNotNegated(sum,00423585,true) 
     and CardsMatchingFilter(AIHand(),FilterType,TYPE_SPELL)>ahl
     and CardsMatchingFilter(AIDeck(),FilterLevel,4)>0
     then
-      --print("live Monk, +1")
       result = result+1 
     end
     if HasIDNotNegated(sum,00423585,true) 
@@ -263,7 +260,6 @@ function SummonCount(sum) -- checks, how many level 4s the AI can probably bring
     and CardsMatchingFilter(AIHand(),FilterType,TYPE_SPELL)>ahl+1
     and CardsMatchingFilter(AIDeck(),FilterLevel,4)>1
     then
-      --print("live double Monk, +1")
       result = result+1 
     end
     --if TODO ?
@@ -281,7 +277,6 @@ function SummonCount(sum) -- checks, how many level 4s the AI can probably bring
       if HandCheck(4)>0 or CardsMatchingFilter(AICards(),FilterID,00213326)
       +CardsMatchingFilter(AICards(),FilterID,32807846)>1
       then
-        --print("live Tin/Goblindbergh, +1")
         result = result+1
       end
     end
@@ -290,12 +285,9 @@ function SummonCount(sum) -- checks, how many level 4s the AI can probably bring
   or (rota>0 or ecall>0) and HasID(AIDeck(),79979666,true))
   and CardsMatchingFilter(AIHand(),FilterType,TYPE_SPELL+TYPE_TRAP)<=stspace
   then
-    --print("live Bubbleman, +1")
     result = result+1
   end
-  --print("can summon: "..result..",adjusting for available space")
   result = math.min(result,mspace)
-  --print("AI can get "..result.." lvl4s on the board.")
   return result
 end
 function SummonAbZero(c,cards)

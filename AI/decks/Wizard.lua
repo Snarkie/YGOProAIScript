@@ -144,6 +144,9 @@ end
 function SummonJoker()
 	return CardsMatchingFilter(AIDeck(),JokerFilter)>0
 end
+function InsightFilter(c)
+  return not FilterAffected(c,EFFECT_INDESTRUCTABLE_EFFECT)
+end
 function UseInsight()
 	return (((HasID(UseLists({AIHand(),AIST()}),51531505,true)
 		or HasID(UseLists({AIHand(),AIST()}),15146890,true)
@@ -328,7 +331,7 @@ function WizardInit(cards)
 		OPTSet(57624336)
 		return {COMMAND_ACTIVATE,CurrentIndex}
 	end
-	if HasIDNotNegated(Act,72714461,nil,nil,LOCATION_SZONE) and OPTCheck(53208660) then
+	if HasIDNotNegated(Act,72714461,nil,nil,LOCATION_SZONE,InsightFilter) and OPTCheck(53208660) then
 		return {COMMAND_ACTIVATE,CurrentIndex}
 	end
 	if HasID(Act,72714461,nil,nil,LOCATION_HAND) and (UseInsight() or WizardPendulumSummonExCheck(Act[CurrentIndex].id)) then
