@@ -47,7 +47,7 @@ Experimental = false
 
 ]]
 
-GlobalCheating = 0
+GlobalCheating = false
 EXTRA_DRAW = 0
 EXTRA_SUMMON = 0
 LP_RECOVER = 0
