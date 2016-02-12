@@ -689,6 +689,11 @@ function PaladynamoTarget(cards,minTargets)
   return result
 end
 function FoolishTarget(cards)
+  if GlobalFoolishID then
+    local id = GlobalFoolishID
+    GlobalFoolishID = nil
+    return FindID(id,cards,true)
+  end
   if DeckCheck(DECK_BUJIN) then
     return BujinAdd(cards,LOCATION_GRAVE)
   elseif DeckCheck(DECK_CHAOSDRAGON) or DeckCheck(DECK_BA) then

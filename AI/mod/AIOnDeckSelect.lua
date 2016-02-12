@@ -101,7 +101,7 @@ end
 PRIO_TOHAND = 1
 PRIO_TOFIELD = 3
 PRIO_TOGRAVE = 5
-PRIO_DISCARD,PRIO_TODECK,PRIO_EXTRA = 7,7,7
+PRIO_DISCARD,PRIO_TODECK,PRIO_EXTRA,PRIO_TRIBUTE = 7,7,7,7
 PRIO_BANISH = 9
 -- priority lists for decks:
 function PrioritySetup()
@@ -116,7 +116,7 @@ function PrioritySetup()
   SatellarknightPriority()
   --HEROPriority()
   BAPriority()
-  --NekrozPriority()
+  NekrozPriority()
 
 AddPriority({
 -- HERO
@@ -336,7 +336,7 @@ function AssignPriority(cards,loc,filter,opt)
       end
     end
     if loc==PRIO_TOHAND and bit32.band(c.location,LOCATION_ONFIELD)>0 
-    and not DeckCheck(DECK_HARPIE) -- temp
+    and not DeckCheck(DECK_HARPIE) -- TODO: temp
     then
       c.prio=-1
     end
@@ -393,4 +393,7 @@ function Add(cards,loc,count,filter,opt)
     end
   end
   return result
+end
+function SortByPrio(cards)
+  table.sort(cards,function(a,b) return a.prio>b.prio end)
 end

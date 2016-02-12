@@ -11,6 +11,17 @@ function XYZSummon(index,id)
   end
   return {COMMAND_SPECIAL_SUMMON,index}
 end
+function SynchroSummon(index,id)
+  if index == nil then
+    index = CurrentIndex
+  end
+  GlobalMaterial = true
+  GlobalSynchroMaterial = true
+  if id then
+    GlobalSSCardID = id
+  end
+  return {COMMAND_SPECIAL_SUMMON,index}
+end
 function Summon(index)
   if index == nil then
     index = CurrentIndex
@@ -143,7 +154,7 @@ function SummonExtraDeck(cards,prio)
   if HasIDNotNegated(SpSum,46772449) and SummonBelzebuth() then          
     return XYZSummon()
   end
-  if HasID(SpSum,57774843) and SummonJD() then                 
+  if HasID(SpSum,57774843,SummonJD,1) then                 
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasIDNotNegated(SpSum,73580471) and UseFieldNuke(-2) then             -- Black Rose
@@ -257,6 +268,20 @@ function SummonExtraDeck(cards,prio)
 ---- 
 
 -- Synchro
+  if HasIDNotNegated(SpSum,52687916,SummonSyncTrishula) then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  
+  -- Trishula enabling
+  for i=1,#Sum do
+    if TrishulaCheck(Sum[i]) then
+      return Summon(i)
+    end
+  end
+  if HasID(Act,01845204,ShaddollUseInstantFusion,1) then
+    return Activate()
+  end
+  
   if HasID(SpSum,08561192,SummonLeoh) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
@@ -395,7 +420,7 @@ function SummonExtraDeck(cards,prio)
   if HasIDNotNegated(SpSum,82633039) and SummonSkyblaster() then 
     return XYZSummon()
   end
-  if HasID(SpSum,26329679,SummonOmega) then 
+  if HasID(SpSum,26329679,SummonConstellarOmega) then 
     return XYZSummon()
   end
   if HasID(SpSum,16195942,SummonRebellion) then 
@@ -850,7 +875,7 @@ function SummonNaturiaBeast(c)
 end
 function SummonArmades(c)
   return BattlePhaseCheck()
-  and CanWinBattle(c,OppMon())
+  and c and CanWinBattle(c,OppMon())
 end
 function SummonStardustSpark(c)
   return NotNegated(c) and MP2Check(c) 
@@ -1012,10 +1037,7 @@ function SummonVolcaGaiaFinish(mode)
     return result >= AI.GetPlayerLP(2) and result2 < AI.GetPlayerLP(2)
   end
 end
-function SummonJD()
-  return UseFieldNuke(-1) and not HasID(AIMon(),57774843,true) 
-  or #OppField()==0 and Duel.GetCurrentPhase()==PHASE_MAIN1 and GlobalBPAllowed
-end
+
 function LeviairFilter(c)
   return bit32.band(c.type,TYPE_MONSTER)>0 and c.level<5 
   and c:is_affected_by(EFFECT_SPSUMMON_CONDITION)==0
@@ -1505,7 +1527,7 @@ function SummonGaiaDragonFinish(source)
   end
   return result
 end
-function ChainOmega(source)
+function ChainConstellarOmega(source)
   local cards = RemovalCheckList(AIMon(),nil,TYPE_SPELL+TYPE_TRAP,nil,nil,ConstellarMonsterFilter)
   if cards and #cards>0 then
     return true
@@ -1516,7 +1538,7 @@ function ChainOmega(source)
   end
   return false
 end
-function SummonOmega(c)
+function SummonConstellarOmega(c)
   return NotNegated(c) and (not OppHasStrongestMonster() or OppGetStrongestAttDef()<c.attack)
   and CardsMatchingFilter(OppST(),FilterPosition,POS_FACEDOWN)>2
   or Negated(c) and OppHasStrongestMonster() and OppGetStrongestAttDef()<c.attack
@@ -2193,7 +2215,7 @@ function PriorityChain(cards) -- chain these before anything else
   if HasIDNotNegated(cards,99590524,ChainTreacherous) then
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,26329679,ChainOmega) then
+  if HasIDNotNegated(cards,26329679,ChainConstellarOmega) then
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,51452091,ChainDecree) then
@@ -2363,17 +2385,7 @@ end
 function VolcasaurusTarget(cards)
   return BestTargets(cards,1,true)
 end
-function MichaelTarget(cards,c)
-  local result = {}
-  if FilterLocation(c,LOCATION_MZONE) then
-    result = BestTargets(cards,1,TARGET_BANISH)
-  else
-    for i=1,#cards do
-      result[i]=i
-    end
-  end
-  return result
-end
+
 function ArcaniteTarget(cards)
   return BestTargets(cards,1,true)
 end

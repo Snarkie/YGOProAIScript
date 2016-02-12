@@ -316,6 +316,8 @@ NSBL={
 79979666,21565445,47826112,13073850, -- Bubbleman, Atlantean Neptabyss, Poseidra, Qli Stealth
 51194046,18326736,58069384,10443957, -- Qli Monolith, Planetellarknight Ptolemaios, Cyber Dragon Nova, Infinity
 81992475,59438930,01050186, -- BA Barbar, Ghost Ogre, Satellarknight Unukalhai
+29888389,47196430,53180020,27796375, -- Gishki Shadow, Vision, Nekroz Exa, Sorcerer
+67696066,68819554, -- Trick Clown, Damage Juggler
 }
 function NormalSummonBlacklist(CardId) 
   for i=1,#NSBL do
@@ -422,6 +424,7 @@ SSBL={
 18326736,58069384,10443957, -- Planetellarknight Ptolemaios, Cyber Dragon Nova, Infinity
 27552504,18386170,65305468, -- Beatrice, Pilgrim, F0
 56840427,16051717,30100551, -- Utopia Ray, Raikiri, Minerva
+31292357, -- Hat Tricker
 }
 
 
@@ -900,7 +903,8 @@ ScriptedCards ={
 27552504,18386170,60743819,20036055, -- Beatrice, Pilgrim, Fiend Griefing, Traveler
 40605147,65305468,59438930,56840427, -- Solemn Notice, F0, Ghost Ogre, Utopia Ray
 16051717,30100551,20513882,31222701, -- Raikiri, Minerva, Painful Escape, Wavering Eyes
-01050186,19508728, -- Satellarknight Unukalhai, Moon Mirror Shield
+01050186,19508728,27796375,53180020, -- Satellarknight Unukalhai, Moon Mirror Shield, Nekroz Exa, Sorcerer
+29888389,47196430,68819554,67696066, -- Gishki Shadow, Vision, Performage Damage Juggler, Trick Clown
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do

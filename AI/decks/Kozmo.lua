@@ -149,6 +149,10 @@ end
 function FarmgirlCond(loc,c)
   if loc == PRIO_TOHAND then
     return not HasID(AICards(),c.id)
+    and not NormalSummonCheck()
+    and BattlePhaseCheck()
+    and (CanDealBattleDamage(c,OppMon())
+    or not OppHasStrongestMonster())
   end
   if loc == PRIO_TOFIELD then
     return Duel.GetTurnPlayer()==player_ai
@@ -157,6 +161,28 @@ function FarmgirlCond(loc,c)
     and (OPTCheck(c.id) or CardsMatchingFilter(AIMon(),KozmoRider)==0)
     and not GlobalSummonNegated
     and not HasID(AIMon(),31061682,true)
+    and BattlePhaseCheck()
+  end
+  return true
+end
+function StrawmanCond(loc,c)
+  if loc == PRIO_TOHAND then
+    return Duel.GetTurnPlayer()==player_ai
+    and not Duel.GetCurrentPhase()==PHASE_END
+    and not HasID(AICards(),c.id)
+    and OPTCheck(c.id)
+    and not NormalSummonCheck()
+    and CardsMatchingFilter(AIBanish(),KozmoShip)>0
+    and AI.GetPlayerLP(1)>1000
+  end
+  if loc == PRIO_TOFIELD then
+    return Duel.GetTurnPlayer()==player_ai
+    and not Duel.GetCurrentPhase()==PHASE_END
+    and not HasID(AIMon(),c.id)
+    and OPTCheck(c.id)
+    and not NormalSummonCheck()
+    and CardsMatchingFilter(AIBanish(),KozmoShip)>0
+    and AI.GetPlayerLP(1)>1000
   end
   return true
 end
@@ -172,7 +198,7 @@ KozmoPriorityList={
 [93302695] = {5,1,4,1,1,1,2,1,2,1,WickedwitchCond},  -- Wickedwitch
 [67050396] = {1,1,3,1,1,1,4,1,1,1,GoodwitchCond},  -- Goodwitch
 [31061682] = {8,2,9,2,1,1,1,1,1,1,FarmgirlCond},  -- Farmgirl
-[56907986] = {2,1,2,1,1,1,3,1,1,1,StrawmanCond},  -- Strawman
+[56907986] = {6,1,6,1,1,1,3,1,1,1,StrawmanCond},  -- Strawman
 
 [37742478] = {1,1,1,1,1,1,1,1,1,1},  -- Honest
 [59438930] = {1,1,1,1,1,1,1,1,1,1},  -- Ghost Ogre
@@ -251,7 +277,7 @@ function UseFarmgirl(c,mode)
 end
 function UseStrawman(c,mode)
   if mode == 1 
-  and AI.GetPlayerLP(1)>2000
+  and AI.GetPlayerLP(1)>1000
   then
     GlobalSummonNegated=true
     return true
@@ -351,9 +377,11 @@ function KozmoInit(cards)
     return Summon()
   end
   if HasIDNotNegated(Act,56907986,false,56907986*16+1,UseStrawman,1) then
+    OPTSet(56907986)
     return Activate()
   end
   if HasID(Act,56907986,false,56907986*16,UseStrawman,2) then
+    OPTSet(569079861)
     return Activate()
   end
   if HasIDNotNegated(Act,67050396,false,67050396*16,UseGoodwitch,2) then

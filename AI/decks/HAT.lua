@@ -216,7 +216,7 @@ function SummonMonster(atk)
   return OppGetStrongestAttDef()<=atk and #AIMon()==0 and Duel.GetTurnCount()>1
 end
 function SetMonster()
-  return #AIMon()==0 and (Duel.GetCurrentPhase()==PHASE_MAIN2 or not GlobalBPAllowed)
+  return #AIMon()==0 and TurnEndCheck()
 end
 function SetDionaea()
   return #AIMon()==0 and (Duel.GetCurrentPhase()==PHASE_MAIN2 or not GlobalBPAllowed)

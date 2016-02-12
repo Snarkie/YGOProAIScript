@@ -195,12 +195,12 @@ local OppExtra = AI.GetOppExtraDeck()
    end
   return list
 end
-function UseLists(lists,opt,opt2)
+function Merge(lists,opt,opt2)
   local cards
   local Result={}
   if lists then
     if type(lists)~="table" then
-      print("Warning: UseLists invalid type")
+      print("Warning: Merge invalid type")
       PrintCallingFunction()
       return Result
     end
@@ -228,6 +228,9 @@ function UseLists(lists,opt,opt2)
     end
   end
   return Result
+end
+function UseLists(lists,opt,opt2)
+  return Merge(lists,opt,opt2)
 end
 function AIField() 
   return UseLists({AIMon(),AIST()})
@@ -1587,7 +1590,7 @@ function ApplyATKBoosts(Cards)
   if #Cards > 0 then
     for i=1,#Cards do
       if Cards[i] ~= false then
-        if Cards[i].id == 96235275 or Cards[i].id == 50604950 or -- Jain, XSG
+        if  Cards[i].id == 50604950 or -- XSG
            Cards[i].id == 05373478 then                          -- Zwei
           Cards[i].attack = Cards[i].attack + 300
         end
@@ -2073,4 +2076,23 @@ function ListHasCard(cards,c)
     end
   end
   return false
+end
+
+function ListRemoveCards(cards,rem)
+  if rem == nil then
+    return cards
+  end
+  if rem.GetCode then
+    rem = GetCardFromScript(rem)
+  end
+  if type(rem) == "table" and rem.id then
+    rem = {rem}
+  end
+  for i=1,#cards do
+    for j=1,#rem do
+      if cards[i] and rem[j] and CardsEqual(cards[i],rem[j]) then
+        table.remove(cards,i)
+      end
+    end
+  end
 end

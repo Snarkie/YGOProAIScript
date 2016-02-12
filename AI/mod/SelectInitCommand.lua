@@ -92,7 +92,7 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
   ResetOncePerTurnGlobals()
   GlobalBPAllowed = to_bp_allowed
   SurrenderCheck()
-
+  
   ---------------------------------------
   -- Don't do anything if the AI controls
   -- a face-up Light and Darkness Dragon.
@@ -180,6 +180,10 @@ if DeckCommand ~= nil and (d == 0
 or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
 then
   return DeckCommand[1],DeckCommand[2]
+end
+
+if HasID(SpSummonableCards,80696379,SummonMeteorburst,1) then
+  return SynchroSummon()
 end
 
 -- If the AI can attack for game, attempt to do so first

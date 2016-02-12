@@ -728,7 +728,7 @@ function ShaddollIFFilter(c)
   and FilterType(c,TYPE_FUSION)
 end
 function ShaddollXYZSummon()
-  return true
+  return true -- TODO
 end
 GlobalIFTarget=nil
 GlobalNordenFilter=nil
@@ -743,9 +743,12 @@ function ShaddollUseInstantFusion(c,mode)
   end
   if mode == 1 then
     if TrishulaCheck() then
+      print("going for Trish")
       GlobalIFTarget=17412721
       local lvl = GlobalNordenMatch.lvl
       local tuner = GlobalNordenMatch.tuner
+      print(lvl)
+      print(tuner)
       GlobalNordenFilter=
       function(c)
         return FilterLevel(c,lvl) and (tuner and FilterType(c,TYPE_TUNER)
@@ -776,7 +779,6 @@ function ShaddollUseInstantFusion(c,mode)
       return true
     end
   end
-  return false
 end
 function TrishulaCheckFilter(card,params)
   if CardsEqual(card,params[1]) or CardsEqual(card,params[2]) then
@@ -795,7 +797,9 @@ function TrishulaCheckFilter(card,params)
       if FilterType(c,TYPE_TUNER) then
         tuner = tuner + 1
       end
-      if FilterLocation(c,LOCATION_GRAVE) then
+      if FilterLocation(c,LOCATION_GRAVE) 
+      and not (c.id == 67441435 and OPDCheck(c))
+      then
         norden={}
         norden.lvl=c.level
         if FilterType(c,TYPE_TUNER) then
@@ -845,6 +849,15 @@ function TrishulaCheck(c)
   then
     table.insert(cards,#cards+1,AIHand()[i])
   end
+  if HasID(AIGrave(),67441435,true,FilterOPD) then
+    table.insert(cards,#cards+1,FindID(67441435,AIGrave()))
+  end
+  if HasID(AICards(),81439173,true) 
+  and HasID(AIDeck(),58996430,true)
+  and MacroCheck()
+  then
+    table.insert(cards,#cards+1,FindID(58996430,AIHand()))
+  end
   local result = false
   for i=1,#cards do
     local c2=cards[i]
@@ -853,7 +866,7 @@ function TrishulaCheck(c)
     or FilterLevelMax(c2,4))
     and FilterLevelMax(c,4)
     and not CardsEqual(c2,c)
-    and CardsMatchingFilter(cards2,TrishulaCheckFilter,{c,c2})>0 
+    and CardsMatchingFilter(cards2,TrishulaCheckFilter,{c,c2})>0
     then
       result = true
     end

@@ -8,6 +8,7 @@ function OnAIGoingFirstSecond(name)
   or name=="AI_Blackwing"
   or name=="AI_Shaddoll"
   or name=="AI_Kozmo"
+  or name=="AI_Lightsworn"
   then
     player_ai = 1
     result = 0
@@ -121,7 +122,8 @@ function HasID(cards,id,skipglobal,desc,loc,pos,filter,opt)
     for i=1,#cards do
       local c = cards[i]
       if (c.id == id 
-      or c.id == 76812113 and c.original_id == id )
+      or c.id == 76812113 and c.original_id == id 
+      or c.id == 70902743 and c.original_id == id )
       and (desc == nil or c.description == desc) 
       and (loc == nil or bit32.band(c.location,loc)>0)
       and (pos == nil or bit32.band(c.position,pos)>0)
@@ -164,7 +166,8 @@ function HasIDNotNegated(cards,id,skipglobal,desc,loc,pos,filter,opt)
     for i=1,#cards do
       local c = cards[i]
       if (c.id == id 
-      or c.id == 76812113 and c.original_id == id )
+      or c.id == 76812113 and c.original_id == id 
+      or c.id == 70902743 and c.original_id == id )
       and (desc == nil or c.description == desc) 
       and (loc == nil or bit32.band(c.location,loc)>0)
       and (pos == nil or bit32.band(c.position,pos)>0)
@@ -876,6 +879,21 @@ function OPTSet(id)
   end
   return
 end
+OPD={}
+-- same for once per duel
+function OPDSet(id)
+  if type(id)=="table" then
+    id = GetCardFromScript(id).id
+  end
+  OPD[id]=true
+end
+function OPDCheck(id)
+  if type(id)=="table" then
+    id = GetCardFromScript(id).id
+  end
+  return not OPT[id]
+end
+
 -- used to keep track, if the OPT was reset willingly
 -- for example if the card was bounced back to the hand
 function OPTReset(id)
@@ -1055,6 +1073,13 @@ function FilterType(c,type) -- TODO: change all filters to support card script
     return bit32.band(c.type,type)>0
   end
 end
+function FilterNotType(c,type) -- TODO: change all filters to support card script
+  if c.GetCode then
+    return not c:IsType(type)
+  else
+    return bit32.band(c.type,type)==0
+  end
+end
 function FilterAttack(c,attack)
   local atk = 0
   if c.GetCode then
@@ -1198,6 +1223,12 @@ function FilterOPT(c,hard)
     return OPTCheck(c.cardid)
   end
 end
+function FilterOPD(c,id)
+  if id then
+    return OPDCheck(id)
+  end
+  return OPDCheck(c)
+end
 function FilterMaterials(c,count)
   return c.xyz_material_count>=count
 end
@@ -1311,6 +1342,15 @@ function FindID(id,cards,index,filter,opt)
       else
         return cards[i]
       end
+    end
+  end
+  return nil
+end
+
+function FindCardByFilter(cards,filter,opt)
+  for i=1,#cards do
+    if FilterCheck(filter,opt) then
+      return cards[i]
     end
   end
   return nil
@@ -1954,6 +1994,10 @@ end
 -- function to determine, if a card can win a battle against any of the targets, and if the 
 -- target is expected to hit the graveyard (for effects that trigger on battle destruction)
 function CanWinBattle(c,targets,tograve,ignorebonus,filter,opt)
+  if c == nil then
+    print("WARNING: CanWinBattle null card")
+    PrintCallingFunction()
+  end
   local sub = SubGroup(targets,filter,opt)
   local atk = c.attack
   local baseatk = c.attack
@@ -2258,6 +2302,14 @@ function Sequence(c)
 end
 
 function FilterCheck(c,filter,opt)
+  if not filter then
+    return c
+  end
+  if type(filter)~="function" then
+    print("Warning: FilterCheck not a valid filter")
+    print(filter)
+    PrintCallingFunction()
+  end
   return c and (not filter or opt==nil 
   and filter(c) or filter(c,opt))
 end
@@ -2897,9 +2949,44 @@ function RemoveOnActivation(link,filter,opt)
   return target
 end
 
+function PrintList(cards,prio)
+  print("printing list")
+  for i,c in pairs(cards) do
+    local s = "#"..i..": "..GetName(c)
+    if prio and c.prio then s=s..", prio: "..c.prio end
+    print(s)
+  end
+  print("end list")
+end
 
-
-
+function CheckSum(cards,sum,filter,opt)
+  local result = false
+  local valid = {}
+  for i,c in pairs(cards) do
+    if FilterCheck(c,filter,opt) then valid[#valid+1]=c end
+  end
+  for i=1,#valid do
+    local c=valid[i]
+    if c.level == sum then
+      result = true
+    end
+    for j=math.min(i+1,#valid),#valid do
+      local c2 = valid[j]
+      if not CardsEqual(c,c2) and c.level+c2.level == sum then
+        result = true
+      end
+      for k=math.min(j+1,#valid),#valid do
+        local c3 = valid[k]
+        if not CardsEqual(c2,c3) and not CardsEqual(c,c3) 
+        and c.level+c2.level+c3.level==sum 
+        then
+          result=true
+        end
+      end
+    end
+  end
+  return result
+end
 
 
 
