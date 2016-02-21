@@ -491,6 +491,9 @@ function OnSelectBattleCommand(cards,activatable)
   if HasID(activatable,83555666,ChainRoD) then -- Ring of Destruction
     return 2,CurrentIndex
   end
+  if HasID(activatable,83555666,ChainRoD) then -- Ring of Destruction
+    return 2,CurrentIndex
+  end
   local result,result2 = nil,nil
   local d = DeckCheck()
   if d and d.Chain then

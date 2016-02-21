@@ -304,7 +304,7 @@ function ChainSkillDrain(card)
 	if c then
 		return true
 	end
-	if Duel.GetCurrentPhase() == PHASE_BATTLE then
+	if IsBattlePhase() then
 		if Duel.GetTurnPlayer()==player_ai 
 		and not OppHasStrongestMonster() 
 		and CardsMatchingFilter(OppMon(),NegateBPCheck)>0 

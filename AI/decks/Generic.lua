@@ -127,6 +127,9 @@ function SummonExtraDeck(cards,prio)
   if HasID(Act,05318639,nil,nil,LOCATION_SZONE,UseMST) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+  if HasID(Act,43898403,UseTwinTwister) then
+    return Activate()
+  end
   if HasID(Act,05318639,UseMST) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -558,6 +561,55 @@ function SummonExtraDeck(cards,prio)
   end
   return nil
 end
+function UseTwinTwister(c,mode)
+  local targets = DestroyCheck(OppST())
+  local facedown = DestroyCheck(OppST(),nil,nil,nil,FilterPosition,POS_FACEDOWN)
+  local prio = HasPriorityTarget(OppST(),true)
+  if facedown>1 then
+    GlobalTwinTwisterTarget = function(c) return FilterPosition(c,POS_FACEDOWN) end
+    return true
+  end
+  if prio and targets>1 then
+    return true
+  end
+  if PriorityCheck(AIHand(),PRIO_TOGRAVE)>3 
+  and targets>1 then
+    return true
+  end
+end
+GlobalTwinTwisterTarget = nil
+function ChainTwinTwister(c,mode)
+  local targets = DestroyCheck(OppST())
+  local facedown = DestroyCheck(OppST(),nil,nil,nil,FilterPosition,POS_FACEDOWN)
+  local prio = HasPriorityTarget(OppST(),true)
+  local endphase = CardsMatchingFilter(OppST(),MSTEndPhaseFilter)
+  if RemovalCheckCard(c)
+  then
+    return targets>1 or targets>0 and PriorityCheck(AIHand(),PRIO_TOGRAVE)>3
+  end
+  if not UnchainableCheck(c) then
+    return false
+  end
+  if Duel.CheckTiming(TIMING_END_PHASE)
+  and Duel.GetCurrentChain()==0
+  and endphase>0
+  and targets>1
+  then
+    GlobalTwinTwisterTarget = MSTEndPhaseFilter
+    return true
+  end
+  if Duel.GetTurnPlayer()==1-player_ai
+  and prio
+  and targets>1
+  then
+    return true
+  end
+  local target = RemoveOnActivation(nil,MSTFilter)
+  if target then
+    GlobalTwinTwisterTarget = target
+    return true
+  end
+end
 function SummonDelteros(c,mode)
   if DeckCheck(DECK_TELLARKNIGHT) then return false end
   if mode == 1 
@@ -684,7 +736,7 @@ function UsePtolemaios(c)
 end
 function SummonNova(c)
   return HasIDNotNegated(AIExtra(),10443957,true)
-  and UseInfinity(FindID(10443957,AIExtra()))
+  --and UseInfinity(FindID(10443957,AIExtra()))
 end
 function SummonInfinity(c)
   return HasID(AIMon(),58069384,true)
@@ -1188,7 +1240,7 @@ function ChainPleiades(c)
       end
     end	
   end
-  if Duel.GetCurrentPhase()==PHASE_BATTLE and Duel.GetTurnPlayer()~=player_ai and targets>0 then
+  if IsBattlePhase() and Duel.GetTurnPlayer()~=player_ai and targets>0 then
     local source=Duel.GetAttacker()
     local target=Duel.GetAttackTarget()
     if source and target 
@@ -1666,7 +1718,7 @@ function ChainBTS(card)
     GlobalTargetSet(c,OppMon())
     return true
   end
-  if Duel.GetCurrentPhase() == PHASE_BATTLE then
+  if IsBattlePhase() then
     if Duel.GetTurnPlayer()==player_ai then
       local cards=OppMon()
       for i=1,#cards do
@@ -1702,7 +1754,7 @@ function ChainFiendish(card)
     GlobalTargetSet(c,OppMon())
     return true
   end
-  if Duel.GetCurrentPhase() == PHASE_BATTLE and Duel.GetTurnPlayer()~=player_ai then
+  if IsBattlePhase() and Duel.GetTurnPlayer()~=player_ai then
 		local source = Duel.GetAttacker()
 		local target = Duel.GetAttackTarget()
     if source and target and WinsBattle(source,target) 
@@ -1735,7 +1787,7 @@ function ChainSkillDrain(card)
     --GlobalTargetSet(c,OppMon())
     return true
   end
-  if Duel.GetCurrentPhase() == PHASE_BATTLE then
+  if IsBattlePhase() then
     if Duel.GetTurnPlayer()==player_ai 
     and not OppHasStrongestMonster() 
     and CardsMatchingFilter(OppMon(),NegateBPCheck)>0 
@@ -1994,7 +2046,7 @@ function ChainCompulse()
   if targets2 > 0 then
     return true
   end
-  if Duel.GetCurrentPhase()==PHASE_BATTLE and targets>0 then
+  if IsBattlePhase() and targets>0 then
     local source=Duel.GetAttacker()
     local target=Duel.GetAttackTarget()
     if source and target then
@@ -2052,7 +2104,7 @@ function ChainMST(c)
   if targets3 > 0 and ArtifactCheck() then
     return true
   end
-  if Duel.GetCurrentPhase()==PHASE_BATTLE then
+  if IsBattlePhase() then
     local source=Duel.GetAttacker()
     local target=Duel.GetAttackTarget()
     if source and source:IsControler(1-player_ai) then
@@ -2229,6 +2281,9 @@ function PriorityChain(cards) -- chain these before anything else
   return nil
 end
 function GenericChain(cards)
+  if HasID(cards,43898403,ChainTwinTwister) then
+    return Chain()
+  end
   if HasID(cards,05318639,ChainMST) then
     return {1,CurrentIndex}
   end
@@ -2445,10 +2500,48 @@ function DwellerTarget(cards)
   local filter = function(c) return not FilterAttribute(c,ATTRIBUTE_WATER) end
   return Add(cards,PRIO_TOGRAVE,1,filter)
 end
+function TwinTwisterTarget(cards)
+  if LocCheck(cards,LOCATION_HAND) then
+    return Add(cards,PRIO_TOGRAVE)
+  end
+  local filter = function(c) return true end
+  local targets = {}
+  if GlobalTwinTwisterTarget then
+    if type(GlobalTwinTwisterTarget) == "function" then
+      filter = GlobalTwinTwisterTarget
+    elseif type(GlobalTwinTwisterTarget) == "table" then
+      if GlobalTwinTwisterTarget.id then
+        targets[1]=GlobalTwinTwisterTarget
+      else
+        targets=GlobalTwinTwisterTarget
+      end
+      filter=function(card) 
+        for i,c in pairs(targets) do
+          if CardsEqual(c,card) then
+            return true
+          end
+        end
+      end
+    end
+    GlobalTwinTwisterTarget = nil
+  end
+  local count = 0
+  local check = DestroyCheck(cards,false,true,false,FilterController,2)
+  if #targets == 0 then
+    count = check
+  else
+    count = 2,math.max(#targets,check)
+  end
+  count = math.min(2,count)
+  return BestTargets(cards,count,TARGET_DESTROY,filter)
+end
 function GenericCard(cards,min,max,id,c)
   if c then
     id = c.id
   end 
+  if id == 43898403 then
+    return TwinTwisterTarget(cards)
+  end
   if id == 21044178 then
     return DwellerTarget(cards)
   end

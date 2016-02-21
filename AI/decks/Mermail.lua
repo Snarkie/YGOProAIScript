@@ -1057,7 +1057,7 @@ function ChainSphere(c)
     GlobalSphereID = 23899727
     return true
   end
-  if Duel.GetCurrentPhase() == PHASE_BATTLE and Duel.GetTurnPlayer() == 1-player_ai
+  if IsBattlePhase() and Duel.GetTurnPlayer() == 1-player_ai
   --and HasID(AIDeck(),23899727,true) and LindeCond(PRIO_TOFIELD) 
   then
     if Duel.GetAttacker() and #AIMon()==0 then
@@ -1098,7 +1098,7 @@ function ChainMechquipped(c)
     GlobalTargetSet(targets[1],AIMon())
     return true
   end
-  if Duel.GetCurrentPhase() == PHASE_BATTLE then
+  if IsBattlePhase() then
     local aimon,oppmon = GetBattlingMons()
     if WinsBattle(oppmon,aimon) 
     and aimon.id ~= 23899727 
@@ -1122,7 +1122,7 @@ function ChainMechquipped(c)
   return false
 end
 function ChainKappa()
-  if Duel.GetCurrentPhase() == PHASE_BATTLE then
+  if IsBattlePhase() then
 		local source = Duel.GetAttacker()
 		local target = Duel.GetAttackTarget()
     if source and target then
@@ -1152,7 +1152,7 @@ local effect = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EF
       return true
     end
   end
-  if Duel.GetCurrentPhase() == PHASE_BATTLE then
+  if IsBattlePhase() then
     if Duel.GetTurnPlayer()==player_ai then
       local cards=OppMon()
       for i=1,#cards do
@@ -1209,7 +1209,7 @@ function ChainDweller(c,mode)
     then
       cat={CATEGORY_TOGRAVE,CATEGORY_DESTROY}
       for j=1,2 do
-        local ex,cg=Duel.GetOperationInfo(i,car[j])
+        local ex,cg=Duel.GetOperationInfo(i,cat[j])
         if ex then
           local c = CardFromScript(cg:GetFirst())
           if CurrentOwner(c)==2 then
@@ -1220,7 +1220,7 @@ function ChainDweller(c,mode)
       end
     end
   end
-  if Duel.GetCurrentPhase() == PHASE_BATTLE then
+  if IsBattlePhase() then
     local aimon,oppmon = GetBattlingMons()
     if WinsBattle(aimon,oppmon) 
     or WinsBattle(oppmon,aimon) and CardsEqual(c,aimon)
@@ -1349,7 +1349,7 @@ function MermailOnSelectPosition(id, available)
     if MermailAtt[i]==id then result=POS_FACEUP_ATTACK end
   end
   for i=1,#MermailDef do
-    if MermailDef[i]==id and not (Duel.GetCurrentPhase()==PHASE_BATTLE 
+    if MermailDef[i]==id and not (IsBattlePhase() 
     and Duel.GetTurnPlayer()==player_ai) 
     then 
       result=POS_FACEUP_DEFENCE 

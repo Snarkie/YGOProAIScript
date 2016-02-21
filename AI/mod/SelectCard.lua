@@ -24,7 +24,7 @@ function OnSelectCard(cards, minTargets, maxTargets, triggeringID,triggeringCard
 
   -- AI attack target selection
   -- redirected to SelectBattleComand.lua
-  if Duel.GetCurrentPhase()==PHASE_BATTLE 
+  if IsBattlePhase() 
   and GlobalAIIsAttacking 
   and Duel.GetCurrentChain()==0
   and not triggeringCard

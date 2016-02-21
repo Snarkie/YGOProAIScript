@@ -894,7 +894,7 @@ function ChainIcarus(card)
   then
     return true
   end
-  if Duel.GetCurrentPhase()==PHASE_BATTLE 
+  if IsBattlePhase() 
   and Duel.GetTurnPlayer()==1-player_ai
   then
     local aimon,oppmon = GetBattlingMons()

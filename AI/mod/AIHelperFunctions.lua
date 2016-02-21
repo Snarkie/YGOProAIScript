@@ -2067,6 +2067,10 @@ function CardsEqual(Card1, Card2)
   return Card1 and Card2 and Card1.cardid==Card2.cardid
 end
 
+function CardsNotEqual(c1,c2)
+  return not CardsEqual(c1,c2)
+end
+
 function ListHasCard(cards,c)
   if cards and c then
     for i=1,#cards do

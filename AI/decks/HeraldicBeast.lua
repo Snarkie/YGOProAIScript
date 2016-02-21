@@ -688,11 +688,17 @@ function PaladynamoTarget(cards,minTargets)
   if result == nil then result = {math.random(#cards)} end
   return result
 end
+GlobalFoolishFilter = nil
 function FoolishTarget(cards)
+  if GlobalFoolishFilter then
+    local filter = GlobalFoolishFilter
+    GlobalFoolishFilter = nil
+    return Add(cards,PRIO_TOGRAVE,1,filter)
+  end
   if GlobalFoolishID then
     local id = GlobalFoolishID
     GlobalFoolishID = nil
-    return FindID(id,cards,true)
+    return Add(cards,PRIO_TOGRAVE,1,FilterID,id)
   end
   if DeckCheck(DECK_BUJIN) then
     return BujinAdd(cards,LOCATION_GRAVE)
@@ -824,7 +830,7 @@ function ChainSafeZone(c)
     GlobalTargetSet(targets[1],targets)
     return true
   end
-  if Duel.GetCurrentPhase() == PHASE_BATTLE then
+  if IsBattlePhase() then
 		local source = Duel.GetAttacker()
 		local target = Duel.GetAttackTarget()
     if source and target then

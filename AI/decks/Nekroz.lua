@@ -638,9 +638,9 @@ function UseEnterblathnir(cards)
   if cards == nil then cards = UseLists(OppHand(),OppField()) end
   return #cards>0
 end
-function SummonEnterblathnir()
+function SummonEnterblathnir(c)
   return DualityCheck() and HasID(AIExtra(),95113856,true)
-  and MP2Check() and #UseLists(OppHand(),OppMon())>0
+  and MP2Check(c) and #UseLists(OppHand(),OppCards())>0
 end
 function UseTradeIn()
   return true
@@ -936,8 +936,8 @@ function NekrozInit(cards)
   if HasID(Act,95113856) and UseEnterblathnir() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end   
-  if HasID(SpSum,95113856) and SummonEnterblathnir() then
-    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  if HasID(SpSum,95113856,SummonEnterblathnir()) then
+    return XYZSummon()
   end 
   if HasID(Act,51124303,false,nil,LOCATION_HAND+LOCATION_SZONE,UseKaleido) then 
     OPTSet(51124303)
@@ -1460,7 +1460,7 @@ function ChainGungnir(c)
         return true
       end
     end
-    if Duel.GetCurrentPhase()==PHASE_BATTLE then
+    if IsBattlePhase() then
       local source = Duel.GetAttacker()
       local target = Duel.GetAttackTarget()
       if source and target then
@@ -1487,7 +1487,7 @@ function ValkBattleFilter(c)
   and not c:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE)
 end
 function ChainValk(c)
-  if Duel.GetCurrentPhase() == PHASE_BATTLE and Duel.GetTurnPlayer() == 1-player_ai then
+  if IsBattlePhase() and Duel.GetTurnPlayer() == 1-player_ai then
     local source = Duel.GetAttacker()
     local target = Duel.GetAttackTarget()
     if source and target then

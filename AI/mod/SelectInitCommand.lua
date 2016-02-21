@@ -1156,7 +1156,7 @@ end
    local AIHand = AIHand()
    local HandHighestATK = 0
    local Result = 0
-  if AI.GetCurrentPhase() == PHASE_BATTLE and Duel.GetTurnPlayer() == 1-player_ai and 
+  if IsBattlePhase() and Duel.GetTurnPlayer() == 1-player_ai and 
      Get_Card_Count_Type(AIBanish(),TYPE_MONSTER,">",nil) >= 3 and Get_Card_Count(AIMon()) == 0 then 
    return 1,i
   end

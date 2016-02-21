@@ -1356,6 +1356,9 @@ function BAChain(cards)
   if HasID(cards,71587526) and ChainKarmaCut() then
     return {1,CurrentIndex}
   end
+  if HasID(cards,71587526,ChainPWWB) then
+    return Chain()
+  end
   if HasID(cards,20513882,ChainPainfulEscape) then
     return Chain()
   end

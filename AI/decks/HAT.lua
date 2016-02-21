@@ -540,7 +540,7 @@ function ChainCotH(card)
       return true
     end
   end
-  if Duel.GetCurrentPhase()==PHASE_BATTLE then
+  if IsBattlePhase() then
     local source=Duel.GetAttacker()
     local target=Duel.GetAttackTarget()
     if source and source:IsControler(1-player_ai) then
@@ -648,7 +648,7 @@ function ChainBoM(card)
       end
     end
   end
-  if Duel.GetCurrentPhase() == PHASE_BATTLE and Duel.GetTurnPlayer()==1-player_ai then
+  if IsBattlePhase() and Duel.GetTurnPlayer()==1-player_ai then
     local source = Duel.GetAttacker()
 		local target = Duel.GetAttackTarget()
     if WinsBattle(source,target) and MoonFilter2(source,1-player_ai) 
@@ -768,7 +768,7 @@ function ChainSanctum()
     return true
   end
   if Duel.GetTurnPlayer()==1-player_ai and targets2>0 and check then
-    if Duel.GetCurrentPhase()==PHASE_BATTLE then
+    if IsBattlePhase() then
       local source = Duel.GetAttacker()
       if source and source:IsControler(1-player_ai) then
         GlobalCardMode = 1
@@ -866,7 +866,7 @@ function ChainIgnition(c)
   if targets3 > 0 and ArtifactCheck(true) then
     return true
   end
-  if Duel.GetCurrentPhase()==PHASE_BATTLE then
+  if IsBattlePhase() then
     local source=Duel.GetAttacker()
     local target=Duel.GetAttackTarget()
     if source and source:IsControler(1-player_ai) then

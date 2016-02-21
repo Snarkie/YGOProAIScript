@@ -1197,7 +1197,7 @@ function ChainRoD(c)
     GlobalCardMode = 1
     return true
   end
-  if Duel.GetCurrentPhase()==PHASE_BATTLE then
+  if IsBattlePhase() then
     local aimon,oppmon = GetBattlingMons()
     if WinsBattle(oppmon,aimon) 
     and RoDFilter(oppmon)
@@ -1239,7 +1239,7 @@ function ChainCCV(card)
   if RemovalCheckCard(card) then
     return true
   end
-  if Duel.GetCurrentPhase()==PHASE_BATTLE then
+  if IsBattlePhase() then
     local aimon,oppmon=GetBattlingMons()
     if WinsBattle(oppmon,aimon) 
     and CCVFilter(aimon) 
@@ -1284,7 +1284,7 @@ function SummonDarkLaw(c,darkheroes,mode,bonus)
     GlobalCardMode = 1
     return true
   end
-  if (c and Duel.GetCurrentPhase()==PHASE_BATTLE 
+  if (c and IsBattlePhase() 
   and Duel.GetTurnPlayer()==player_ai
   or not c and BattlePhaseCheck())
   and CanFinishGame(card,nil,nil,bonus)
@@ -1338,7 +1338,7 @@ function SummonDarkLaw(c,darkheroes,mode,bonus)
       end
     end
   end
-  if Duel.GetCurrentPhase()==PHASE_BATTLE 
+  if IsBattlePhase() 
   and Duel.GetTurnPlayer()==1-player_ai
   and UnchainableCheck(21143940)
   and mode == 2
@@ -1361,7 +1361,7 @@ function SummonDarkLaw(c,darkheroes,mode,bonus)
     return CanWinBattle(tc,OppMon())
     and CanAttack(tc)
   end
-  if (c and Duel.GetCurrentPhase()==PHASE_BATTLE 
+  if (c and IsBattlePhase() 
   and Duel.GetTurnPlayer()==player_ai
   or not c and BattlePhaseCheck())
   and CanWinBattle(card,OppMon())
@@ -1419,7 +1419,7 @@ function SummonAcid(c,waterheroes,mode)
     end
     return true
   end
-  if (c and Duel.GetCurrentPhase()==PHASE_BATTLE 
+  if (c and IsBattlePhase() 
   and Duel.GetTurnPlayer()==player_ai
   and ExpectedDamage(2)==0
   or not c and BattlePhaseCheck())
@@ -1467,7 +1467,7 @@ function SummonKoga(c,lightheroes,mode)
     return true
   end
   SortByATK(lightheroes,true)
-  if (c and Duel.GetCurrentPhase()==PHASE_BATTLE and Duel.GetTurnPlayer()==player_ai
+  if (c and IsBattlePhase() and Duel.GetTurnPlayer()==player_ai
   or not c and BattlePhaseCheck())
   and CardsMatchingFilter(OppMon(),KogaTargetFilter,lightheroes[1].attack)>0 
   and mode == 1
@@ -1479,7 +1479,7 @@ function SummonKoga(c,lightheroes,mode)
     end
     return true
   end
-  if (c and Duel.GetCurrentPhase()==PHASE_BATTLE 
+  if (c and IsBattlePhase() 
   and Duel.GetTurnPlayer()==player_ai
   and ExpectedDamage(2)==0
   or not c and BattlePhaseCheck())
@@ -1511,7 +1511,7 @@ function SummonAnki(c,darkheroes,mode,bonus)
     end
     return true
   end
-  if (c and Duel.GetCurrentPhase()==PHASE_BATTLE 
+  if (c and IsBattlePhase() 
   and Duel.GetTurnPlayer()==player_ai
   or not c and BattlePhaseCheck())
   and CanFinishGame(card,nil,1400)
@@ -1527,7 +1527,7 @@ function SummonAnki(c,darkheroes,mode,bonus)
     end
     return true
   end
-  if (c and Duel.GetCurrentPhase()==PHASE_BATTLE 
+  if (c and IsBattlePhase() 
   and Duel.GetTurnPlayer()==player_ai
   and ExpectedDamage(2)==0
   or not c and BattlePhaseCheck())
@@ -1548,7 +1548,7 @@ function SummonAnki(c,darkheroes,mode,bonus)
     return CanWinBattle(tc,OppMon())
     and CanAttack(tc)
   end
-  if (c and Duel.GetCurrentPhase()==PHASE_BATTLE 
+  if (c and IsBattlePhase() 
   and Duel.GetTurnPlayer()==player_ai
   or not c and BattlePhaseCheck())
   and CanWinBattle(card,OppMon(),true)

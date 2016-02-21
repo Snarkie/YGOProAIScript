@@ -685,6 +685,7 @@ Unchainable={
 84536654,50608164,06511113,30575681, -- Form Change, Koga, Rafflesia, Treacherous, Bedwyr
 27552504,18386170,60743819,20036055, -- Beatrice, Pilgrim, Fiend Griefing, Traveler
 36553319,65305468,20513882,31222701, -- Farfa, F0, Painful Escape, Wavering Eyes
+43898403, -- Twin Twister
 }
 function isUnchainableTogether(CardId)
   for i=1,#Unchainable do
@@ -905,6 +906,7 @@ ScriptedCards ={
 16051717,30100551,20513882,31222701, -- Raikiri, Minerva, Painful Escape, Wavering Eyes
 01050186,19508728,27796375,53180020, -- Satellarknight Unukalhai, Moon Mirror Shield, Nekroz Exa, Sorcerer
 29888389,47196430,68819554,67696066, -- Gishki Shadow, Vision, Performage Damage Juggler, Trick Clown
+43898403, -- Twin Twister
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do

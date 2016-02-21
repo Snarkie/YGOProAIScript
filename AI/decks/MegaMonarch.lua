@@ -1177,7 +1177,7 @@ function ChainOriginal(c)
       OPTSet(54241725)
       return true
     end
-    if Duel.GetCurrentPhase()==PHASE_BATTLE then
+    if IsBattlePhase() then
       local aimon,oppmon = GetBattlingMons()
       if #AIMon()==0 and oppmon 
       and (oppmon:GetAttack()<=2400

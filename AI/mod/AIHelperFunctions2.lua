@@ -803,7 +803,7 @@ function GlobalTargetGet(cards,index)
     cards = All()
   end
   local cardid = GlobalTargetID
-  GlobalTargetID = nil
+  --GlobalTargetID = nil --TODO: check if this is safe to not reset
   local c = FindCard(cardid,cards,index)
   if c == nil then
     c = FindCard(cardid,All(),index)
@@ -1008,6 +1008,10 @@ function NotNegated(c)
       then 
         return false
       end
+      if GlobalCoinormaTurn == Duel.GetTurnCount()
+      then
+        return PredictionPrincessFilter(c)
+      end
     end
   end
   GlobalNegatedLoop=false
@@ -1022,6 +1026,7 @@ function DestroyFilter(c,nontarget,skipblacklist,skipignore)
   and (nontarget==true or not FilterAffected(c,EFFECT_CANNOT_BE_EFFECT_TARGET))
   and (skipblacklist or not (DestroyBlacklist(c)
   and FilterPublic(c)))
+  and not RemovalCheckCard(c)
 end
 function DestroyFilterIgnore(c,nontarget,skipblacklist,skipignore)
   return DestroyFilter(c,skipblacklist)
@@ -1243,8 +1248,12 @@ function FilterPendulum(c)
   return not FilterType(c,TYPE_PENDULUM+TYPE_TOKEN) 
 end
 function FilterRevivable(c,skipcond)
+  local revivelimit = false
+  if STATUS_REVIVE_LIMIT then -- TODO: backwards compatibility
+    revivelimit = FilterStatus(c,STATUS_REVIVE_LIMIT)
+  end
   return FilterType(c,TYPE_MONSTER)
-  and (not FilterStatus(c,STATUS_REVIVE_LIMIT) or FilterStatus(c,STATUS_PROC_COMPLETE))
+  and (not revivelimit or FilterStatus(c,STATUS_PROC_COMPLETE))
   and (skipcond or not FilterAffected(c,EFFECT_SPSUMMON_CONDITION))
 end
 function FilterTuner(c,level)
@@ -1276,6 +1285,10 @@ function FilterOwner(c,player)
   if not player then player = 1 end
   c=GetCardFromScript(c)
   return c.owner==player
+end
+function FilterGlobalTarget(c,cards)
+  local target = GlobalTargetGet(cards)
+  return CardsEqual(c,target)
 end
 
 GlobalTargetList = {}
@@ -2084,6 +2097,9 @@ end
 -- function to determine, if a card can deal battle damage to a targets
 -- for search effects, or just to push damage against battle-immune targets
 function CanDealBattleDamage(c,targets,ignorebonus,filter,opt)
+  if not BattlePhaseCheck() then
+    return false
+  end
   if targets == nil then
     targets = {}
   end
@@ -2281,7 +2297,7 @@ function BattlePhaseCheck()
   local p = Duel.GetCurrentPhase()
   return (p==PHASE_DRAW
   or p==PHASE_STANDBY
-  or p==PHASE_BATTLE)
+  or IsBattlePhase())
   or p==PHASE_MAIN1
   and GlobalBPAllowed
 end
@@ -2988,8 +3004,30 @@ function CheckSum(cards,sum,filter,opt)
   return result
 end
 
+function IsBattlePhase()
+  local current=Duel.GetCurrentPhase()
+  local phases =
+  {
+    PHASE_BATTLE_START,
+    PHASE_BATTLE_STEP,
+    PHASE_DAMAGE,
+    PHASE_DAMAGE_CAL,
+    PHASE_BATTLE,
+  }
+  local result = false
+  for i,p in pairs(phases) do
+    if p and current == p then 
+      result = true
+    end
+  end
+  return result
+end
 
-
+function AITrashTalk(s) -- to make the AI comment its plays. Can be disabled in ai.lua
+  if TRASHTALK then
+    AI.Chat(s)
+  end
+end
 
 
 

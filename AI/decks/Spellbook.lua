@@ -744,7 +744,7 @@ function ChainFateSecond()
 			return true
 		end
 	end
-	if Duel.GetCurrentPhase() == PHASE_BATTLE then
+	if IsBattlePhase() then
 		local source = Duel.GetAttacker()
 		local target = Duel.GetAttackTarget()
 		if source and target and target:IsControler(player_ai) and target:IsFaceup() and target:IsCode(14824019) then

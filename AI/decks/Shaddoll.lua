@@ -1,4 +1,42 @@
+--[[
+91501248, -- Pot of the Forbidden
+03717252, -- Shaddoll Beast
+67503139, -- Prediction Princess Crystaldine
+77723643, -- Shaddoll Dragon
+30328508, -- Shaddoll Squamata
+26517393, -- Spirit of the Tailwind
+95492061, -- Manju
+31118030, -- Prediction Princess Arrowsylph
+32231618, -- Prediction Princess Coinorma
+04939890, -- Shaddoll Hedgehog
+37445295, -- Shaddoll Falcon
+97268402, -- Effect Veiler
+94997874, -- Prediction Princess Tarotray
 
+01845204, -- Instant Fusion
+13048472, -- Pre-Preparation of Rites
+44394295, -- Shaddoll Fusion
+81439173, -- Foolish Burial
+30392583, -- Prediction Ritual
+06417578, -- El-Shaddoll Fusion
+43898403, -- Twin Twister
+04904633, -- Shaddoll Core
+84749824, -- Solemn Warning
+
+74822425, -- El-Shaddoll Shekinaga
+19261966, -- El-Shaddoll Anoyatilis
+94977269, -- El-Shaddoll Winda
+17412721, -- Elder God Norden
+52687916, -- Trishula
+74586817, -- Omega
+82044279, -- Clear Wing
+95113856, -- Enterblathnir
+56832966, -- Utopia Lightning
+84013237, -- Utopia
+63746411, -- Giant Hand
+82633039, -- Castel
+00581014, -- Emeral
+]]
 function ShaddollStartup(deck)
   deck.Init                 = ShaddollInit
   deck.Card                 = ShaddollCard
@@ -12,8 +50,8 @@ function ShaddollStartup(deck)
   deck.Tribute				      = ShaddollTribute
   deck.Option               = ShaddollOption
   deck.ChainOrder           = ShaddollChainOrder
+  deck.Sum                  = ShaddollSum
   --[[
-  deck.Sum 
   deck.DeclareCard
   deck.Number
   deck.Attribute
@@ -31,28 +69,96 @@ function ShaddollStartup(deck)
   
 end
 
-ShaddollIdentifier = 77505534 -- Shadow Games
+ShaddollIdentifier = 94997874 -- Prediction Princess Tarotray
 
 DECK_SHADDOLL = NewDeck("Shaddoll",ShaddollIdentifier,ShaddollStartup) 
 
 
 ShaddollActivateBlacklist={
-67696066, -- Performage Trick Clown
-68819554, -- Performage Damage Juggler
-31292357, -- Performage Hat Tricker
+91501248, -- Pot of the Forbidden
+03717252, -- Shaddoll Beast
+67503139, -- Prediction Princess Crystaldine
+77723643, -- Shaddoll Dragon
+30328508, -- Shaddoll Squamata
+95492061, -- Manju
+31118030, -- Prediction Princess Arrowsylph
+32231618, -- Prediction Princess Coinorma
+04939890, -- Shaddoll Hedgehog
+37445295, -- Shaddoll Falcon
+--97268402, -- Effect Veiler
+94997874, -- Prediction Princess Tarotray
+
+01845204, -- Instant Fusion
+13048472, -- Pre-Preparation of Rites
+44394295, -- Shaddoll Fusion
+81439173, -- Foolish Burial
+30392583, -- Prediction Ritual
 06417578, -- El-Shaddoll Fusion
+--43898403, -- Twin Twister
+04904633, -- Shaddoll Core
+--84749824, -- Solemn Warning
+
 74822425, -- El-Shaddoll Shekinaga
-17016362, -- Trapeze Magician
+19261966, -- El-Shaddoll Anoyatilis
+94977269, -- El-Shaddoll Winda
+17412721, -- Elder God Norden
+74009824, -- El-Shaddoll Wendigo
+--[[52687916, -- Trishula
+74586817, -- Omega
+82044279, -- Clear Wing
+95113856, -- Enterblathnir
+56832966, -- Utopia Lightning
+84013237, -- Utopia
+63746411, -- Giant Hand
+82633039, -- Castel
+00581014, -- Emeral]]
 }
 ShaddollSummonBlacklist={
-67696066, -- Performage Trick Clown
-68819554, -- Performage Damage Juggler
-31292357, -- Performage Hat Tricker
-17016362, -- Trapeze Magician
+91501248, -- Pot of the Forbidden
+03717252, -- Shaddoll Beast
+67503139, -- Prediction Princess Crystaldine
+77723643, -- Shaddoll Dragon
+30328508, -- Shaddoll Squamata
+26517393, -- Spirit of the Tailwind
+95492061, -- Manju
+31118030, -- Prediction Princess Arrowsylph
+32231618, -- Prediction Princess Coinorma
+04939890, -- Shaddoll Hedgehog
+37445295, -- Shaddoll Falcon
+97268402, -- Effect Veiler
+94997874, -- Prediction Princess Tarotray
+
+01845204, -- Instant Fusion
+13048472, -- Pre-Preparation of Rites
+44394295, -- Shaddoll Fusion
+81439173, -- Foolish Burial
+30392583, -- Prediction Ritual
+06417578, -- El-Shaddoll Fusion
+43898403, -- Twin Twister
+04904633, -- Shaddoll Core
+84749824, -- Solemn Warning
+
+74822425, -- El-Shaddoll Shekinaga
+19261966, -- El-Shaddoll Anoyatilis
+94977269, -- El-Shaddoll Winda
+17412721, -- Elder God Norden
+52687916, -- Trishula
+--74586817, -- Omega
+--82044279, -- Clear Wing
+95113856, -- Enterblathnir
+--56832966, -- Utopia Lightning
+--84013237, -- Utopia
+--63746411, -- Giant Hand
+--82633039, -- Castel
+--00581014, -- Emeral
 }
 ShaddollSetBlacklist={
+13048472, -- Pre-Preparation of Rites
+30392583, -- Prediction Ritual
+06417578, -- El-Shaddoll Fusion
 }
 ShaddollRepoBlacklist={
+91501248, -- Pot of the Forbidden
 }
 ShaddollUnchainable={
 06417578, -- El-Shaddoll Fusion
@@ -78,6 +184,17 @@ function PerformageFilter(c,exclude)
     end
   end
   return FilterSet(c,0xc6) and check
+end
+function PredictionPrincessFilter(c,exclude)
+  local check = true
+  if exclude then
+    if type(exclude)=="table" then
+      check = not CardsEqual(c,exclude)
+    elseif type(exclude)=="number" then
+      check = (c.id ~= exclude)
+    end
+  end
+  return FilterSet(c,0xcc) and check
 end
 function ShaddollMonsterFilter(c,exclude)
   return FilterType(c,TYPE_MONSTER) 
@@ -193,14 +310,21 @@ function DragonFilter(c)
 end
 function DragonCond(loc)
   if loc == PRIO_TOGRAVE then
-    return OPTCheck(77723643) 
+    if OPTCheck(77723643) 
     and CardsMatchingFilter(OppST(),DragonFilter)>0 
     and GetMultiple(77723643)==0
     and ShaddollGraveCheck(77723643)
+    and MacroCheck()
+    then
+      if HasPriorityTarget(OppST(),true,nil,DragonFilter) then
+        return 11
+      end
+      return true
+    end
   end
   return true
 end
-function BeastCond(loc)
+function BeastCond(loc,c)
   if loc == PRIO_TOGRAVE then
     return OPTCheck(03717252) 
     and GetMultiple(03717252)==0
@@ -319,28 +443,52 @@ function HatCond(loc,c)
   end
   return true
 end
+function PotCond(loc,c)
+  if loc == PRIO_TOHAND then
+    return not HasAccess(c.id)
+    --[[and (HasIDNotNegated(AIMon(),94997874,true)
+    or ]]
+  end
+  if loc == PRIO_TOGRAVE then
+    return not HasAccess(c.id)
+    or FilterLocation(c,LOCATION_HAND)
+    --[[and (HasIDNotNegated(AIMon(),94997874,true)
+    or ]]
+  end
+  return true
+end
+function TarotrayCond(loc,c)
+  if loc == PRIO_TOHAND 
+  then
+    return CardsMatchingFilter(AIHand(),FilterID,c.id)==0
+    or HasID(AIHand(),c.id,true,SummonTarotray,1)
+    and not HasID(AIHand(),c.id,true,TarotrayTributeCheck)
+  end
+  return true
+end
+function PredictionRitualCond(loc,c)
+  if loc == PRIO_TOHAND 
+  then
+    return CardsMatchingFilter(AICards(),FilterID,c.id)==0
+  end
+  if loc == PRIO_TOGRAVE
+  then
+    return CardsMatchingFilter(AICards(),FilterID,c.id)>1
+  end
+  return true
+end
 ShaddollPriorityList={                      
 --[12345678] = {1,1,1,1,1,1,1,1,1,1,XXXCond},  -- Format
 
 -- Shaddoll
 
-[37445295] = {3,3,3,1,7,1,7,1,1,1,FalconCond},        -- Shaddoll Falcon
-[04939890] = {5,2,2,1,5,2,5,4,1,1,HedgehogCond},      -- Shaddoll Hedgehog
+[37445295] = {3,3,3,1,7,1,5,1,1,1,FalconCond},        -- Shaddoll Falcon
+[04939890] = {5,2,2,1,5,2,8,4,1,1,HedgehogCond},      -- Shaddoll Hedgehog
 [30328508] = {4,1,5,1,9,1,9,1,1,1,SquamataCond},      -- Shaddoll Squamata
-[77723643] = {3,1,4,1,7,1,7,1,1,1,DragonCond},        -- Shaddoll Dragon
-[03717252] = {4,1,6,1,6,1,6,1,1,1,BeastCond},         -- Shaddoll Beast
+[77723643] = {3,1,4,1,7,1,6,1,1,1,DragonCond},        -- Shaddoll Dragon
+[03717252] = {4,1,6,1,6,1,7,1,1,1,BeastCond},         -- Shaddoll Beast
 
-[67696066] = {6,2,5,1,6,1,1,1,1,1,ClownCond},         -- Performage Trick Clown
-[68819554] = {3,1,2,1,5,1,1,1,1,1,JugglerCond},       -- Performage Damage Juggler
-[31292357] = {7,1,3,1,2,1,1,1,1,1,HatCond},           -- Performage Hat Tricker
-
-[41386308] = {1,1,1,1,2,1,1,1,1,1,MathCond},          -- Mathematician
-[23434538] = {1,1,1,1,2,1,1,1,1,1},                   -- Maxx "C"
 [97268402] = {1,1,1,1,2,1,1,1,1,1},                   -- Effect Veiler
-[72989439] = {1,1,1,1,1,1,1,1,1,1},                   -- BLS
-
-[24062258] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Secret Sect Druid Dru
-[73176465] = {1,1,1,1,6,5,1,1,1,1,FelisCond},         -- Lightsworn Felis
 
 [44394295] = {8,5,1,1,1,1,1,1,1,1,ShadFusionCond},    -- Shaddoll Fusion
 [06417578] = {9,6,1,1,1,1,1,1,1,1,ElFusionCond},      -- El-Shaddoll Fusion
@@ -359,15 +507,25 @@ ShaddollPriorityList={
 [78474168] = {1,1,1,1,1,1,1,1,1,1},                   -- Breakthrough Skill
 [05851097] = {1,1,1,1,1,1,1,1,1,1},                   -- Vanity's Emptiness
 
+[31118030] = {1,1,1,1,1,1,1,1,1,1,},                  -- Prediction Princess Arrowsylph
+[67503139] = {1,1,1,1,1,1,1,1,1,1,},                  -- Prediction Princess Crystaldine
+[32231618] = {1,1,1,1,1,1,1,1,1,1,},                  -- Prediction Princess Coinorma
+[94997874] = {6,1,1,1,1,1,1,1,1,1,TarotrayCond},      -- Prediction Princess Tarotray
+[30392583] = {7,2,1,1,4,2,1,1,1,1,PredictionRitualCond}, -- Prediction Ritual
 
-[20366274] = {1,1,6,4,2,1,2,1,1,1,ConstructCond},     -- El-Shaddoll Construct
-[94977269] = {1,1,7,3,2,1,2,1,1,1,WindaCond},         -- El-Shaddoll Winda
-[74822425] = {1,1,1,1,1,1,1,1,1,1,ShekinagaCond},     -- El-Shaddoll Shekinaga
-[19261966] = {1,1,1,1,1,1,1,1,1,1,AnoyatilisCond},    -- El-Shaddoll Anoyatilis
+[91501248] = {6,1,1,1,10,5,1,1,1,1,PotCond},           -- Pot of the Forbidden
+[26517393] = {1,1,1,1,1,1,1,1,1,1,},                  -- Spirit of the Tailwind
+[95492061] = {1,1,1,1,1,1,1,1,1,1,},                  -- Manju
 
-[48424886] = {1,1,1,1,1,1,1,1,1,1,EgrystalCond},      -- El-Shaddoll Egrystal
+[20366274] = {1,1,7,4,2,1,2,1,1,1,ConstructCond},     -- El-Shaddoll Construct
+[94977269] = {1,1,5,3,2,1,2,1,1,1,WindaCond},         -- El-Shaddoll Winda
+[74822425] = {1,1,6,1,2,1,1,1,1,1,ShekinagaCond},     -- El-Shaddoll Shekinaga
+[19261966] = {1,1,4,1,4,1,1,1,1,1,AnoyatilisCond},    -- El-Shaddoll Anoyatilis
 
-[52687916] = {1,1,1,1,1,1,1,1,1,1},                   -- Trishula
+[48424886] = {1,1,3,1,1,1,1,1,1,1,EgrystalCond},      -- El-Shaddoll Egrystal
+[74009824] = {1,1,2,1,1,1,1,1,1,1},                   -- El-Shaddoll Wendigo
+
+[52687916] = {1,1,1,1,3,1,1,1,1,1},                   -- Trishula
 [17016362] = {1,1,1,1,1,1,1,1,1,1},                   -- Trapeze Magician
 [82633039] = {1,1,1,1,6,1,1,1,1,1,CastelCond},        -- Skyblaster Castel
 [00581014] = {1,1,1,1,1,1,1,1,1,1},                   -- Daigusto Emeral
@@ -486,9 +644,27 @@ end
   and not HasID(AIMon(),20366274,true)
   or CardsMatchingFilter(OppMon(),ShaddollFusionFilter)>0)
 end]]
-function UseCore()
-  return HasID(AIHand(),44394295,true) and WindaCheck()
-  and not Duel.IsExistingMatchingCard(ShaddollFusionFilter,1-player_ai,LOCATION_MZONE,0,1,nil)
+function UseCore(c,mode)
+  if mode==1 
+  and ShaddollHasFusion()
+  and WindaCheck()
+  then
+    return true
+  end
+  if mode==2
+  and HasIDNotNegated(AICards(),30392583,true)
+  and HasID(AIHand(),94997874,true,SummonTarotray,1)
+  and not HasID(AICards(),91501248,true)
+  then
+    return true
+  end
+  if mode==3
+  and HasIDNotNegated(AIExtra(),95113856,true,SummonEnterblathnir)
+  and (HasIDNotNegated(AIMon(),94997874,true) and FieldCheck(9)>1
+  or not HasIDNotNegated(AIMon(),94997874,true) and  FieldCheck(9)>0)
+  then
+    return true
+  end
 end
 function DruFilter(c)
   return bit32.band(c.attribute,ATTRIBUTE_DARK)>0 and c.level==4 and (c.attack==0 or c.defense==0)
@@ -631,8 +807,8 @@ end
 function UseFalcon()
   return OPTCheck(37445295) and PriorityCheck(AIGrave(),PRIO_TOFIELD,1,FalconFilter)>1
 end
-function UseHedgehog()
-  return OPTCheck(04939890) and HasID(AIDeck(),44394295,true)
+function UseHedgehog(c,mode)
+  return OPTCheck(04939890) and CardsMatchingFilter(AIDeck(),ShaddollSTFilter)>0
 end
 function SquamataFilter(c)
   return c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0
@@ -743,12 +919,9 @@ function ShaddollUseInstantFusion(c,mode)
   end
   if mode == 1 then
     if TrishulaCheck() then
-      print("going for Trish")
       GlobalIFTarget=17412721
       local lvl = GlobalNordenMatch.lvl
       local tuner = GlobalNordenMatch.tuner
-      print(lvl)
-      print(tuner)
       GlobalNordenFilter=
       function(c)
         return FilterLevel(c,lvl) and (tuner and FilterType(c,TYPE_TUNER)
@@ -873,6 +1046,157 @@ function TrishulaCheck(c)
   end
   return result
 end
+function UsePreprep(c)
+  return true
+end
+function SummonManju(c,mode)
+  if mode == 1 
+  then
+    return true
+  end
+end
+function SummonTailwind(c,mode)
+  if mode == 1 
+  and NeedsCard(91501248,AIDeck(),AICards(),true)
+  then
+    return true
+  end
+  if mode == 2 
+  then
+    return true
+  end
+end
+function TarotrayTributeFilter(other,source)
+  for i,c in pairs(AICards()) do
+    if not CardsEqual(c,source)
+    and not CardsEqual(other,source)
+    and source.level <= c.level+other.level
+    then
+      return true
+    end
+  end
+  return false
+end
+function TarotrayTributeCheck(source)
+  for i,c in pairs(AICards()) do
+    if not CardsEqual(c,source)
+    and (c.level == source.level
+    or CardsMatchingFilter(AICards(),TarotrayTributeFilter,source)>0)
+    then
+      return true
+    end
+  end
+  return false
+end
+function SummonTarotray(c,mode)
+  if mode == 1
+  and NotNegated(c)
+  and not HasID(AIMon(),94997874,true)
+  and (c.id == 30392583
+  or HasIDNotNegated(AICards(),30392583,true))
+  then
+    return true
+  end
+  if mode == 2
+  and NotNegated(c)
+  and not HasID(AIMon(),94997874,true)
+  and HasID(AIHand(),94997874,true,TarotrayTributeCheck)
+  and (c.id == 30392583
+  or HasIDNotNegated(AICards(),30392583,true))
+  then
+    return true
+  end
+end
+function UsePredictionRitualGrave(c,mode)
+  if FilterLocation(c,LOCATION_GRAVE) then
+    if c.mode == 1 
+    and HasID(AICards(),30392583,true)
+    and HasID(AIHand(),94997874,true,SummonTarotray,1)
+    and not HasID(AIHand,94997874,true,TarotrayTributeCheck)
+    then
+      return true
+    end
+  end
+end
+function UseFoolishShaddoll(c,mode)
+  if not MacroCheck() then
+    return false
+  end
+  if mode == 1 
+  and HasIDNotNegated(AICards(),30392583,true)
+  and HasID(AIHand(),94997874,true,SummonTarotray,1)
+  and not HasID(AIHand(),94997874,true,TarotrayTributeCheck)
+  and HasID(AIDeck(),04939890,FilterOPT,true)
+  then
+    GlobalFoolishID = 04939890
+    return true
+  end
+  if mode == 2 
+  then
+    return true
+  end
+end
+function SetArrowsylph(c,mode)
+  if mode == 1 
+  and NeedsCard(30392583,Merge(AIDeck(),AIGrave()),AICards(),true)
+  and HasID(AIHand(),94997874,true)
+  then
+    return true
+  end
+  if mode == 2
+  then
+    return true
+  end
+end
+function SetCoinorma(c,mode)
+  if mode == 1 
+  and not HasAccess(91501248)
+  and HasID(AIDeck(),91501248,true)
+  and TurnEndCheck()
+  then
+    return true
+  end
+  if mode == 2
+  and TurnEndCheck()
+  then
+    return true
+  end
+end
+function FlipCoinorma(c,mode)
+  if mode == 1
+  and FilterPosition(c,POS_FACEDOWN)
+  and DualityCheck()
+  and NotNegated(c)
+  and TurnEndCheck()
+  and CardsMatchingFilter(AIDeck(),PredictionPrincessFilter)>0
+  then
+    return true
+  end
+  if mode == 2
+  and FilterPosition(c,POS_FACEUP_ATTACK)
+  then
+    return true
+  end
+end
+function FlipArrowsylph(c,mode)
+  if mode == 1
+  and FilterPosition(c,POS_FACEDOWN)
+  and NotNegated(c)
+  and HasID(Merge(AIDeck(),AIGrave()),30392583,true)
+  then
+    return true
+  end
+end
+function SummonEnterblathnirShaddoll(c,mode)
+  if mode == 1
+  and NotNegated(c)
+  and SummonEnterblathnir(c)
+  and (FieldCheck(9)>2 
+  or not HasIDNotNegated(AIMon(),94997874,true))
+  then
+    return true
+  end
+end
 function ShaddollInit(cards)
   GlobalNordenFilter=nil
   local Act = cards.activatable_cards
@@ -881,7 +1205,7 @@ function ShaddollInit(cards)
   local Rep = cards.repositionable_cards
   local SetMon = cards.monster_setable_cards
   local SetST = cards.st_setable_cards
-  if HasID(Act,04904633) and UseCore() then
+  if HasID(Act,04904633,UseCore,1) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Act,00581014,false,9296225) then
@@ -891,11 +1215,36 @@ function ShaddollInit(cards)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(SpSum,52687916,SummonSyncTrishula) then
-    return SpSummon()
+    return SynchroSummon()
   end
-  if HasID(Act,81439173) then -- Foolish
+  if HasID(Act,13048472,UsePreprep) then
+    return Activate()
+  end
+  if HasID(Rep,31118030,false,FlipArrowsylph) then
+    return Repo()
+  end
+  if HasID(Rep,67503139,false,FlipCrystaldine) then
+    return Repo()
+  end
+  if HasIDNotNegated(Sum,95492061,SummonManju,1) then
+    return Summon()
+  end
+  if HasIDNotNegated(Sum,26517393,SummonTailwind,1) then
+    return Summon()
+  end
+  if HasID(Act,04904633,UseCore,2) then
+    return Activate()
+  end
+  if HasIDNotNegated(Act,30392583,SummonTarotray,2) then
+    return Activate()
+  end
+  if HasIDNotNegated(Act,30392583,UsePredictionRitualGrave,1) then
+    return Activate()
+  end
+  if HasID(Act,81439173,UseFoolishShaddoll,1) then -- Foolish
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+
   if HasID(Rep,37445295,false,nil,nil,POS_FACEDOWN_DEFENCE,UseFalcon) then
     return {COMMAND_CHANGE_POS,CurrentIndex}
   end
@@ -942,6 +1291,12 @@ function ShaddollInit(cards)
     if TrishulaCheck(Sum[i]) then
       return Summon(i)
     end
+  end
+  if HasID(Act,04904633,UseCore,3) then
+    return Activate()
+  end
+  if HasID(SpSum,95113856,SummonEnterblathnirShaddoll,1) then
+    return XYZSummon()
   end
   if HasID(Sum,41386308) and SummonMathShaddoll() then
     return {COMMAND_SUMMON,CurrentIndex}
@@ -994,7 +1349,18 @@ function ShaddollInit(cards)
   if HasID(Sum,03717252) and SummonBeast() then
     return {COMMAND_SUMMON,CurrentIndex}
   end
-  
+  if HasID(Act,81439173,UseFoolishShaddoll,2) then
+    return Activate()
+  end
+  if HasIDNotNegated(Sum,26517393,SummonTailwind,2) then
+    return Summon()
+  end
+  if HasID(SetMon,31118030,SetArrowsylph,1) then
+    return Set()
+  end
+  if HasID(SetMon,32231618,SetCoinorma,1) then
+    return Set()
+  end
   if HasID(SetMon,37445295) and SetFalcon() then
     return {COMMAND_SET_MONSTER,CurrentIndex}
   end
@@ -1016,24 +1382,36 @@ function ShaddollInit(cards)
     if HasID(SetMon,68819554,SetJuggler) then
     return Set()
   end
+  if HasID(SetMon,32231618,SetCoinorma,2) then
+    return Set()
+  end
+  if HasID(SetMon,31118030,SetArrowsylph,2) then
+    return Set()
+  end
   if HasID(SetST,77505534) and SetShadowGames() then
     return {COMMAND_SET_ST,CurrentIndex}
   end
   -- TODO: only for backwards compatibility
-  if HasID(SetableST,85103922) and SetArtifacts() then
+  if HasID(SetST,85103922) and SetArtifacts() then
     return {COMMAND_SET_ST,CurrentIndex}
   end
-  if HasID(SetableST,20292186) and SetArtifacts() then
+  if HasID(SetST,20292186) and SetArtifacts() then
     return {COMMAND_SET_ST,CurrentIndex}
   end
-  if HasID(SetableST,12697630) and SetArtifacts() then
+  if HasID(SetST,12697630) and SetArtifacts() then
     return {COMMAND_SET_ST,CurrentIndex}
   end
-  if HasID(SetableST,12444060) and SetArtifacts() then
+  if HasID(SetST,12444060) and SetArtifacts() then
     return {COMMAND_SET_ST,CurrentIndex}
   end
-  if HasID(SetableST,29223325) and SetArtifacts() then
+  if HasID(SetST,29223325) and SetArtifacts() then
     return {COMMAND_SET_ST,CurrentIndex}
+  end
+  if HasID(Rep,32231618,FlipCoinorma,1) then
+    return Repo()
+  end
+  if HasID(Rep,32231618,FlipCoinorma,2) then
+    return Repo()
   end
   return nil
 end
@@ -1054,7 +1432,13 @@ end
 function FalconTarget(cards)
   return Add(cards,PRIO_TOFIELD)
 end
+GlobalHedgehogFilter = nil
 function HedgehogTarget(cards)
+  if GlobalHedgehogFilter then
+    local filter = GlobalHedgehogFilter
+    GlobalHedgehogFilter = nil
+    return Add(cards,PRIO_TOHAND,1,filter)
+  end
   if (FieldCheck(4)==1
   or HatCheck())
   and FilterType(cards[1],TYPE_MONSTER)
@@ -1082,6 +1466,7 @@ function ShaddollFusionTarget(cards)
     if SummonConstruct() then
       result = Add(cards,PRIO_TOFIELD,1,FilterID,20366274)
     end
+    result = Add(cards,PRIO_TOFIELD)
   else
     result = Add(cards,PRIO_TOGRAVE)
   end
@@ -1134,7 +1519,51 @@ function ClownTarget(cards)
   GlobalClownSummon = cards[1].id
   return result
 end
-function ShaddollCard(cards,min,max,id,c)
+function PreprepTarget(cards)
+  return Add(cards)
+end
+function ManjuTarget(cards)
+  return Add(cards)
+end
+function TailwindTarget(cards)
+  return Add(cards)
+end
+function PredictionRitualTarget(cards)
+  return Add(cards,PRIO_TOFIELD,1,FilterID,94997874)
+end
+function TarotrayTarget(cards)
+  if GlobalCardMode == 1 then
+    GlobalCardMode = nil
+    return Add(cards,PRIO_TOFIELD,1,FilterGlobalTarget,cards)
+  end
+  if LocCheck(cards,LOCATION_HAND) 
+  or LocCheck(cards,LOCATION_GRAVE) 
+  then
+    return Add(cards,PRIO_TOFIELD,1,FilterLocation,LOCATION_GRAVE)
+  end
+  if FilterPosition(cards[1],POS_FACEDOWN) then
+    return Add(cards,PRIO_TOFIELD,1,FilterType,TYPE_FLIP)
+  end
+  if FilterPosition(cards[1],POS_FACEUP) then
+    return BestTargets(cards,1,TARGET_FACEDOWN)
+  end
+end
+function ShaddollCard(cards,min,max,id,c) 
+  if id == 94997874 then
+    return TarotrayTarget(cards)
+  end
+  if id == 95492061 then
+    return ManjuTarget(cards)
+  end
+  if id == 13048472 then
+    return PreprepTarget(cards)
+  end
+  if id == 26517393 then
+    return TailwindTarget(cards)
+  end
+  if id == 30392583 then
+    return PredictionRitualTarget(cards)
+  end
   if id == 68819554 then
     return JugglerTarget(cards)
   end  
@@ -1209,7 +1638,7 @@ function ChainElFusion(c)
       return true
     end
   end
-  if Duel.GetCurrentPhase()==PHASE_BATTLE 
+  if IsBattlePhase() 
   and Duel.GetTurnPlayer()==player_ai
   and ShaddollFinishCheck()
   then
@@ -1260,7 +1689,7 @@ function ChainShadowGames(c)
   then
     result = true
   end
-  if Duel.GetCurrentPhase()==PHASE_BATTLE 
+  if IsBattlePhase() 
   and Duel.GetTurnPlayer()==1-player_ai
   then
     local aimon,oppmon=GetBattlingMons()
@@ -1282,10 +1711,21 @@ function ChainShadowGames(c)
   return result
 end
 function ChainCore()
-  if Duel.GetCurrentPhase()==PHASE_BATTLE then
+  if IsBattlePhase() then
     local source=Duel.GetAttacker()
-    return source and source:IsControler(1-player_ai) 
+    if source and source:IsControler(1-player_ai) 
     and source:GetAttack()<=1950 and #AIMon()==0 
+    then
+      return true
+    end
+    local aimon,oppmon=GetBattlingMons()
+    if Duel.GetTurnPlayer()==player_ai 
+    and GlobalBPEnd and not aimon
+    and (#OppMon()>0 and OppGetStrongestAttDef()<1450
+    or #OppMon()==0)
+    then
+      return true
+    end
   end
 end
 function ChainClown(c)
@@ -1296,8 +1736,101 @@ end
 function ChainJuggler(c)
   return false --TODO: everything
 end
-
+function ChainForbiddenPot(c)
+  return true
+end
+function FlipForbiddenPot(c)
+  return NotNegated(c)
+  and OPTCheck(c.id)
+  and FilterPosition(c,POS_FACEDOWN)
+end
+function ChainTarotraySummon(c)
+  return NotNegated(c) 
+  and (CardsMatchingFilter(AIGrave(),FilterType,TYPE_FLIP)>0
+  or NeedsCard(91501248,AIHand(),AIMon())
+  or NeedsCard(03717252,AIHand(),AIMon())
+  or #AIMon()<3 and CardsMatchingFilter(AIHand(),FilterType,TYPE_FLIP)>0)
+end
+function ChainTarotrayFacedown(c,mode)
+  --return true
+  if not OPTCheck(c.id) 
+  or Negated(c)
+  then
+    return false
+  end
+  if mode == 1 
+  and HasID(AIMon(),91501248,true,FilterPosition,POS_FACEUP)
+  and Duel.CheckTiming(TIMING_END_PHASE)
+  then
+    local target = FindID(91501248,AIMon(),nil,FilterPosition,POS_FACEUP)
+    GlobalCardMode = 1
+    GlobalTargetSet(FindID(91501248,AIMon(),nil,FilterPosition,POS_FACEUP))
+    return true
+  end
+end
+function UseHedgehogGrave(c)
+  if HasIDNotNegated(AICards(),30392583,true)
+  and HasID(AIMon(),94997874,true,SummonTarotray,1)
+  and not HasID(AIMon(),94997874,true,SummonTarotray,2)
+  then
+    if HasID(AICards(),03717252,true) then
+      GlobalHedgehogFilter=function(c) return FilterLevelMin(c,4) end
+    else
+      GlobalHedgehogFilter=function(c) return FilterLevelMin(c,5) end
+    end
+  end
+  return true
+end
+function ChainTarotrayFaceup(c,mode)
+  if not OPTCheck(c.id) 
+  or Negated(c)
+  then
+    return false
+  end
+  if mode == 1
+  and HasID(AIMon(),91501248,true,FlipForbiddenPot)
+  and Duel.CheckTiming(TIMING_END_PHASE)
+  then
+    GlobalCardMode = 1
+    GlobalTargetSet(FindID(91501248,AIMon(),nil,FlipForbiddenPot))
+    return true
+  end
+end
+function ChainArrowsylph(c)
+  return true
+end
+function ChainCrystaldine(c)
+  return true
+end
+function ChainCoinorma(c)
+  return true
+end
 function ShaddollChain(cards)
+  if HasID(cards,31118030,ChainArrowsylph) then
+    return Chain()
+  end
+  if HasID(cards,67503139,ChainCrystaldine) then
+    return Chain()
+  end
+  if HasID(cards,32231618,ChainCoinorma) then
+    GlobalCoinormaTurn = Duel.GetTurnCount()
+    return Chain()
+  end
+  if HasID(cards,91501248,ChainForbiddenPot) then
+    OPTSet(91501248)
+    return Chain()
+  end
+  if HasID(cards,94997874,false,94997874*16,ChainTarotrayFaceup,1) then 
+    OPTSet(94997874)
+    return Chain()
+  end
+  if HasID(cards,94997874,false,94997874*16+1,ChainTarotrayFacedown,1) then
+    OPTSet(94997874)
+    return Chain()
+  end
+  if HasID(cards,94997874,false,94997874*16+2,ChainTarotraySummon) then
+    return Chain()
+  end
   if HasID(cards,31292357) then -- Hat Tricker
     return {1,CurrentIndex}
   end
@@ -1331,7 +1864,7 @@ function ShaddollChain(cards)
     OPTSet(37445295)
     return {1,CurrentIndex}
   end
-  if HasID(cards,04939890,false,nil,LOCATION_GRAVE) then -- Hedgehog
+  if HasID(cards,04939890,false,nil,LOCATION_GRAVE,UseHedgehogGrave) then -- Hedgehog
     OPTSet(04939890)
     return {1,CurrentIndex}
   end
@@ -1371,6 +1904,26 @@ end
 function ShaddollEffectYesNo(id,card)
   local field = bit32.band(card.location,LOCATION_ONFIELD)>0
   local grave = bit32.band(card.location,LOCATION_GRAVE)>0
+  if id == 94997874 
+  and card.description==id*16+2 
+  and ChainTarotraySummon(card)
+  then
+    return true
+  end
+  if id == 31118030 and ChainArrowsylph(card) then
+    return true
+  end
+  if id == 32231618 and ChainCoinorma(card) then
+    GlobalCoinormaTurn = Duel.GetTurnCount()
+    return true
+  end  
+  if id == 67503139 and ChainCrystaldine(card) then
+    return true
+  end
+  if id == 91501248 and ChainForbiddenPot(card) then
+    OPTSet(id)
+    return true
+  end
   if id == 67696066 and ChainClown(card) then
     OPTSet(id)
     return 1
@@ -1399,7 +1952,7 @@ function ShaddollEffectYesNo(id,card)
     OPTSet(37445295)
     return 1
   end
-  if id == 04939890 and grave then -- Hedgehog
+  if id == 04939890 and grave and UseHedgehogGrave(c) then -- Hedgehog
     OPTSet(04939890)
     return 1
   end
@@ -1428,6 +1981,35 @@ function ShaddollEffectYesNo(id,card)
   end
   return nil
 end
+function ShaddollSum(cards,sum,c)
+  if c and c.id == 30392583 then
+    if HasID(cards,91501248) then
+      return {CurrentIndex}
+    end
+    if HasID(cards,04904633) then
+      return {CurrentIndex}
+    end
+    AssignPriority(cards,PRIO_TOGRAVE)
+    table.sort(cards,function(a,b)return a.prio>b.prio end)
+    local levels = 0
+    local result = {}
+    for i,c in pairs(cards) do
+      levels = levels + c.level
+      result[i]=c.index
+      if (c.level >= sum) then
+        result={c.index}
+        break
+      end
+      if levels >= sum then
+        break
+      end
+    end
+    if result and #result>0 then
+      return result
+    end
+  end
+
+end
 function ShaddollYesNo(desc)
 end
 function ShaddollTribute(cards,min, max)
@@ -1438,7 +2020,89 @@ function ShaddollAttackTarget(cards,attacker)
 end
 function ShaddollAttackBoost(cards)
 end
+function ForbiddenPotOption(result)
+  if result[2]
+  and DestroyCheck(OppMon(),true)>2
+  and OppHasStrongestMonster()
+  then
+    return result[2]
+  end
+  if result[4]
+  and Duel.GetTurnPlayer()==1-player_ai
+  and #OppHand()<1
+  and not OppHasStrongestMonster()
+  then
+    return result[4]
+  end
+  if result[1] 
+  and #AIHand()<2
+  then
+    return result[1]
+  end
+  if result[3] 
+  and Duel.GetTurnPlayer()==player_ai
+  and BattlePhaseCheck()
+  and ExpectedDamage()>AI.GetPlayerLP(2)
+  and not OppHasStrongestMonster()
+  and CardsMatchingFilter(OppST(),FilterPosition,POS_FACEDOWN)>1
+  then
+    return result[3]
+  end
+  if result[2] 
+  and Duel.GetTurnPlayer()==player_ai
+  and BattlePhaseCheck()
+  and ExpectedDamage()>AI.GetPlayerLP(2)
+  and DestroyCheck(OppMon(),true)==#OppMon
+  then
+    return result[2]
+  end
+  if result[2]
+  and OppHasStrongestMonster()
+  and DestroyCheck(OppMon())==#OppMon()
+  then
+    return result[2]
+  end
+  if result[1]
+  and Duel.GetTurnPlayer()==player_ai
+  and not Duel.GetCurrentPhase()==PHASE_END
+  and #AIHand()<6
+  and #AIDeck()>2
+  then
+    return result[1]
+  end
+  if result[1]
+  and Duel.GetTurnPlayer()==player_ai
+  and Duel.GetTurnCount()==1
+  and #AIHand()<5
+  then
+    return result[1]
+  end
+  if result[4] then
+    return result[4]
+  end
+  if result[1] then
+    return result[1]
+  end
+end
 function ShaddollOption(options)
+  local result = {}
+  for i,v in pairs(options) do
+    if v == 91501248*16 then -- draw 
+      result[1]=i
+    end
+    if v == 91501248*16+1 then -- destroy monsters
+      result[2]=i
+    end
+    if v == 91501248*16+2 then -- return S/T
+      result[3]=i
+    end
+    if v == 91501248*16+3 then -- shuffle from hand
+      result[4]=i
+    end
+  end
+  if #result>0 then
+    return ForbiddenPotOption(result)
+  end
 end
 function ShaddollChainOrder(cards)
 end
@@ -1449,6 +2113,7 @@ ShaddollVary={
   74822425,04904633, -- Shekinaga,Core
 }
 ShaddollDef={
+  74009824, -- El-Shaddoll Wendigo
 }
 function ShaddollPosition(id,available)
   result = nil

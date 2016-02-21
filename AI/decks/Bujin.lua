@@ -182,7 +182,7 @@ function UseRegaliaGrave()
     GlobalCardMode=2
     return true
   end
-  if Duel.GetCurrentPhase() == PHASE_BATTLE and HasID(AIGrave(),68601507,true) 
+  if IsBattlePhase() and HasID(AIGrave(),68601507,true) 
   and not HasID(AIHand(),68601507,true) and not HasID(AIHand(),37742478,true)
   then
 		local source = Duel.GetAttacker()
@@ -611,7 +611,7 @@ function ChainHare()
       return true
     end
   end
-  if Duel.GetCurrentPhase() == PHASE_BATTLE then
+  if IsBattlePhase() then
 		local source = Duel.GetAttacker()
 		local target = Duel.GetAttackTarget()
     if source and target then

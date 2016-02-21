@@ -292,7 +292,7 @@ result = 0
    local AIHand = AIHand()
    local HandHighestATK = 0
    local Result = 0
-  if AI.GetCurrentPhase() == PHASE_BATTLE and Duel.GetTurnPlayer() == player_ai
+  if IsBattlePhase() and Duel.GetTurnPlayer() == player_ai
   and Get_Card_Count_Type(AIBanish(),TYPE_MONSTER,">",nil) >= 3 
   and Get_Card_Count(AIMon()) == 0 
   then 
@@ -359,7 +359,7 @@ end
   -- "Amazoness Archers" trap card
   ---------------------------------------------
   if Get_Card_Count_ID(OppST(), 67987611, POS_FACEUP) > 0 then
-   if AI.GetCurrentPhase() == PHASE_BATTLE then
+   if IsBattlePhase() then
      Global1PTAArchers = 1
     end
   end

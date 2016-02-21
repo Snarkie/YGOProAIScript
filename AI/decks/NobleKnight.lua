@@ -1344,7 +1344,7 @@ end
 
 
 function HighSallyTarget(cards)
-  if Duel.GetCurrentPhase() == PHASE_BATTLE then
+  if IsBattlePhase() then
     return Add(cards)
   else
     local result = ArmsByAtk(cards,2100)
@@ -1646,7 +1646,7 @@ function ChainMerlin()
       return #GlobalMerlinID>0
     end
   end
-  if Duel.GetCurrentPhase() == PHASE_BATTLE then
+  if IsBattlePhase() then
     if Duel.GetTurnPlayer() == player_ai then
       if ExpectedDamage(2)==0 then
         --return true
