@@ -50,10 +50,13 @@ KozmoActivateBlacklist={
 64280356, -- Tincan
 67723438, -- Emergency Teleport
 67237709, -- Kozmotown
-43898403, -- Twin Twister
+--43898403, -- Twin Twister
 23171610, -- Limiter Removal
 37520316, -- Mind Control
 58577036, -- Reasoning
+90452877, -- Kozmojo
+97077563, -- CotH
+
 }
 KozmoSummonBlacklist={
 55885348, -- Dark Destroyer
@@ -97,6 +100,7 @@ KozmoUnchainable={
 20849090, -- Forerunner
 29491334, -- Dog Fighter
 94454495, -- Sliprider
+90452877, -- Kozmojo
 }
 function KozmoFilter(c,exclude)
   local check = true
@@ -221,6 +225,7 @@ function TincanCond(loc,c)
       end
       return true
     end
+    return false
   end
   return true
 end
@@ -261,20 +266,27 @@ function SlipriderCond(loc,c)
     return DestroyCheck(OppST())>0
   end
 end
+function KozmojoCond(loc,c)
+  if loc==PRIO_TOHAND then
+    return not HasIDNotNegated(AICards(),c.id,true)
+    and CardsMatchingFilter(AIField(),KozmoShip)>0
+  end
+  return true
+end
 KozmoPriorityList={                      
 --[12345678] = {1,1,1,1,1,1,1,1,1,1,XXXCond},  -- Format
 
 -- Kozmo
 
-[54063868] = {6,1,6,1,1,1,2,1,1,1,EclipserCond},  -- Dark Eclipser
-[55885348] = {8,3,8,4,1,1,2,1,1,1,DestroyerCond},  -- Dark Destroyer
-[20849090] = {7,2,7,3,1,1,3,1,1,1,ForerunnerCond},  -- Forerunner
-[29491334] = {4,1,6,1,1,1,4,1,3,1,DogfighterCond},  -- Dog Fighter
-[94454495] = {3,1,5,1,1,1,3,1,1,1,SlipriderCond},  -- Sliprider
+[54063868] = {6,1,6,1,1,1,2,1,6,1,EclipserCond},  -- Dark Eclipser
+[55885348] = {8,3,8,4,1,1,2,1,9,1,DestroyerCond},  -- Dark Destroyer
+[20849090] = {7,2,7,3,1,1,3,1,8,1,ForerunnerCond},  -- Forerunner
+[29491334] = {4,1,6,1,1,1,4,1,7,1,DogfighterCond},  -- Dog Fighter
+[94454495] = {3,1,5,1,1,1,3,1,5,1,SlipriderCond},  -- Sliprider
 [93302695] = {5,1,4,1,1,1,2,1,2,1,WickedwitchCond},  -- Wickedwitch
-[67050396] = {1,1,3,1,1,1,4,1,1,1,GoodwitchCond},  -- Goodwitch
+[67050396] = {1,1,3,1,1,1,4,1,2,1,GoodwitchCond},  -- Goodwitch
 [31061682] = {9,2,9,2,1,1,1,1,1,1,FarmgirlCond},  -- Farmgirl
-[01274455] = {4,1,4,1,1,1,1,1,1,SoartrooperCond}, -- Soartrooper
+[01274455] = {4,1,4,1,1,1,1,1,1,1,SoartrooperCond}, -- Soartrooper
 [56907986] = {9,1,8,1,1,1,3,1,1,1,StrawmanCond},  -- Strawman
 [64280356] = {5,1,5,1,1,1,1,1,1,1,TincanCond},  -- Tincan
 
@@ -294,6 +306,7 @@ KozmoPriorityList={
 [05851097] = {1,1,1,1,1,1,1,1,1,1},  -- Vanity
 [40605147] = {1,1,1,1,1,1,1,1,1,1},  -- Notice
 [84749824] = {1,1,1,1,1,1,1,1,1,1},  -- Warning
+[90452877] = {8,1,1,1,1,1,1,1,1,1,Kozmojocond},  -- Kozmojo
 } 
 function ActivateKozmotown(c)
   return not HasID(AIST(),67237709,true,FilterPosition,POS_FACEUP)
@@ -544,9 +557,6 @@ function KozmoInit(cards)
   if HasID(Act,73628505) then -- Terraforming
     return Activate()
   end
-  if HasID(Act,01475311,UseAllure) then -- Allure
-    return Activate()
-  end
   if HasIDNotNegated(Act,67237709,false,nil,LOCATION_SZONE,POS_FACEDOWN,ActivateKozmotown) then
     return Activate()
   end
@@ -618,6 +628,9 @@ function KozmoInit(cards)
   end
   if HasIDNotNegated(Act,01274455,false,93302695*16+1,UseSoartrooper,2) then
     OPTSet(01274455)
+    return Activate()
+  end
+  if HasID(Act,01475311,UseAllure) then -- Allure
     return Activate()
   end
   if HasID(Act,31061682,false,UseFarmgirl,1) then
@@ -710,7 +723,7 @@ function Eteletarget(cards)
 end
 function TincanTarget(cards)
   if LocCheck(cards,LOCATION_DECK) then
-    return Add(cards,nil,nil,FilterType,TYPE_MONSTER)
+    return Add(cards,nil,nil,KozmoShip)
   end
   if LocCheck(cards,LOCATION_HAND) then
     return Add(cards,PRIO_TOFIELD)
@@ -726,6 +739,16 @@ function SoartrooperTarget(cards)
 end
 function DarkEclipserTarget(cards)
   return Add(cards,PRIO_BANISH)
+end
+function KozmojoTarget(cards)
+  if CurrentOwner(cards[1])==1 then
+    if GlobalCardMode == 1 then
+      GlobalCardMode = nil
+      return Add(cards,PRIO_BANISH,1,FilterGlobalTarget)
+    end
+    return Add(cards,PRIO_BANISH)
+  end
+  return BestTargets(cards,1,TARGET_BANISH)
 end
 function KozmoCard(cards,min,max,id,c)
   if id == 64280356 then
@@ -766,6 +789,9 @@ function KozmoCard(cards,min,max,id,c)
   end   
   if id == 67237709 then
     return KozmotownTarget(cards,min,max)
+  end
+  if id == 90452877 then
+    return KozmojoTarget(cards)
   end
   return nil
 end
@@ -915,8 +941,8 @@ function ChainStrawman(c,mode)
 end
 function ChainTincan(c,mode)
   if mode == 1 then
-    return CardsMatchingFilter(AIGrave(),KozmoShip)<5
-    or not MacroCheck()
+    return CardsMatchingFilter(AIDeck(),KozmoShip)>1
+    and MacroCheck()
   end
   if mode == 2 then
     return ChainRiderSummon(c)
@@ -941,6 +967,113 @@ function ChainEtele(c)
     return true
   end
   return false
+end
+function KozmojoFilter(c)
+  return Affected(c,TYPE_TRAP)
+  and FilterRemovable(c)
+end
+function ChainKozmojo(c)
+  local targets = SubGroup(OppField(),KozmojoFilter)
+  local prio = SubGroup(targets,FilterPriorityTarget)
+  local tribute = SubGroup(AIMon(),KozmoFilter)
+  local ships = SubGroup(tribute,KozmoShip)
+  if RemovalCheckCard(c) 
+  and #targets>0
+  then
+    return true
+  end
+  if not UnchainableCheck(c) then
+    return false
+  end
+  local removed=RemovalCheckList(tribute) 
+  if #tribute>0 
+  and removed
+  and #targets>0
+  then
+    table.sort(removed,function(a,b) if KozmoShip(a) then return a end return b end)
+    GlobalTargetSet(removed[1])
+    GlobalCardMode=1
+    return true
+  end
+  if #prio>0
+  and #ships>0
+  then
+    return true
+  end
+  local aimon,oppmon=GetBattlingMons()
+  if aimon and KozmoFilter(aimon) 
+  and WinsBattle(oppmon,aimon)
+  and #targets>0
+  then
+    GlobalTargetSet(aimon)
+    GlobalCardMode=1
+    return true
+  end
+  if Duel.GetCurrentPhase()==PHASE_END
+  and Duel.GetCurrentChain()==0
+  and Duel.GetTurnPlayer()==1-player_ai
+  and #targets>0
+  and #ships>0
+  then
+    return true
+  end
+end
+
+function ChainCotHKozmo(c)
+  local ships = SubGroup(AIGrave(),KozmoShip)
+  local targetmons = SubGroup(OppMon(),DestroyFilterIgnore)
+  local priomons = SubGroup(targetmons,FilterPriorityTarget)
+  local targetst = SubGroup(OppST(),DestroyFilterIgnore)
+  local priost = SubGroup(targetst,FilterPriorityTarget)
+  if RemovalCheckCard(c) then
+    if HasID(ships,55885348,true) and #targetmons>0 then
+      GlobalCardMode = 1
+      GlobalTargetSet(55885348)
+    elseif HasID(ships,94454495,true) and #targetst>0 then
+      GlobalCardMode = 1
+      GlobalTargetSet(94454495)
+    end
+    return true
+  end
+  if HasID(ships,55885348,true) and #priomons>0 then
+    GlobalCardMode = 1
+    GlobalTargetSet(55885348)
+    return true
+  end
+  if HasID(ships,94454495,true) and #priost>0 then
+    GlobalCardMode = 1
+    GlobalTargetSet(94454495)
+    return true
+  end
+  if Duel.GetCurrentPhase()==PHASE_END
+  and Duel.GetCurrentChain()==0
+  and Duel.GetTurnPlayer()==1-player_ai
+  then
+    if HasID(ships,55885348,true) and #targetmons>0 then
+      GlobalCardMode = 1
+      GlobalTargetSet(55885348)
+      return true
+    end
+    if HasID(ships,94454495,true) and #targetst>0 then
+      GlobalCardMode = 1
+      GlobalTargetSet(94454495)
+      return true
+    end
+  end
+  local aimon,oppmon=GetBattlingMons()
+  if Duel.GetCurrentPhase()==PHASE_BATTLE
+  and Duel.GetTurnPlayer()==player_ai
+  and HasID(AIGrave(),31061682,true)
+  and CanDealBattleDamage(FindID(31061682,AIGrave()),OppMon())
+  and GlobalBPEnd and not aimon
+  and UnchainableCheck(c.id)
+  and not HasIDNotNegated(AIMon(),31061682,true,function(c) return AvailableAttacks(c)>0 end)
+  then
+    return true
+  end
+  if ChainCotH(card) then
+    return true
+  end
 end
 function KozmoChain(cards)
   if HasIDNotNegated(cards,54063868,ChainNegation,2) then
@@ -985,7 +1118,12 @@ function KozmoChain(cards)
   if HasID(cards,31061682,ChainFarmgirl) then
     return Chain()
   end
-
+  if HasID(cards,90452877,ChainKozmojo) then
+    return Chain()
+  end
+  if HasID(cards,97077563,ChainCotHKozmo) then
+    return true
+  end
   if HasID(cards,67237709,ChainKozmotown) then
     return Chain()
   end

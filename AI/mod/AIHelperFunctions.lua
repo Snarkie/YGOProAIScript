@@ -204,6 +204,16 @@ function Merge(lists,opt,opt2)
       PrintCallingFunction()
       return Result
     end
+    if opt and type(opt)~="table" then
+      print("Warning: Merge invalid type")
+      PrintCallingFunction()
+      return Result
+    end
+    if opt2 and type(opt2)~="table" then
+      print("Warning: Merge invalid type")
+      PrintCallingFunction()
+      return Result
+    end
     if opt then
       for i=1,#lists do
         Result[#Result+1]=lists[i]

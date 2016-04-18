@@ -297,9 +297,8 @@ end
 function AssignPriority(cards,loc,filter,opt)
   local index = 0
   Multiple = nil
-  for i=1,#cards do
-    local c = cards[i]
-    c.index=i
+  for i,c in pairs(cards) do
+    if not c.index then c.index=i end
     c.prio=GetPriority(c,loc)
     if loc==PRIO_TOFIELD and c.location==LOCATION_DECK then
       c.prio=c.prio+2
@@ -380,10 +379,6 @@ function Add(cards,loc,count,filter,opt)
   local compare = function(a,b) return a.prio>b.prio end
   AssignPriority(cards,loc,filter,opt)
   table.sort(cards,compare)
-  --print("priority list:")
-  for i=1,#cards do
-    --print(GetName(cards[i])..", prio:"..cards[i].prio)
-  end
   for i=1,count do
     result[i]=cards[i].index
   end

@@ -22,6 +22,16 @@ function SynchroSummon(index,id)
   end
   return {COMMAND_SPECIAL_SUMMON,index}
 end
+function PendulumSummon(index,id)
+  if index == nil then
+    index = CurrentIndex
+  end
+  if id then
+    GlobalSSCardID = id
+  end
+  GlobalPendulumSummon = true
+  return {COMMAND_SPECIAL_SUMMON,index}
+end
 function Summon(index)
   if index == nil then
     index = CurrentIndex
@@ -124,6 +134,9 @@ function SummonExtraDeck(cards,prio)
   then  
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+  if HasID(Act,60082869,nil,nil,LOCATION_SZONE,UseDustTornado) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   if HasID(Act,05318639,nil,nil,LOCATION_SZONE,UseMST) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -223,7 +236,10 @@ function SummonExtraDeck(cards,prio)
     GlobalCardMode = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-    if HasIDNotNegated(Act,22653490) then -- Chidori                         
+  if HasIDNotNegated(Act,63519819,UseTER) then
+    return Activate()
+  end
+  if HasIDNotNegated(Act,22653490) then -- Chidori                         
     GlobalCardMode = 2
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -519,6 +535,68 @@ function SummonExtraDeck(cards,prio)
   if HasIDNotNegated(SpSum,81330115,SummonAcidGolem) then
     return XYZSummon()
   end
+  
+-- Pendulum scales
+  local scales={}
+  for i,c in pairs(Act) do
+    if c.description == 1160  -- activate as pendulum scale
+    and CardIsScripted(c.id) == 0
+    then
+      scales[#scales+1]=c
+      c.index = i
+    end
+  end
+  if #scales>0 then
+    table.sort(scales,function(a,b) return a.lscale>b.lscale end)
+    local high = scales[1]
+    local low = scales[#scales]
+    local levels = 0
+    local mons = SubGroup(UseLists(AIHand(),AIExtra()),FilterPendulumSummonable)
+    local targets = {}
+    local targets2 = {}
+    if ScaleCheck() == false then -- no active scales
+      table.remove(mons,FindCard(high,mons,true)[1])
+      table.remove(mons,FindCard(low,mons,true)[1])
+      for i,c in pairs(mons) do
+        if high.lscale>c.level and c.level>low.lscale then
+          targets[#targets+1]=c
+        end
+      end
+      if #targets>1 then
+        return Activate(high.index)
+      end
+    elseif ScaleCheck() == true then -- 2 active scales, and you can still use some?
+      print("Warning: Can activate more than 2 scales?")
+    else -- one scale active
+      table.remove(mons,FindCard(high,mons,true)[1])
+      for i,c in pairs(mons) do
+        if high.lscale>c.level and c.level>ScaleCheck() then
+          targets[#targets+1]=c
+        end
+      end
+      table.insert(mons,high)
+      table.remove(mons,FindCard(low,mons,true)[1])
+      for i,c in pairs(mons) do
+        if ScaleCheck()>c.level and c.level>low.lscale then
+          targets2[#targets2+1]=c
+        end
+      end
+      if #targets>1 or #targets2>1 then
+        if #targets>#targets2 then
+          return Activate(high.index)
+        else
+          return Activate(low.index)
+        end
+      end
+    end
+  end
+  
+-- Pendulum summoning
+  for i,c in pairs(SpSum) do
+    if FilterLocation(c,LOCATION_SZONE) then
+      return PendulumSummon(i)
+    end
+  end
 
   
 -- if the opponent still has stronger monsters, use Raigeki  
@@ -529,13 +607,16 @@ function SummonExtraDeck(cards,prio)
   if HasID(Act,54447022) and UseSoulCharge() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasIDNotNegated(Act,01845204) and UseInstantFusion(2) then
+  if HasIDNotNegated(Act,01845204,UseInstantFusion,2) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasIDNotNegated(Act,01845204) and UseInstantFusion(1) then
+  if HasIDNotNegated(Act,01845204,UseInstantFusion,1) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasIDNotNegated(Act,01845204) and UseInstantFusion(3) then
+  if HasIDNotNegated(Act,01845204,UseInstantFusion,4) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Act,01845204,UseInstantFusion,3) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Act,98645731)  -- Duality
@@ -560,6 +641,15 @@ function SummonExtraDeck(cards,prio)
     end
   end
   return nil
+end
+function TERFilter(c)
+  return Affected(c,TYPE_MONSTER,1)
+  and Targetable(c,TYPE_MONSTER)
+end
+function UseTER(c)
+  if CardsMatchingFilter(OppMon(),TERFilter)>0 then
+    return true
+  end
 end
 function UseTwinTwister(c,mode)
   local targets = DestroyCheck(OppST())
@@ -764,15 +854,18 @@ function UseMST(c)
   end
   local OppTargets=SubGroup(OppST(),filter)
   if (#AIField()==0 
-  or #AIField()==CardsMatchingFilter(AIField(),FilterID,05318639))
+  or #AIField()==CardsMatchingFilter(AIField(),FilterID,c.id))
   and #OppTargets>0
-  and #OppTargets<=CardsMatchingFilter(AICards(),FilterID,05318639)
+  and #OppTargets<=CardsMatchingFilter(AICards(),FilterID,c.id)
   then
     GlobalCardMode = 1
     GlobalTargetSet(OppTargets[math.random(1,#OppTargets)])
     return true
   end
   return false
+end
+function UseDustTornado(c)
+  return UseMST(c)
 end
 function SummonStardust(c)
   return OppGetStrongestAttDef()<2500 and MP2Check(c)
@@ -1603,7 +1696,7 @@ end
 function NodenFilter(c)
   return c.level==4 and c.id~=17412721
 end
-function UseInstantFusion(mode)
+function UseInstantFusion(c,mode)
   if not (WindaCheck() and DualityCheck) then return false end
   if mode == 1 
   and CardsMatchingFilter(AIGrave(),NodenFilter)>0 
@@ -1624,6 +1717,13 @@ function UseInstantFusion(mode)
   and MacroCheck()
   then
     GlobalCardMode = 1
+    return true
+  end
+  if mode == 4 
+  and HasPriorityTarget(OppField(),true)
+  and HasID(AIExtra(),63519819,true)
+  then
+    GlobalIFTarget = 63519819 -- Thousand-Eyes Restrict
     return true
   end
   return false
@@ -2098,7 +2198,7 @@ function ChainMST(c)
       return true
     end
   end
-  if not UnchainableCheck(05318639) then
+  if not UnchainableCheck(c.id) then
     return false
   end
   if targets3 > 0 and ArtifactCheck() then
@@ -2145,6 +2245,9 @@ function ChainMST(c)
   end
   return false
 end
+function ChainDustTornado(c)
+  return ChainMST(c)
+end
 function ChainPanzerDragon(c)
   return DestroyCheck(OppField())>0
 end
@@ -2180,6 +2283,9 @@ function PriorityChain(cards) -- chain these before anything else
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,99188141,ChainNegation) then -- THRIO
+    return {1,CurrentIndex}
+  end
+  if HasID(cards,74822425,ChainNegation) then -- Shekinaga
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,29616929,ChainNegation) then -- Traptrix Trap Hole Nighmare
@@ -2283,6 +2389,9 @@ end
 function GenericChain(cards)
   if HasID(cards,43898403,ChainTwinTwister) then
     return Chain()
+  end
+  if HasID(cards,60082869,ChainDustTornado) then
+    return {1,CurrentIndex}
   end
   if HasID(cards,05318639,ChainMST) then
     return {1,CurrentIndex}
@@ -2466,7 +2575,9 @@ function MSTTarget(cards)
   if cards[1].prio then TargetSet(cards[1]) else TargetSet(cards[result[1]]) end
   return result
 end
-
+function DustTornadoTarget(cards)
+  return MSTTarget(cards)
+end
 function SoulChargeTarget(cards,min,max)
   local result={}
   local count = max
@@ -2535,10 +2646,23 @@ function TwinTwisterTarget(cards)
   count = math.min(2,count)
   return BestTargets(cards,count,TARGET_DESTROY,filter)
 end
+function TERTarget(cards)
+  return BestTargets(cards,1,TARGET_TOGRAVE)
+end
+function PendulumSummonTarget(cards,max)
+  return BestTargets(cards,max,TARGET_PROTECT,FilterLocation,LOCATION_EXTRA)
+end
 function GenericCard(cards,min,max,id,c)
   if c then
     id = c.id
   end 
+  if GlobalPendulumSummon then
+    GlobalPendulumSummon = nil
+    return PendulumSummonTarget(cards,max)
+  end
+  if id == 63519819 then
+    return TERTarget(cards)
+  end
   if id == 43898403 then
     return TwinTwisterTarget(cards)
   end
@@ -2601,6 +2725,9 @@ function GenericCard(cards,min,max,id,c)
   end
   if id == 05318639 then
     return MSTTarget(cards)
+  end
+  if id == 60082869 then
+    return DustTornadoTarget(cards)
   end
   if id == 94192409 then
     return CompulseTarget(cards)

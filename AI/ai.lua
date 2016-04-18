@@ -1,4 +1,4 @@
-Version = "0.33b"
+Version = "0.33c"
 Experimental = true
 
 --[[
@@ -48,7 +48,7 @@ Experimental = true
 ]]
 
 GlobalCheating = false
-TRASHTALK = true -- some decks might comment their actions
+TRASHTALK = true -- some decks might comment their actions. Set to false, if you don't like that
 EXTRA_DRAW = 0
 EXTRA_SUMMON = 0
 LP_RECOVER = 0
@@ -105,6 +105,7 @@ require("ai.decks.Monarch")
 require("ai.decks.MegaMonarch")
 require("ai.decks.Kozmo")
 require("ai.decks.Lightsworn")
+require("ai.decks.DDD")
 requireoptional("ai.decks.Majespecter")
 requireoptional("ai.decks.Spellbook")
 requireoptional("ai.decks.X-Saber")

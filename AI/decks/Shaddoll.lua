@@ -98,7 +98,7 @@ ShaddollActivateBlacklist={
 04904633, -- Shaddoll Core
 --84749824, -- Solemn Warning
 
-74822425, -- El-Shaddoll Shekinaga
+--74822425, -- El-Shaddoll Shekinaga
 19261966, -- El-Shaddoll Anoyatilis
 94977269, -- El-Shaddoll Winda
 17412721, -- Elder God Norden
@@ -321,6 +321,7 @@ function DragonCond(loc)
       end
       return true
     end
+    return false
   end
   return true
 end
@@ -455,6 +456,9 @@ function PotCond(loc,c)
     --[[and (HasIDNotNegated(AIMon(),94997874,true)
     or ]]
   end
+  if loc == PRIO_TOFIELD then
+    return not HasID(AIMon(),c.id,true)
+  end
   return true
 end
 function TarotrayCond(loc,c)
@@ -462,7 +466,7 @@ function TarotrayCond(loc,c)
   then
     return CardsMatchingFilter(AIHand(),FilterID,c.id)==0
     or HasID(AIHand(),c.id,true,SummonTarotray,1)
-    and not HasID(AIHand(),c.id,true,TarotrayTributeCheck)
+    and not (HasID(AIHand(),c.id,true,TarotrayTributeCheck) and FieldCheck(4)==0)
   end
   return true
 end
@@ -513,7 +517,7 @@ ShaddollPriorityList={
 [94997874] = {6,1,1,1,1,1,1,1,1,1,TarotrayCond},      -- Prediction Princess Tarotray
 [30392583] = {7,2,1,1,4,2,1,1,1,1,PredictionRitualCond}, -- Prediction Ritual
 
-[91501248] = {6,1,1,1,10,5,1,1,1,1,PotCond},           -- Pot of the Forbidden
+[91501248] = {6,1,9,1,10,5,1,1,1,1,PotCond},           -- Pot of the Forbidden
 [26517393] = {1,1,1,1,1,1,1,1,1,1,},                  -- Spirit of the Tailwind
 [95492061] = {1,1,1,1,1,1,1,1,1,1,},                  -- Manju
 
@@ -815,7 +819,7 @@ function SquamataFilter(c)
   and c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
 end
 function UseSquamata()
-  return CardsMatchingFilter(OppMon(),SquamataFilter)>0 and OPTCheck(37445295)
+  return CardsMatchingFilter(OppMon(),SquamataFilter)>0 and OPTCheck(30328508)
 end
 function DragonFilter2(c)
   return c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0 and (c.level>4 
@@ -951,6 +955,16 @@ function ShaddollUseInstantFusion(c,mode)
       GlobalIFTarget=94977269
       return true
     end
+  end
+  if mode == 4 
+  and HasIDNotNegated(AICards(),30392583,true)
+  and HasID(AIHand(),94997874,true,SummonTarotray,1)
+  and not HasID(AIHand(),94997874,true,TarotrayTributeCheck)
+  and (FieldCheck(4)>0 or HandCheck(4)>0)
+  and HasID(AIExtra(),94977269,true)
+  then
+    GlobalIFTarget=94977269
+    return true
   end
 end
 function TrishulaCheckFilter(card,params)
@@ -1116,6 +1130,13 @@ function UsePredictionRitualGrave(c,mode)
     then
       return true
     end
+    if c.mode == 2
+    and HasID(AICards(),30392583,true)
+    and HasID(AIDeck(),94997874,true,SummonTarotray,1)
+    and HasID(AIDeck(),94997874,true,TarotrayTributeCheck)
+    then
+      return true
+    end
   end
 end
 function UseFoolishShaddoll(c,mode)
@@ -1126,12 +1147,19 @@ function UseFoolishShaddoll(c,mode)
   and HasIDNotNegated(AICards(),30392583,true)
   and HasID(AIHand(),94997874,true,SummonTarotray,1)
   and not HasID(AIHand(),94997874,true,TarotrayTributeCheck)
-  and HasID(AIDeck(),04939890,FilterOPT,true)
+  and HasID(AIDeck(),04939890,true,FilterOPT,true)
   then
     GlobalFoolishID = 04939890
     return true
   end
-  if mode == 2 
+  if mode == 2
+  and HasIDNotNegated(AIMon(),91501248,true)
+  and not HasAccess(91501248)
+  then
+    GlobalFoolishID = 91501248
+    return true
+  end
+  if mode == 3 
   then
     return true
   end
@@ -1197,6 +1225,10 @@ function SummonEnterblathnirShaddoll(c,mode)
     return true
   end
 end
+function UseTarotrayFaceup(c,mode)
+end
+function UseTarotrayFacedown(c,mode)
+end
 function ShaddollInit(cards)
   GlobalNordenFilter=nil
   local Act = cards.activatable_cards
@@ -1241,10 +1273,15 @@ function ShaddollInit(cards)
   if HasIDNotNegated(Act,30392583,UsePredictionRitualGrave,1) then
     return Activate()
   end
-  if HasID(Act,81439173,UseFoolishShaddoll,1) then -- Foolish
-    return {COMMAND_ACTIVATE,CurrentIndex}
+  if HasIDNotNegated(Act,30392583,UsePredictionRitualGrave,2) then
+    return Activate()
   end
-
+  if HasID(Act,81439173,UseFoolishShaddoll,1) then
+    return Activate()
+  end
+  if HasID(Act,81439173,UseFoolishShaddoll,2) then
+    return Activate()
+  end
   if HasID(Rep,37445295,false,nil,nil,POS_FACEDOWN_DEFENCE,UseFalcon) then
     return {COMMAND_CHANGE_POS,CurrentIndex}
   end
@@ -1319,6 +1356,9 @@ function ShaddollInit(cards)
   if HasID(Act,01845204,ShaddollUseInstantFusion,3) then
     return Activate()
   end
+  if HasID(Act,01845204,ShaddollUseInstantFusion,4) then
+    return Activate()
+  end
   if HasID(SpSum,31292357,SummonHatTricker,2) then
     return SpSummon()
   end
@@ -1349,7 +1389,7 @@ function ShaddollInit(cards)
   if HasID(Sum,03717252) and SummonBeast() then
     return {COMMAND_SUMMON,CurrentIndex}
   end
-  if HasID(Act,81439173,UseFoolishShaddoll,2) then
+  if HasID(Act,81439173,UseFoolishShaddoll,3) then
     return Activate()
   end
   if HasIDNotNegated(Sum,26517393,SummonTailwind,2) then
@@ -1539,6 +1579,9 @@ function TarotrayTarget(cards)
   if LocCheck(cards,LOCATION_HAND) 
   or LocCheck(cards,LOCATION_GRAVE) 
   then
+    if NeedsCard(91501248,cards,AIMon()) then
+      return Add(cards,PRIO_TOFIELD,1,FilterID,91501248)
+    end
     return Add(cards,PRIO_TOFIELD,1,FilterLocation,LOCATION_GRAVE)
   end
   if FilterPosition(cards[1],POS_FACEDOWN) then
@@ -1753,6 +1796,11 @@ function ChainTarotraySummon(c)
 end
 function ChainTarotrayFacedown(c,mode)
   --return true
+  if RemovalCheckCard(c) 
+  or NegateCheckCard(c)
+  then
+    return true
+  end
   if not OPTCheck(c.id) 
   or Negated(c)
   then
@@ -1761,12 +1809,124 @@ function ChainTarotrayFacedown(c,mode)
   if mode == 1 
   and HasID(AIMon(),91501248,true,FilterPosition,POS_FACEUP)
   and Duel.CheckTiming(TIMING_END_PHASE)
+  and Duel.GetTurnPlayer()==1-player_ai
   then
-    local target = FindID(91501248,AIMon(),nil,FilterPosition,POS_FACEUP)
     GlobalCardMode = 1
     GlobalTargetSet(FindID(91501248,AIMon(),nil,FilterPosition,POS_FACEUP))
     return true
   end
+  local aimon,oppmon=GetBattlingMons()
+  if mode == 2 
+  and IsBattlePhase()
+  and aimon 
+  and aimon:GetCode()==91501248
+  and OPTCheck(91501248)
+  and Duel.GetTurnPlayer()==1-player_ai
+  then
+    GlobalCardMode = 1
+    GlobalTargetSet(aimon)
+    return true
+  end
+  if mode == 3
+  and IsBattlePhase()
+  and aimon 
+  and FilterType(aimon,TYPE_FLIP)
+  and OPTCheck(aimon)
+  and Duel.GetTurnPlayer()==1-player_ai
+  then
+    GlobalCardMode = 1
+    GlobalTargetSet(aimon)
+    return true
+  end
+  if mode == 4
+  and IsBattlePhase()
+  and oppmon
+  and (WinsBattle(oppmon,aimon) or CanFinishGame(oppmon))
+  and Affected(oppmon,TYPE_MONSTER,9)
+  and Targetable(oppmon,TYPE_MONSTER)
+  and Duel.GetTurnPlayer()==1-player_ai
+  then
+    GlobalCardMode = 1
+    GlobalTargetSet(oppmon)
+    return true
+  end
+  local cg = NegateCheck()
+  local e = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
+  local source = nil
+  if e then
+    source = e:GetHandler()
+  end
+  if mode == 5
+  and CardsMatchingFilter(AIMon(),FilterFlipFaceup)>0
+  --and Duel.GetTurnPlayer()==1-player_ai
+  and Duel.CheckTiming(TIMING_END_PHASE)
+  then
+    return true
+  end
+end
+function ChainTarotrayFaceup(c,mode)
+  if RemovalCheckCard(c) 
+  or NegateCheckCard(c)
+  then
+    return true
+  end
+  if not OPTCheck(c.id) 
+  or Negated(c)
+  then
+    return false
+  end
+  if mode == 1
+  and HasID(AIMon(),91501248,true,FlipForbiddenPot)
+  and Duel.CheckTiming(TIMING_END_PHASE)
+  then
+    GlobalCardMode = 1
+    GlobalTargetSet(FindID(91501248,AIMon(),nil,FlipForbiddenPot))
+    return true
+  end
+  if mode == 2 
+  and HasID(AIMon(),91501248,true,FlipForbiddenPot)
+  and Duel.CheckTiming(TIMING_STANDBY)
+  and #OppHand()==1
+  then
+    GlobalCardMode = 1
+    GlobalTargetSet(FindID(91501248,AIMon(),nil,FlipForbiddenPot))
+    return true
+  end
+  if mode == 3
+  and HasID(AIMon(),91501248,true,FlipForbiddenPot)
+  and Duel.GetTurnPlayer()==1-player_ai
+  and ChainPotDestroy()
+  then
+    GlobalCardMode = 1
+    GlobalTargetSet(FindID(91501248,AIMon(),nil,FlipForbiddenPot))
+    return true
+  end
+  if mode == 4
+  and CardsMatchingFilter(AIMon(),FilterFlip,true)>0
+  --and Duel.GetTurnPlayer()==1-player_ai
+  and Duel.CheckTiming(TIMING_END_PHASE)
+  then
+    return true
+  end
+  --[[if mode == 5
+  and HasID(AIMon()30328508,true,nil,nil,POS_FACEDOWN_DEFENCE,UseSquamata) 
+  then
+    return {COMMAND_CHANGE_POS,CurrentIndex}
+  end
+  and Duel.GetTurnPlayer()==1-player_ai
+  then
+    return true
+  end]]
+end
+function PotDestroyFilter(c)
+  return DestroyFilter(c)
+  and Affected(c,TYPE_MONSTER,9)
+end
+function ChainPotDestroy()
+  local targets = SubGroup(OppMon(),PotDestroyFilter,c)
+  local prio = SubGroup(targets,PriorityTarget)
+  return #targets>2 or #prio>1 or #prio>0 and #targets>0
+  or #targets>0 and ExpectedDamage()>AI.GetPlayerLP(2)
 end
 function UseHedgehogGrave(c)
   if HasIDNotNegated(AICards(),30392583,true)
@@ -1781,21 +1941,7 @@ function UseHedgehogGrave(c)
   end
   return true
 end
-function ChainTarotrayFaceup(c,mode)
-  if not OPTCheck(c.id) 
-  or Negated(c)
-  then
-    return false
-  end
-  if mode == 1
-  and HasID(AIMon(),91501248,true,FlipForbiddenPot)
-  and Duel.CheckTiming(TIMING_END_PHASE)
-  then
-    GlobalCardMode = 1
-    GlobalTargetSet(FindID(91501248,AIMon(),nil,FlipForbiddenPot))
-    return true
-  end
-end
+
 function ChainArrowsylph(c)
   return true
 end
@@ -1824,7 +1970,35 @@ function ShaddollChain(cards)
     OPTSet(94997874)
     return Chain()
   end
+  if HasID(cards,94997874,false,94997874*16,ChainTarotrayFaceup,2) then 
+    OPTSet(94997874)
+    return Chain()
+  end
+  if HasID(cards,94997874,false,94997874*16,ChainTarotrayFaceup,3) then 
+    OPTSet(94997874)
+    return Chain()
+  end
+  if HasID(cards,94997874,false,94997874*16,ChainTarotrayFaceup,4) then 
+    OPTSet(94997874)
+    return Chain()
+  end
   if HasID(cards,94997874,false,94997874*16+1,ChainTarotrayFacedown,1) then
+    OPTSet(94997874)
+    return Chain()
+  end
+  if HasID(cards,94997874,false,94997874*16+1,ChainTarotrayFacedown,2) then
+    OPTSet(94997874)
+    return Chain()
+  end
+  if HasID(cards,94997874,false,94997874*16+1,ChainTarotrayFacedown,3) then
+    OPTSet(94997874)
+    return Chain()
+  end
+  if HasID(cards,94997874,false,94997874*16+1,ChainTarotrayFacedown,4) then
+    OPTSet(94997874)
+    return Chain()
+  end
+  if HasID(cards,94997874,false,94997874*16+1,ChainTarotrayFacedown,5) then
     OPTSet(94997874)
     return Chain()
   end

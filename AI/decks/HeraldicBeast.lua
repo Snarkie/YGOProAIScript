@@ -37,11 +37,13 @@ function UsePlainCoat()
   local cards=UseLists({AIMon(),OppMon()})
   local check={}
   local result=false
-  for i=1,#cards do
-    if check[cards[i].id] and (check[cards[i].id].owner==2 or cards[i].owner==2) then
+  for i,c in pairs(cards) do
+    if check[c.id] and FilterPosition(c,POS_FACEUP)
+    and (CurrentOwner(check[c.id])==2 or CurrentOwner(c)==2) 
+    then
       result=true
     end
-    check[cards[i].id]=cards[i]
+    check[c.id]=c
   end
   return result
 end
@@ -134,9 +136,11 @@ function UseTwinEagle()
   return false
 end
 function GenomHeritageFilter(c)
-  return bit32.band(c.type,TYPE_XYZ)>0 and c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
+  return FilterType(c,TYPE_XYZ)
+  and Affected(c,TYPE_MONSTER,4)
+  and Targetable(c,TYPE_MONSTER)
   and (c.original_id~=47387961 or c.attack>0)
-  and bit32.band(c.position,POS_FACEUP_ATTACK)>0
+  and FilterPosition(c,POS_FACEUP_ATTACK)
 end
 function UseGenomHeritage() 
   return CardsMatchingFilter(OppMon(),GenomHeritageFilter)>0

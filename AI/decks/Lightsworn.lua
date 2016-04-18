@@ -220,7 +220,7 @@ function SummonBlackRose(c)
   return UseFieldNuke(-1)
 end
 function SummonWulf(c)
-  return MakroCheck()
+  return MacroCheck()
   and DualityCheck()
 end
 function SummonLightsworn(c,mode)
@@ -322,8 +322,12 @@ function UseIFLS(c,mode)
   if mode == 1 then
     if TrishulaCheck() then
       GlobalIFTarget=17412721
-      local lvl = GlobalNordenMatch.lvl
-      local tuner = GlobalNordenMatch.tuner
+      local lvl = 4
+      local tuner = false
+      if GlobalNordenMatch then
+        lvl = GlobalNordenMatch.lvl
+        tuner = GlobalNordenMatch.tuner
+      end
       GlobalNordenFilter=
       function(c)
         return FilterLevel(c,lvl) and (tuner and FilterType(c,TYPE_TUNER)
@@ -819,13 +823,44 @@ function ChainLSJudgment(c)
   return false
 end
 function ChainPero(c)
-  return true
+  if not UnchainableCheck(c.id) then
+    --return false
+  end
+  if DestroyCheck(OppField())>0
+  then
+    return true
+  end
 end
 function ChainRainboh(c)
-  return true
+  if not UnchainableCheck(c.id) then
+    return false
+  end
+  local aimon,oppmon=GetBattlingMons()
+  if FilterLocation(c,LOCATION_HAND) then
+    if WinsBattle(oppmon,aimon) then
+      return true
+    end
+    if BattleDamage(aimon,oppmon)>=.8*AI.GetPlayerLP(1) 
+    then
+      return true
+    end
+  end
+  if FilterLocation(c,LOCATION_GRAVE) then
+    if BattleDamage(nil,oppmon)>.8*AI.GetPlayerLP(1) then
+      return true
+    end
+  end
 end
-function ChainETurtle(c)  
-  return true
+function ChainETurtle(c) 
+  if not UnchainableCheck(c.id) then
+    return false
+  end
+  if #AIMon()==0 and ExpectedDamage()>=0.8*AI.GetPlayerLP(1) then
+    return true
+  end
+  if OppHasStrongestMonster() and #AIMon()>0 then
+    return true
+  end
 end
 function ChainMichael(c)
   return CardsMatchingFilter(AIGrave(),LighswornMonsterFilter)>4

@@ -491,7 +491,7 @@ function RemovalCheckCard(target,category,cardtype,targeted,chainlink,filter,opt
   end
   local a=1
   local b=Duel.GetCurrentChain()
-  if chainlink then
+  if chainlink and type(chainlink)=="number" then
     a=chainlink
     b=chainlink
   end
@@ -595,7 +595,7 @@ function NegateCheckCard(target,type,chainlink,filter,opt)
         local id = e:GetHandler():GetCode()
         if id == 82732705 -- Skill Drain
         then
-          return FilterAffected(target,TYPE_TRAP)
+          return Affected(target,TYPE_TRAP)
           and FilterPosition(target,POS_FACEUP)
         end
         if id == 86848580 -- Zerofyne
@@ -792,6 +792,10 @@ function GlobalTargetSet(c,cards)
     PrintCallingFunction()
     return nil
   end
+  if type(c) == "number" then
+    GlobalTargetID = c
+    return c
+  end
   if c.GetCode then
     c = GetCardFromScript(c,cards)
   end
@@ -804,9 +808,11 @@ function GlobalTargetGet(cards,index)
   end
   local cardid = GlobalTargetID
   --GlobalTargetID = nil --TODO: check if this is safe to not reset
-  local c = FindCard(cardid,cards,index)
-  if c == nil then
-    c = FindCard(cardid,All(),index)
+  local c = nil
+  if type(c) == "number" then
+    c = FindID(cardid,cards,index)
+  else
+    c = FindCard(cardid,cards,index)
   end
   if c == nil then
     print("Warning: Null GlobalTargetGet")
@@ -1026,7 +1032,7 @@ function DestroyFilter(c,nontarget,skipblacklist,skipignore)
   and (nontarget==true or not FilterAffected(c,EFFECT_CANNOT_BE_EFFECT_TARGET))
   and (skipblacklist or not (DestroyBlacklist(c)
   and FilterPublic(c)))
-  and not RemovalCheckCard(c)
+  and (nontarget or not RemovalCheckCard(c))
 end
 function DestroyFilterIgnore(c,nontarget,skipblacklist,skipignore)
   return DestroyFilter(c,skipblacklist)
@@ -1193,6 +1199,10 @@ function FilterSummon(c,type)
   end
 end
 function FilterAffected(c,effect)
+  if c == nil then
+    print("Warning: FilterAffected null card")
+    PrintCallingFunction()
+  end
   if c.GetCode then
     return c:IsHasEffect(effect)
   else
@@ -1247,35 +1257,54 @@ end
 function FilterPendulum(c)
   return not FilterType(c,TYPE_PENDULUM+TYPE_TOKEN) 
 end
-function FilterRevivable(c,skipcond)
-  local revivelimit = false
-  if STATUS_REVIVE_LIMIT then -- TODO: backwards compatibility
-    revivelimit = FilterStatus(c,STATUS_REVIVE_LIMIT)
+GlobalEffect = nil
+function GetGlobalEffect(c)
+  if GlobalEffect then
+    return GlobalEffect
+  else
+    c=GetScriptFromCard(c)
+    GlobalEffect=Effect.CreateEffect(c)
+    return GlobalEffect
   end
-  return FilterType(c,TYPE_MONSTER)
-  and (not revivelimit or FilterStatus(c,STATUS_PROC_COMPLETE))
-  and (skipcond or not FilterAffected(c,EFFECT_SPSUMMON_CONDITION))
+end
+function FilterRemovable(c)
+  c=GetScriptFromCard(c)
+  return c:IsAbleToRemove(GetGlobalEffect(c),0,nil,false,false)
+end
+function FilterRevivable(c,skipcond)
+  c=GetScriptFromCard(c)
+  return c:IsCanBeSpecialSummoned(GetGlobalEffect(c),0,nil,false,false)
 end
 function FilterTuner(c,level)
   return FilterType(c,TYPE_MONSTER)
   and FilterType(c,TYPE_TUNER)
   and (not level or FilterLevel(c,level))
 end
---[[function ScaleCheck(p)
+function Scale(c) -- backwards compatibility
+  return c.lscale
+end
+function ScaleCheck(p)
   local cards=AIST()
   local result = 0
-  local scale = {}
-  if p==2 then
+  local count = 0
+  if p == 2 then
     cards=OppST()
   end
   for i=1,#cards do
     if bit32.band(cards[i].type,TYPE_PENDULUM)>0 then
-      result = result + 1
-      --scale[result]= --missing function?
+      result = Scale(cards[i])
+      count = count + 1
     end
   end
-  return result
-end]]
+  if count == 0 then
+    return false
+  elseif count == 1 then
+    return result
+  elseif count == 2 then
+    return true
+  end
+  return nil
+end
 function FilterController(c,player)
   if not player then player = 1 end
   c=GetCardFromScript(c)
@@ -1290,7 +1319,30 @@ function FilterGlobalTarget(c,cards)
   local target = GlobalTargetGet(cards)
   return CardsEqual(c,target)
 end
-
+function FilterPriorityTarget(c)
+  return PriorityTarget(c)
+end
+function FilterPendulumSummonable(c,scalecheck)
+  return FilterType(c,TYPE_MONSTER)
+  and FilterRevivable(c)
+  and (FilterLocation(c,LOCATION_HAND)
+  or FilterLocation(c,LOCATION_EXTRA)
+  and FilterPosition(c,POS_FACEUP)
+  and FilterType(c,TYPE_PENDULUM))
+  and (not scalecheck) -- TODO: implement scalecheck
+end
+function FilterFlip(c,checkopt)
+  return FilterType(c,TYPE_MONSTER)
+  and FilterType(c,TYPE_FLIP)
+  and FilterPosition(c,POS_FACEDOWN)
+  and (not checkopt or OPTCheck(c.id))
+end
+function FilterFlipFaceup(c,checkopt)
+  return FilterType(c,TYPE_MONSTER)
+  and FilterType(c,TYPE_FLIP)
+  and FilterPosition(c,POS_FACEUP)
+  and (not checkopt or OPTCheck(c.id))
+end
 GlobalTargetList = {}
 -- function to prevent multiple cards to target the same card in the same chain
 function TargetCheck(card)
@@ -1330,6 +1382,9 @@ end
 
 function FindCard(cardid,cards,index)
   if cards == nil then cards = All() end
+  if type(cardid)=="table" then
+    cardid=cardid.cardid
+  end
   for i=1,#cards do
     if cards[i].cardid==cardid then
       if index then
@@ -1344,6 +1399,11 @@ end
 
 function FindID(id,cards,index,filter,opt)
   if cards == nil then cards = All() end
+  if filter and type(filter) ~= "function" then
+    print("Warning: FindID invalid filter")
+    print(filter)
+    PrintCallingFunction()
+  end
   for i=1,#cards do
     if cards[i].id == id 
     and (filter == nil
@@ -1361,9 +1421,9 @@ function FindID(id,cards,index,filter,opt)
 end
 
 function FindCardByFilter(cards,filter,opt)
-  for i=1,#cards do
-    if FilterCheck(filter,opt) then
-      return cards[i]
+  for i,c in pairs(cards) do
+    if FilterCheck(c,filter,opt) then
+      return c
     end
   end
   return nil
@@ -1529,7 +1589,7 @@ function Affected(c,type,level)
     type = TYPE_SPELL
   end
   if level == nil then
-    level = 0
+    level = 12
   end
   if immune and atkdiff == 800 
   and bit32.band(type,TYPE_SPELL+TYPE_TRAP)==0
@@ -1829,6 +1889,9 @@ function BattleDamage(c,source,atk,oppatk,oppdef,pierce)
   end
   if source and source.GetCode then
     source=GetCardFromScript(source)
+  end
+  if source == nil then
+    return 0
   end
   if atk == nil  then
     atk = source.attack
@@ -2681,9 +2744,11 @@ function ChainCardNegation(card,targeted,prio,filter,opt,skipnegate)
 end
 
 
-function NegateMonk(c,e,source,link)
+function NegateDiscardSummon(c,e,source,link) -- like Summoner Monk
   if not Duel.GetOperationInfo(link, CATEGORY_SPECIAL_SUMMON) then
     return 0
+  else
+    return 4
   end
   return nil
 end
@@ -2703,8 +2768,14 @@ NegatePriority={
 [98645731] = 0, -- Duality
 [81439173] = 0, -- Foolish
 [75500286] = 0, -- Gold Sarc
+[01845204] = 4, -- Instant Fusion
+[79844764] = 5, -- Stormforth
 
-[00423585] = NegateMonk,
+[00423585] = NegateDiscardSummon, -- Summoner Monk
+[95503687] = NegateDiscardSummon, -- Lightsworn Lumina
+[90238142] = NegateDiscardSummon, -- Harpie Channeler
+[17259470] = NegateDiscardSummon, -- Zombie Master
+
 [53804307] = NegateDragonRuler,
 [26400609] = NegateDragonRuler,
 [89399912] = NegateDragonRuler,
@@ -2869,10 +2940,12 @@ function GetNegatePriority(source,link,targeted)
   end
   local check = NegatePriority[id]
   if prio>-1 and check then
-    if type(check) == "function" 
-    and check(c,e,source)
-    then
-      prio=check(c,e,source)
+    if type(check) == "function" then
+      if check(c,e,source) then
+        prio=check(c,e,source)
+      else
+        prio=-1
+      end
     else
       prio=check
     end

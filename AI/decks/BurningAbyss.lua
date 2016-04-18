@@ -1047,7 +1047,6 @@ function ChainPWWB()
   then
     return true
   end
-  return false
 end
 function ChainFarfa()
   return CardsMatchingFilter(OppMon(),FarfaFilter)>0
@@ -1356,7 +1355,7 @@ function BAChain(cards)
   if HasID(cards,71587526) and ChainKarmaCut() then
     return {1,CurrentIndex}
   end
-  if HasID(cards,71587526,ChainPWWB) then
+  if HasID(cards,63356631,ChainPWWB) then
     return Chain()
   end
   if HasID(cards,20513882,ChainPainfulEscape) then

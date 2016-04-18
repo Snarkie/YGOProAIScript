@@ -415,9 +415,8 @@ if DeckCheck(DECK_TELLARKNIGHT) then
   if HasID(Activatable,54447022) and UseSoulCharge() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Activatable,01845204) 
+  if HasID(Activatable,01845204,UseInstantFusion,1) 
   and DeckCheck(DECK_TELLARKNIGHT)
-  and UseInstantFusion(1) 
   then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end

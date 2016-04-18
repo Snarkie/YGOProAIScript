@@ -1350,6 +1350,7 @@ end
     and not FilterType(c,TYPE_FIELD)           
     and CardIsScripted(c.id) == 0
     and NotNegated(c) 
+    and not c.description == 1160 -- Pendulum scale activation
     then
       GlobalActivatedCardID = c.id
       return COMMAND_ACTIVATE,i

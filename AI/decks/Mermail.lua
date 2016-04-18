@@ -19,7 +19,7 @@ AddPriority({
 
 
 [26400609] = {6,3,4,2,6,4,5,4,0,0,TidalCond},         -- Tidal
-[78868119] = {8,3,2,2,2,1,1,1,2,2,DivaCond},          -- Deep Sea Diva
+[78868119] = {8,3,2,2,2,1,4,1,2,2,DivaCond},          -- Deep Sea Diva
 [04904812] = {4,2,2,2,2,1,5,1,3,3,UndineCond},        -- Genex Undine
 [68505803] = {2,1,2,2,3,1,4,1,5,5,ControllerCond},    -- Genex Controller
 
@@ -288,6 +288,9 @@ function DivaCond(loc)
     and Duel.GetTurnPlayer()==player_ai 
     and not NormalSummonCheck(player_ai))
     or not HasID(AICards(),21565445,true)
+  end
+  if loc == PRIO_TRIBUTE then
+    return FilterLocation(c,LOCATION_MZONE)
   end
   return true
 end

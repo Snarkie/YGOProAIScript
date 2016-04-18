@@ -354,7 +354,8 @@ function SummonNothung(mode)
 end
 function HawkJoeFilter(c)
   return BlackwingSynchroFilter(c) 
-  and FilterStatus(c,STATUS_PROC_COMPLETE)
+  and FilterRace(c,RACE_WINDBEAST)
+  and FilterRevivable(c)
 end
 function SummonHawkJoe(mode)
   if mode == 1 and WindaCheck()

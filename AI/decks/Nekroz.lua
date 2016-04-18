@@ -2,10 +2,10 @@ function NekrozPriority()
 AddPriority(
 {
 -- Nekroz: 
-[90307777] = {6,3,1,1,1,1,1,1,1,1,ShritCond},         -- Shrit, Caster of Nekroz
-[52738610] = {3,2,1,1,8,1,8,1,5,1,PrincessCond},      -- Nekroz Dance Princess
-[53180020] = {5,2,1,1,6,1,6,1,9,1,ExaCond},           -- Exa, Enforcer of the Nekroz
-[27796375] = {4,2,1,1,7,1,7,1,8,1,SorcererCond},      -- Great Sorcerer of the Nekroz
+[90307777] = {9,3,1,1,1,1,5,1,1,1,ShritCond},         -- Shrit, Caster of Nekroz
+[52738610] = {7,2,1,1,8,1,8,1,5,1,PrincessCond},      -- Nekroz Dance Princess
+[53180020] = {6,2,1,1,6,1,6,1,9,1,ExaCond},           -- Exa, Enforcer of the Nekroz
+[27796375] = {8,2,1,1,7,1,7,1,8,1,SorcererCond},      -- Great Sorcerer of the Nekroz
 
 [25857246] = {6,2,3,1,3,1,1,1,3,1,ValkCond},          -- The Nekroz of Valkyrus
 [99185129] = {12,2,4,1,5,1,1,1,2,1,ClausCond},        -- The Nekroz of Clausolas
@@ -14,15 +14,15 @@ AddPriority(
 [74122412] = {4,2,3,1,4,1,1,1,7,1,GungCond},          -- The Nekroz of Gungnir
 [52068432] = {7,2,6,1,3,1,1,1,5,1,TrishCond},         -- The Nekroz of Trishula
 [88240999] = {5,2,5,1,1,1,1,1,3,1,ArmorCond},         -- The Nekroz of Decisive Armor
-[52846880] = {6,2,4,1,1,1,1,1,4,1,NekrozCatastorCond},-- The Nekroz of Catastor
+[52846880] = {5,2,4,1,1,1,1,1,4,1,NekrozCatastorCond},-- The Nekroz of Catastor
 
 [67696066] = {6,2,5,1,6,1,8,1,1,1,ClownCond},         -- Performage Trick Clown
 [68819554] = {3,1,2,1,5,1,7,1,1,1,JugglerCond},       -- Performage Damage Juggler
 [31292357] = {7,1,3,1,2,1,2,1,1,1,HatCond},           -- Performage Hat Tricker
 
 [29888389] = {1,1,1,1,1,1,1,1,1,1,ShadowCond},        -- Gishki Shadow
-[47196430] = {1,1,1,1,1,1,1,1,1,1,VisionCond},        -- Gishki Vision
---[78868119] = {1,1,1,1,1,1,1,1,1,1,VisionCond},      -- Deep Sea Diva
+[47106439] = {1,1,1,1,1,1,1,1,1,1,VisionCond},        -- Gishki Vision
+--[78868119] = {1,1,1,1,1,1,1,1,1,1,DivaCond},      -- Deep Sea Diva
 [08903700] = {3,1,1,1,9,2,1,1,1,1,ReleaserCond},      -- Djinn Releaser of Rituals
 [95492061] = {10,1,1,1,5,1,5,1,1,1,ManjuCond},        -- Manju of the Ten Thousand Hands
 [23401839] = {9,1,1,1,6,1,6,1,1,1,SenjuCond},         -- Senju of the Thousand Hands
@@ -193,7 +193,7 @@ end
 function RitualTributeCheck(level,mirror,lvlrestrict,fav)
   local cards
   local ritual=AICards()
-  local mirrorcheck = function(m) return (mirror == m or mirror == 0) and MasMirror(m) end 
+  local mirrorcheck = function(m) return (mirror == m or mirror == 0) and HasMirror(m) end 
   if mirrorcheck(1) then -- Kaleidomirror 
     cards = UseLists(AIHand(),AIMon(),AIExtra())
     if fav then cards = AIExtra() end
@@ -263,7 +263,7 @@ end
 function ExaCond(loc,c)
   if (FilterLocation(c,LOCATION_HAND)
   or FilterLocation(c,LOCATION_MZONE))
-  and loc == PRIO_TOGRAVE
+  and loc == PRIO_TRIBUTE
   then
     return OPTCheck(c.id)
     and CardsMatchingFilter(AIDeck(),ExaFilter)>0
@@ -282,9 +282,10 @@ end
 function SorcererCond(loc,c)
   if (FilterLocation(c,LOCATION_HAND)
   or FilterLocation(c,LOCATION_MZONE))
-  and loc == PRIO_TOGRAVE
+  and loc == PRIO_TRIBUTE
   then
     return OPTCheck(c.id)
+     and CardsMatchingFilter(AIDeck(),SorcererFilter)>0
   end
   if loc == PRIO_BANISH
   then
@@ -332,11 +333,12 @@ function UniCond(loc,c)
 end
 function BrioCond(loc,c)
   if loc == PRIO_TOHAND then
-    return UseBrio() and Duel.GetTurnPlayer()==player_ai
-    and not FilterLocation(c,LOCATION_GRAVE)
+    return Duel.GetTurnPlayer()==1-player_ai
+    or CardsMatchingFilter(OppMon(),BrioFilter)>0
+    or HasIDNotNegated(AIMon(),25857246,true)
   end
   if loc == PRIO_TOFIELD then
-    return SummonBrio()
+    return SummonBrio(c)
   end
   if loc == PRIO_TOGRAVE and FilterLocation(c,LOCATION_MZONE) then
     return not ReleaserCheck(c)
@@ -373,7 +375,7 @@ function ValkCond(loc,c)
     return true
   end
   if loc == PRIO_TOGRAVE and FilterLocation(c,LOCATION_MZONE) then
-    return not ReleaserCheck(c)
+    return Negated(c)
   end
   return true
 end
@@ -403,6 +405,19 @@ function ManjuCond(loc,c)
   if loc == PRIO_TOHAND then
     return not (HasID(AIHand(),95492061,true) 
     or HasID(AIHand(),23401839,true))
+  end
+  if loc == PRIO_TRIBUTE then
+    return FilterLocation(c,LOCATION_MZONE)
+  end
+  return true
+end
+function SenjuCond(loc,c)
+  if loc == PRIO_TOHAND then
+    return not (HasID(AIHand(),95492061,true) 
+    or HasID(AIHand(),23401839,true))
+  end
+  if loc == PRIO_TRIBUTE then
+    return FilterLocation(c,LOCATION_MZONE)
   end
   return true
 end
@@ -483,7 +498,7 @@ function SummonTrishula(c,mode)
   end
   return false
 end
-function SummonUnicore(mirror)
+function SummonUnicore(c,mirror)
   return DualityCheck() and mirror == 1 
   and HasID(AIExtra(),79606837,true)
   and not HasID(AIMon(),79606837,true)
@@ -508,8 +523,17 @@ function UseClaus()
        or NeedsCard(97211663,AIDeck(),AIHand(),true) and OPTCheck(97211663))
       and OPTCheck(99185129)
 end
-function UseBrio()
-  return OPTCheck(26674724) and not QuasarComboCheck() and not SummonBrio(0)
+function UseBrio(c,mode)
+  if FilterLocation(c,LOCATION_HAND) then
+    if mode == 1 then
+      if HasIDNotNegated(AIMon(),25857246,true,FilterOPT) then
+        return true
+      end
+    end
+    if mode == 2 then
+      return OPTCheck(26674724) and not QuasarComboCheck() and not SummonBrio(c,0)
+    end
+  end
 end
 function BrioFilter(c)
   return FilterLocation(c,LOCATION_MZONE) and FilterPreviousLocation(c,LOCATION_EXTRA) 
@@ -517,23 +541,45 @@ function BrioFilter(c)
   and Targetable(c,TYPE_MONSTER) and Affected(c,TYPE_MONSTER,6)
   and CurrentOwner(c)==2
 end
-function SummonBrio(mirror)
+function SummonBrio(c,mirror)
   return OPTCheck(266747241) and CardsMatchingFilter(OppMon(),BrioFilter)>1 
   and (mirror==nil or RitualTributeCheck(6,mirror,false))
 end
 function UseBrioField()
   return OPTCheck(266747241) and CardsMatchingFilter(OppMon(),BrioFilter)>0
 end
-function UseUnicore()
-  return not SummonUnicore(1) and OPTCheck(89463537)
-  and not HasID(UseLists(AIHand(),AIST()),97211663,true) and UseCycle()
+function UseUnicore(c)
+  return not SummonUnicore(c,1) and OPTCheck(89463537)
+  and not HasID(UseLists(AIHand(),AIST()),97211663,true,UseCycle,1)
 end
-function SummonValk(mirror)
-  return DualityCheck() and RitualTributeCheck(8,mirror,true,true)
+function SummonValk(c,mode)
+  if not (c.id == 25857246 and DualityCheck()) then
+    return false
+  end
+  if mode == 1 
+  and not HasIDNotNegated(AIMon(),c.id,true)
+  then
+    return true
+  end
 end
-function UseValk(check)
-  return PriorityCheck(AIMon(),PRIO_TOGRAVE)>2 and (MP2Check() or check) 
-  and OPTCheck(25857246) and #AIHand()<5
+function UseValk(c)
+  return PriorityCheck(AICards(),PRIO_TRIBUTE,1,FilterType,TYPE_MONSTER)>2 
+  and MP2Check() 
+  and OPTCheck(25857246)  
+  and #AIHand()<5
+  and FilterLocation(c,LOCATION_MZONE)
+end
+function SummonDA(c,mode)
+  return true -- WIP
+end
+function SummonGung(c,mode)
+  return true -- WIP
+end
+function SummonClaus(c,mode)
+  return true -- WIP
+end
+function SummonNekrozCatastor(c,mode)
+  return true -- WIP
 end
 function RitualSummonCheck(mirror)
   local cards = UseLists(AIHand(),AIMon(),AIGrave())
@@ -651,7 +697,7 @@ end
 function UseChainNekroz2() 
   if DeckCheck(DECK_NEKROZ) 
   and (Duel.GetCurrentPhase()==PHASE_MAIN2 or not GlobalBPAllowed 
-  or HasID(AIMon(),25857246,true) and UseValk())
+  or HasID(AIMon(),25857246,true,UseValk))
   then
     GlobalStacked=Duel.GetTurnCount()
     return true
@@ -685,31 +731,39 @@ function RainbowNeosCheck()
   and (HasID(AIHand(),99185129,true) and HasID(AIHand(),74122412,true)
   or HasID(AIHand(),89463537,true) and HasID(AIHand(),26674724,true))
 end
+
 function ShouldRitualSummon(cards,mode,filter,opt)
+  cards=SubGroup(cards,NekrozMonsterFilter,true)
   local result = {}
   if not mode then mode = 1 end
-  result = Merge(result,CardsMatchingFilter(cards,SummonTrishula,mode))
-  result = Merge(result,CardsMatchingFilter(cards,SummonValk,mode))
-  result = Merge(result,CardsMatchingFilter(cards,SummonDA,mode))
-  result = Merge(result,CardsMatchingFilter(cards,SummonBrio,mode))
-  result = Merge(result,CardsMatchingFilter(cards,SummonGung,mode))
-  result = Merge(result,CardsMatchingFilter(cards,SummonUnicore,mode))
-  result = Merge(result,CardsMatchingFilter(cards,SummonClaus,mode))
-  result = Merge(result,CardsMatchingFilter(cards,SummonNekrozCatastor,mode))
-  result = CardsMatchingFilter(cards,filter,opt)
+  for i,c in pairs(cards) do
+    if FilterID(c,52068432) and SummonTrishula(c,mode) then result[#result+1]=c;c.prio=8 end
+    if FilterID(c,26674724) and SummonBrio(c,mode) then result[#result+1]=c;c.prio=7 end
+    if FilterID(c,25857246) and SummonValk(c,mode) then result[#result+1]=c;c.prio=6 end
+    if FilterID(c,88240999) and SummonDA(c,mode) then result[#result+1]=c;c.prio=5 end
+    if FilterID(c,74122412) and SummonGung(c,mode) then result[#result+1]=c;c.prio=4 end
+    if FilterID(c,89463537) and SummonUnicore(c,mode) then result[#result+1]=c;c.prio=3 end
+    if FilterID(c,99185129) and SummonClaus(c,mode) then result[#result+1]=c;c.prio=2 end
+    if FilterID(c,52846880) and SummonNekrozCatastor(c,mode) then result[#result+1]=c;c.prio=1 end
+  end
+  result = SubGroup(cards,filter,opt)
+  table.sort(result,function(a,b) return a.prio>b.prio end)
+  PrintList(result)
   if #result == 0 then
     result = nil
   end
   return result
 end
 function UseKaleido(c,mode)
+ if FilterLocation(c,LOCATION_HAND) or FilterLocation(c,LOCATION_SZONE) then
   if mode == 1 then -- send Arc Light, summon Unicore
-    local target = FindID(89463537,AIHand(),SummonUnicore,1)
+    local target = FindID(89463537,AIHand(),nil,SummonUnicore,1)
     if HasID(AIExtra(),79606837,true) 
     and MacroCheck() and DualityCheck() 
     and target
     then
-      GlobalKaleidoTarget = FindID(AIExtra(),79606837,true)
+      GlobalKaleidoTarget = FindID(79606837,AIExtra())
+      print("summon Unicore/Arc")
       return true
     end
   end
@@ -719,8 +773,20 @@ function UseKaleido(c,mode)
       if target then
         GlobalKaleidoTarget = FindCardByFilter(AICards(),IsFullTribute)
         GlobalKaleidoSummon = target
+        print("summon with full tribute:")
+        print(GetName(GlobalKaleidoSummon))
+        return true
       end
     end 
+  end
+  if mode == 5 then -- send from extra, summon Brio
+    local target = FindCardByFilter(AIExtra(),FilterLevel,6)
+    if HasID(AIHand(),26674724,true,SummonBrio) 
+    and target
+    then
+      GlobalKaleidoTarget = target
+      return true
+    end
   end
   if mode == 3 then -- send from extra, summon whatever
     local target = FindCardByFilter(AIExtra(),FilterLevel,6)
@@ -749,42 +815,44 @@ function UseKaleido(c,mode)
     local target = FindCardByFilter(AIExtra(),FilterLevel,12)
     if target and SummonTrishClaus() then
       GlobalKaleidoTarget = target
-      GlobalKaleidoSummon = {FindID(AIHand(),52068432),FindID(AIHand(),99185129)}
+      GlobalKaleidoSummon = {FindID(52068432,AIHand()),FindID(99185129,AIHand())}
     end
     if target and SummonValkUnicore() then
       GlobalKaleidoTarget = target
-      GlobalKaleidoSummon = {FindID(AIHand(),25857246),FindID(AIHand(),89463537)}
+      GlobalKaleidoSummon = {FindID(25857246,AIHand()),FindID(89463537,AIHand())}
     end
     if target and SummonGungCatastor() then
       GlobalKaleidoTarget = target
-      GlobalKaleidoSummon = {FindID(AIHand(),74122412),FindID(AIHand(),52846880)}
+      GlobalKaleidoSummon = {FindID(74122412,AIHand()),FindID(52846880,AIHand())}
     end
     target = FindCardByFilter(AIExtra(),FilterLevel,11)
     if target and SummonValkClaus() then
       GlobalKaleidoTarget = target
-      GlobalKaleidoSummon = {FindID(AIHand(),25857246),FindID(AIHand(),99185129)}
+      GlobalKaleidoSummon = {FindID(25857246,AIHand()),FindID(99185129,AIHand())}
     end
     if target and SummonGungUnicore() then
       GlobalKaleidoTarget = target
-      GlobalKaleidoSummon = {FindID(AIHand(),74122412),FindID(AIHand(),89463537)}
+      GlobalKaleidoSummon = {FindID(74122412,AIHand()),FindID(89463537,AIHand())}
     end
     if target and SummonBrioCatastor() then
       GlobalKaleidoTarget = target
-      GlobalKaleidoSummon = {FindID(AIHand(),26674724),FindID(AIHand(),52846880)}
+      GlobalKaleidoSummon = {FindID(26674724,AIHand()),FindID(52846880,AIHand())}
     end
     target = FindCardByFilter(AIExtra(),FilterLevel,10)
     if target and SummonBrioUnicore() then
       GlobalKaleidoTarget = target
-      GlobalKaleidoSummon = {FindID(AIHand(),26674724),FindID(AIHand(),89463537)}
+      GlobalKaleidoSummon = {FindID(26674724,AIHand()),FindID(89463537,AIHand())}
     end
     if target and SummonCatastorClaus() then
       GlobalKaleidoTarget = target
-      GlobalKaleidoSummon = {FindID(AIHand(),52846880),FindID(AIHand(),99185129)}
+      GlobalKaleidoSummon = {FindID(52846880,AIHand()),FindID(99185129,AIHand())}
     end 
   end
   return false
+ end
 end
-function UseExo(mode)
+function UseExo(c,mode)
+ if FilterLocation(c,LOCATION_HAND) or FilterLocation(c,LOCATION_SZONE) then
   if mode == 1 then -- banish from grave for full tribute
     if HasFullTribute(AIGrave()) then
       local target = ShouldRitualSummon(AIHand())[1]
@@ -816,17 +884,41 @@ function UseExo(mode)
   
   end
   return false
+ end
 end
-function UseCycle(mode)
+function UseCycle(c,mode)
+ if FilterLocation(c,LOCATION_HAND) or FilterLocation(c,LOCATION_SZONE) then
   if mode == 1 then -- send for full tribute to summon from grave
+    if HasFullTribute(AIHand()) then
+      local target = ShouldRitualSummon(AIGrave())[1]
+      if target then
+        GlobalCycleTarget = FindCardByFilter(AIHand(),IsFullTribute)
+        GlobalCycleSummon = target
+      end
+    end 
   end
   if mode == 2 then -- send for full tribute
+    if HasFullTribute(AIHand()) then
+      local target = ShouldRitualSummon(AIHand())[1]
+      if target then
+        GlobalCycleTarget = FindCardByFilter(AIHand(),IsFullTribute)
+        GlobalCycleSummon = target
+      end
+    end 
   end
   if mode == 3 then -- summon from grave
   end
   if mode == 4 then -- summon from hand
   end
   return false
+ end
+end
+function UseMirrorGrave(c,mode)
+  if FilterLocation(c,LOCATION_GRAVE) then
+    if mode == 1 then
+      return #AIHand()<6
+    end
+  end
 end
 function NekrozInit(cards)
   GlobalPreparation = nil
@@ -861,40 +953,19 @@ function NekrozInit(cards)
   if HasID(Act,96729612) and UsePreparation() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Act,51124303,false,nil,LOCATION_GRAVE) and #AIHand()<6 then -- Kaleido grave
+  if HasID(Act,51124303,UseMirrorGrave) then -- Kaleido grave
     GlobalCardMode = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Act,97211663,false,nil,LOCATION_GRAVE) and #AIHand()<6 then -- Cycle grave
+  if HasID(Act,97211663,UseMirrorGrave) then -- Cycle grave
     GlobalCardMode = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end 
-  if HasID(Act,14735698,false,nil,LOCATION_GRAVE) and #AIHand()<6 then -- Exo grave
+  if HasID(Act,14735698,UseMirrorGrave) then -- Exo grave
     GlobalCardMode = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end 
   if HasID(Act,32807846) and UseRotA() then  -- RotA
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
-  if HasID(Act,08809344) then -- Nyarla
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
-  if HasID(Act,99185129,false,nil,LOCATION_HAND) and UseClaus() then
-    OPTSet(99185129)
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
-  if HasID(Act,26674724,false,nil,LOCATION_HAND) and UseBrio() then
-    OPTSet(26674724)
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
-  if HasID(Act,88240999,false,nil,LOCATION_MZONE) and UseArmor() then
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
-  if HasID(Act,89463537,false,nil,LOCATION_HAND) and UseUnicore() then
-    OPTSet(89463537)
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end  
-  if HasID(Act,44505297) and UseExaBeetle() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Sum,23401839) then -- Senju
@@ -903,9 +974,28 @@ function NekrozInit(cards)
   if HasID(Sum,95492061) then -- Manju
     return {COMMAND_SUMMON,CurrentIndex}
   end 
-  if HasID(Sum,95492061) then -- Manju
-    return {COMMAND_SUMMON,CurrentIndex}
-  end 
+  if HasID(Act,08809344) then -- Nyarla
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasID(Act,99185129,false,nil,LOCATION_HAND) and UseClaus() then
+    OPTSet(99185129)
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasID(Act,26674724,UseBrio,1) then
+    OPTSet(26674724)
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasID(Act,88240999,false,nil,LOCATION_MZONE) and UseArmor() then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasID(Act,89463537,false,nil,LOCATION_HAND,UseUnicore) then
+    OPTSet(89463537)
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end  
+  if HasID(Act,44505297) and UseExaBeetle() then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+
   if HasID(Sum,13974207) and SummonDenkou() then 
     return {COMMAND_SUMMON,CurrentIndex}
   end 
@@ -939,15 +1029,27 @@ function NekrozInit(cards)
   if HasID(SpSum,95113856,SummonEnterblathnir()) then
     return XYZSummon()
   end 
-  if HasID(Act,51124303,false,nil,LOCATION_HAND+LOCATION_SZONE,UseKaleido) then 
+  if HasID(Act,51124303,UseKaleido,5) then 
     OPTSet(51124303)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Act,97211663,false,nil,LOCATION_HAND+LOCATION_SZONE) and UseCycle() then
+  if HasID(Act,26674724,UseBrio,2) then
+    OPTSet(26674724)
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasID(Act,51124303,UseKaleido,2) then 
+    OPTSet(51124303)
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasID(Act,51124303,UseKaleido,3) then 
+    OPTSet(51124303)
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasID(Act,97211663,UseCycle,1) then
     OPTSet(97211663)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Act,14735698,false,nil,LOCATION_HAND+LOCATION_SZONE) and UseExo() then
+  if HasID(Act,14735698,UseExo,1) then
     OPTSet(14735698)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -955,7 +1057,11 @@ function NekrozInit(cards)
     GlobalCardMode = 2
     return {COMMAND_ACTIVATE,CurrentIndex}
   end 
-  if HasID(Act,25857246,false,nil,LOCATION_MZONE) and UseValk() then
+  if HasID(Act,51124303,UseKaleido,1) then 
+    OPTSet(51124303)
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasID(Act,25857246,UseValk) then
     OPTSet(25857246)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -992,7 +1098,8 @@ end
 GlobalKaleidoTarget = nil
 GlobalExoTarget = nil
 GlobalCycleTarget = nil
-function KaleidoTarget(cards)
+function KaleidoTarget(cards,count)
+  local result = {}
   if GlobalCardMode == 1 then
     GlobalCardMode = nil
     return Add(cards,PRIO_BANISH)
@@ -1004,7 +1111,28 @@ function KaleidoTarget(cards)
   end
   local c = FindCard(GlobalKaleidoTarget)
   if c then
-    return Add(cards,PRIO_TOFIELD,CardsEqual,c)
+    GlobalKaleidoTarget=nil
+    return Add(cards,PRIO_TOFIELD,1,CardsEqual,c)
+  end
+  if GlobalKaleidoSummon then
+    if type(GlobalKaleidoSummon) == "table" 
+    and count == 2
+    then
+      local list = GlobalKaleidoSummon
+      GlobalKaleidoSummon = nil
+      result[1]=FindCard(cards,list[1],true)
+      result[2]=FindCard(cards,list[2],true)
+      return result
+    else
+      c = FindCard(GlobalKaleidoSummon,cards)
+      GlobalKaleidoSummon = nil
+      return Add(cards,PRIO_TOFIELD,1,CardsEqual,c)
+    end
+  end
+  local c = FindCard(GlobalKaleidoSummon)
+  if c then
+    GlobalKaleidoSummon=nil
+    return Add(cards,PRIO_TOFIELD,1,CardsEqual,c)
   end
   local result = {math.random(#cards)}
   for i=1,#cards do
@@ -1021,7 +1149,7 @@ function KaleidoTarget(cards)
     end
   end
   for i=1,#cards do
-    if cards[i].level == 6 and SummonBrio() then
+    if cards[i].level == 6 and SummonBrio(cards[i]) then
       return {i}
     end
   end
@@ -1212,14 +1340,16 @@ function EnterblathnirTarget(cards)
   return BestTargets(cards,1,TARGET_BANISH)
 end
 function ValkFilter(c)
-  return (FilterLocation(c,LOCATION_MZONE) or FilterID(c,52738610))
+  return (FilterLocation(c,LOCATION_MZONE) or FilterLocation(c,LOCATION_HAND))
+  and c.prio>3
 end
 function ValkTarget(cards)
   if LocCheck(cards,LOCATION_GRAVE) then
     return Add(cards,PRIO_BANISH)
   end
-  local count = math.max(math.min(2,CardsMatchingFilter(AICards(),ValkFilter)),1)
-  return Add(cards,PRIO_TOGRAVE,count,ValkFilter)
+  AssignPriority(cards,PRIO_TRIBUTE)
+  local count = math.max(math.min(2,CardsMatchingFilter(cards,ValkFilter)),1)
+  return Add(cards,PRIO_TRIBUTE,count,ValkFilter)
 end
 function UsePoC()
   return HasID(AIGrave(),86346643,true) and UseRainbowNeos()
@@ -1274,7 +1404,7 @@ function NekrozCard(cards,min,max,id,c)
     return BrioTarget(cards,max)
   end
   if id == 51124303 then
-    return KaleidoTarget(cards)
+    return KaleidoTarget(cards,min)
   end
   if id == 14735698 then
     return ExoTarget(cards)
@@ -1480,6 +1610,31 @@ function ChainGungnir(c)
       end
     end
   end
+  if FilterLocation(c,LOCATION_MZONE) 
+  and NotNegated(c)
+  then
+    local targets = SubGroup(OppField(),DestroyFilter)
+    local priotargets = SubGroup(targets,FilterPriorityTarget)
+    if RemovalCheckCard(c) or NegateCheckCard(c)
+    and #targets>0
+    then
+      return true
+    end
+    if not UnchainableCheck(74122412) then
+      return false
+    end
+    if #priotargets>0 and (OppHasStrongestMonster()
+    or not BattlePhaseCheck()) 
+    then
+      return true
+    end
+    if #targets>0 and Duel.GetTurnPlayer()==1-player_ai
+    and Duel.CheckTiming(TIMING_END_PHASE) 
+    and PriorityCheck(AIHand(),PRIO_DISCARD,1,NekrozFilter)>3
+    then
+      return true
+    end
+  end
   return false
 end
 function ValkBattleFilter(c)
@@ -1558,6 +1713,9 @@ function ChainClaus()
     end
   end
 end
+function ChainNekrozSorcerer(c)
+  return true
+end
 function NekrozChain(cards)
   if HasID(cards,79606837,false,nil,LOCATION_GRAVE) then -- Rainbow Herald
     return {1,CurrentIndex}
@@ -1596,6 +1754,9 @@ function NekrozChain(cards)
   end
   if HasID(cards,52738610) then -- Dance Princess
     return {1,CurrentIndex}
+  end
+  if HasID(cards,27796375,ChainNekrozSorcerer) then
+    return Chain()
   end
   return nil
 end
@@ -1639,6 +1800,9 @@ function NekrozEffectYesNo(id,card)
   end
   if id == 52738610 then -- Dance Princess
     result = 1
+  end
+  if id == 27796375 and ChainNekrozSorcerer(card) then
+    return true
   end
   return result
 end
