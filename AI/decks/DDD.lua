@@ -141,9 +141,9 @@ function DDDFilter(c,exclude)
 end
 function DDDMonsterFilter(c,exclude)
   return FilterType(c,TYPE_MONSTER) 
-  and DDFilter(c,exclude)
+  and DDDFilter(c,exclude)
 end
-function DDDFilter(c,exclude)
+function DDFilter(c,exclude)
   local check = true
   if exclude then
     if type(exclude)=="table" then

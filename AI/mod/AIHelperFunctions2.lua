@@ -9,6 +9,7 @@ function OnAIGoingFirstSecond(name)
   or name=="AI_Shaddoll"
   or name=="AI_Kozmo"
   or name=="AI_Lightsworn"
+  or name=="AI_GladiatorBeast"
   then
     player_ai = 1
     result = 0
@@ -413,8 +414,13 @@ end
 -- returns true, if the AI controls any backrow, either traps or setable bluffs
 function HasBackrow(Setable)
   local cards=AIST()
+  if Setable == nil then
+    Setable = SubGroup(AIHand(),FilterType,TYPE_SPELL+TYPE_TRAP)
+  end
   for i=1,#Setable do
-    if SetBlacklist(Setable[i].id)==0 then
+    if SetBlacklist(Setable[i].id)==0 
+    and SpaceCheck(LOCATION_SZONE)>0
+    then
       return true
     end
   end
@@ -504,6 +510,11 @@ function RemovalCheckCard(target,category,cardtype,targeted,chainlink,filter,opt
       or e and e:GetHandler():IsType(cardtype))
       then
         if targeted and not tg then 
+          return false
+        end
+        if e and e:GetHandler()
+        and Negated(e:GetHandler())
+        then
           return false
         end
         if target==nil then 
@@ -673,35 +684,24 @@ function BestTargets(cards,count,target,filter,opt,immuneCheck,source)
     local c = cards[i]
     c.index = i
     c.prio = 0
-    if bit32.band(c.type,TYPE_MONSTER)>0 then
-      if bit32.band(c.position, POS_FACEUP)>0
-      or bit32.band(c.status,STATUS_IS_PUBLIC)>0
+    if FilterType(c,TYPE_MONSTER) then
+      if FilterPublic(c)
       then
-        if c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)>0 and target==TARGET_DESTROY 
-        or c:is_affected_by(EFFECT_IMMUNE_EFFECT)>0
+        c.prio = math.max(c.attack+1,c.defense)+5
+        if c.owner==2 and c:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE)==0 
+        and Duel.GetTurnPlayer()==player_ai
+        and BattlePhaseCheck()
         then
-          c.prio = 1
-        else
-          c.prio = math.max(c.attack+1,c.defense)+5
-          if c.owner==2 and c:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE)==0 then
-            c.prio = math.max(5,c.prio-AIAtt*.75)
-          end
+          c.prio = math.max(1,c.prio-AIAtt*.9)
         end
       else
         c.prio = 2
       end
-    else
-      if c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)>0 and target==TARGET_DESTROY
-      or c:is_affected_by(EFFECT_IMMUNE_EFFECT)>0 
-      or bit32.band(c.status,STATUS_LEAVE_CONFIRMED)>0
-      then
-        c.prio = 0
-      else    
-        if bit32.band(c.position, POS_FACEUP)>0 then
-          c.prio = 4
-        else
-          c.prio = 3
-        end
+    else  
+      if FilterPosition(c,POS_FACEUP) then
+        c.prio = 4
+      else
+        c.prio = 3
       end
     end
     if c.prio>0 then
@@ -711,7 +711,7 @@ function BestTargets(cards,count,target,filter,opt,immuneCheck,source)
       if c.level>4 then
         c.prio = c.prio+1
       end
-      if bit32.band(c.position, POS_FACEUP_ATTACK)>0 then
+      if FilterPosition(c,POS_FACEUP_ATTACK) then
         c.prio = c.prio+1
       end
     end
@@ -722,7 +722,7 @@ function BestTargets(cards,count,target,filter,opt,immuneCheck,source)
     then
       c.prio = 1
     end
-    if (bit32.band(c.position, POS_FACEUP)>0 or bit32.band(c.status,STATUS_IS_PUBLIC)>0)
+    if FilterPublic(c)
     and (target == TARGET_TOHAND and ToHandBlacklist(c.id)
     or target == TARGET_DESTROY and DestroyBlacklist(c)
     or target == TARGET_FACEDOWN and bit32.band(c.type,TYPE_FLIP)>0)
@@ -837,18 +837,18 @@ function IsMonster(card)
 end
 -- fool-proof check, if a card belongs to a specific archetype
 function IsSetCode(card_set_code, set_code)
-    local band = bit32.band
-    local rshift = bit32.rshift
-    local settype = band(set_code,0xfff);
-    local setsubtype = band(set_code,0xf000);
-    local setcode = card_set_code
-    while setcode and setcode > 0 do
-        if (band(setcode,0xfff) == settype and band(band(setcode,0xf000),setsubtype) == setsubtype) then
-            return true
-        end
-        setcode = rshift(setcode,16);
-    end
-    return false;
+  local band = bit32.band
+  local rshift = bit32.rshift
+  local settype = band(set_code,0xfff);
+  local setsubtype = band(set_code,0xf000);
+  local setcode = card_set_code
+  while setcode and setcode > 0 do
+      if (band(setcode,0xfff) == settype and band(band(setcode,0xf000),setsubtype) == setsubtype) then
+          return true
+      end
+      setcode = rshift(setcode,16);
+  end
+  return false;
 end
 OPT={}
 -- functions to keep track of OPT clauses
@@ -1078,6 +1078,10 @@ function FilterRank(c,rank)
   end
 end
 function FilterType(c,type) -- TODO: change all filters to support card script
+  if c == nil then
+    print("Warning: FilterLocation null card")
+    PrintCallingFunction()
+  end
   if c.GetCode then
     return c:IsType(type)
   else
@@ -2031,11 +2035,19 @@ end
 
 -- function to determine, if a card can attack into another card
 -- without needing any bonus attack or taking any damage
-function CanAttackSafely(c,targets,filter,opt)
+function CanAttackSafely(c,targets,damage,filter,opt)
+  if not targets then targets=OppMon() end
+  if #targets == 0 then return true end
   local sub = SubGroup(targets,filter,opt)
   local atk = c.attack
   local baseatk = c.attack
   local usedatk
+  if damage == true then 
+    damage = 0.2 -- percentage of lp you're willing to lose on an attack
+  end
+  if not damage then
+    damage = 0
+  end
   if c.bonus then
     baseatk = math.max(0,atk-c.bonus)
   end
@@ -2057,7 +2069,7 @@ function CanAttackSafely(c,targets,filter,opt)
     end
     if (FilterPosition(target,POS_ATTACK) and (oppatk<usedatk
     or CrashCheck(c) and oppatk==usedatk)
-    or FilterPosition(target,POS_DEFENCE) and (oppdef<usedatk)
+    or FilterPosition(target,POS_DEFENCE) and (oppdef-usedatk<=damage*AI.GetPlayerLP(1))
     and (FilterPosition(target,POS_FACEUP) or FilterPublic(target))) 
     and SafeAttackCheck(target,c) 
     then

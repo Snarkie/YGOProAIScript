@@ -235,18 +235,6 @@ result = 0
   end
   
       
-  ---------------------------------------------
-  -- Activate Gladiator Beast War Chariot,
-  -- only if Opp controls effect type monsters
-  ---------------------------------------------
-  for i=1,#cards do 
-   if cards[i].id == 96216229 then -- Gladiator Beast War Chariot
-	 if Get_Card_Count_Type(OppMon(), TYPE_MONSTER + TYPE_EFFECT, "==", POS_FACEUP) > 0 then
-	    GlobalActivatedCardID = cards[i].id
-	   return 1,i
-      end
-    end    
-  end
   
   ---------------------------------------------
   -- AI should activate: Waboku, Negate Attack 

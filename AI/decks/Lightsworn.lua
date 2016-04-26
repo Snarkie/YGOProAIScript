@@ -429,7 +429,7 @@ function SummonJD(c,mode)
     NukeModifier = NukeModifier+1
   end
   if mode == 1 
-  and UseFieldNuke(NukeModifier)
+  and UseFieldNuke(c,NukeModifier)
   and not HasID(AIMon(),57774843,true) 
   and NotNegated(c)
   then
@@ -451,6 +451,9 @@ function SummonJD(c,mode)
 end
 function UseJD(c)
   local NukeModifier = 1
+  if AI.GetPlayerLP(1)<=1000 then
+    return false
+  end
   if HasIDNotNegated(AIMon(),74586817,true) and #OppHand()>0 
   then
     NukeModifier = NukeModifier+1
@@ -461,7 +464,7 @@ function UseJD(c)
   if DestroyCheck(OppField())>5 then
     NukeModifier = NukeModifier+1
   end
-  return UseFieldNuke(NukeModifier)
+  return UseFieldNuke(c,NukeModifier)
 end
 function SummonEmeralLS(c)
   return SummonEmeral(c) 

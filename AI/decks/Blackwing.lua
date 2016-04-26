@@ -720,7 +720,7 @@ function IcarusTarget(cards,min)
   elseif min==1 then
     return Add(cards,PRIO_TOGRAVE)
   else
-    return BestTargets(cards,2,TARGET_DESTROY)
+    return BestTargets(cards,2,TARGET_DESTROY,Affected,TYPE_TRAP)
   end
 end
 GlobalMKB={}
@@ -862,13 +862,13 @@ function ChainBlackSonic(c)
   end
 end
 function IcarusFilter(c)
-  return DestroyCheck(c)
+  return DestroyFilterIgnore(c)
   and Targetable(c,TYPE_TRAP)
   and Affected(c,TYPE_TRAP)
 end
 function ChainIcarus(card)
   local targets = SubGroup(OppField(),IcarusFilter)
-  local targets2 = SubGroup(targets,PriorityTarget)
+  local prio = HasPriorityTarget(targets)
   local removal = {}
   for i=1,#AIMon() do
     local c = AIMon()[i]
@@ -889,7 +889,7 @@ function ChainIcarus(card)
     end
     return true
   end
-  if #targets2>0 and #targets>1 
+  if prio and #targets>1 
   and Duel.GetTurnPlayer()==1-player_ai
   and UnchainableCheck(53567095) 
   then

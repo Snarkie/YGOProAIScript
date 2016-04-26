@@ -356,7 +356,7 @@ if DeckCheck(DECK_BUJIN) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
 
-  if HasID(SpSummonable,46772449) and DeckCheck(DECK_BUJIN) and SummonBelzebuth() then
+  if HasID(SpSummonable,46772449,SummonBelzebuth) and DeckCheck(DECK_BUJIN) then
     return {COMMAND_SPECIAL_SUMMON,IndexByID(SpSummonable,46772449)}
   end
   if HasID(SpSummonable,01855932) and SummonKagutsuchi() then

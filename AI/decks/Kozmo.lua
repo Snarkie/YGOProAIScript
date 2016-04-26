@@ -210,6 +210,20 @@ function EclipserCond(loc,c)
 end
 function TincanCond(loc,c)
   if loc == PRIO_TOHAND then
+    if(Duel.GetTurnPlayer()==player_ai
+    or Duel.GetTurnPlayer()~=player_ai
+    and Duel.GetCurrentPhase()==PHASE_END)
+    and not HasID(AICards(),c.id)
+    and CardsMatchingFilter(AIHand(),KozmoShip)==0
+    and CardsMatchingFilter(AIMon(),KozmoRider)>2
+    and not GlobalSummonNegated
+    then
+      if CardsMatchingFilter(AIMon(),KozmoRider)>0 then
+        return 6
+      end
+      return true
+    end
+    return false
   end
   if loc == PRIO_TOFIELD then
     if(Duel.GetTurnPlayer()==player_ai

@@ -597,6 +597,11 @@ function IgnoreList(c) -- cards to ignore with removal effects
   then
     return true
   end
+  if id == 56111151 -- Kyotou Waterfront
+  and c:get_counter(0x37)>0
+  then
+    return true
+  end
   for i=1,#Ignore do
     if Ignore[i]==id then
       return true

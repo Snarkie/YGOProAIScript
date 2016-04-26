@@ -80,10 +80,13 @@ function SummonSpirit()
   return CardsMatchingFilter(AIGrave(),SpiritFilter)>0 --or CanXYZ(3)
 end
 function WolfbarkFilter(c)
-  return bit32.band(c.race,RACE_BEASTWARRIOR)>0 and bit32.band(c.attribute,ATTRIBUTE_FIRE)>0 and c.level==4 
+  return FilterRace(c,RACE_BEASTWARRIOR)
+  and FilterAttribute(c,ATTRIBUTE_FIRE)
+  and c.level==4
 end
 function GetWolfbark()
-  return CardsMatchingFilter(AIGrave(),WolfbarkFilter)>0 or HasID(UseLists({AIHand(),AIMon()}),06353603,true)
+  return CardsMatchingFilter(AIGrave(),WolfbarkFilter)>0 
+  or HasID(UseLists({AIHand(),AIMon()}),06353603,true)
 end
 function SummonWolfbark()
   return CardsMatchingFilter(AIGrave(),WolfbarkFilter)>0 and OPTCheck(03534077)
@@ -841,7 +844,7 @@ function FireFistOnChain(cards,only_chains_by_player)
   if HasID(cards,23434538) and ChainMaxxC() then
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,46772449) and UseFieldNuke(1) then
+  if HasIDNotNegated(cards,46772449,UseFieldNuke,1) then
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,01662004) then

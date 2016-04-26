@@ -100,10 +100,10 @@ function SummonExtraDeck(cards,prio)
   if HasIDNotNegated(Act,29669359) and UseVolcasaurus() then                -- Volcasaurus finish
     return {COMMAND_ACTIVATE,CurrentIndex}
   end  
-  if HasIDNotNegated(Act,46772449) and UseFieldNuke(1) then       -- Evilswarm Exciton Knight
+  if HasIDNotNegated(Act,46772449,UseFieldNuke,1) then       -- Evilswarm Exciton Knight
     return {COMMAND_ACTIVATE,CurrentIndex}
   end  
-  if HasIDNotNegated(Act,57774843) and UseFieldNuke(1) then       -- Judgment Dragon
+  if HasIDNotNegated(Act,57774843,UseFieldNuke,1) then       -- Judgment Dragon
     return {COMMAND_ACTIVATE,CurrentIndex}
   end  
   if HasIDNotNegated(Act,39765958,UseJeweledRDA,0) then 
@@ -167,13 +167,13 @@ function SummonExtraDeck(cards,prio)
   if HasIDNotNegated(SpSum,88120966,SummonGiantGrinderFinish) then
     return XYZSummon()
   end
-  if HasIDNotNegated(SpSum,46772449) and SummonBelzebuth() then          
+  if HasIDNotNegated(SpSum,46772449,SummonBelzebuth) then          
     return XYZSummon()
   end
   if HasID(SpSum,57774843,SummonJD,1) then                 
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-  if HasIDNotNegated(SpSum,73580471) and UseFieldNuke(-2) then             -- Black Rose
+  if HasIDNotNegated(SpSum,73580471,UseFieldNuke,-2) then             -- Black Rose
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
   if HasIDNotNegated(SpSum,16195942) and SummonRebellionFinish() then 
@@ -910,10 +910,14 @@ function SummonFelgrand(c)
   return MP2Check(c) and OppGetStrongestAttack()<2800
   and not SkillDrainCheck()
 end
-function UseFieldNuke(exclude)
-  return (DestroyCheck(OppField())+exclude)-DestroyCheck(AIField())>0 
+function FieldNukeFilter(c,source)
+  return Affected(c,TYPE_MONSTER,source.level)
 end
-function SummonBelzebuth()
+function UseFieldNuke(source,exclude)
+  local targets = SubGroup(OppField(),FieldNukeFilter,source)
+  return DestroyCheck(targets+exclude,true)-DestroyCheck(AIField(),true)>0 
+end
+function SummonBelzebuth(c)
   if DeckCheck(DECK_CONSTELLAR) and HasIDNotNegated(AIMon(),70908596,true)
   and CardsMatchingFilter(AIMon(),ConstellarNonXYZFilter)>1
   and (SummonVolcasaurusFinish() or SummonVolcaGaiaFinish(1))
@@ -922,7 +926,7 @@ function SummonBelzebuth()
   end
   local AICards=UseLists({AIHand(),AIField()})
   local OppCards=UseLists({OppHand(),OppField()})
-  return #AICards<=#OppCards and UseFieldNuke(-1)
+  return #AICards<=#OppCards and UseFieldNuke(c,-1)
 end
 function SummonCowboyDef(mode)
   return AI.GetPlayerLP(2)<=800 
@@ -2288,6 +2292,9 @@ function PriorityChain(cards) -- chain these before anything else
   if HasID(cards,74822425,ChainNegation) then -- Shekinaga
     return {1,CurrentIndex}
   end
+  if HasIDNotNegated(cards,27346636,ChainNegation) then -- Heraklinos
+    return {1,CurrentIndex}
+  end
   if HasIDNotNegated(cards,29616929,ChainNegation) then -- Traptrix Trap Hole Nighmare
     return {1,CurrentIndex}
   end
@@ -2301,6 +2308,9 @@ function PriorityChain(cards) -- chain these before anything else
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,06511113,ChainRafflesia,1) then -- Rafflesia
+    return {1,CurrentIndex}
+  end
+  if HasIDNotNegated(cards,96216229,ChainNegation) then -- War Chariot
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,41510920,ChainNegation) then -- Stellarnova Alpha
