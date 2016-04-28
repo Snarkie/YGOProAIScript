@@ -1,44 +1,54 @@
---[[
-ai-template.lua
-
 Author: Percival18
-Version: 0.9.0
+
+#Version: 0.9.0
+
 Website: http://www.ygopro.co
 
 To be used with ygopro percy 1.033.6v2 and up. For help on how to use this file please read the comments thoroughly.
 
---- What's new ---
-0.9.0:
--New functions
-AI.GetLastSummonedCards()
-AI.GetScriptFromCardObject(ai_card)
-AI.GetCardObjectFromScript(script_card)
-card.extra_attack_count
-0.8.9:
--Added OnSelectChainOrder()
-0.8.8:
--Added OnAIGoingFirstSecond()
--Added OnPlayerGoingFirstSecond()
--Ojama Trio monster placement bug fixed
--AI is now called [AI]Impulse
-0.8.7:
--card.turnid
-0.8.6:
--Added triggeringCard to OnSelectSum
--New card fields
-card.text_attack
-card.text_defense
-0.8.5:
--Added description to triggeringCard in OnSelectEffectYesNo()
--New card fields
-card.lscale
-card.rscale
-card.equip_count
-card:is_affectable_by_chain(index)
-card:can_be_targeted_by_chain(index)
-card:get_equipped_cards()
-card:get_equip_target()
-0.8.4:
+
+#What's new
+
+
+
+##0.9.0:
+###New functions
+
+- AI.GetLastSummonedCards()
+- AI.GetScriptFromCardObject(ai_card)
+- AI.GetCardObjectFromScript(script_card)
+- `card.extra_attack_count`
+- 
+##0.8.9:
+- Added OnSelectChainOrder()
+
+##0.8.8:
+- Added OnAIGoingFirstSecond()
+- Added OnPlayerGoingFirstSecond()
+- Ojama Trio monster placement bug fixed
+- AI is now called [AI]Impulse
+ 
+##0.8.7:
+- card.turnid
+
+##0.8.6:
+- Added triggeringCard to OnSelectSum
+- New card fields
+- card.text_attack
+- card.text_defense
+
+#0.8.5:
+- Added description to triggeringCard in OnSelectEffectYesNo()
+- New card fields
+- `card.lscale`
+- `card.rscale`
+- `card.equip_count`
+- `card:is_affectable_by_chain(index)`
+- `card:can_be_targeted_by_chain(index)`
+- `card:get_equipped_cards()`
+- `card:get_equip_target()`
+
+#0.8.4:
 -Added new parameter activatable_cards to OnSelectBattleCommand()
 -Added new return value to OnSelectBattleCommand()
 0.8.3:
@@ -102,6 +112,7 @@ AI.GetScriptFromCardObject(ai_card) --convert ai card object to script card
 AI.GetCardObjectFromScript(script_card) --convert script card to ai card
 
 --Sample usage
+````Lua
 local cards = AI.GetOppMonsterZones()
 for i=1,#cards do
 	if cards[i] == false then			
@@ -112,7 +123,7 @@ for i=1,#cards do
 		print(i..": "..cards[i].id)
 	end
 end
-
+````
 --More sample usage
 local summonedCards = AI.GetLastSummonedCards()
 for i=1,#summonedCards do
@@ -268,7 +279,7 @@ end
 -- description_id = id of the text dialog that is normally shown to the player
 --
 -- The descriptions can be found in strings.conf
--- For example, description id 30 = 'Replay, do you want to continue the Battle?'
+-- For example, description id 30 = 'Replay,Â doÂ youÂ wantÂ toÂ continueÂ theÂ Battle?'
 --
 -- Return: 
 -- 1 = yes
