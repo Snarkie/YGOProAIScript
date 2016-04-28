@@ -1,41 +1,54 @@
 Author: Percival18
-Version: 0.9.0
+
+#Version: 0.9.0
+
 Website: http://www.ygopro.co
 
 To be used with ygopro percy 1.033.6v2 and up. For help on how to use this file please read the comments thoroughly.
 
---- What's new ---
-0.9.0:
--New functions
-AI.GetLastSummonedCards()
-AI.GetScriptFromCardObject(ai_card)
-AI.GetCardObjectFromScript(script_card)
-card.extra_attack_count
-0.8.9:
--Added OnSelectChainOrder()
-0.8.8:
--Added OnAIGoingFirstSecond()
--Added OnPlayerGoingFirstSecond()
--Ojama Trio monster placement bug fixed
--AI is now called [AI]Impulse
-0.8.7:
--card.turnid
-0.8.6:
--Added triggeringCard to OnSelectSum
--New card fields
-card.text_attack
-card.text_defense
-0.8.5:
--Added description to triggeringCard in OnSelectEffectYesNo()
--New card fields
-`card.lscale`
-`card.rscale`
-`card.equip_count`
-`card:is_affectable_by_chain(index)`
-`card:can_be_targeted_by_chain(index)`
-`card:get_equipped_cards()`
-`card:get_equip_target()`
-0.8.4:
+
+#What's new
+
+
+
+##0.9.0:
+###New functions
+
+- AI.GetLastSummonedCards()
+- AI.GetScriptFromCardObject(ai_card)
+- AI.GetCardObjectFromScript(script_card)
+- `card.extra_attack_count`
+- 
+##0.8.9:
+- Added OnSelectChainOrder()
+
+##0.8.8:
+- Added OnAIGoingFirstSecond()
+- Added OnPlayerGoingFirstSecond()
+- Ojama Trio monster placement bug fixed
+- AI is now called [AI]Impulse
+ 
+##0.8.7:
+- card.turnid
+
+##0.8.6:
+- Added triggeringCard to OnSelectSum
+- New card fields
+- card.text_attack
+- card.text_defense
+
+#0.8.5:
+- Added description to triggeringCard in OnSelectEffectYesNo()
+- New card fields
+- `card.lscale`
+- `card.rscale`
+- `card.equip_count`
+- `card:is_affectable_by_chain(index)`
+- `card:can_be_targeted_by_chain(index)`
+- `card:get_equipped_cards()`
+- `card:get_equip_target()`
+
+#0.8.4:
 -Added new parameter activatable_cards to OnSelectBattleCommand()
 -Added new return value to OnSelectBattleCommand()
 0.8.3:
