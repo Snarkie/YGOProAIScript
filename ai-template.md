@@ -49,67 +49,72 @@ To be used with ygopro percy 1.033.6v2 and up. For help on how to use this file 
 - `card:get_equip_target()`
 
 #0.8.4:
--Added new parameter activatable_cards to OnSelectBattleCommand()
--Added new return value to OnSelectBattleCommand()
-0.8.3:
--card.previous_location
--card.summon_type 
-0.8.2:
--Added triggeringCard to OnSelectEffectYesNo
-0.8.1:
--Fixed crash if AI uses a Pendulum monster
--Added parameter "forced" to OnSelectChain()
--Fixed missing description card field in OnSelectChain()
-0.8:
--AI is now called [AI]Harute
--OnSelectSum() added
--card.cardid added
--card.description added
-0.7:
--AI is now called [AI]Gaia
--OnSelectCard() parameter triggeringCard added
--Removed eternal loop detections from the engine
--Modified example code for card:is_affected_by() because it returns a number instead of a boolean
+- Added new parameter activatable_cards to OnSelectBattleCommand()
+- Added new return value to OnSelectBattleCommand()
+
+#0.8.3:
+- card.previous_location
+- card.summon_type 
+
+#0.8.2:
+- Added triggeringCard to OnSelectEffectYesNo
+
+#0.8.1:
+- Fixed crash if AI uses a Pendulum monster
+- Added parameter "forced" to OnSelectChain()
+- Fixed missing description card field in OnSelectChain()
+
+#0.8:
+- AI is now called [AI]Harute
+- `OnSelectSum()` added
+- card.cardid added
+- card.description added
+
+#0.7:
+- AI is now called [AI]Gaia
+- OnSelectCard() parameter triggeringCard added
+- Removed eternal loop detections from the engine
+- Modified example code for card:is_affected_by() because it returns a number instead of a boolean
 
 
-Tips for ai developers
--Knowledge of the Lua programming language is highly recommended http://www.lua.org/manual/5.2/
--Make a backup of this file before editing
--Always return a valid value! The program will crash otherwise
--Use the debug executable that has the console available (ygopro_vs_ai_debug.exe)
--Use print() or AI.Chat() to debug. The print() statements will show up in the console
--To test game situations use the puzzle mode:
-	-find and open /script/utility.lua
-	-make a backup of that file
-	-find the function Auxiliary.BeginPuzzle(effect)
-	-comment out everything in that function (or remove the contents)
-	-now the puzzle won't end at the end phase
-	-in the puzzle lua file change DUEL_SIMPLE_AI to 0x80
--Use Duel.GetTurnCount() to get the current turn
+#Tips for ai developers
+- Knowledge of the Lua programming language is highly recommended http://www.lua.org/manual/5.2/
+- Make a backup of this file before editing
+- Always return a valid value! The program will crash otherwise
+- Use the debug executable that has the console available (ygopro_vs_ai_debug.exe)
+- Use print() or AI.Chat() to debug. The print() statements will show up in the console
+- To test game situations use the puzzle mode:
+	- find and open /script/utility.lua
+	- make a backup of that file
+	- find the function Auxiliary.BeginPuzzle(effect)
+	- comment out everything in that function (or remove the contents)
+	- now the puzzle won't end at the end phase
+	- in the puzzle lua file change DUEL_SIMPLE_AI to 0x80
+- Use Duel.GetTurnCount() to get the current turn
 
 
-Available functions:
-AI.Chat(text) --text: a string
-AI.GetPlayerLP(player) --1 = AI, 2 = the player
-AI.GetCurrentPhase() --Refer to /script/constant.lua for a list of valid phases
+#Available functions:
+`AI.Chat(text)` --text: a string
+`AI.GetPlayerLP(player)` --1 = AI, 2 = the player
+`AI.GetCurrentPhase()` --Refer to /script/constant.lua for a list of valid phases
 
-AI.GetOppMonsterZones()
-AI.GetAIMonsterZones()
-AI.GetOppSpellTrapZones()
-AI.GetAISpellTrapZones()
-AI.GetOppGraveyard()
-AI.GetAIGraveyard()
-AI.GetOppBanished()
-AI.GetAIBanished()
-AI.GetOppHand()
-AI.GetAIHand()
-AI.GetOppExtraDeck()
-AI.GetAIExtraDeck()
-AI.GetOppMainDeck()
-AI.GetAIMainDeck()
-AI.GetLastSummonedCards() --The last card(s) that were successfully summoned on the field with event code EVENT_SUMMON_SUCCESS, EVENT_SPSUMMON_SUCCESS or EVENT_SPSUMMON_SUCCESS
-AI.GetScriptFromCardObject(ai_card) --convert ai card object to script card
-AI.GetCardObjectFromScript(script_card) --convert script card to ai card
+`AI.GetOppMonsterZones()`
+`AI.GetAIMonsterZones()`
+`AI.GetOppSpellTrapZones()`
+`AI.GetAISpellTrapZones()`
+`AI.GetOppGraveyard()`
+`AI.GetAIGraveyard()`
+`AI.GetOppBanished()`
+`AI.GetAIBanished()`
+`AI.GetOppHand()`
+`AI.GetAIHand()`
+`AI.GetOppExtraDeck()`
+`AI.GetAIExtraDeck()`
+`AI.GetOppMainDeck()`
+`AI.GetAIMainDeck()`
+`AI.GetLastSummonedCards()` --The last card(s) that were successfully summoned on the field with event code EVENT_SUMMON_SUCCESS, EVENT_SPSUMMON_SUCCESS or EVENT_SPSUMMON_SUCCESS
+`AI.GetScriptFromCardObject(ai_card)` --convert ai card object to script card
+`AI.GetCardObjectFromScript(script_card)` --convert script card to ai card
 
 --Sample usage
 ````Lua
@@ -125,12 +130,15 @@ for i=1,#cards do
 end
 ````
 --More sample usage
+````Lua
 local summonedCards = AI.GetLastSummonedCards()
 for i=1,#summonedCards do
 	print(i..": "..summonedCards[i].id)
 end
-
+````
 --Card conversion sample usage
+
+````
 local hand_cards = AI.GetAIHand()
 for i=1,#hand_cards do
 	local c = AI.GetScriptFromCardObject(hand_cards[i])
@@ -138,17 +146,19 @@ for i=1,#hand_cards do
 	local cc = AI.GetCardObjectFromScript(c)
 	print("[ai card]: ", cc.id)
 end
-
+````
 The following functions will be available for developers later:
--OnSelectCounter() -> Chaos Zone, Gateway of the Six
-Other todo's:
--Better error checking
--Do fallbacks if error found
--Stop AI from skipping battle phase if battles are mandatory (e.g. Karakuri)
--Prevent eternal loops
---]]
 
+- OnSelectCounter() -> Chaos Zone, Gateway of the Six
+Other todo's:
+- Better error checking
+- Do fallbacks if error found
+- Stop AI from skipping battle phase if battles are mandatory (e.g. Karakuri)
+- Prevent eternal loops
+
+````
 math.randomseed( require("os").time() )
+````
 
 --- OnAIGoingFirstSecond ---
 -- Called if AI can choose to go first or second.
