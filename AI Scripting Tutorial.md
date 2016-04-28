@@ -1,18 +1,16 @@
 This tutorial explains, how to create or modify an AI script for YGOPro. The first few sections are tailored towards beginners, while the later sections cover a little more in-depth stuff, as well as how to integrate your own deck into the standard AI. Prerequisites are rudimentary knowledge of Lua and/or programming languages in general, and a lot of patience. AI scripting isn't exactly user-friendly :D
 
 ###Table of Contents###
-**
-1. Generic Information
-2. Getting Started
-3. Breakdown of the ai-template.lua
-4. Making our first AI
-5. Custom Functions
-6. Common problems
-7. Card script assistance
-8. Adding new decks to the existing AI
-9. Fin
-**
-...
+
+1. Generic Information  
+2. Getting Started  
+3. Breakdown of the ai-template.lua  
+4. Making our first AI  
+5. Custom Functions  
+6. Common problems  
+7. Card script assistance  
+8. Adding new decks to the existing AI  
+9. Fin  
 
 ###1) Generic information###
 
@@ -34,13 +32,13 @@ If you are not interested in the inner workings of these AI functions, or if you
 
 ###2) Getting started###
 
-If you want to get into AI scripting, the first thing I would recommend is taking a look at the "ai-template.lua" file in your "ai" folder. It does not show up when you select the AI to play against, since it is only relevant for developing. You can read and edit .lua files in any common text editor. I personally use Notepad++: http://notepad-plus-plus.org/
+If you want to get into AI scripting, the first thing I would recommend is taking a look at the "ai-template.lua" file in your "ai" folder. It does not show up when you select the AI to play against, since it is only relevant for developing. You can read and edit .lua files in any common text editor. I personally use Notepad++: http://notepad-plus-plus.org/  
 There are other programs, like LuaEdit, but that is quite outdated and crashes on my system. If you have programming experience yourself, you may of course use the IDE of your choice, as long as it supports Lua.
 
 The template holds most of the important functions you can use to modify the AI's behavior. It also has comments and notes about how to use these functions. More about that in the detailed breakdown of the ai-template.lua
 
 For scripting AI files, it is always recommended to have some sort of syntax check to eliminate some errors before testing the script. If your IDE supports this already, great.  
-For my Notepad++, I use this file:   http://www.mediafire.com/download/qd4po92yddy48rr/Notepad%2B%2B+Syntax+Check.rar  
+For my Notepad++, I use [this](http://www.mediafire.com/download/qd4po92yddy48rr/Notepad%2B%2B+Syntax+Check.rar) file.   
 Follow the instructions in the readme to add a syntax check to your Notepad++.
 
 
@@ -377,8 +375,7 @@ require("ai.ai")
 
 to your ai-tutorial.lua should enable you to use most of these functions. This links to the standard AI file, which in turn requires all the other files in their respective folders, holding the functions. Additionally, this allows you to skip some functions and let the default AI handle it. Don't want to write your own attack logic? Just delete OnSelectBattleCommand from your tutorial AI, and the standard AI attack logic should take over.
 
-**
-Shorter variables/functions**
+**Shorter variables/functions**
 
 Stuff you use a LOT should probably be short, so you don't have to write a whole lot. AIMon() is a shortened version of AI.GetAIMonsterZones() with all empty zones filtered out already, which makes it a lot easier to handle for most practical applications. Similar functions exist in OppMon(), AIGrave(), AIHand() etc ect. I will list an API of useful custom functions later in the tutorial.
 
@@ -419,17 +416,17 @@ There is also HasIDNotNegated, which does the same thing + a negation check, so 
 
 An attempt to generalize removal effects and make them aware of as many things as possible, that might prevent them from working. BestTargets takes a list of cards, a count and a custom constant, defining, what kind of effect it is currently used with. It assigns priorities to the targets, based on type, position, location, stats, the effect type, and the kinds of protection effects the targets are affected by. It also checks for blacklists, some cards just shouldn't be targeted or affected by certain card effects. By default, it assumes a destruction effect, but you can pass the following constants:
 
-TARGET_OTHER
-TARGET_DESTROY
-TARGET_TOGRAVE
-TARGET_BANISH
-TARGET_TOHAND
-TARGET_TODECK
-TARGET_FACEDOWN
-TARGET_CONTROL -- as in Snatch Steal
-TARGET_BATTLE -- redirects to battle target logic
-TARGET_DISCARD
-TARGET_PROTECT -- this can be any beneficial effect
+    TARGET_OTHER
+    TARGET_DESTROY
+    TARGET_TOGRAVE
+    TARGET_BANISH
+    TARGET_TOHAND
+    TARGET_TODECK
+    TARGET_FACEDOWN
+    TARGET_CONTROL -- as in Snatch Steal
+    TARGET_BATTLE -- redirects to battle target logic
+    TARGET_DISCARD
+    TARGET_PROTECT -- this can be any beneficial effect
 
 It returns a list of indexes based on the card list input, so it is designed to work in OnSelectCard, obviously. For the example of Breaker, it would look like this:
 
@@ -456,11 +453,11 @@ This sounds horribly complicated, how does that help us and why do we need it? W
 
 You can pass a bunch of custom constants again:
 
-PRIO_TOHAND
-PRIO_TOFIELD
-PRIO_TOGRAVE
-PRIO_DISCARD=PRIO_TODECK=PRIO_EXTRA
-PRIO_BANISH
+    PRIO_TOHAND
+    PRIO_TOFIELD
+    PRIO_TOGRAVE
+    PRIO_DISCARD=PRIO_TODECK=PRIO_EXTRA
+    PRIO_BANISH
 
 The 4th one depends on the deck I am using it in. For Mermails or Dark World, I handle discards with it (since discarding or sending from hand to grave makes a huge difference here). Others use it for shuffling their cards back to the deck, with Daigusto Emeral for example, or Satellarknight Sirius.
 
@@ -597,7 +594,7 @@ Why do we use both LocCheck and a global variable here? Well, we can correctly i
 
 Will add more problems as I remember them.
 
-###7) Card Script assistance**###
+###7) Card Script assistance###
 
 Some of you might be familiar with scripting cards for YGOPro. There are tons of card script functions available, that provide information or functionality otherwise not available to the AI. This is mainly useful in the battle phase, to determine current attacker and attack target, or for chainable effects to get information about the current chain and respond accordingly.
 
@@ -677,7 +674,7 @@ Everything we have learned so far can be used to make our very own AI script. Ho
 
 As of AI version 0.28, there is a solution to this problem. I included a bunch of custom functions designed to integrate custom AI deck scripts into the existing AI, in a few simple steps. These allow your deck to function almost 100% independantly of any other deck, while still giving you the option to let the standard AI script handle most of the cards, if you want. We will use our previous example of Breaker the Magical Warrior and see, how we can integrate him into the standard AI.
 
-**First step: The bare minimum. **
+**First step: The bare minimum.**
 
 What are the absolute minimum requirements to add your own deck to the AI?
 
@@ -688,10 +685,10 @@ What are the absolute minimum requirements to add your own deck to the AI?
     DECK_BREAKER = NewDeck("Breaker",71413901,nil) 
 
 DECK_BREAKER is the variable holding your deck from now on.
-NewDeck has 3 parameters:
-1) The name of your deck. Mainly used for displaying the current deck type during debug mode. Use anything you like, but it should be informative, like your deck's archetype (Nekroz) or common abbreviation (HAT).
+NewDeck has 3 parameters:  
+1) The name of your deck. Mainly used for displaying the current deck type during debug mode. Use anything you like, but it should be informative, like your deck's archetype (Nekroz) or common abbreviation (HAT).  
 For the purpose of this example, we will use the name "Breaker".
-2) The deck identifier. This can be a card id, or a list of multiple card ids. You want to use a card, that distinguishes your deck from other decks. For example, it might be a bad idea to use Fire Formation - Tenki to identify a Fire Fist deck, because Tenki can be used in basically anything that runs Beast-Warriors.
+2) The deck identifier. This can be a card id, or a list of multiple card ids. You want to use a card, that distinguishes your deck from other decks. For example, it might be a bad idea to use Fire Formation - Tenki to identify a Fire Fist deck, because Tenki can be used in basically anything that runs Beast-Warriors.  
 For our example, we will use the id of Breaker, 71413901.
 3) The startup function. It will be called at the start of the duel, if the AI detects your deck. Not required, but you probably want to have it.
 We will add it later on, use nil for now.
