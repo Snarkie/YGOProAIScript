@@ -1,25 +1,25 @@
 This tutorial explains, how to create or modify an AI script for YGOPro. The first few sections are tailored towards beginners, while the later sections cover a little more in-depth stuff, as well as how to integrate your own deck into the standard AI. Prerequisites are rudimentary knowledge of Lua and/or programming languages in general, and a lot of patience. AI scripting isn't exactly user-friendly :D
 
-#Table of Contents#
+###Table of Contents###
 **
-1) Generic Information
-2) Getting Started
-3) Breakdown of the ai-template.lua
-4) Making our first AI
-5) Custom Functions
-6) Common problems
-7) Card script assistance
-8) Adding new decks to the existing AI
-9) Fin
+1. Generic Information
+2. Getting Started
+3. Breakdown of the ai-template.lua
+4. Making our first AI
+5. Custom Functions
+6. Common problems
+7. Card script assistance
+8. Adding new decks to the existing AI
+9. Fin
 **
 ...
 
-#1) Generic information#
+###1) Generic information###
 
 You can play a game against the YGOPro AI by starting YGOPro, then selecting the "AI Mode (beta)" button. You can modify some rulings and duel settings in the following screen, then press "OK". Now you can select a deck and a script file for the AI to use. The deck has to be located in your "deck" folder of YGOPro, the script file sits in the "ai" subfolder. By default, you can use 3 ai files: 
 
-"ai.lua", the standard AI file
-"ai-cheating.lua", the same as "ai.lua", except the AI gets some benefits
+"ai.lua", the standard AI file  
+"ai-cheating.lua", the same as "ai.lua", except the AI gets some benefits  
 "ai-exodialib.lua", an AI file to be used with the AI_Exodia deck. As of the AI script version 0.26, this file is obsolete and can be deleted, the standard AI file handles the Exodia deck from now on.
 
 In theory, the AI can use any deck you make for it. However, if any card is not specifically scripted into the AI, it will usually just be activated whenever possible. Target selection for effects will be random, so the AI will usually search or target the wrong cards with its effects.
@@ -32,130 +32,132 @@ This tutorial does have a couple of seemingly redundant chapters, the same funct
 
 If you are not interested in the inner workings of these AI functions, or if you are already familiar with them, feel free to skip ahead to Chapter 5: Custom Functions. If you already have a working AI script, and only want to know, how to integrate your own deck into the standard AI script, Chapter 8: Adding new decks to the existing AI is the place for you.
 
-#2) Getting started#
+###2) Getting started###
 
 If you want to get into AI scripting, the first thing I would recommend is taking a look at the "ai-template.lua" file in your "ai" folder. It does not show up when you select the AI to play against, since it is only relevant for developing. You can read and edit .lua files in any common text editor. I personally use Notepad++: http://notepad-plus-plus.org/
 There are other programs, like LuaEdit, but that is quite outdated and crashes on my system. If you have programming experience yourself, you may of course use the IDE of your choice, as long as it supports Lua.
 
 The template holds most of the important functions you can use to modify the AI's behavior. It also has comments and notes about how to use these functions. More about that in the detailed breakdown of the ai-template.lua
 
-For scripting AI files, it is always recommended to have some sort of syntax check to eliminate some errors before testing the script. If your IDE supports this already, great. For my Notepad++, I use this file: http://www.mediafire.com/download/qd4po92yddy48rr/Notepad%2B%2B+Syntax+Check.rar
+For scripting AI files, it is always recommended to have some sort of syntax check to eliminate some errors before testing the script. If your IDE supports this already, great.  
+For my Notepad++, I use this file:   http://www.mediafire.com/download/qd4po92yddy48rr/Notepad%2B%2B+Syntax+Check.rar  
 Follow the instructions in the readme to add a syntax check to your Notepad++.
 
 
-#3) Breakdown of the ai-template.lua#
+###3) Breakdown of the ai-template.lua###
 
 In my opinion, the best starting point to get into AI scripting is a file called "ai-template.lua". It is located in the "ai" subfolder of your YGOPro folder, and it is kind of the most basic of AIs you can get. It is a fully working AI file by itself, it is well documented and holds most of the available AI functions you can use. 
 
 
 So, we will open up this file, and have a look at it. Starting at the top, we have a ton of comments, including version info, changelogs, some useful tips. After the tips, we have a list of available AI functions you can call at any time: 
 
-AI.Chat(text) --text: a string
+    AI.Chat(text) --text: a string
 
 This function makes the AI say things. You can use this for information, debugging, taunts, insults or whatever you want the AI to say.
 
-AI.GetPlayerLP(player) --1 = AI, 2 = the player
+    AI.GetPlayerLP(player) --1 = AI, 2 = the player
 
 Returns the current LP of the player.
 
-AI.GetCurrentPhase() --Refer to /script/constant.lua for a list of valid phases
+    AI.GetCurrentPhase() --Refer to /script/constant.lua for a list of valid phases
 
-The "constant.lua" file in the script subfolder is referred to on a regular basis, so open that as well and look for the phases. They are prefixed with PHASE_ , for example PHASE_MAIN2 or PHASE_BATTLE.
+The "constant.lua" file in the script subfolder is referred to on a regular basis, so open that as well and look for the phases. They are prefixed with PHASE_ , for example PHASE_MAIN2 or PHASE_BATTLE.  
 You can use this function and compare it to the current phase like this:
-If AI.GetCurrentPhase()==PHASE_BATTLE then -- do stuff in the Battle Phase 
+  
+    If AI.GetCurrentPhase()==PHASE_BATTLE then -- do stuff in the Battle Phase 
 
-AI.GetOppMonsterZones()
-AI.GetAIMonsterZones()
-AI.GetOppSpellTrapZones()
-AI.GetAISpellTrapZones()
-AI.GetOppGraveyard()
-AI.GetAIGraveyard()
-AI.GetOppBanished()
-AI.GetAIBanished()
-AI.GetOppHand()
-AI.GetAIHand()
-AI.GetOppExtraDeck()
-AI.GetAIExtraDeck()
-AI.GetOppMainDeck()
-AI.GetAIMainDeck()
+    AI.GetOppMonsterZones()
+    AI.GetAIMonsterZones()
+    AI.GetOppSpellTrapZones()
+    AI.GetAISpellTrapZones()
+    AI.GetOppGraveyard()
+    AI.GetAIGraveyard()
+    AI.GetOppBanished()
+    AI.GetAIBanished()
+    AI.GetOppHand()
+    AI.GetAIHand()
+    AI.GetOppExtraDeck()
+    AI.GetAIExtraDeck()
+    AI.GetOppMainDeck()
+    AI.GetAIMainDeck()
 
 All the cards you ever wanted. Pretty self explanatory, these return a list of all the cards located in the specified location. If there are no cards in a location, it will return a list filled with nil entrys. Usage example in the template.
 
 Now comes the first line of actual script in the template:
 
-math.randomseed( require("os").time() )
+    math.randomseed( require("os").time() )
 
 This line is mandatory. I do not know exactly, what it does, it probably sets up the random seed and syncs it with the system time. Just include this line into your AI file, it is important.
 
 Next up:
 
-function OnStartOfDuel()	
-  ...
-end
+    function OnStartOfDuel()	
+      ...
+    end
 
 This function is called by the system automatically at the start of each duel. In the template, it uses the AI.Chat() function to display some information.
 
 
 Following are a bunch of functions provided by the system, designed to give you an interface to regulate decisions the AI has to make. These include:
 
-OnSelectOption
-OnSelectEffectYesNo
-OnSelectYesNo
-OnSelectPosition
-OnSelectTribute
-OnDeclareMonsterType
-OnDeclareAttribute
-OnDeclareCard
-OnSelectNumber
-OnSelectChain
-OnSelectSum
-OnSelectCard
-OnSelectBattleCommand
-OnSelectInitCommand
+    OnSelectOption
+    OnSelectEffectYesNo
+    OnSelectYesNo
+    OnSelectPosition
+    OnSelectTribute
+    OnDeclareMonsterType
+    OnDeclareAttribute
+    OnDeclareCard
+    OnSelectNumber
+    OnSelectChain
+    OnSelectSum
+    OnSelectCard
+    OnSelectBattleCommand
+    OnSelectInitCommand
 
 Each of these functions are called by the system, whenever a situation occurs, where the AI has to take a choice of some sort. Most of them are pretty self-explanatory, or explained in the comments of the template. I will go over the important ones later.
 
 Right before the OnSelectInitCommand function, you get a list of a whole bunch of card functions. 
 
-card.id
-card.original_id
-card.cardid
-card.description 
-card.type 
-card.attack
-card.defense
-card.base_attack
-card.base_defense
-card.level
-card.base_level
-card.rank
-card.race 
-card.attribute
-card.position
-card.setcode 
-card.location
-card.xyz_material_count
-card.xyz_materials
-card.owner
-card.status
-card:is_affected_by(effect_type)
-card:get_counter(counter_type)
-card.previous_location 
-card.summon_type
-card.lscale
-card.rscale
-card.equip_count
-card:is_affectable_by_chain(index)
-card:can_be_targeted_by_chain(index)
-card:get_equipped_cards()
-card:get_equip_target()
-card.text_attack
-card.text_defense
+    card.id
+    card.original_id
+    card.cardid
+    card.description 
+    card.type 
+    card.attack
+    card.defense
+    card.base_attack
+    card.base_defense
+    card.level
+    card.base_level
+    card.rank
+    card.race 
+    card.attribute
+    card.position
+    card.setcode 
+    card.location
+    card.xyz_material_count
+    card.xyz_materials
+    card.owner
+    card.status
+    card:is_affected_by(effect_type)
+    card:get_counter(counter_type)
+    card.previous_location 
+    card.summon_type
+    card.lscale
+    card.rscale
+    card.equip_count
+    card:is_affectable_by_chain(index)
+    card:can_be_targeted_by_chain(index)
+    card:get_equipped_cards()
+    card:get_equip_target()
+    card.text_attack
+    card.text_defense
 
 Most of them should be pretty obvious again, the others are explained in the comments. If you have a card object, you have access to all kinds of information using these.
 
 
-#4) Making our first AI#
+###4) Making our first AI###
 
 Great, now we have looked at the template. But what now? How can we make an actual AI out of this?
 
@@ -360,9 +362,9 @@ I personally like to use separate functions like these for almost every card, an
 
 Alright, that should do it for our very first AI. These are only the very basics, but we learned a little about how to handle the OnSelectInitCommand, OnSelectCard, OnSelectEffectYesNo and OnSelectChain functions. These are by far the most important ones, I guess about 80% of the entire AI is just handling of these functions. The basic principle is always the same, a lot of looping, checking specific conditions, returning the correct index.
 
-#5) Custom Functions#
+###5) Custom Functions###
 
-In the last paragraph, we added 2 cards to the AI, which it can handle a little better now. Great, only 8,829 to go :D
+In the last paragraph, we added 2 cards to the AI, which it can handle a little better now. Great, only 8,829 to go :D  
 On a serious note, adding lots of cards or a complete deck to YGOPro is a lot of work, so you do want to find some ways to optimize this procedure. Also, the 2 cards we added are not exactly used very well yet. Breaker targets random cards, he might blow his effect on an indestructible card, or kill an orphan Call of the Haunted without a target over a much more threatening Macro Cosmos. TKRO might let the special summon of a dangerous effect monster go through, because its attack is just low enough.
 
 To improve on the handling of newly added cards and the speed these can be added without having to add hundreds of checks for every card, a couple of useful custom functions developed over time, while I proceeded scripting the AI.
@@ -516,7 +518,7 @@ For Castel, you use this instead:
 More functions to come. Currently thinking about, which ones are important enough to mention here.
 
 
-#6) Common problems#
+###6) Common problems###
 
 There are a lot of things, that can be problematic, when coding an AI. I will try to go over some of the problems I encountered, and how to solve them or work around them.
 
@@ -595,7 +597,7 @@ Why do we use both LocCheck and a global variable here? Well, we can correctly i
 
 Will add more problems as I remember them.
 
-#7) Card Script assistance**#
+###7) Card Script assistance**###
 
 Some of you might be familiar with scripting cards for YGOPro. There are tons of card script functions available, that provide information or functionality otherwise not available to the AI. This is mainly useful in the battle phase, to determine current attacker and attack target, or for chainable effects to get information about the current chain and respond accordingly.
 
@@ -669,7 +671,7 @@ GlobalTargetSet finds the target on the field and stores it in a global variable
 This will flag the chain link activated by the targeted card as negated 
 
 
-#8) Adding new decks to the existing AI#
+###8) Adding new decks to the existing AI###
 
 Everything we have learned so far can be used to make our very own AI script. However, a seperate AI script file does come with some problems. You would have to repeat a lot of code, which is already handled by the standard AI, you would need to select a different AI file, every time, you want to play against your deck, the "random deck" function cannot be used, because the program cannot change the used AI file automatically. Integrating new code into the existing AI is quite troublesome as well, you would need to deal with my huge mess of code, you might interfere with already existing decks etc etc...
 
@@ -744,17 +746,17 @@ If you set deck.Init to a function, the AI will call it like your standard OnSel
 deck.SummonBlacklist expects a table of card ids. Those cards will never be normal- or special summoned by the standard AI, if it detects your deck.
 
 For a full list of functions and lists available here, refer to the documented [template](https://www.dropbox.com/s/sl254q1lfvqw5at/DeckTemplate.lua?dl=1). The most important ones are
-probably
+probably:
 
-deck.Init -- OnSelectInit
-deck.Card -- OnSelectCard
-deck.Chain -- OnSelectChain
-deck.EffectYesNo -- OnSelectEffectYesNo
+    deck.Init -- OnSelectInit
+    deck.Card -- OnSelectCard
+    deck.Chain -- OnSelectChain
+    deck.EffectYesNo -- OnSelectEffectYesNo
 
-deck.ActivateBlacklist -- never activate or chain any cards or effects in this list
-deck.SummonBlacklist -- never normal-, special summon or set monsters in this list
+    deck.ActivateBlacklist -- never activate or chain any cards or effects in this list
+    deck.SummonBlacklist -- never normal-, special summon or set monsters in this list
 
-deck.PriorityList -- sets up the priority list. Refer to AIOnDeckSelect.lua and the "Add" function.
+    deck.PriorityList -- sets up the priority list. Refer to AIOnDeckSelect.lua and the "Add" function.
 
 Do note, if you use the blacklists, the game expects you to handle those cards in your script. Otherwise, they won't be used at all.
 
@@ -795,7 +797,7 @@ Alright, basic setup complete. Now we integrate all the functionality we added e
     71564252, -- TKRO
     }
 
-- Add the code we used earlier to make Breaker and TKRO be used properly to the respective functions. I modified some of the functions using the information of the previous chapters.
+- Add the code we used earlier to make Breaker and TKRO be used properly to the respective functions. I modified some of the functions using the information of the previous chapters.  
 Using Breaker:
 
     function UseBreaker()
@@ -850,6 +852,6 @@ Chaining TKRO:
 
 You can check out the end result in [this file](https://www.dropbox.com/s/al8hj8lqd4j4s61/Breaker.lua?dl=1). Do note, that this can be expanded upon at will. Currently, the normal summons of the cards are handled by the default logic, because we did not restrict them. You can add them to the summon blacklist and add conditions for their summoning, like only summon Breaker, if the opponent controls any targets to destroy for his effect. Or only summon TKRO, if the opponent does not control monsters stronger than 1900.
 
-#9)Fin#
+###9)Fin###
 
 This concludes the AI Scripting Tutorial, I hope, you can make use of it. It is a lot of information to absorb, I know. Scripting for the YGOPro AI is not a trivial matter, there are lots of obstacles on the way. I look forward to test all your new custom decks, and eventually integrate them into the AI officially:)
