@@ -89,6 +89,7 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
   set_player_turn(true)
   DeckCheck()
   GlobalAIIsAttacking = nil
+  GlobalMaterial = nil
   ResetOncePerTurnGlobals()
   GlobalBPAllowed = to_bp_allowed
   SurrenderCheck()
@@ -98,7 +99,12 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
   -- a face-up Light and Darkness Dragon.
   ---------------------------------------
   
+  --if player_ai.xyz_material_count > 1 then
+    --error
+  --end
+  
   if LADDCheck(atk) then
+
     return COMMAND_TO_NEXT_PHASE,1
   end
   
@@ -216,10 +222,8 @@ then
 end
 
 -- AI can attack for game on an opponent's monster
-for i=1,#AIMon() do
-  for j=1,#OppMon() do
-    source=AIMon()[i]
-    target=OppMon()[i]
+for i,source in pairs(AIMon()) do
+  for j,target in pairs(OppMon()) do
     if CanFinishGame(source,target)
     and to_bp_allowed
     and BattlePhaseCheck()
@@ -234,8 +238,22 @@ if d and d.Init then
 end
 if DeckCommand ~= nil then
   if type(DeckCommand)=="table" then
+    if DeckCommand[2]==0
+    then
+      print("Warning: null command for OnSelectInit")
+      print("attempting to execute deck command: "..DeckCommand[1]..", "..DeckCommand[2])
+      PrintCallingFunction()
+    end
+    --print("executing deck command: "..DeckCommand[1]..", "..DeckCommand[2])
     return DeckCommand[1],DeckCommand[2]
   else
+    if DeckCommand2==0
+    then
+      print("Warning: null command for OnSelectInit")
+      print("attempting to execute deck command: "..DeckCommand..", "..DeckCommand2)
+      PrintCallingFunction()
+    end
+    --print("executing deck command: "..DeckCommand..", "..DeckCommand2)
     return DeckCommand,DeckCommand2
   end
 end
@@ -1350,7 +1368,7 @@ end
     and not FilterType(c,TYPE_FIELD)           
     and CardIsScripted(c.id) == 0
     and NotNegated(c) 
-    and not c.description == 1160 -- Pendulum scale activation
+    and c.description ~= 1160 -- Pendulum scale activation
     then
       GlobalActivatedCardID = c.id
       return COMMAND_ACTIVATE,i

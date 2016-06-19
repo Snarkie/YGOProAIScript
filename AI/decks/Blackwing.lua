@@ -438,8 +438,7 @@ function SetVayu()
 end
 function RftDDFilter(c)
   return FilterType(c,TYPE_MONSTER)
-  and (not FilterStatus(c,STATUS_REVIVE_LIMIT)
-  or FilterStatus(c,STATUS_PROC_COMPLETE))
+  and FilterRevivable(c)
 end
 function UseRftDD()
   return CardsMatchingFilter(AIBanish(),RftDDFilter)>2 

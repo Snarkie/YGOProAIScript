@@ -273,7 +273,7 @@ function OppGetStrongestAttDef(filter,opt,loop)
           result=result-cards[i].bonus
         end   
       elseif bit32.band(cards[i].position,POS_DEFENCE)>0 and cards[i].defense>result 
-      and (bit32.band(cards[i].position,POS_FACEUP)>0 or bit32.band(cards[i].status,STATUS_IS_PUBLIC)>0)
+      and FilterPublic(cards[i])
       then
         result=cards[i].defense
       end
@@ -291,7 +291,7 @@ function OppGetWeakestAttDef()
       if bit32.band(cards[i].position,POS_ATTACK)>0 and cards[i].attack<result then
         result=cards[i].attack-cards[i].bonus
       elseif bit32.band(cards[i].position,POS_DEFENCE)>0 and cards[i].defense<result 
-      and (bit32.band(cards[i].position,POS_FACEUP)>0 or bit32.band(cards[i].status,STATUS_IS_PUBLIC)>0)
+      and FilterPublic(cards[i])
       then
         result=cards[i].defense
       end
@@ -381,7 +381,8 @@ function HandCheck(level)
   local result=0
   local cards=AIHand()
   for i=1,#cards do
-    if cards[i].level==level then
+    if cards[i].level==level 
+    then
       result = result + 1
     end
   end
@@ -684,41 +685,49 @@ function BestTargets(cards,count,target,filter,opt,immuneCheck,source)
     local c = cards[i]
     c.index = i
     c.prio = 0
-    if FilterType(c,TYPE_MONSTER) then
-      if FilterPublic(c)
-      then
-        c.prio = math.max(c.attack+1,c.defense)+5
-        if c.owner==2 and c:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE)==0 
-        and Duel.GetTurnPlayer()==player_ai
-        and BattlePhaseCheck()
+    if FilterLocation(c,LOCATION_ONFIELD) then
+      if FilterType(c,TYPE_MONSTER) then
+        if FilterPublic(c)
         then
-          c.prio = math.max(1,c.prio-AIAtt*.9)
+          c.prio = math.max(c.attack+1,c.defense)+5
+          if c.owner==2 and c:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE)==0 
+          and Duel.GetTurnPlayer()==player_ai
+          and BattlePhaseCheck()
+          then
+            c.prio = math.max(1,c.prio-AIAtt*.9)
+          end
+        else
+          c.prio = 2
         end
-      else
-        c.prio = 2
+      else  
+        if FilterPosition(c,POS_FACEUP) then
+          c.prio = 4
+        else
+          c.prio = 3
+        end
       end
-    else  
-      if FilterPosition(c,POS_FACEUP) then
-        c.prio = 4
-      else
-        c.prio = 3
+      if c.prio>0 then
+        if PriorityTarget(c) then
+          c.prio = c.prio+2
+        end
+        if c.level>4 then
+          c.prio = c.prio+1
+        end
+        if FilterPosition(c,POS_FACEUP_ATTACK) then
+          c.prio = c.prio+1
+        end
       end
     end
-    if c.prio>0 then
-      if PriorityTarget(c) then
-        c.prio = c.prio+2
-      end
-      if c.level>4 then
-        c.prio = c.prio+1
-      end
-      if FilterPosition(c,POS_FACEUP_ATTACK) then
-        c.prio = c.prio+1
-      end
+    if FilterLocation(c,LOCATION_GRAVE)
+    and (target==TARGET_BANISH or target==TARGET_TODECK)
+    then
+      c.prio=c.prio+GetGraveTargetPriority(c)
     end
     if IgnoreList(c) 
     or (target == TARGET_TOHAND 
     and FilterType(c,TYPE_SPELL+TYPE_TRAP) 
-    and FilterPosition(c,POS_FACEUP))
+    and FilterPosition(c,POS_FACEUP)
+    and FilterLocation(c,LOCATION_ONFIELD))
     then
       c.prio = 1
     end
@@ -732,7 +741,9 @@ function BestTargets(cards,count,target,filter,opt,immuneCheck,source)
     if FilterType(c,TYPE_PENDULUM) and HasIDNotNegated(AIST(),05851097,true,nil,nil,POS_FACEUP) then
       c.prio = -1
     end
-    if immuneCheck and source and not Affected(c,source.type,source.level) then
+    if immuneCheck and source and not Affected(c,source.type,source.level) 
+    and FilterLocation(c,LOCATION_ONFIELD)
+    then
       c.prio = -1
     end
     if CurrentOwner(c) == 1 then 
@@ -1189,6 +1200,10 @@ function FilterPreviousLocation(c,loc)
   return bit32.band(c.previous_location,loc)>0
 end
 function FilterStatus(c,status)
+  if status==nil then
+    print("Warning: FilterStatus null status")
+    PrintCallingFunction()
+  end
   if c.GetCode then
     return c:IsStatus(status)
   else
@@ -1214,7 +1229,8 @@ function FilterAffected(c,effect)
   end
 end
 function FilterPublic(c)
-  return FilterStatus(c,STATUS_IS_PUBLIC) 
+  return STATUS_IS_PUBLIC and FilterStatus(c,STATUS_IS_PUBLIC)
+  or c.is_public and c:is_public()
   or FilterPosition(c,POS_FACEUP)
   or FilterSummon(c,SUMMON_TYPE_SPECIAL) -- TODO: find better check
 end
@@ -1634,10 +1650,6 @@ PriorityTargetList=
   82732705,30241314,81674782,47084486,  -- Skill Drain, Macro Cosmos, Dimensional Fissure, Vanity's Fiend
   72634965,59509952,58481572,45986603,  -- Vanity's Ruler, Archlord Kristya, Dark Law, Snatch Steal
 }
-PriorityGraveTargetList=
-{
-  34230233,12538374, -- Grapha, Treeborn
-}
 function PriorityTarget(c,destroycheck,loc,filter,opt) -- preferred target for removal
   local result = false
   if loc == nil then loc = LOCATION_ONFIELD end
@@ -1664,12 +1676,6 @@ function PriorityTarget(c,destroycheck,loc,filter,opt) -- preferred target for r
       result = true
     end
     result = (result or not AttackBlacklistCheck(c))
-  elseif loc == LOCATION_GRAVE then
-    for i=1,#PriorityGraveTargetList do
-      if PriorityGraveTargetList[i]==c.id then
-        result = true
-      end
-    end
   end
   if result and (not destroycheck or DestroyFilter(c)) 
   and FilterPublic(c) and (filter == nil or (opt==nil and filter(c) or filter(c,opt)))
@@ -1967,7 +1973,7 @@ function CrashCheck(c)
       return Targetable(c,TYPE_MONSTER) and Affected(c,TYPE_MONSTER,8)
     end
   end
-  if FilterAffected(c,EFFECT_INDESTRUCTABLE_BATTLE)then
+  if FilterAffected(c,EFFECT_INDESTRUCTABLE_BATTLE) then
     return true
   end
   if not DestroyCountCheck(c,TYPE_MONSTER,true) 
@@ -2012,6 +2018,9 @@ function CrashCheck(c)
   end
   if c.id == 71921856 and HasMaterials(c) then
     return true -- Nova Caesar
+  end
+  if c.id == 29357956 and not FilterLocation(c,LOCATION_MZONE) then
+    return true -- Nerokius
   end
   if CurrentMonOwner(c.cardid) ~= c.owner 
   and StrongerAttackerCheck(c,AIMon())
@@ -2606,6 +2615,13 @@ function MatchupCheck(id) -- make AI consider matchups
   or OppAttributeCheck({ATTRIBUTE_DARK}))
   then
     return true
+  end
+  if id == 58577036 then -- Reasoning
+    if OppDeckCheck(0xd2) then -- Kozmo
+      return 8
+    elseif OppDeckCheck(0xbb) then -- Infernoid
+      return 1
+    end
   end
   return false
 end

@@ -815,15 +815,17 @@ function UseHedgehog(c,mode)
   return OPTCheck(04939890) and CardsMatchingFilter(AIDeck(),ShaddollSTFilter)>0
 end
 function SquamataFilter(c)
-  return c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0
-  and c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
+  return Affected(c,TYPE_MONSTER,4)
+  and Targetable(c,TYPE_MONSTER)
+  and DestroyFilterIgnore(c)
 end
 function UseSquamata()
   return CardsMatchingFilter(OppMon(),SquamataFilter)>0 and OPTCheck(30328508)
 end
 function DragonFilter2(c)
-  return c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0 and (c.level>4 
-  or bit32.band(c.type,TYPE_FUSION+TYPE_RITUAL+TYPE_SYNCHRO+TYPE_XYZ)>0) 
+  return Targetable(c,TYPE_MONSTER)
+  and Affected(c,TYPE_MONSTER,4)
+  and (c.level>4 or bit32.band(c.type,TYPE_FUSION+TYPE_RITUAL+TYPE_SYNCHRO+TYPE_XYZ)>0) 
 end
 function UseDragon()
   return OPTCheck(37445295) and CardsMatchingFilter(OppMon(),DragonFilter2)>0
@@ -1080,24 +1082,23 @@ function SummonTailwind(c,mode)
     return true
   end
 end
-function TarotrayTributeFilter(other,source)
-  for i,c in pairs(AICards()) do
-    if not CardsEqual(c,source)
-    and not CardsEqual(other,source)
-    and source.level <= c.level+other.level
-    then
-      return true
+function TarotrayTributeCheck(source)
+  local cards=SubGroup(AICards(),FilterType,TYPE_MONSTER)
+  for i,c in pairs(cards) do
+    if CardsEqual(c,source) then
+      table.remove(cards,i)
+      break
     end
   end
-  return false
-end
-function TarotrayTributeCheck(source)
-  for i,c in pairs(AICards()) do
-    if not CardsEqual(c,source)
-    and (c.level == source.level
-    or CardsMatchingFilter(AICards(),TarotrayTributeFilter,source)>0)
-    then
-      return true
+  for i,c in pairs(cards) do  
+    for j=1,i do
+      for k=1,j do
+        local c2=cards[j]
+        local c3=cards[k]
+        if source.level<=c.level+c2.level+c3.level then
+          return true
+        end
+      end
     end
   end
   return false
@@ -1757,7 +1758,8 @@ function ChainCore()
   if IsBattlePhase() then
     local source=Duel.GetAttacker()
     if source and source:IsControler(1-player_ai) 
-    and source:GetAttack()<=1950 and #AIMon()==0 
+    and (source:GetAttack()<=1950 or source:GetAttack()>=0.8*AI.GetPlayerLP(1))
+    and #AIMon()==0 
     then
       return true
     end
@@ -1908,15 +1910,24 @@ function ChainTarotrayFaceup(c,mode)
   then
     return true
   end
-  --[[if mode == 5
-  and HasID(AIMon()30328508,true,nil,nil,POS_FACEDOWN_DEFENCE,UseSquamata) 
-  then
-    return {COMMAND_CHANGE_POS,CurrentIndex}
-  end
+  if mode == 5
+  and HasID(AIMon(),30328508,true,nil,nil,POS_FACEDOWN_DEFENCE,UseSquamata) 
   and Duel.GetTurnPlayer()==1-player_ai
+  and HasPriorityTarget(OppMon(),true,nil,SquamataFilter)
   then
+    GlobalCardMode = 1
+    GlobalTargetSet(FindID(30328508,AIMon(),nil,FilterPosition,POS_FACEDOWN))
     return true
-  end]]
+  end
+  if mode == 6
+  and HasID(AIMon(),77723643,true,nil,nil,POS_FACEDOWN_DEFENCE,UseDragon) 
+  and Duel.GetTurnPlayer()==1-player_ai
+  and HasPriorityTarget(OppMon(),true,nil,DragonFilter2)
+  then
+    GlobalCardMode = 1
+    GlobalTargetSet(FindID(77723643,AIMon(),nil,FilterPosition,POS_FACEDOWN))
+    return true
+  end
 end
 function PotDestroyFilter(c)
   return DestroyFilter(c)
@@ -1951,7 +1962,20 @@ end
 function ChainCoinorma(c)
   return true
 end
+function ChainFusionsGrave(c)
+  if ShaddollMonsterFilter(c)
+  and FilterType(c,TYPE_FUSION)
+  and FilterLocation(c,LOCATION_GRAVE)
+  then
+    return true
+  end
+end
 function ShaddollChain(cards)
+  for i,c in pairs(cards) do
+    if ChainFusionsGrave(c) then
+      return Chain(i)
+    end
+  end
   if HasID(cards,31118030,ChainArrowsylph) then
     return Chain()
   end
@@ -2078,6 +2102,9 @@ end
 function ShaddollEffectYesNo(id,card)
   local field = bit32.band(card.location,LOCATION_ONFIELD)>0
   local grave = bit32.band(card.location,LOCATION_GRAVE)>0
+  if ChainFusionsGrave(card) then
+    return true
+  end
   if id == 94997874 
   and card.description==id*16+2 
   and ChainTarotraySummon(card)
@@ -2264,10 +2291,10 @@ function ShaddollOption(options)
     if v == 91501248*16 then -- draw 
       result[1]=i
     end
-    if v == 91501248*16+1 then -- destroy monsters
+    if v == 91501248*16+2 then -- destroy monsters
       result[2]=i
     end
-    if v == 91501248*16+2 then -- return S/T
+    if v == 91501248*16+1 then -- return S/T
       result[3]=i
     end
     if v == 91501248*16+3 then -- shuffle from hand

@@ -582,19 +582,20 @@ function MoonWhitelist2(id) -- cards to chain Book of Moon to to save your monst
   or id == 70342110 -- DPrison
 end
 function MoonFilter(c)
-  return bit32.band(c.type,TYPE_MONSTER)>0 and bit32.band(c.position,POS_FACEUP)>0 
-  and c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0 and c:is_affected_by(EFFECT_IMMUNE_EFFECT)==0
+  return FilterType(c,TYPE_MONSTER)
+  and FilterPosition(c,POS_FACEUP)
+  and Affected(c,TYPE_SPELL)
+  and Targetable(c,TYPE_SPELL)
+  and not FilterType(c,TYPE_TOKEN)
 end
 function MoonFilter2(c,p)
-  return c:IsType(TYPE_MONSTER) and c:IsPosition(POS_FACEUP) and c:IsControler(p)
-  and not c:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET) and not c:IsHasEffect(EFFECT_IMMUNE_EFFECT)
-  and not FilterType(c,TYPE_TOKEN)
+  return MoonFilter(c) and c:IsControler(p)
 end
 function MoonFilter3(c)
   return MoonFilter(c) and ShaddollFusionFilter(c)
 end
 function MoonOppFilter(c)
-  return MoonFilter(c) and bit32.band(c.type,TYPE_FLIP)==0
+  return MoonFilter(c) and FilterType(c,TYPE_FLIP)
 end
 function MoonPriorityFilter(c)
   return MoonFilter(c) and MoonWhitelist(c)

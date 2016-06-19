@@ -317,7 +317,7 @@ NSBL={
 51194046,18326736,58069384,10443957, -- Qli Monolith, Planetellarknight Ptolemaios, Cyber Dragon Nova, Infinity
 81992475,59438930,01050186, -- BA Barbar, Ghost Ogre, Satellarknight Unukalhai
 29888389,47106439,53180020,27796375, -- Gishki Shadow, Vision, Nekroz Exa, Sorcerer
-67696066,68819554, -- Trick Clown, Damage Juggler
+67696066,68819554,44635489, -- Trick Clown, Damage Juggler, Siat
 }
 function NormalSummonBlacklist(CardId) 
   for i=1,#NSBL do
@@ -424,7 +424,7 @@ SSBL={
 18326736,58069384,10443957, -- Planetellarknight Ptolemaios, Cyber Dragon Nova, Infinity
 27552504,18386170,65305468, -- Beatrice, Pilgrim, F0
 56840427,16051717,30100551, -- Utopia Ray, Raikiri, Minerva
-31292357, -- Hat Tricker
+31292357,44635489, -- Hat Tricker, Siat
 }
 
 
@@ -911,7 +911,8 @@ ScriptedCards ={
 16051717,30100551,20513882,31222701, -- Raikiri, Minerva, Painful Escape, Wavering Eyes
 01050186,19508728,27796375,53180020, -- Satellarknight Unukalhai, Moon Mirror Shield, Nekroz Exa, Sorcerer
 29888389,47106439,68819554,67696066, -- Gishki Shadow, Vision, Performage Damage Juggler, Trick Clown
-43898403,63519819,60082869, -- Twin Twister, Thousand-Eyes Restrict, Dust Tornado
+43898403,63519819,60082869,27346636, -- Twin Twister, Thousand-Eyes Restrict, Dust Tornado, Gladbeast Heraklinos
+63767246, -- Titanic Galaxy
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do
@@ -1014,4 +1015,65 @@ function BlacklistCheckChain(command,index,deck,cards)
   return true
 end
 
+GraveTargetPriority= -- cards to hit in the opponent's graveyard
+{
+  [34230233] = 3, -- Grapha
+  [12538374] = 2, -- Treeborn
+  [78474168] = 1, -- BTS
+  [72291412] = 1, -- Necro Slime
+  [19580308] = 2, -- Lamia
+  [45206713] = 2, -- Swirl Slime
+  [04904633] = 1, -- Shaddoll Core
+  [44394295] = 1, -- Shaddoll Fusion
+  [06417578] = 1, -- El-Shaddoll Fusion
+  [74586817] = 1, -- PSYFrame Omega
+  [34710660] = 2, -- Electromagnetic Turtle
+  [69764158] = 2, -- Peropero Cerberus
+  [02830693] = 1, -- Rainbow Kuriboh
+  [67441435] = 1, -- Glow-up Bulb
+  [05133471] = 1, -- Galaxy Cyclone
+  [17412721] = 1, -- Norden
+  [67696066] = 2, -- Trick Clown
+  [14735698] = 1, -- Nekroz Mirror
+  [51124303] = 1, -- Nekroz Kaleido
+  [97211663] = 1, -- Nekroz Exo
+  [50720316] = 1, -- Shadow Mist
+  [95457011] = 2, -- Edea
+  [59463312] = 1, -- Eidos
+  [01357146] = 1, -- Ronintoadin
+  [83531441] = 3, -- Dante
+  [57143342] = 2, -- Cir
+  [20758643] = 1, -- Graff
+  [84764038] = 1, -- Scarm
+  [62835876] = 1, -- Good&Evil
+  [00601193] = 1, -- Virgil
+  [90307777] = 1, -- Shurit
+  [19748583] = 2, -- Gwen
+  [93085839] = 1, -- Eachtar
+  [07452945] = 1, -- Destiny
+  [14745409] = 1, -- Gallatin
+  [23562407] = 1, -- Caliburn
+  [46008667] = 1, -- Excaliburn
+  [03580032] = 1, -- Merlin
+  [46008667] = 1, -- Excaliburn
+  [88264978] = 1, -- REDMD
+  [99365553] = 1, -- Lightpulsar
+  [33420078] = 1, -- Plaguespreader
+  [51617185] = 2, -- Machina Megaform
+  [05556499] = 3, -- Machina Fortress
+  [53804307] = 3, -- Dragon Rulers
+  [26400609] = 3,
+  [89399912] = 3,
+  [90411554] = 3,
+}
+function GetGraveTargetPriority(c)
+  local id
+  if type(c) == "number" then
+    id = c
+  else
+    c = GetCardFromScript(c)
+    id = c.id
+  end
+  return GraveTargetPriority[id] or 0
+end
 

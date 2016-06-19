@@ -857,12 +857,16 @@ function ChainSafeZone(c)
   end
   return false
 end
-
-function LanceFilter(card)
+function LanceDisruptCheck(c,target)
+  c = GetCardFromScript(c)
+  return LanceFilter(target,true)
+  and (FilterSet(c,0xa5) or FilterSet(c,0x95))
+end
+function LanceFilter(card,skippos)
   return Targetable(card,TYPE_SPELL)
   and Affected(card,TYPE_SPELL)
   and FilterType(card,TYPE_MONSTER)
-  and FilterPosition(card,POS_FACEUP_ATTACK)
+  and (FilterPosition(card,POS_FACEUP_ATTACK) or skippos)
   and FilterLocation(card,LOCATION_MZONE)
 end
 function ChainLance()
@@ -896,6 +900,19 @@ function ChainLance()
     then
       GlobalTargetSet(oppmon)
       return true
+    end
+  end
+  if not UnchainableCheck(27243130) then
+    return false
+  end
+  for i=1,Duel.GetCurrentChain() do
+    local e,c,id = EffectCheck(1-player_ai,i)
+    if e then
+      local target = Duel.GetChainInfo(i, CHAININFO_TARGET_CARDS)
+      if target and LanceDisruptCheck(c,target:GetFirst()) then
+        GlobalTargetSet(target:GetFirst())
+        return true
+      end
     end
   end
   return false

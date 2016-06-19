@@ -352,7 +352,10 @@ function SummonExtraDeck(cards,prio)
 -- XYZ
 
 -- Rank 8
-  if HasIDNotNegated(SpSum,01639384,SummonFelgrand) then
+  if HasIDNotNegated(SpSum,63767246,SummonTitanicGalaxy,1) then
+    return XYZSummon()
+  end
+  if HasIDNotNegated(SpSum,01639384,SummonFelgrand,1) then
     return XYZSummon()
   end
   if HasIDNotNegated(SpSum,88120966,SummonGiantGrinder) then
@@ -362,6 +365,12 @@ function SummonExtraDeck(cards,prio)
     return XYZSummon()
   end
   if HasID(SpSum,73445448,SummonZombiestein) then
+    return XYZSummon()
+  end
+  if HasIDNotNegated(SpSum,01639384,SummonFelgrand,2) then
+    return XYZSummon()
+  end
+  if HasIDNotNegated(SpSum,63767246,SummonTitanicGalaxy,2) then
     return XYZSummon()
   end
   
@@ -695,7 +704,7 @@ function ChainTwinTwister(c,mode)
     return true
   end
   local target = RemoveOnActivation(nil,MSTFilter)
-  if target then
+  if target and targets>1 then
     GlobalTwinTwisterTarget = target
     return true
   end
@@ -906,16 +915,42 @@ function SummonZombiestein(c)
   return MP2Check(c) and OppHasStrongestMonster() --and OppGetStrongestAttack()>2800
   and OppGetStrongestAttack()<4500
 end
-function SummonFelgrand(c)
-  return MP2Check(c) and OppGetStrongestAttack()<2800
-  and not SkillDrainCheck()
+function SummonFelgrand(c,mode)
+  if mode == 1 
+  and NotNegated(c)
+  and MP2Check(c) 
+  and OppGetStrongestAttack()<c.attack
+  then
+    return true
+  end
+  if mode == 2
+  and OppHasStrongestMonster()
+  and CanWinBattle(c,OppMon())
+  then
+    return true
+  end
+end
+function SummonTitanicGalaxy(c,mode)
+  if mode == 1 
+  and NotNegated(c) 
+  and MP2Check(c) 
+  and OppGetStrongestAttack()<c.attack
+  then
+    return true
+  end
+  if mode == 2
+  and OppHasStrongestMonster()
+  and CanWinBattle(c,OppMon())
+  then
+    return true
+  end
 end
 function FieldNukeFilter(c,source)
   return Affected(c,TYPE_MONSTER,source.level)
 end
 function UseFieldNuke(source,exclude)
   local targets = SubGroup(OppField(),FieldNukeFilter,source)
-  return DestroyCheck(targets+exclude,true)-DestroyCheck(AIField(),true)>0 
+  return DestroyCheck(targets,exclude,true)-DestroyCheck(AIField(),true)>0 
 end
 function SummonBelzebuth(c)
   if DeckCheck(DECK_CONSTELLAR) and HasIDNotNegated(AIMon(),70908596,true)
@@ -1214,7 +1249,7 @@ end
 function CowboyFilter(c)
   return ((c.attack<3000 and bit32.band(c.position,POS_ATTACK)>0
   or c.defense<2500 and bit32.band(c.position,POS_DEFENCE)>0
-  and (bit32.band(c.position,POS_FACEUP)>0 or bit32.band(c.status,STATUS_IS_PUBLIC)>0))
+  and FilterPublic(c))
   and c:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE)==0 
   and c:is_affected_by(EFFECT_CANNOT_BE_BATTLE_TARGET)==0)
 end
@@ -1637,15 +1672,15 @@ function SummonUtopiaRay(c,mode)
   return false
 end
 function SummonUtopia(c,mode)
-  local c = FindID(56832966,AIExtra()) 
-  if mode == 1 and c and SummonUtopiaLightning(c,2) then
+  local lightning = FindID(56832966,AIExtra()) 
+  if mode == 1 and lightning and SummonUtopiaLightning(lightning,2) then
     return true
   end
-  if mode == 2 and c and SummonUtopiaLightning(c,3) then
+  if mode == 2 and lightning and SummonUtopiaLightning(lightning,3) then
     return true
   end
   if mode == 3 and CanWinBattle(c,OppMon()) 
-  and not c and MP2Check(2500)
+  and not lightning and MP2Check(2500)
   then
     return true
   end
@@ -1697,27 +1732,31 @@ function InstantFusionFilter(c)
   return bit32.band(c.attribute,ATTRIBUTE_LIGHT)>0 and c.level==5
   or c.id==70908596 and NotNegated(c)
 end
-function NodenFilter(c)
-  return c.level==4 and c.id~=17412721
+function NodenFilter(c,level)
+  return (level and c.level==level or c.level<=4) --and c.id~=17412721 -- Norden
+end
+function NodenTunerFilter(c,level)
+  return NodenFilter(c,level-4)
+  and FilterType(c,TYPE_TUNER)
 end
 function UseInstantFusion(c,mode)
   if not (WindaCheck() and DualityCheck) then return false end
   if mode == 1 
-  and CardsMatchingFilter(AIGrave(),NodenFilter)>0 
-  and HasIDNotNegated(AIExtra(),17412721,true)
+  and CardsMatchingFilter(AIGrave(),NodenFilter,4)>0 
+  and HasIDNotNegated(AIExtra(),17412721,true) -- Norden
   and (FieldCheck(4)==1 and OverExtendCheck(2,6) 
   or #AIMon()==0 and #OppMon()>0
-  or DeckCheck(DECK_TELLARKNIGHT) and FieldCheck(1) and DestroyCheck(OppField())>0) 
+  or DeckCheck(DECK_TELLARKNIGHT) and FieldCheck(4)==1 and DestroyCheck(OppField())>0) 
   then
     GlobalCardMode = nil
     return true
   elseif mode == 2 and CardsMatchingFilter(AIMon(),InstantFusionFilter)==1 
-  and HasID(AIExtra(),73964868,true)
+  and HasID(AIExtra(),73964868,true) -- Pleiades
   then
     GlobalCardMode = 1
     return true
   elseif mode == 3 and HasPriorityTarget(OppField(),true)
-  and HasID(AIExtra(),73964868,true) and TurnEndCheck()
+  and HasID(AIExtra(),72959823,true) and TurnEndCheck()  -- Panzer Dragon
   and MacroCheck()
   then
     GlobalCardMode = 1
@@ -1729,6 +1768,25 @@ function UseInstantFusion(c,mode)
   then
     GlobalIFTarget = 63519819 -- Thousand-Eyes Restrict
     return true
+  end
+  if mode == 5
+  and HasIDNotNegated(AIExtra(),17412721,true) -- Norden
+  and LocCheck()>1
+  and (OverExtendCheck(2,6)
+  or #AIMon()==0)
+  then
+    for i,c in pairs(AIExtra()) do
+      if FilterType(c,TYPE_SYNCHRO) 
+      and c.level>4 and c.level<9
+      then
+        for j,target in pairs(AIGrave()) do
+          if NodenTunerFilter(target,c.level) then
+            GlobalNordenFilter=function(card)return FilterTuner(card,c.level) end
+            return true
+          end
+        end
+      end
+    end
   end
   return false
 end
@@ -2173,8 +2231,7 @@ function MSTFilter(c)
   return c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0 
   and c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0 
   and not (DestroyBlacklist(c)
-  and (bit32.band(c.position, POS_FACEUP)>0 
-  or bit32.band(c.status,STATUS_IS_PUBLIC)>0))
+  and FilterPublic(c))
 end
 function MSTEndPhaseFilter(c)
   return MSTFilter(c) and bit32.band(c.status,STATUS_SET_TURN)>0
@@ -2255,6 +2312,16 @@ end
 function ChainPanzerDragon(c)
   return DestroyCheck(OppField())>0
 end
+function ChainTitanicGalaxy(c)
+  local aimon,oppmon = GetBattlingMons()
+  if NotNegated(c)
+  and WinsBattle(oppmon,aimon)
+  and not WinsBattle(oppmon,c)
+  and Affected(oppmon,TYPE_MONSTER,8)
+  then
+    return true
+  end
+end
 function PriorityChain(cards) -- chain these before anything else
   if HasIDNotNegated(cards,58120309,ChainNegation) then -- Starlight Road
     return {1,CurrentIndex}
@@ -2277,6 +2344,9 @@ function PriorityChain(cards) -- chain these before anything else
   if HasID(cards,61257789,false,nil,LOCATION_MZONE,ChainNegation) then -- Stardust AM
     return {1,CurrentIndex}
   end
+  if HasIDNotNegated(cards,63767246,ChainNegation) then -- Titanic Galaxy
+    return {1,CurrentIndex}
+  end
   if HasIDNotNegated(cards,35952884,false,nil,LOCATION_MZONE,ChainNegation) then -- Quasar
     return {1,CurrentIndex}
   end
@@ -2289,7 +2359,7 @@ function PriorityChain(cards) -- chain these before anything else
   if HasIDNotNegated(cards,99188141,ChainNegation) then -- THRIO
     return {1,CurrentIndex}
   end
-  if HasID(cards,74822425,ChainNegation) then -- Shekinaga
+  if HasID(cards,74822425,false,nil,LOCATION_MZONE,ChainNegation) then -- Shekinaga
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,27346636,ChainNegation) then -- Heraklinos
@@ -2789,10 +2859,13 @@ function GenericEffectYesNo(id,card)
   if id == 33698022 then -- Moonlight Rose
     retult = 1
   end
-  if id == 72959823 and ChainPanzerDragon(Card) then
+  if id == 72959823 and ChainPanzerDragon(card) then
     result = 1
   end
   if id == 73176465 and grave then -- Felis
+    result = 1
+  end
+  if id == 63767246 and ChainTitanicGalaxy(card) then
     result = 1
   end
   return result

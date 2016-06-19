@@ -89,19 +89,19 @@ GladBeastActivateBlacklist={
 
 01845204, -- Instant Fusion
 08949584, -- AHL
-12580477, -- Raigeki
-14087893, -- BoM
+--12580477, -- Raigeki
+--14087893, -- BoM
 
 40838625, -- Sandstorm Mirror Force
 53567095, -- Icarus
 97077563, -- CotH
 --96216229, -- War Chariot
 
-27346636, -- Heraklinos
+--27346636, -- Heraklinos
 29357956, -- Nerokius
 48156348, -- Gyzarus
-63767246, -- Titanic Galaxy
-01639384, -- Felgrand
+--63767246, -- Titanic Galaxy
+--01639384, -- Felgrand
 95169481, -- DDW
 }
 GladBeastSummonBlacklist={
@@ -119,7 +119,6 @@ GladBeastSummonBlacklist={
 48156348, -- Gyzarus
 63767246, -- Titanic Galaxy
 01639384, -- Felgrand
-56832966, -- Utopia Lightning
 84013237, -- Utopia
 86848580, -- Zerofyne
 63746411, -- Giant Hand
@@ -214,7 +213,7 @@ function EquesteCond(loc,c)
     if CardsMatchingFilter(AIGrave(),FilterID,96216229) -- War Chariot
     +CardsMatchingFilter(AIGrave(),GladBeastNonFusion,07573135) -- Augustus
     >GetMultiple(c.id)
-    and CardsMatchingFilter(AIHand(),GladBeastFilter)
+    and CardsMatchingFilter(AIHand(),GladBeastFilter)==0
     then
       return true
     end
@@ -314,9 +313,9 @@ GladBeastPriorityList={
 [40838625] = {1,1,1,1,1,1,1,1,1,1,},  -- Sandstorm Mirror Force
 [96216229] = {5,1,1,1,1,1,1,1,1,1,ChariotCond},  -- War Chariot
 
-[27346636] = {1,1,1,1,1,1,1,1,1,1,HeraklinosCond},  -- Heraklinos
-[29357956] = {1,1,1,1,1,1,1,1,1,1,NerokiusCond},  -- Nerokius
-[48156348] = {9,1,9,1,8,1,1,1,1,1,GyzarusCond},  -- Gyzarus
+[27346636] = {1,1,9,1,1,1,1,1,1,1,HeraklinosCond},  -- Heraklinos
+[29357956] = {1,1,9,1,1,1,1,1,1,1,NerokiusCond},  -- Nerokius
+[48156348] = {9,1,10,1,8,1,1,1,1,1,GyzarusCond},  -- Gyzarus
 [63767246] = {1,1,1,1,1,1,1,1,1,1,},  -- Titanic Galaxy
 [01639384] = {1,1,1,1,1,1,1,1,1,1,},  -- Felgrand
 [56832966] = {1,1,1,1,1,1,1,1,1,1,},  -- Utopia Lightning
@@ -330,16 +329,24 @@ GladBeastPriorityList={
 } 
 function UsePrisma(c,mode)
   if mode == 1
-  and CardsMatchingFilter(AIDeck(),FilterID,41470137)>1 -- Bestiari
+  and CardsMatchingFilter(AIDeck(),FilterID,41470137)>0 -- Bestiari
   and HasIDNotNegated(AIExtra(),48156348,true) -- Gyzarus
   then
+    return true
+  end
+  if mode == 2
+  and CardsMatchingFilter(AIDeck(),FilterID,78868776)>0 -- Laquari
+  and HasIDNotNegated(AIExtra(),27346636,true) -- Heraklinos
+  then
+    GlobalCardMode = 1
+    GlobalTargetSet(FindID(AIExtra(),27346636))
     return true
   end
 end
 function SummonPrisma(c,mode)
   local mats = CardsMatchingFilter(AIMon(),GladBeastNonFusion,c)
   if mode == 1
-  and CardsMatchingFilter(AIDeck(),FilterID,41470137)>1 -- Bestiari
+  and CardsMatchingFilter(AIDeck(),FilterID,41470137)>0 -- Bestiari
   and HasIDNotNegated(AIExtra(),48156348,true,SummonGyzarus) -- Gyzarus
   and (mats>0 and(mats<2 or not HasID(AIMon(),41470137,true)) -- Bestiari
   or HasIDNotNegated(AICards(),92373006,true) -- Test Tiger
@@ -350,6 +357,15 @@ function SummonPrisma(c,mode)
     return true
   end
   if mode == 2
+  and CardsMatchingFilter(AIDeck(),FilterID,78868776)>0 -- Laquari
+  and HasID(AIExtra(),27346636,true) -- Heraklinos
+  and HasIDNotNegated(AIExtra(),48156348,true,SummonGyzarus) -- Gyzarus
+  and HasID(AIMon(),41470137,true)
+  and mats<2
+  then
+    return true
+  end
+  if mode == 3
   and #AIMon()==0
   --and TurnEndCheck()
   then
@@ -588,6 +604,13 @@ function UseCotHGlad(c,mode)
   then
     return true
   end
+  if mode == 5
+  and HasID(AIGrave(),29357956,true,FilterRevivable) -- Nerokius
+  then
+    GlobalCardMode = 1
+    GlobalTargetSet(FindID(29357956,AIGrave())) -- Nerokius
+    return true
+  end
 end
 function ContactFusion(index,id)
   if index == nil then
@@ -598,6 +621,117 @@ function ContactFusion(index,id)
     GlobalSSCardID = id
   end
   return {COMMAND_SPECIAL_SUMMON,index}
+end
+function NerokiusFilter(c,source)
+  return BattleTargetCheck(c,source)
+  and (FilterPosition(c,POS_FACEDOWN)
+  or not SelectAttackConditions(c) 
+  and SelectAttackConditions(c,source))
+end
+function SummonNerokius(c,mode)
+  local mats = SubGroup(AIMon(),GladBeastNonFusion)
+  if #mats<3 then return false end
+  if mode == 1
+  and MatchupCheck(c.id) 
+  and CanWinBattle(c,OppMon())
+  then
+    return true
+  end
+  if mode == 2
+  and BattlePhaseCheck()
+  and CanWinBattle(c,OppMon(),nil,nil,NerokiusFilter,c)
+  then
+    return true
+  end
+  if mode == 3
+  and OppHasStrongestMonster()
+  and CanWinBattle(c,OppMon())
+  then
+    return true
+  end
+  if mode == 4
+  and MP2Check()
+  then
+    return true
+  end
+end
+function SummonHeraklinos(c,mode)
+  local mats = SubGroup(AIMon(),GladBeastNonFusion)
+  if #mats<3 then return false end
+  if mode == 1
+  and MatchupCheck(c.id)
+  and OppGetStrongestAttack()<c.attack
+  and MP2Check()
+  and #AIHand()>0
+  then
+    return true
+  end
+  if mode == 2 
+  and OppGetStrongestAttack()<c.attack
+  and MP2Check()
+  and #AIHand()>2
+  then
+    return true
+  end
+  if mode == 3
+  and OppHasStrongestMonster()
+  and CanWinBattle(c,OppMon())
+  then
+    return true
+  end
+end
+function GladBeastXYZMaterialCheck(c) -- only XYZ summon, if AI has no backrow, 
+  if not HasBackrow() then           -- or leaves a Gladbeast on the field for Chariot
+    return MP2Check()
+  end
+  local cards = SubGroup(AIMon(),GladBeastNonFusion)
+  if c and not FilterLocation(c,LOCATION_MZONE) 
+  then
+    table.insert(cards,c)
+  end
+  return #cards>2
+end
+--[[
+63767246 -- Titanic Galaxy
+01639384 -- Felgrand
+56832966 -- Utopia Lightning
+84013237 -- Utopia
+86848580 -- Zerofyne
+63746411 -- Giant Hand
+82633039 -- Castel
+95169481 -- DDW
+22653490 -- Chidori
+function SummonFelgrandGladbeast(c,mode)
+end
+function SummonTitanicGalaxyGladbeast(c,mode)
+end
+function SummonUtopiaGladbeast(c,mode)
+end
+function SummonChidoriGladbeast(c,mode)
+end
+function SummonZerofyneGladbeast(c,mode)
+end
+]]
+
+function UseBomGladbeast(card)
+  local result = true
+  if #AIMon() == 0 then
+    result = false
+  end
+  for i,c in pairs(AIMon()) do
+    if CanAttackSafely(c,OppMon(),true) then
+      result = false
+    end
+  end
+  local targets = SubGroup(OppMon(),MoonFilter)
+  if result and #targets>0 then
+    targets = SubGroup(targets,FilterDefenseMax,AIGetStrongestAttack(true,GladBeastFilter))
+    if #targets>0 then
+      GlobalCardMode = 1
+      GlobalTargetSet(targets[1])
+    end
+    return true
+  end
 end
 function GladBeastInit(cards)
   local Act = cards.activatable_cards
@@ -618,12 +752,17 @@ function GladBeastInit(cards)
   if HasID(SpSum,48156348,SummonGyzarus,2) then
     return ContactFusion()
   end
-
+  if HasID(Act,89312388,UsePrisma,2) then
+    return Activate()
+  end
  
   if HasID(Act,08949584,UseAHLGlad,1) then
     return Activate()
   end
   if HasID(Sum,89312388,SummonPrisma,1) then
+    return Summon()
+  end
+  if HasID(Sum,89312388,SummonPrisma,2) then
     return Summon()
   end
   if HasID(Act,08949584,UseAHLGlad,2) then
@@ -684,6 +823,9 @@ function GladBeastInit(cards)
   if HasIDNotNegated(Act,97077563,UseCotHGlad,4) then
     return Activate()
   end
+  if HasIDNotNegated(Act,97077563,UseCotHGlad,5) then
+    return Activate()
+  end
   gladbeasts = { -- order of summoning, if attacking
   78868776, -- Laquari
   25924653, -- Darius
@@ -708,8 +850,72 @@ function GladBeastInit(cards)
       return Summon()
     end
   end
-  if HasID(Sum,89312388,SummonPrisma,2) then
+  if HasID(Sum,89312388,SummonPrisma,3) then
     return Summon()
+  end
+  
+  if #AIMon()>1 and GladBeastXYZMaterialCheck() then
+    print("considering XYZ summons...")
+    if HasID(SpSum,63767246,SummonTitanicGalaxy,1) then
+      return XYZSummon()
+    end
+    if HasID(SpSum,01639384,SummonFelgrand,1) then
+      return XYZSummon()
+    end
+    if HasID(SpSum,22653490,SummonChidori,1) then
+      return XYZSummon()
+    end
+    if HasID(SpSum,84013237,SummonUtopia,1) then
+      return XYZSummon()
+    end
+    if HasID(SpSum,84013237,SummonUtopia,2) then
+      return XYZSummon()
+    end
+    if HasID(SpSum,86848580,SummonZerofyne) then
+      return XYZSummon()
+    end
+    if HasID(SpSum,82633039,SummonSkyblaster) then
+      return XYZSummon()
+    end
+    if HasID(SpSum,22653490,SummonChidori,2) then
+      return XYZSummon()
+    end
+    if HasID(SpSum,01639384,SummonFelgrand,2) then
+      return XYZSummon()
+    end
+    if HasID(SpSum,63767246,SummonTitanicGalaxy,2) then
+      return XYZSummon()
+    end
+    if HasID(SpSum,84013237,SummonUtopia,3) then
+      return XYZSummon()
+    end
+    print("...or not")
+  end
+  
+  if HasID(SpSum,27346636,SummonHeraklinos,1) then
+    return ContactFusion()
+  end
+  if HasID(SpSum,29357956,SummonNerokius,1) then
+    return ContactFusion()
+  end
+  if HasID(SpSum,29357956,SummonNerokius,2) then
+    return ContactFusion()
+  end
+  if HasID(SpSum,27346636,SummonHeraklinos,2) then
+    return ContactFusion()
+  end
+  if HasID(SpSum,29357956,SummonNerokius,3) then
+    return ContactFusion()
+  end
+  if HasID(SpSum,29357956,SummonNerokius,4) then
+    return ContactFusion()
+  end
+  if HasID(SpSum,27346636,SummonHeraklinos,3) then
+    return ContactFusion()
+  end
+  
+  if HasIDNotNegated(Act,14087893,UseBomGladbeast) then
+    return Activate()
   end
   return nil
 end
@@ -725,9 +931,12 @@ function LaquariTarget(cards)
   end
 end
 function PrismaTarget(cards)
+  if GlobalCardMode == 1 then
+    GlobalCardMode = nil
+    return Add(cards,PRIO_TOFIELD,1,FilterGlobalTarget,cards)
+  end
   if LocCheck(cards,LOCATION_EXTRA) then
-    if CardsMatchingFilter(AIDeck(),FilterID,41470137)>1 -- Bestiari
-    or not HasID(AIGrave(),41470137,true) 
+    if CardsMatchingFilter(AIDeck(),FilterID,41470137)>0 -- Bestiari
     then
       return Add(cards,PRIO_TOFIELD,1,FilterID,48156348) -- Gyzarus
     else
@@ -777,7 +986,7 @@ end
 function HeraklinosTarget(cards,c,min,max)
   return Add(cards,PRIO_TOGRAVE)
 end
-function NerokiusTarget(cards)
+function NerokiusTarget(cards,c,min,max)
   if LocCheck(cards,LOCATION_DECK) then
     return Add(cards,PRIO_TOFIELD,max)
   end
@@ -824,13 +1033,13 @@ function GladBeastCard(cards,min,max,id,c)
 end
 function ChainCothGlad(c)
   if RemovalCheckCard(c) then
-    --return true --no minion can profit from that, do it anyway?
+    return true -- no minion can profit from that, do it anyway?
   end
   if not UnchainableCheck(c) then
     return false
   end
   local gyz = HasIDNotNegated(AIGrave(),48156348,true,FilterRevivable) and SummonGyzarus() -- Gyzarus
-  if gyz then gyz = FindID(48156348,AIGrave()) end
+  if gyz then gyz = FindID(48156348,AIGrave()) end -- Gyzarus
   local targets = SubGroup(OppField(),GyzarusFilter)
   local prio = HasPriorityTarget(targets,true)
   if Duel.GetTurnPlayer()==1-player_ai
@@ -946,7 +1155,6 @@ function TagGladBeast(c)
   if not check then return false end
   local desc = 0
   if c.id==78868776
-  or c.id==29357956
   then
     desc=c.id*16
   else

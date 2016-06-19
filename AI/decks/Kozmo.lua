@@ -540,6 +540,11 @@ function UseReasoning(c,mode)
     return #AIMon()==0 or OppHasStrongestMonster()
   end
 end
+function ReasoningNumber() -- for opponent's Reasoning
+  local result = MatchupCheck(58577036) -- Reasoning
+  if result then return result end
+  return 4
+end
 function UseTincan(c,mode)
   if mode == 2 
   and UseRiderSummon(c)
@@ -1182,6 +1187,17 @@ end
 function KozmoAttackBoost(cards)
 end
 function KozmoOption(options)
+  for i,v in pairs(options) do
+    if v == 90452877*16+2 then -- Kozmojo
+      local targets = SubGroup(OppField(),KozmojoFilter)
+      if #targets>0 then
+        return i
+      end
+    end
+    if v == 90452877*16+1 then -- Kozmojo
+      return i
+    end
+  end
 end
 function KozmoChainOrder(cards)
 end

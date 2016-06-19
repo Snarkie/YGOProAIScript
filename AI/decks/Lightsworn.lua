@@ -217,7 +217,7 @@ LightswornPriorityList={
 
 } 
 function SummonBlackRose(c)
-  return UseFieldNuke(-1)
+  return UseFieldNuke(c,-1)
 end
 function SummonWulf(c)
   return MacroCheck()
@@ -407,7 +407,7 @@ function SummonOmega(c,mode)
   or HasIDNotNegated(AIHand(),57774843,true,SummonJD,1) 
   and LightswornNameCheck(Merge(AIGrave(),AIMon()))>3)
   and DestroyCheck(OppField())>1
-  and OppHand()>0
+  and #OppHand()>0
   and NotNegated(c)
   then
     return true

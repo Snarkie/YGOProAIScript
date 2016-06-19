@@ -281,7 +281,7 @@ function SquallCond(loc)
   end
   return true
 end
-function DivaCond(loc)
+function DivaCond(c,loc)
   if loc == PRIO_TOHAND then
     return ((HasIDNotNegated(AIST(),60202749,true) 
     or FieldCheck(4)>1) 
@@ -428,8 +428,13 @@ function UseTeus()
   return MermailPriorityCheck(AIHand(),PRIO_DISCARD,1,FilterAttribute,ATTRIBUTE_WATER)>4
 end
 function UseLeed(card)
-  return bit32.band(card.location,LOCATION_HAND)>0 and MermailPriorityCheck(AIHand(),PRIO_DISCARD,3,FilterAttribute,ATTRIBUTE_WATER)>5 
-  and CardsMatchingFilter(AIGrave(),function(c) return bit32.band(c.setcode,0x75)>0 and bit32.band(c.type,TYPE_SPELL+TYPE_TRAP)>0 end)>0 
+  return FilterLocation(card,LOCATION_HAND)
+  and MermailPriorityCheck(AIHand(),PRIO_DISCARD,3,FilterAttribute,ATTRIBUTE_WATER)>5 
+  and CardsMatchingFilter(AIGrave(),
+    function(c) 
+      return FilterSet(c,0x75)
+      and FilterType(c,TYPE_SPELL+TYPE_TRAP)
+    end)>0 
 end
 function LeedFilter(c)
   return bit32.band(c.position,POS_FACEUP_ATTACK)>0 
@@ -447,7 +452,8 @@ function UseTurge(c)
   return TurgeCond(PRIO_TOFIELD,c)
 end
 function UseSalvage()
-  return MermailPriorityCheck(AIGrave(),PRIO_TOHAND,2,function(c) return bit32.band(c.attribute,ATTRIBUTE_WATER)>0 and c.attack<=1500 end)>1
+  return MermailPriorityCheck(AIGrave(),PRIO_TOHAND,2,
+    function(c) return FilterAttribute(c,ATTRIBUTE_WATER) and c.attack<=1500 end)>1
   and #AIHand()<6
   and CardsMatchingFilter(AIGrave(),FilterAttribute,ATTRIBUTE_WATER)~=5
 end
@@ -1044,20 +1050,24 @@ function UseSphereBP()
 end
 function ChainSphere(c)
   if RemovalCheckCard(c) then
+    if HasID(AIDeck(),23899727,true) and LindeCond(PRIO_TOFIELD) then -- Linde
+      GlobalSphere = 1
+      GlobalSphereID = 23899727 -- Linde
+    end
     return true
   end
   local effect = Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)
 	if effect then
     local c=effect:GetHandler() 
-    if c:IsCode(60202749) and c:IsControler(player_ai) then
+    if c:IsCode(60202749) and c:IsControler(player_ai) then -- Sphere
       return false
     end
   end
   if Duel.GetCurrentPhase()==PHASE_MAIN2 and Duel.CheckTiming(TIMING_MAIN_END) and Duel.GetTurnPlayer() == 1-player_ai 
-  and HasID(AIDeck(),23899727,true) and LindeCond(PRIO_TOFIELD) 
+  and HasID(AIDeck(),23899727,true) and LindeCond(PRIO_TOFIELD) -- Linde
   then
     GlobalSphere = 1
-    GlobalSphereID = 23899727
+    GlobalSphereID = 23899727 -- Linde
     return true
   end
   if IsBattlePhase() and Duel.GetTurnPlayer() == 1-player_ai
@@ -1065,7 +1075,7 @@ function ChainSphere(c)
   then
     if Duel.GetAttacker() and #AIMon()==0 then
       GlobalSphere = 1
-      GlobalSphereID = 23899727
+      GlobalSphereID = 23899727 -- Linde
       return true
     end
   end
@@ -1214,7 +1224,7 @@ function ChainDweller(c,mode)
       for j=1,2 do
         local ex,cg=Duel.GetOperationInfo(i,cat[j])
         if ex then
-          local c = CardFromScript(cg:GetFirst())
+          local c = GetCardFromScript(cg:GetFirst())
           if CurrentOwner(c)==2 then
             --print(removal by AI, chaining")
             return true

@@ -116,7 +116,7 @@ function HonestCond(loc)
 end
 function NodenCond(loc,c)
   if loc == PRIO_TOFIELD then
-    return Duel.GetCurrentChain()==0 and CardsMatchingFilter(AIGrave(),NodenFilter)>0
+    return Duel.GetCurrentChain()==0 and CardsMatchingFilter(AIGrave(),NodenFilter,4)>0
   end
   return true
 end
@@ -600,7 +600,7 @@ function SatellarknightOnSelectChain(cards,only_chains_by_player)
   if HasID(cards,97077563) and ChainCotH2() then
     return {1,CurrentIndex}
   end
-  if HasID(cards,82732705) and ChainSkillDrain(cards[CurrentIndex]) then
+  if HasID(cards,82732705,ChainSkillDrain) then
     return {1,CurrentIndex}
   end
   if HasID(cards,25789292) and ChainChaliceAtk() then
