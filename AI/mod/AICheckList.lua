@@ -100,7 +100,7 @@ function IsGladiatorArchetype(CardId)
      CardId == 02619149 or CardId == 77642288 or   -- Gladiator Beast Samnite, Gladiator Beast Secutor
      CardId == 79580323 or CardId == 65984457 or   -- Gladiator Beast Spartacus, Gladiator Beast Torax
      CardId == 50893987 and                        -- Gladiator Beast Tygerius
-     (AIMons[i].position == POS_FACEUP_ATTACK or AIMons[i].position == POS_FACEUP_DEFENCE) then
+     (AIMons[i].position == POS_FACEUP_ATTACK or AIMons[i].position == POS_FACEUP_DEFENSE) then
     return 1
      end
       end

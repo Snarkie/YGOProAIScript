@@ -796,7 +796,7 @@ function MermailOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(SetableMon,68505803) and MermailOpenFieldCheck() then
     return {COMMAND_SET_MONSTER,CurrentIndex}
   end
-  if HasID(Repositionable,23899727,false,nil,nil,POS_FACEDOWN_DEFENCE) and SummonLinde() then
+  if HasID(Repositionable,23899727,false,nil,nil,POS_FACEDOWN_DEFENSE) and SummonLinde() then
     return {COMMAND_CHANGE_POS,CurrentIndex}
   end
   if HasIDNotNegated(Activatable,47826112,false,nil,LOCATION_HAND,SummonPoseidra) then
@@ -1365,7 +1365,7 @@ function MermailOnSelectPosition(id, available)
     if MermailDef[i]==id and not (IsBattlePhase() 
     and Duel.GetTurnPlayer()==player_ai) 
     then 
-      result=POS_FACEUP_DEFENCE 
+      result=POS_FACEUP_DEFENSE 
     end
   end
   if id == 22446869 then -- Teus
@@ -1376,7 +1376,7 @@ function MermailOnSelectPosition(id, available)
     then
       result=POS_FACEUP_ATTACK
     else
-      result=POS_FACEUP_DEFENCE
+      result=POS_FACEUP_DEFENSE
     end
   end
   if id == 23899727 then -- Linde
@@ -1386,7 +1386,7 @@ function MermailOnSelectPosition(id, available)
     then
       result=POS_FACEUP_ATTACK
     else
-      result=POS_FACEUP_DEFENCE
+      result=POS_FACEUP_DEFENSE
     end
   end
   return result

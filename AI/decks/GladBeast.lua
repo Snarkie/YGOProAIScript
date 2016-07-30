@@ -855,7 +855,6 @@ function GladBeastInit(cards)
   end
   
   if #AIMon()>1 and GladBeastXYZMaterialCheck() then
-    print("considering XYZ summons...")
     if HasID(SpSum,63767246,SummonTitanicGalaxy,1) then
       return XYZSummon()
     end
@@ -889,7 +888,6 @@ function GladBeastInit(cards)
     if HasID(SpSum,84013237,SummonUtopia,3) then
       return XYZSummon()
     end
-    print("...or not")
   end
   
   if HasID(SpSum,27346636,SummonHeraklinos,1) then
@@ -1270,14 +1268,14 @@ function GladBeastPosition(id,available)
       then 
         result=POS_FACEUP_ATTACK
       else 
-        result=POS_FACEUP_DEFENCE 
+        result=POS_FACEUP_DEFENSE 
       end
     end
   end
   for i=1,#GladBeastDef do
     if GladBeastDef[i]==id 
     then 
-      result=POS_FACEUP_DEFENCE 
+      result=POS_FACEUP_DEFENSE 
     end
   end
   return result

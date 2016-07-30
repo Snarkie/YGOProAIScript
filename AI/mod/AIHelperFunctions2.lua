@@ -235,7 +235,7 @@ function AIGetStrongestAttack(skipbonus,filter,opt)
     and c:is_affected_by(EFFECT_CANNOT_ATTACK)==0 
     and c.attack>result 
     and FilterCheck(c,filter,opt)
-    and not (FilterPosition(c,POS_DEFENCE) 
+    and not (FilterPosition(c,POS_DEFENSE) 
     and c.turnid==Duel.GetTurnCount())
     then
       result=c.attack
@@ -272,7 +272,7 @@ function OppGetStrongestAttDef(filter,opt,loop)
         if cards[i].bonus then 
           result=result-cards[i].bonus
         end   
-      elseif bit32.band(cards[i].position,POS_DEFENCE)>0 and cards[i].defense>result 
+      elseif bit32.band(cards[i].position,POS_DEFENSE)>0 and cards[i].defense>result 
       and FilterPublic(cards[i])
       then
         result=cards[i].defense
@@ -290,7 +290,7 @@ function OppGetWeakestAttDef()
     if cards[i] and cards[i]:is_affected_by(EFFECT_CANNOT_BE_BATTLE_TARGET)==0 then
       if bit32.band(cards[i].position,POS_ATTACK)>0 and cards[i].attack<result then
         result=cards[i].attack-cards[i].bonus
-      elseif bit32.band(cards[i].position,POS_DEFENCE)>0 and cards[i].defense<result 
+      elseif bit32.band(cards[i].position,POS_DEFENSE)>0 and cards[i].defense<result 
       and FilterPublic(cards[i])
       then
         result=cards[i].defense
@@ -955,8 +955,8 @@ function WinsBattle(source,target)
   and FilterLocation(target,LOCATION_MZONE)
   and (target:IsPosition(POS_FACEUP_ATTACK) 
   and source:GetAttack() >= target:GetAttack()
-  or target:IsPosition(POS_FACEUP_DEFENCE)
-  and source:GetAttack() > target:GetDefence()) 
+  or target:IsPosition(POS_FACEUP_DEFENSE)
+  and source:GetAttack() > target:GetDefense()) 
   and source:IsPosition(POS_FACEUP_ATTACK)
   and not target:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE)
   and not source:IsHasEffect(EFFECT_CANNOT_ATTACK)
@@ -1136,7 +1136,7 @@ end
 function FilterDefense(c,defense)
   local def = 0
   if c.GetCode then
-    def = c:GetDefence()
+    def = c:GetDefense()
   else
     def = c.defense
   end
@@ -1145,7 +1145,7 @@ end
 function FilterDefenseMin(c,defense)
   local def = 0
   if c.GetCode then
-    def = c:GetDefence()
+    def = c:GetDefense()
   else
     def = c.defense
   end
@@ -1154,7 +1154,7 @@ end
 function FilterDefenseMax(c,defense)
   local def = 0
   if c.GetCode then
-    def = c:GetDefence()
+    def = c:GetDefense()
   else
     def = c.defense
   end
@@ -1468,9 +1468,9 @@ function AttackBoostCheck(bonus,malus,player,filter,opt)
     and (source:IsPosition(POS_FACEUP_ATTACK) 
     and source:GetAttack() >= target:GetAttack() 
     and source:GetAttack()-malus <= target:GetAttack()+bonus
-    or source:IsPosition(POS_FACEUP_DEFENCE) 
-    and source:GetDefence() >= target:GetAttack() 
-    and source:GetDefence() <= target:GetAttack()+bonus)
+    or source:IsPosition(POS_FACEUP_DEFENSE) 
+    and source:GetDefense() >= target:GetAttack() 
+    and source:GetDefense() <= target:GetAttack()+bonus)
     and not source:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE)
     and (filter == nil 
     or opt == nil and filter(target)
@@ -1926,7 +1926,7 @@ function BattleDamage(c,source,atk,oppatk,oppdef,pierce)
     if FilterPosition(c,POS_FACEUP_ATTACK) then
       return atk-oppatk
     end
-    if FilterPosition(c,POS_DEFENCE) and pierce then
+    if FilterPosition(c,POS_DEFENSE) and pierce then
       if FilterPublic(c) then
         return atk-oppdef
       end
@@ -2073,12 +2073,12 @@ function CanAttackSafely(c,targets,damage,filter,opt)
     local oppatk = target.attack
     local oppdef = target.defense
     usedatk = baseatk
-    if FilterPosition(target,POS_FACEDOWN_DEFENCE) and not FilterPublic(target) then
+    if FilterPosition(target,POS_FACEDOWN_DEFENSE) and not FilterPublic(target) then
       oppdef = 1500
     end
     if (FilterPosition(target,POS_ATTACK) and (oppatk<usedatk
     or CrashCheck(c) and oppatk==usedatk)
-    or FilterPosition(target,POS_DEFENCE) and (oppdef-usedatk<=damage*AI.GetPlayerLP(1))
+    or FilterPosition(target,POS_DEFENSE) and (oppdef-usedatk<=damage*AI.GetPlayerLP(1))
     and (FilterPosition(target,POS_FACEUP) or FilterPublic(target))) 
     and SafeAttackCheck(target,c) 
     then
@@ -2123,12 +2123,12 @@ function CanWinBattle(c,targets,tograve,ignorebonus,filter,opt)
     then
       oppatk = oppatk - target.bonus
     end
-    if FilterPosition(target,POS_FACEDOWN_DEFENCE) and not FilterPublic(target) then
+    if FilterPosition(target,POS_FACEDOWN_DEFENSE) and not FilterPublic(target) then
       oppdef = 1500
     end
     if FilterPosition(target,POS_ATTACK) and (oppatk<usedatk
     or CrashCheck(c) and oppatk==usedatk)
-    or FilterPosition(target,POS_DEFENCE) and oppdef<usedatk 
+    or FilterPosition(target,POS_DEFENSE) and oppdef<usedatk 
     and BattleTargetCheck(target,c) 
     then
       return true
@@ -2153,7 +2153,7 @@ function CanChangePos(c)
 end
 function CanAttack(c,direct,filter,opt)
   return (FilterPosition(c,POS_FACEUP_ATTACK)
-  or FilterPosition(c,POS_DEFENCE) and CanChangePos(c))
+  or FilterPosition(c,POS_DEFENSE) and CanChangePos(c))
   and AvailableAttacks(c)>0
   and not FilterAffected(c,EFFECT_CANNOT_ATTACK)
   and (not direct or not FilterAffected(c,EFFECT_CANNOT_DIRECT_ATTACK))
@@ -2249,7 +2249,7 @@ function CanFinishGame(c,target,atk,bonus,malus)
   local oppatk, oppdef
   if target.GetCode then
     oppatk = target:GetAttack()
-    oppdef = target:GetDefence()
+    oppdef = target:GetDefense()
   else
     oppatk = target.attack
     oppdef = target.defense
@@ -2259,7 +2259,7 @@ function CanFinishGame(c,target,atk,bonus,malus)
     if FilterPosition(target,POS_FACEUP_ATTACK) then
       return AI.GetPlayerLP(p)<=atk-oppatk
     end
-    if FilterPosition(target,POS_DEFENCE) and FilterAffected(c,EFFECT_PIERCE) then
+    if FilterPosition(target,POS_DEFENSE) and FilterAffected(c,EFFECT_PIERCE) then
       if FilterPublic(target) then
         return AI.GetPlayerLP(p)<=atk-oppatk
       else

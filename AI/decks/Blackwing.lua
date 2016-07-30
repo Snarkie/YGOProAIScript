@@ -466,7 +466,7 @@ function SummonBlackwing(c)
 end
 function ArmedWingFilter(c,source)
   return BattleTargetCheck(c,source)
-  and FilterPosition(c,POS_DEFENCE)
+  and FilterPosition(c,POS_DEFENSE)
   and (FilterPrivate(c) or c.defense<source.attack+500)
 end
 function ArmedWingCheck(c,targets)
@@ -1087,7 +1087,7 @@ function BlackwingPosition(id,available)
   for i=1,#BlackwingDef do
     if BlackwingDef[i]==id 
     then 
-      result=POS_FACEUP_DEFENCE 
+      result=POS_FACEUP_DEFENSE 
     end
   end
   return result

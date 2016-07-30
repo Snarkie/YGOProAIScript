@@ -982,11 +982,11 @@ function HeraldicOnSelectPosition(id, available)
     if HeraldicAtt[i]==id then result=POS_FACEUP_ATTACK end
   end
   for i=1,#HeraldicDef do
-    if HeraldicDef[i]==id then result=POS_FACEUP_DEFENCE end
+    if HeraldicDef[i]==id then result=POS_FACEUP_DEFENSE end
   end
   if id==23649496 then
     if AI.GetCurrentPhase() == PHASE_MAIN2 or Duel.GetTurnCount() == 1 then
-      result=POS_FACEUP_DEFENCE
+      result=POS_FACEUP_DEFENSE
     else
       result=POS_FACEUP_ATTACK
     end

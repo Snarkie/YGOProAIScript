@@ -94,7 +94,7 @@ function SummonExtraDeck(cards,prio)
   if HasIDNotNegated(Rep,12014404,false,nil,nil,POS_FACEUP_ATTACK) and UseCowboyDef() then 
     return {COMMAND_CHANGE_POS,CurrentIndex}                                -- Gagaga Cowboy finish
   end
-  if HasIDNotNegated(Act,12014404,false,nil,nil,POS_DEFENCE) and UseCowboyDef() then 
+  if HasIDNotNegated(Act,12014404,false,nil,nil,POS_DEFENSE) and UseCowboyDef() then 
     return {COMMAND_ACTIVATE,CurrentIndex}                                -- Gagaga Cowboy finish
   end
   if HasIDNotNegated(Act,29669359) and UseVolcasaurus() then                -- Volcasaurus finish
@@ -509,7 +509,7 @@ function SummonExtraDeck(cards,prio)
   if HasIDNotNegated(SpSum,12014404) and SummonCowboyAtt() then
     return XYZSummon()
   end
-  if HasIDNotNegated(Rep,12014404,nil,nil,POS_DEFENCE,UseCowboyAtt) then
+  if HasIDNotNegated(Rep,12014404,nil,nil,POS_DEFENSE,UseCowboyAtt) then
     return {COMMAND_CHANGE_POS,CurrentIndex}
   end
   if HasIDNotNegated(Act,12014404,FilterPosition,POS_FACEUP_ATTACK) and UseCowboyAtt() then
@@ -644,7 +644,7 @@ function SummonExtraDeck(cards,prio)
     local c=Rep[i]
     local equips = c:get_equipped_cards()
     if HasIDNotNegated(equips,19508728,true)
-    and FilterPosition(c,POS_DEFENCE)
+    and FilterPosition(c,POS_DEFENSE)
     then
       return Repo()
     end
@@ -1248,7 +1248,7 @@ function SummonSharkKnight(cards)
 end
 function CowboyFilter(c)
   return ((c.attack<3000 and bit32.band(c.position,POS_ATTACK)>0
-  or c.defense<2500 and bit32.band(c.position,POS_DEFENCE)>0
+  or c.defense<2500 and bit32.band(c.position,POS_DEFENSE)>0
   and FilterPublic(c))
   and c:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE)==0 
   and c:is_affected_by(EFFECT_CANNOT_BE_BATTLE_TARGET)==0)
@@ -1498,7 +1498,7 @@ function RepoZenmaines(c)
   and Duel.GetCurrentPhase()==PHASE_MAIN1
   and GlobalBPAllowed
   then
-    return FilterPosition(c,POS_DEFENCE)
+    return FilterPosition(c,POS_DEFENSE)
   else
     return FilterPosition(c,POS_ATTACK)
   end
@@ -1969,9 +1969,9 @@ function ChainSkillDrain(card)
       and source:GetAttack() <= target:GetAttack()+QliphortAttackBonus(target:GetCode(),target:GetLevel())
       and not (source:GetAttack() == target:GetAttack() 
       and QliphortAttackBonus(target:GetCode(),target:GetLevel())==0)
-      or source:IsPosition(POS_FACEUP_DEFENCE)
-      and source:GetDefence() >= target:GetAttack() 
-      and source:GetDefence() < target:GetAttack()+QliphortAttackBonus(target:GetCode(),target:GetLevel()))
+      or source:IsPosition(POS_FACEUP_DEFENSE)
+      and source:GetDefense() >= target:GetAttack() 
+      and source:GetDefense() < target:GetAttack()+QliphortAttackBonus(target:GetCode(),target:GetLevel()))
       and target:IsPosition(POS_FACEUP_ATTACK) 
       then
         return true
@@ -2213,7 +2213,7 @@ function ChainCompulse()
     local target=Duel.GetAttackTarget()
     if source and target then
       if source:IsControler(1-player_ai) and target:IsControler(player_ai) 
-      and (target:IsPosition(POS_DEFENCE) and source:GetAttack()>target:GetDefence() 
+      and (target:IsPosition(POS_DEFENSE) and source:GetAttack()>target:GetDefense() 
       or target:IsPosition(POS_ATTACK) and source:GetAttack()>=target:GetAttack())
       and not source:IsHasEffect(EFFECT_CANNOT_BE_EFFECT_TARGET)
       and not source:IsHasEffect(EFFECT_IMMUNE_EFFECT)
@@ -2883,7 +2883,7 @@ function GenericPosition(id,available)
     if GenericAtt[i]==id then result=POS_FACEUP_ATTACK end
   end
   for i=1,#GenericDef do
-    if GenericDef[i]==id then result=POS_FACEUP_DEFENCE end
+    if GenericDef[i]==id then result=POS_FACEUP_DEFENSE end
   end
   if id == 78156759 then -- Zenmaines
     local c = FindID(78156759,AIExtra())
@@ -2894,7 +2894,7 @@ function GenericPosition(id,available)
     then
       result = POS_FACEUP_ATTACK
     else
-      result = POS_FACEUP_DEFENCE
+      result = POS_FACEUP_DEFENSE
     end
   end
   return result

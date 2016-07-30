@@ -682,12 +682,12 @@ function SummonShadowMist(c,mode)
   return false
 end
 function RepoShadowMist(c)
-  if FilterPosition(c,POS_FACEDOWN_DEFENCE)
+  if FilterPosition(c,POS_FACEDOWN_DEFENSE)
   and HasID(AICards(),21143940,true)
   then
     return true
   end
-  if FilterPosition(c,POS_FACEUP_DEFENCE)
+  if FilterPosition(c,POS_FACEUP_DEFENSE)
   and HasID(AICards(),21143940,true)
   and BattlePhaseCheck()
   and (CanWinBattle(c,OppMon())
@@ -1804,14 +1804,14 @@ function HEROPosition(id,available)
       then 
         result=POS_FACEUP_ATTACK
       else 
-        result=POS_FACEUP_DEFENCE 
+        result=POS_FACEUP_DEFENSE 
       end
     end
   end
   for i=1,#HERODef do
     if HERODef[i]==id 
     then 
-      result=POS_FACEUP_DEFENCE 
+      result=POS_FACEUP_DEFENSE 
     end
   end
   if id == 50720316 then
@@ -1821,7 +1821,7 @@ function HEROPosition(id,available)
     then
       result=POS_FACEUP_ATTACK
     else
-      result=POS_FACEUP_DEFENCE 
+      result=POS_FACEUP_DEFENSE 
     end
   end
   return result

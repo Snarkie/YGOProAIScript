@@ -651,7 +651,7 @@ function SatellarknightOnSelectPosition(id, available)
     if SatellarknightAtt[i]==id then result=POS_FACEUP_ATTACK end
   end
   for i=1,#SatellarknightDef do
-    if SatellarknightDef[i]==id then result=POS_FACEUP_DEFENCE end
+    if SatellarknightDef[i]==id then result=POS_FACEUP_DEFENSE end
   end
   return result
 end

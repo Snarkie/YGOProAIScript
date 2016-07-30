@@ -322,7 +322,7 @@ function AssignPriority(cards,loc,filter,opt)
       if Negated(c) then 
         c.prio=c.prio+3
       end
-      if FilterPosition(c,POS_DEFENCE)
+      if FilterPosition(c,POS_DEFENSE)
       and c.turnid==Duel.GetTurnCount()
       and c.attack>c.defense
       then

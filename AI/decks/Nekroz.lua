@@ -1823,7 +1823,7 @@ function NekrozPosition(id,available)
     if NekrozAtt[i]==id then result=POS_FACEUP_ATTACK end
   end
   for i=1,#NekrozDef do
-    if NekrozDef[i]==id then result=POS_FACEUP_DEFENCE end
+    if NekrozDef[i]==id then result=POS_FACEUP_DEFENSE end
   end
   return result
 end

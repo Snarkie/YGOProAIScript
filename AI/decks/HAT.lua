@@ -292,10 +292,10 @@ function HATInit(cards)
   if HasID(Summonable,91812341) and SummonMonster(Summonable[CurrentIndex].attack) then
     return {COMMAND_SUMMON,CurrentIndex}
   end
-  if HasID(Repositionable,68535320,false,nil,nil,POS_FACEDOWN_DEFENCE) and SummonFireHand() then
+  if HasID(Repositionable,68535320,false,nil,nil,POS_FACEDOWN_DEFENSE) and SummonFireHand() then
     return {COMMAND_CHANGE_POS,CurrentIndex}
   end
-  if HasID(Repositionable,95929069,false,nil,nil,POS_FACEDOWN_DEFENCE) and SummonIceHand() then
+  if HasID(Repositionable,95929069,false,nil,nil,POS_FACEDOWN_DEFENSE) and SummonIceHand() then
     return {COMMAND_CHANGE_POS,CurrentIndex}
   end
   if HasID(SetableMon,45803070) and SetDionaea() then
@@ -1005,7 +1005,7 @@ function HATPosition(id,available)
     if HATAtt[i]==id then result=POS_FACEUP_ATTACK end
   end
   for i=1,#HATDef do
-    if HATDef[i]==id then result=POS_FACEUP_DEFENCE end
+    if HATDef[i]==id then result=POS_FACEUP_DEFENSE end
   end
   if id == 68535320 or id == 95929069 -- Fire Hand, Ice Hand 
   or id == 63746411 -- Giant Hand
@@ -1015,7 +1015,7 @@ function HATPosition(id,available)
     then
       result = POS_FACEUP_ATTACK 
     else
-      result = POS_FACEUP_DEFENCE
+      result = POS_FACEUP_DEFENSE
     end
   end
   return result

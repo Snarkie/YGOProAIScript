@@ -1188,7 +1188,7 @@ function KozmoAttackBoost(cards)
 end
 function KozmoOption(options)
   for i,v in pairs(options) do
-    if v == 90452877*16+2 then -- Kozmojo
+    if v == 90452877*16 then -- Kozmojo
       local targets = SubGroup(OppField(),KozmojoFilter)
       if #targets>0 then
         return i
@@ -1235,14 +1235,14 @@ function KozmoPosition(id,available)
       then 
         result=POS_FACEUP_ATTACK
       else 
-        result=POS_FACEUP_DEFENCE 
+        result=POS_FACEUP_DEFENSE 
       end
     end
   end
   for i=1,#KozmoDef do
     if KozmoDef[i]==id 
     then 
-      result=POS_FACEUP_DEFENCE 
+      result=POS_FACEUP_DEFENSE 
     end
   end
   return result

@@ -299,7 +299,7 @@ function SquamataCond(loc,c)
     and (HasID(AIGrave(),44394295,true) 
     and HasID(AIDeck(),04904633,true)
     or CardsMatchingFilter(AIGrave(),ShaddollMonsterFilter)<6)
-    and not HasID(AIMon(),c.id,true,nil,nil,POS_FACEDOWN_DEFENCE,OPTCheck,c.id)
+    and not HasID(AIMon(),c.id,true,nil,nil,POS_FACEDOWN_DEFENSE,OPTCheck,c.id)
     and GetMultiple(c.id)==0)
     and ShaddollGraveCheck(c.id)
   end
@@ -1283,37 +1283,37 @@ function ShaddollInit(cards)
   if HasID(Act,81439173,UseFoolishShaddoll,2) then
     return Activate()
   end
-  if HasID(Rep,37445295,false,nil,nil,POS_FACEDOWN_DEFENCE,UseFalcon) then
+  if HasID(Rep,37445295,false,nil,nil,POS_FACEDOWN_DEFENSE,UseFalcon) then
     return {COMMAND_CHANGE_POS,CurrentIndex}
   end
-  if HasID(Rep,04939890,false,nil,nil,POS_FACEDOWN_DEFENCE,UseHedgehog) then
+  if HasID(Rep,04939890,false,nil,nil,POS_FACEDOWN_DEFENSE,UseHedgehog) then
     return {COMMAND_CHANGE_POS,CurrentIndex}
   end
-  if HasID(Rep,30328508,false,nil,nil,POS_FACEDOWN_DEFENCE,UseSquamata) then
+  if HasID(Rep,30328508,false,nil,nil,POS_FACEDOWN_DEFENSE,UseSquamata) then
     return {COMMAND_CHANGE_POS,CurrentIndex}
   end
-  if HasID(Rep,77723643,false,nil,nil,POS_FACEDOWN_DEFENCE,UseDragon) then
+  if HasID(Rep,77723643,false,nil,nil,POS_FACEDOWN_DEFENSE,UseDragon) then
     return {COMMAND_CHANGE_POS,CurrentIndex}
   end
-  if HasID(Rep,03717252,false,nil,nil,POS_FACEDOWN_DEFENCE,UseBeast) then
+  if HasID(Rep,03717252,false,nil,nil,POS_FACEDOWN_DEFENSE,UseBeast) then
     return {COMMAND_CHANGE_POS,CurrentIndex}
   end
-  if HasID(Rep,20366274,false,nil,nil,POS_FACEDOWN_DEFENCE) then
+  if HasID(Rep,20366274,false,nil,nil,POS_FACEDOWN_DEFENSE) then
     return {COMMAND_CHANGE_POS,CurrentIndex}
   end
-  if HasID(Rep,94977269,false,nil,nil,POS_FACEDOWN_DEFENCE) then
+  if HasID(Rep,94977269,false,nil,nil,POS_FACEDOWN_DEFENSE) then
     return {COMMAND_CHANGE_POS,CurrentIndex}
   end
-  if HasID(Rep,67696066,false,nil,nil,POS_FACEDOWN_DEFENCE) then
+  if HasID(Rep,67696066,false,nil,nil,POS_FACEDOWN_DEFENSE) then
     return {COMMAND_CHANGE_POS,CurrentIndex}
   end
-  if HasID(Rep,68819554,false,nil,nil,POS_FACEDOWN_DEFENCE) then
+  if HasID(Rep,68819554,false,nil,nil,POS_FACEDOWN_DEFENSE) then
     return {COMMAND_CHANGE_POS,CurrentIndex}
   end
-  if HasID(Rep,31292357,false,nil,nil,POS_FACEDOWN_DEFENCE) then
+  if HasID(Rep,31292357,false,nil,nil,POS_FACEDOWN_DEFENSE) then
     return {COMMAND_CHANGE_POS,CurrentIndex}
   end
-  if HasID(Rep,41386308,false,nil,nil,POS_FACEDOWN_DEFENCE) then
+  if HasID(Rep,41386308,false,nil,nil,POS_FACEDOWN_DEFENSE) then
     return {COMMAND_CHANGE_POS,CurrentIndex}
   end
   if HasID(Act,68819554,UseJuggler,1) then
@@ -1729,7 +1729,7 @@ function ChainShadowGames(c)
   and Duel.GetTurnPlayer()==1-player_ai
   and (HasID(AIDeck(),77723643,true) and DragonCond(PRIO_TOGRAVE) 
   or HasID(AIDeck(),04939890,true) and HedgehogCond(PRIO_TOGRAVE) 
-  or HasID(AIMon(),37445295,true,FilterPosition,POS_FACEDOWN_DEFENCE) and FalconCheck()) 
+  or HasID(AIMon(),37445295,true,FilterPosition,POS_FACEDOWN_DEFENSE) and FalconCheck()) 
   then
     result = true
   end
@@ -1739,7 +1739,7 @@ function ChainShadowGames(c)
     local aimon,oppmon=GetBattlingMons()
     if aimon and oppmon
     and ShaddollMonsterFilter(oppmon) 
-    and FilterPosition(aimon,POS_FACEDOWN_DEFENCE)
+    and FilterPosition(aimon,POS_FACEDOWN_DEFENSE)
     and WinsBattle(oppmon,aimon)
     and (aimon:IsCode(77723643) and UseDragon2() 
     or aimon:IsCode(30328508) and UseSquamata()
@@ -1911,7 +1911,7 @@ function ChainTarotrayFaceup(c,mode)
     return true
   end
   if mode == 5
-  and HasID(AIMon(),30328508,true,nil,nil,POS_FACEDOWN_DEFENCE,UseSquamata) 
+  and HasID(AIMon(),30328508,true,nil,nil,POS_FACEDOWN_DEFENSE,UseSquamata) 
   and Duel.GetTurnPlayer()==1-player_ai
   and HasPriorityTarget(OppMon(),true,nil,SquamataFilter)
   then
@@ -1920,7 +1920,7 @@ function ChainTarotrayFaceup(c,mode)
     return true
   end
   if mode == 6
-  and HasID(AIMon(),77723643,true,nil,nil,POS_FACEDOWN_DEFENCE,UseDragon) 
+  and HasID(AIMon(),77723643,true,nil,nil,POS_FACEDOWN_DEFENSE,UseDragon) 
   and Duel.GetTurnPlayer()==1-player_ai
   and HasPriorityTarget(OppMon(),true,nil,DragonFilter2)
   then
@@ -2332,19 +2332,19 @@ function ShaddollPosition(id,available)
       then 
         result=nil 
       else 
-        result=POS_FACEUP_DEFENCE 
+        result=POS_FACEUP_DEFENSE 
       end
     end
   end
   for i=1,#ShaddollDef do
     if ShaddollDef[i]==id 
     then 
-      result=POS_FACEUP_DEFENCE 
+      result=POS_FACEUP_DEFENSE 
     end
   end
   if GlobalClownSummon and GlobalClownSummon == id then
     GlobalClownSummon = nil
-    result=POS_FACEUP_DEFENCE 
+    result=POS_FACEUP_DEFENSE 
   end
   return result
 end

@@ -879,7 +879,7 @@ function QliphortPosition(id,available)
     if QliphortAtt[i]==id then result=POS_FACEUP_ATTACK end
   end
   for i=1,#QliphortDef do
-    if QliphortDef[i]==id then result=POS_FACEUP_DEFENCE end
+    if QliphortDef[i]==id then result=POS_FACEUP_DEFENSE end
   end
   return result
 end

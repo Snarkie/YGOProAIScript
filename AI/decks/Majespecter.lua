@@ -2406,7 +2406,7 @@ function SpecterTarOrDesMon()
 end
 
 function Specter21Filter(c)
-  return FilterPosition(c,POS_DEFENCE)
+  return FilterPosition(c,POS_DEFENSE)
   and FilterAffected(c,EFFECT_INDESTRUCTABLE_EFFECT)
 end
 
@@ -2424,7 +2424,7 @@ function SpecterZereortCheck()
 end
 
 function SpecterCorebageFilter(c)
-  return FilterPosition(c,POS_DEFENCE)
+  return FilterPosition(c,POS_DEFENSE)
   and Targetable(c,TYPE_MONSTER)
 end
 
@@ -2443,7 +2443,7 @@ end
 
 function Specter19Filter(c)
   return FilterStatus(c,STATUS_SUMMONING)
-  and FilterPosition(c,POS_FACEUP_DEFENCE)
+  and FilterPosition(c,POS_FACEUP_DEFENSE)
   and c.id==55067058
 end
 
@@ -2520,7 +2520,7 @@ function SpecterTemtempoFilter1(c) --Honor Ark, Honor Dark, Full-Armored Lancer,
   and (c.id==48739166
   or c.id==12744567
   or c.id==25853045
-  or (c.id==12014404 and FilterPosition(c,POS_FACEUP_DEFENCE) and AI.GetPlayerLP(1)<=800)
+  or (c.id==12014404 and FilterPosition(c,POS_FACEUP_DEFENSE) and AI.GetPlayerLP(1)<=800)
   or c.id==03989465
   or c.id==78156759
   or c.id==36776089
@@ -3377,7 +3377,7 @@ function CrowChangeToAttack()
   and (FaceupEnemies() or #OppMon()==0)
 end
 
-function CrowChangeToDefence()
+function CrowChangeToDefense()
   return AI.GetCurrentPhase() == PHASE_MAIN2 
   or not GlobalBPAllowed
 end
@@ -3390,12 +3390,12 @@ function MajesterChangeToAttack()
   and (FaceupEnemies() or #OppMon()==0)
 end
 
-function MajesterChangeToDefence()
+function MajesterChangeToDefense()
   return AI.GetCurrentPhase() == PHASE_MAIN2
   or not GlobalBPAllowed
 end
 
-function CatChangeToDefence()
+function CatChangeToDefense()
   return true
 end
 
@@ -5468,7 +5468,7 @@ function EnemyHasReverseBuster()
 end
 
 function SpecterFacedownFilter(c)
-  return FilterPosition(c,POS_FACEDOWN_DEFENCE)
+  return FilterPosition(c,POS_FACEDOWN_DEFENSE)
 end
 
 function EnemyHasStargazer()
@@ -5718,7 +5718,7 @@ function SpecterAIGetWeakestAttDef()
     if cards[i] and cards[i]:is_affected_by(EFFECT_CANNOT_BE_BATTLE_TARGET)==0 then
       if bit32.band(cards[i].position,POS_ATTACK)>0 and cards[i].attack<result then
         result=cards[i].attack-cards[i].bonus
-      elseif bit32.band(cards[i].position,POS_DEFENCE)>0 and cards[i].defense<result 
+      elseif bit32.band(cards[i].position,POS_DEFENSE)>0 and cards[i].defense<result 
       and (bit32.band(cards[i].position,POS_FACEUP)>0 or bit32.band(cards[i].status,STATUS_IS_PUBLIC)>0)
       then
         result=cards[i].defense
@@ -6076,7 +6076,7 @@ function SpecterInit(cards)
     GlobalCardMode = 1
     return COMMAND_ACTIVATE,CurrentIndex
   end
-  if HasIDNotNegated(Act,12014404,SpecterUseCowboyDef,nil,LOCATION_MZONE,POS_FACEUP_DEFENCE) then
+  if HasIDNotNegated(Act,12014404,SpecterUseCowboyDef,nil,LOCATION_MZONE,POS_FACEUP_DEFENSE) then
     return COMMAND_ACTIVATE,CurrentIndex
   end
   if HasIDNotNegated(SpSum,12014404,SpecterSummonCowboyDef) then
@@ -6501,19 +6501,19 @@ function SpecterInit(cards)
     return SpecterXYZSummon()
   end
   
-  if HasIDNotNegated(Rep,68395509,CrowChangeToDefence,nil,LOCATION_MZONE,POS_FACEUP_ATTACK) then
+  if HasIDNotNegated(Rep,68395509,CrowChangeToDefense,nil,LOCATION_MZONE,POS_FACEUP_ATTACK) then
     return COMMAND_CHANGE_POS,CurrentIndex
   end
-  if HasIDNotNegated(Rep,68395509,CrowChangeToAttack,nil,LOCATION_MZONE,POS_FACEUP_DEFENCE) then
+  if HasIDNotNegated(Rep,68395509,CrowChangeToAttack,nil,LOCATION_MZONE,POS_FACEUP_DEFENSE) then
     return COMMAND_CHANGE_POS,CurrentIndex
   end
-  if HasIDNotNegated(Rep,88722973,MajesterChangeToDefence,nil,LOCATION_MZONE,POS_FACEUP_ATTACK) then
+  if HasIDNotNegated(Rep,88722973,MajesterChangeToDefense,nil,LOCATION_MZONE,POS_FACEUP_ATTACK) then
     return COMMAND_CHANGE_POS,CurrentIndex
   end
-  if HasIDNotNegated(Rep,88722973,MajesterChangeToAttack,nil,LOCATION_MZONE,POS_FACEUP_DEFENCE) then
+  if HasIDNotNegated(Rep,88722973,MajesterChangeToAttack,nil,LOCATION_MZONE,POS_FACEUP_DEFENSE) then
     return COMMAND_CHANGE_POS,CurrentIndex
   end
-  if HasIDNotNegated(Rep,05506791,CatChangeToDefence,nil,LOCATION_MZONE,POS_FACEUP_ATTACK) then
+  if HasIDNotNegated(Rep,05506791,CatChangeToDefense,nil,LOCATION_MZONE,POS_FACEUP_ATTACK) then
     return COMMAND_CHANGE_POS,CurrentIndex
   end
   
@@ -7459,21 +7459,21 @@ function SpecterPosition(id,available)
   for i=1,#SpecterDef do
     if SpecterDef[i]==id
     then
-      result=POS_FACEUP_DEFENCE
+      result=POS_FACEUP_DEFENSE
     end
   end
   if id == 68395509 then
     if CrowAttack() then
 	  result=POS_FACEUP_ATTACK
 	else
-	  result=POS_FACEUP_DEFENCE
+	  result=POS_FACEUP_DEFENSE
 	end
   end
   if id == 88722973 then
     if MajesterAttack() then
 	  result=POS_FACEUP_ATTACK
 	else
-	  result=POS_FACEUP_DEFENCE
+	  result=POS_FACEUP_DEFENSE
 	end
   end
  return result
@@ -7829,7 +7829,7 @@ function SpecterLightningAttackTarget(cards,source,ignorebonus,filter,opt)
         c.prio = c.attack * -1
       end
     end
-    if FilterPosition(c,POS_DEFENCE) then
+    if FilterPosition(c,POS_DEFENSE) then
       c.prio = -99999
     end
     if filter and (opt and not filter(c,opt) or opt==nil and  not filter(c)) 

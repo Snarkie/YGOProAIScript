@@ -832,7 +832,7 @@ function OppHasFaceupMonster(AtkDef)
   if Get_Card_Count_Att_Def(OppMon(),">=",AtkDef,nil,POS_FACEUP_ATTACK) > 0 then
     return 1
   end
-  if Get_Card_Count_Att_Def(OppMon(),">=",AtkDef,nil,POS_FACEUP_DEFENCE) > 0 then
+  if Get_Card_Count_Att_Def(OppMon(),">=",AtkDef,nil,POS_FACEUP_DEFENSE) > 0 then
     return 1
   end
   return 0
@@ -891,21 +891,21 @@ end
 -------------------------------------------------
 -- **********************************************
 -- Functions related to returning value of specified
--- parameter, usually attack or defence.
+-- parameter, usually attack or defense.
 -- **********************************************
 -------------------------------------------------
 
 
 ---------------------------------------
 -- Returns highest or lowest attack or 
--- defence in specified array of cards
+-- defense in specified array of cards
 --
 -- Parameters (4):
 -- Cards = array of cards for search
--- AttDef = attack or defence value of card
+-- AttDef = attack or defense value of card
 -- Oper = operation to check for (> or <)
 -- Position = card's position
--- Return = value to return (attack or defence)
+-- Return = value to return (attack or defense)
 ---------------------------------------
 function Get_Card_Att_Def(Cards, AttDef, Oper, Position, Return)
   local Result = 0
@@ -982,7 +982,7 @@ function Get_Card_Att_Def_Pos(Cards)
           Result = Cards[i].attack
         end
       end
-      if Cards[i].position == POS_FACEUP_DEFENCE then
+      if Cards[i].position == POS_FACEUP_DEFENSE then
         if Cards[i].defense > Result then
           Result = Cards[i].defense
         end
@@ -1547,7 +1547,7 @@ end
 
 -------------------------------------------------
 -- **********************************************
--- Functions to calculate attack, or defence of cards
+-- Functions to calculate attack, or defense of cards
 -- before preforming certain actions.
 -- **********************************************
 -------------------------------------------------
@@ -1958,7 +1958,7 @@ function ApplyATKBoosts(Cards)
   -- unknown face-down monsters
   for i=1,#Cards do
     local c = Cards[i]
-    if FilterPosition(c,POS_FACEDOWN_DEFENCE)
+    if FilterPosition(c,POS_FACEDOWN_DEFENSE)
     and FilterPrivate(c)
     and CurrentOwner(c)==2
     then

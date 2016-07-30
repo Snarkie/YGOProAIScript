@@ -1079,7 +1079,7 @@ function ChaosDragonOnSelectPosition(id, available)
     if ChaosDragonAtt[i]==id then result=POS_FACEUP_ATTACK end
   end
   for i=1,#ChaosDragonDef do
-    if ChaosDragonDef[i]==id then result=POS_FACEUP_DEFENCE end
+    if ChaosDragonDef[i]==id then result=POS_FACEUP_DEFENSE end
   end
   if id == 83531441 then -- Dante
     if GlobalBPAllowed and Duel.GetCurrentPhase()==PHASE_MAIN1 
@@ -1088,7 +1088,7 @@ function ChaosDragonOnSelectPosition(id, available)
     then
       result=POS_FACEUP_ATTACK
     else
-      result=POS_FACEUP_DEFENCE
+      result=POS_FACEUP_DEFENSE
     end
   end
   if id == 61901281 or id == 99234526 then
@@ -1096,7 +1096,7 @@ function ChaosDragonOnSelectPosition(id, available)
     then
       result=POS_FACEUP_ATTACK
     else
-      result=POS_FACEUP_DEFENCE
+      result=POS_FACEUP_DEFENSE
     end
   end
   return result

@@ -462,8 +462,8 @@ end
   ----------------------------------------------------
   for i=1,#RepositionableCards do
     if RepositionableCards[i].id == 14677495 then
-      if RepositionableCards[i].position == POS_FACEUP_DEFENCE or
-         RepositionableCards[i].position == POS_FACEDOWN_DEFENCE then
+      if RepositionableCards[i].position == POS_FACEUP_DEFENSE or
+         RepositionableCards[i].position == POS_FACEDOWN_DEFENSE then
          GlobalActivatedCardID = RepositionableCards[i].id
         return COMMAND_CHANGE_POS,i
       end
@@ -1396,7 +1396,7 @@ end
   --------------------------------------------------   
 	for i=1,#RepositionableCards do
 	  if ChangePosToXYZSummon(cards, SummonableCards, RepositionableCards) == 1 then -- Check if any XYZ can be summoned
-		if RepositionableCards[i].position == POS_FACEDOWN_DEFENCE then -- Only change position of face down monsters
+		if RepositionableCards[i].position == POS_FACEDOWN_DEFENSE then -- Only change position of face down monsters
 		  if isMonLevelEqualToRank(RepositionableCards[i].level,RepositionableCards[i].id) == 1 then -- Check if monster's level is equal to XYZ monsters rank        
 		  return COMMAND_CHANGE_POS,i
          end
@@ -1409,7 +1409,7 @@ end
   -----------------------------------------------------
   for i=1,#RepositionableCards do
     if RepositionableCards[i].id == 21502796 then
-      if RepositionableCards[i].position == POS_FACEDOWN_DEFENCE then
+      if RepositionableCards[i].position == POS_FACEDOWN_DEFENSE then
         if Get_Card_Count(AI.GetOppMonsterZones()) > 0 or Get_Card_Count(OppST()) > 0 then
           return COMMAND_CHANGE_POS,i
          end
@@ -1423,7 +1423,7 @@ end
   -------------------------------------------
   for i=1,#RepositionableCards do
     if RepositionableCards[i].id == 41872150 then
-      if RepositionableCards[i].position == POS_FACEDOWN_DEFENCE then
+      if RepositionableCards[i].position == POS_FACEDOWN_DEFENSE then
         if Get_Card_Count(OppST()) > 0 then
           return COMMAND_CHANGE_POS,i
         end
@@ -1439,7 +1439,7 @@ end
     if RepositionableCards[i].id == 15383415 or   -- Swarm of Scarabs
        RepositionableCards[i].id == 54652250 or   -- Man-Eater Bug
 	   RepositionableCards[i].id == 52323207 then -- Golem Sentry
-      if RepositionableCards[i].position == POS_FACEDOWN_DEFENCE then
+      if RepositionableCards[i].position == POS_FACEDOWN_DEFENSE then
         if Get_Card_Count(OppST()) > 0 then
           return COMMAND_CHANGE_POS,i
         end
@@ -1456,7 +1456,7 @@ end
        RepositionableCards[i].id == 03510565 or   -- Stealth Bird
        RepositionableCards[i].id == 33508719 or   -- Morphing Jar
 	   RepositionableCards[i].id == 44811425 then -- Worm Linx
-	  if RepositionableCards[i].position == POS_FACEDOWN_DEFENCE then
+	  if RepositionableCards[i].position == POS_FACEDOWN_DEFENSE then
         return COMMAND_CHANGE_POS,i
       end
     end
@@ -1677,7 +1677,7 @@ end
     return COMMAND_SUMMON,CurrentIndex
   end
   
-  if HasID(RepositionableCards,34627841,FilterPosition,POS_FACEDOWN_DEFENCE) 
+  if HasID(RepositionableCards,34627841,FilterPosition,POS_FACEDOWN_DEFENSE) 
   and HasID(AIHand(),89631139,true) 
   then
     return COMMAND_CHANGE_POS,CurrentIndex
@@ -1929,7 +1929,7 @@ end
   --------------------------------------
   -- If it gets this far, set a monster.
   --------------------------------------
-  -- if Get_Card_Count(AIMon()) == 0 then -- AI was limited to set monster only when he had none, instead of building up defence, why ?
+  -- if Get_Card_Count(AIMon()) == 0 then -- AI was limited to set monster only when he had none, instead of building up defense, why ?
     for i=1,#cards.monster_setable_cards do
       if NormalSummonBlacklist(cards.monster_setable_cards[i].id) == 0 then
        if cards.monster_setable_cards[i].level < 5 then
@@ -1952,8 +1952,8 @@ end
   for i=1,#RepositionableCards do  
    if RepositionableCards[i] ~= false then
     if isToonUndestroyable(RepositionableCards) == 1 then 
-	  if RepositionableCards[i].position == POS_FACEUP_DEFENCE or
-         RepositionableCards[i].position == POS_FACEDOWN_DEFENCE then   
+	  if RepositionableCards[i].position == POS_FACEUP_DEFENSE or
+         RepositionableCards[i].position == POS_FACEDOWN_DEFENSE then   
 	   return COMMAND_CHANGE_POS,i
        end 
      end
@@ -1967,7 +1967,7 @@ end
   for i=1,#RepositionableCards do  
    if RepositionableCards[i] ~= false then
     if (RepositionableCards[i].id == 88241506 or RepositionableCards[i].id == 15914410) -- Maiden with Eyes of Blue, Mechquipped Angineer
-    and RepositionableCards[i].position == POS_FACEUP_DEFENCE then
+    and RepositionableCards[i].position == POS_FACEUP_DEFENSE then
 	   return COMMAND_CHANGE_POS,i
        end 
      end
@@ -1975,7 +1975,7 @@ end
   
   --------------------------------------------------
   -- If AI's monster has less attack than the
-  -- opponent's strongest monster, turn it to defence position 
+  -- opponent's strongest monster, turn it to defense position 
   -- in MP2.
   --------------------------------------------------
   for i=1,#RepositionableCards do	  
@@ -2012,7 +2012,7 @@ end
   for i=1,#AIMon() do
     local c=AIMon()[i]
     if c.attack > Get_Card_Att_Def(OppMon(),"attack",">",POS_FACEUP_ATTACK,"attack") 
-    and c.attack > Get_Card_Att_Def(OppMon(),"defense",">",POS_FACEUP_DEFENCE,"defense") 
+    and c.attack > Get_Card_Att_Def(OppMon(),"defense",">",POS_FACEUP_DEFENSE,"defense") 
     and Duel.GetCurrentPhase() == PHASE_MAIN1 and GlobalBPAllowed
     then
       ChangePosOK = true
@@ -2020,7 +2020,7 @@ end
   end
   for i=1,#RepositionableCards do
     local c = RepositionableCards[i]
-    if FilterPosition(c,POS_DEFENCE)
+    if FilterPosition(c,POS_DEFENSE)
     and RepositionBlacklist(c.id)==0
     and (ChangePosOK and c.attack > 1000 and c.defense-c.attack < 500
     and not FilterAffected(c,EFFECT_CANNOT_ATTACK)

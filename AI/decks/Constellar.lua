@@ -493,7 +493,7 @@ function ConstellarPosition(id,available)
     end
   end
   for i=1,#ConstellarDef do
-    if ConstellarDef[i]==id then result=POS_FACEUP_DEFENCE end
+    if ConstellarDef[i]==id then result=POS_FACEUP_DEFENSE end
   end
   return result
 end

@@ -196,9 +196,9 @@ function UseRegaliaGrave()
       and (source:GetAttack() >= target:GetAttack() 
       and source:GetAttack() <= target:GetBaseAttack()*2
       and source:IsPosition(POS_FACEUP_ATTACK) 
-      or source:GetDefence() >= target:GetAttack()  
-      and source:GetDefence() < target:GetBaseAttack()*2
-      and source:IsPosition(POS_FACEUP_DEFENCE))
+      or source:GetDefense() >= target:GetAttack()  
+      and source:GetDefense() < target:GetBaseAttack()*2
+      and source:IsPosition(POS_FACEUP_DEFENSE))
       and target:IsPosition(POS_FACEUP_ATTACK)
       and not source:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE) 
       and not target:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE) 
@@ -657,9 +657,9 @@ function ChainCrane()
       and (source:GetAttack() >= target:GetAttack() 
       and source:GetAttack() <= target:GetBaseAttack()*2
       and source:IsPosition(POS_FACEUP_ATTACK) 
-      or source:GetDefence() >= target:GetAttack()  
-      and source:GetDefence() < target:GetBaseAttack()*2
-      and source:IsPosition(POS_FACEUP_DEFENCE))
+      or source:GetDefense() >= target:GetAttack()  
+      and source:GetDefense() < target:GetBaseAttack()*2
+      and source:IsPosition(POS_FACEUP_DEFENSE))
       and target:IsPosition(POS_FACEUP_ATTACK)
       and not source:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE) 
       and not target:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE) 
@@ -690,9 +690,9 @@ function ChainHonest()
       if target:IsControler(player_ai)
       and (source:GetAttack() >= target:GetAttack() 
       and source:IsPosition(POS_FACEUP_ATTACK) 
-      or source:GetDefence() >= target:GetAttack() 
-      and source:GetDefence() < target:GetAttack()+source:GetAttack()
-      and source:IsPosition(POS_FACEUP_DEFENCE))
+      or source:GetDefense() >= target:GetAttack() 
+      and source:GetDefense() < target:GetAttack()+source:GetAttack()
+      and source:IsPosition(POS_FACEUP_DEFENSE))
       and target:IsPosition(POS_FACEUP_ATTACK)
       and not source:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE) 
       and not target:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE) 
@@ -723,9 +723,9 @@ function ChainSinyou()
       if target:IsControler(player_ai)
       and (source:GetAttack() >= target:GetAttack() 
       and source:IsPosition(POS_FACEUP_ATTACK) 
-      or source:GetDefence() >= target:GetAttack() 
-      and source:GetDefence() < target:GetAttack()+source:GetAttack()
-      and source:IsPosition(POS_FACEUP_DEFENCE))
+      or source:GetDefense() >= target:GetAttack() 
+      and source:GetDefense() < target:GetAttack()+source:GetAttack()
+      and source:IsPosition(POS_FACEUP_DEFENSE))
       and target:IsPosition(POS_FACEUP_ATTACK)
       and not source:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE) 
       and not target:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE) 
@@ -817,7 +817,7 @@ function BujinOnSelectPosition(id, available)
     if BujinAtt[i]==id then result=POS_FACEUP_ATTACK end
   end
   for i=1,#BujinDef do
-    if BujinDef[i]==id then result=POS_FACEUP_DEFENCE end
+    if BujinDef[i]==id then result=POS_FACEUP_DEFENSE end
   end
   return result
 end

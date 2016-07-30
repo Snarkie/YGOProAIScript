@@ -733,7 +733,7 @@ function ChainTensen()
         source = Duel.GetAttackTarget()
       end
       if (source:GetAttack() >= target:GetAttack() and source:GetAttack() <= target:GetAttack()+1000 and source:IsPosition(POS_FACEUP_ATTACK)
-      or source:GetDefence() >= target:GetAttack() and source:GetDefence() <= target:GetAttack()+1000 and source:IsPosition(POS_FACEUP_DEFENCE))
+      or source:GetDefense() >= target:GetAttack() and source:GetDefense() <= target:GetAttack()+1000 and source:IsPosition(POS_FACEUP_DEFENSE))
       and target:IsPosition(POS_FACEUP_ATTACK) and target:IsControler(player_ai) and target:IsRace(RACE_BEASTWARRIOR) 
       then
         GlobalTargetSet(target,AIMon())
@@ -820,7 +820,7 @@ function VeilerTarget(card)
   local att=AIGetStrongestAttack()
   if bit32.band(card.position,POS_FACEUP_ATTACK)>0 then
     value=card.attack
-  elseif bit32.band(card.position,POS_FACEUP_DEFENCE)>0 then
+  elseif bit32.band(card.position,POS_FACEUP_DEFENSE)>0 then
     value=card.defense
   end
   if value and att>value and NegateBPCheck(card) 
@@ -913,17 +913,17 @@ function FFGetPos(id)
     if FFAtt[i]==id then return POS_FACEUP_ATTACK end
   end
   for i=1,#FFDef do
-    if FFDef[i]==id then return POS_FACEUP_DEFENCE end
+    if FFDef[i]==id then return POS_FACEUP_DEFENSE end
   end
   if id == 12014404 then -- Cowboy
     if AI.GetPlayerLP(2)<=800 or not BattlePhaseCheck() then
-      return POS_FACEUP_DEFENCE
+      return POS_FACEUP_DEFENSE
     else
       return POS_FACEUP_ATTACK
     end
   end
   if id == 89856523 and AI.GetCurrentPhase() == PHASE_MAIN2 then -- Kirin
-    return POS_FACEUP_DEFENCE
+    return POS_FACEUP_DEFENSE
   end
   return result
 end
