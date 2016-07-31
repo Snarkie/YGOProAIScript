@@ -486,7 +486,7 @@ function SummonMeteorburst(c,mode)
   if mode == 2 
   and BattlePhaseCheck()
   and NotNegated(c)
-  and CardsMatchingFilter(OppMon(),FilterPosition,POS_FACEDOWN_DEFENCE)>0
+  and CardsMatchingFilter(OppMon(),FilterPosition,POS_FACEDOWN_DEFENSE)>0
   and not HasID(AIMon(),80696379,true)
   then
     return true
@@ -500,7 +500,7 @@ function SummonMeteorburst(c,mode)
 end
 function EhrenFilter(c,prio)
   return (PriorityTarget(c) or FilterPrivate(c) or not prio)
-  and FilterPosition(c,POS_DEFENCE)
+  and FilterPosition(c,POS_DEFENSE)
   and Affected(c,TYPE_MONSTER,4)
   and not FilterAffected(c,EFFECT_CANNOT_BE_BATTLE_TARGET)
 end
@@ -1007,14 +1007,14 @@ function LightswornPosition(id,available)
       then 
         result=POS_FACEUP_ATTACK
       else 
-        result=POS_FACEUP_DEFENCE 
+        result=POS_FACEUP_DEFENSE 
       end
     end
   end
   for i=1,#LightswornDef do
     if LightswornDef[i]==id 
     then 
-      result=POS_FACEUP_DEFENCE 
+      result=POS_FACEUP_DEFENSE 
     end
   end
   return result

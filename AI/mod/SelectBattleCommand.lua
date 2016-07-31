@@ -137,6 +137,7 @@ function BestAttackTarget(cards,source,ignorebonus,filter,opt)
   for i=1,#cards do
     local c = cards[i]
     c.index = i
+    c.prio = 0
     if FilterPosition(c,POS_FACEUP_ATTACK) then
       if c.attack<atk 
       or (CrashCheck(source) and c.attack==atk 
