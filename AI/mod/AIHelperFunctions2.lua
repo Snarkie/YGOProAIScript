@@ -10,6 +10,7 @@ function OnAIGoingFirstSecond(name)
   or name=="AI_Kozmo"
   or name=="AI_Lightsworn"
   or name=="AI_GladiatorBeast"
+  or name=="AI_Fluffal"
   then
     player_ai = 1
     result = 0
@@ -1044,6 +1045,7 @@ function DestroyFilter(c,nontarget,skipblacklist,skipignore)
   and (skipblacklist or not (DestroyBlacklist(c)
   and FilterPublic(c)))
   and (nontarget or not RemovalCheckCard(c))
+  and ShouldRemove(c)
 end
 function DestroyFilterIgnore(c,nontarget,skipblacklist,skipignore)
   return DestroyFilter(c,skipblacklist)
@@ -1300,6 +1302,11 @@ function FilterTuner(c,level)
   and FilterType(c,TYPE_TUNER)
   and (not level or FilterLevel(c,level))
 end
+function FilterNonTuner(c,level)
+  return FilterType(c,TYPE_MONSTER)
+  and not FilterType(c,TYPE_TUNER)
+  and (not level or FilterLevel(c,level))
+end
 function Scale(c) -- backwards compatibility
   return c.lscale
 end
@@ -1509,6 +1516,15 @@ function NormalSummonCount(player)
   if player == nil then player = player_ai end
   return Duel.GetActivityCount(player,ACTIVITY_NORMALSUMMON)
 end
+function NormalSummonsAvailable(player)
+  player = player or player_ai
+  local summons = NormalSummonCount(player)
+  local available = 1
+  if HasIDNotNegated(AIMon(),03113836,true) then -- Seraphinite
+    available = 2
+  end
+  return available-summons
+end
 function SpecialSummonCheck(player)
   if player == nil then player = player_ai end
   -- wrapper for changed card script function
@@ -1679,6 +1695,7 @@ function PriorityTarget(c,destroycheck,loc,filter,opt) -- preferred target for r
   end
   if result and (not destroycheck or DestroyFilter(c)) 
   and FilterPublic(c) and (filter == nil or (opt==nil and filter(c) or filter(c,opt)))
+  and ShouldRemove(c)
   then
     return true
   end
@@ -2511,7 +2528,7 @@ function ChainCheck(id,player,link,filter,opt)
     if e and e:GetHandler() then
       c = e:GetHandler()
       if c:GetCode() == id
-      and not player or c:GetControler() == player
+      and (not player or c:GetControler() == player)
       and FilterCheck(c,filter,opt)
       then
         result = result+1
@@ -2964,6 +2981,8 @@ function GetNegatePriority(source,link,targeted)
         prio = prio + 3
         prio=AdjustMonsterPrio(target,prio)
       end
+    else
+      prio = -1
     end
   end
   local check = NegatePriority[id]
@@ -3130,9 +3149,45 @@ function AITrashTalk(s) -- to make the AI comment its plays. Can be disabled in 
   end
 end
 
+function CanXYZSummon(rank,materialcount,filter,opt) 
+  -- checks for space on field and rank in extra
+  -- does not actually check, if you have a way t put materials on board
+  rank = rank or 4
+  materialcount = materialcount or 2 
+  local targets = SubGroup(AIExtra(),FilterRank,rank)
+  local materials = SubGroup(AIMon(),FilterLevel,rank)
+  return CardsMatchingFilter(AIExtra(),filter,opt)>0
+  and SpaceCheck()+#materials>=materialcount
+  and DualityCheck()
+end
 
+function DiscardCheck()
+  -- checks, if the AI needs to keep a card to discard during the opponent's turn
+  if HasIDNotNegated(AIMon(),01561110,true) -- ABC Dragon Buster 
+  or HasID(AIST(),04178474,true) -- Raigeki Break
+  or HasID(AIST(),63356631,true) -- PWWB
+  then
+    return #AIHand()>1
+  end
+  return true
+end
 
-
+function ShouldRemove(c)
+  -- checks for cards, that should probably not be targeted with removal effects
+  -- like spells currently activating on the field etc
+  if FilterType(c,TYPE_SPELL+TYPE_TRAP)
+  and not FilterType(c,TYPE_CONTINUOUS+TYPE_EQUIP+TYPE_FIELD+TYPE_PENDULUM)
+  and FilterPosition(c,POS_FACEUP)
+  then 
+    return false
+  end
+  if FilterType(c,TYPE_TOKEN)
+  and c.attack<1000
+  then
+    return false
+  end
+  return true
+end
 
 
 

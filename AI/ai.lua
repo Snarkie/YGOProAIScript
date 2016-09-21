@@ -1,5 +1,5 @@
-Version = "0.34"
-Experimental = false
+Version = "0.34a"
+Experimental = true
 
 --[[
   AI Script for YGOPro Percy:
@@ -15,7 +15,7 @@ Experimental = false
   http://www.ygopro.co/Forum/tabid/95/g/posts/t/7877/AI-Updates
   
   Contributors: ytterbite, Sebrian, Skaviory, francot514
-  Optional decks: Yeon, Satone, rothayz, Ildana, Iroha, Postar, Nachk, Xaddgx
+  Optional decks: Yeon, Satone, rothayz, Ildana, Iroha, Postar, Nachk, Xaddgx, neftalimich
   You can find and download optional decks here:
   http://www.ygopro.co/Forum/tabid/95/g/posts/t/7877/AI-Updates
   
@@ -107,6 +107,8 @@ require("ai.decks.Kozmo")
 require("ai.decks.Lightsworn")
 require("ai.decks.DDD")
 require("ai.decks.GladBeast")
+require("ai.decks.ABC")
+requireoptional("ai.decks.Fluffal")
 requireoptional("ai.decks.Majespecter")
 requireoptional("ai.decks.Spellbook")
 requireoptional("ai.decks.X-Saber")

@@ -581,10 +581,6 @@ function ChainCotHGadget()
   end
   return false
 end
-
-function ChainNaturiaBeast()
-  return false
-end
 function StardustSparkFilter(card,id)
   return card:IsControler(player_ai) and card:IsPosition(POS_FACEUP) 
   and not card:IsHasEffect(EFFECT_INDESTRUCTABLE_EFFECT) 
@@ -663,9 +659,6 @@ function GadgetOnSelectChain(cards,only_chains_by_player)
   end
   if HasID(cards,97077563) and ChainCotHGadget() then
     return {1,IndexByID(cards,97077563)}
-  end
-  if HasID(cards,33198837) and ChainNaturiaBeast() then
-    return {1,IndexByID(cards,33198837)}
   end
   if HasID(cards,83994433) and ChainStardustSpark() then
     GlobalStardustSparkActivation[cards[CurrentIndex].cardid]=Duel.GetTurnCount()

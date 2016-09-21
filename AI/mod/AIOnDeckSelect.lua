@@ -24,7 +24,6 @@ DECK_HAT          = NewDeck("HAT"             ,45803070) -- Traptrix Dionaea
 DECK_QLIPHORT     = NewDeck("Qliphort"        ,65518099) -- Qliphort Tool
 DECK_NOBLEKNIGHT  = NewDeck("Noble Knight"    ,59057152) -- Noble Knight Medraut
 DECK_NEKROZ       = NewDeck("Nekroz"          ,14735698) -- Nekroz Exomirror
-DECK_BA           = NewDeck("Burning Abyss"   ,36006208) -- Fire Lake of the Burning Abyss
 DECK_EXODIA       = NewDeck("Exodia"          ,{33396948,70791313}) -- Exodia the Forbidden One, Royal Magical Library
 DECK_DARKWORLD    = NewDeck("Dark World"      ,34230233) -- DW Grapha
 DECK_CONSTELLAR   = NewDeck("Constellar"      ,78358521) -- Constellar Sombre
@@ -115,7 +114,7 @@ function PrioritySetup()
   QliphortPriority()
   SatellarknightPriority()
   --HEROPriority()
-  BAPriority()
+  --BAPriority()
   NekrozPriority()
 
 AddPriority({
@@ -201,6 +200,11 @@ AddPriority({
 [73176465] = {1,1,1,1,6,5,1,1,1,1,FelisCond},         -- Lightsworn Felis
 [41386308] = {1,1,1,1,1,1,1,1,1,1,MathCond},          -- Mathematician
 
+-- Speedroid Engine 
+
+[81275020] = {9,1,5,1,1,1,1,1,1,1},                   -- Speedroid Terrortop
+[53932291] = {8,1,1,1,1,1,1,1,1,1},                   -- Speedroid Taketomborg
+
 [05318639] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Mystical Space Typhoon
 
 [82044279] = {1,1,1,1,1,1,1,1,1,1,ClearWingCond},     -- Clear Wing Synchro Dragon
@@ -258,7 +262,7 @@ AddPriority({
   if deck and deck.PriorityList then
     AddPriority(deck.PriorityList,true)
   end
-  
+ 
 end
 
 Prio = {}

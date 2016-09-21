@@ -91,6 +91,9 @@ function SummonExtraDeck(cards,prio)
    if HasIDNotNegated(SpSum,07409792) then 
     --return {COMMAND_SPECIAL_SUMMON,CurrentIndex}                                -- test
   end
+  if HasIDNotNegated(Act,01621413,UseRequiem,1) then 
+    return Activate() -- Requiem Dragon
+  end
   if HasIDNotNegated(Rep,12014404,false,nil,nil,POS_FACEUP_ATTACK) and UseCowboyDef() then 
     return {COMMAND_CHANGE_POS,CurrentIndex}                                -- Gagaga Cowboy finish
   end
@@ -273,6 +276,9 @@ function SummonExtraDeck(cards,prio)
   end
   if HasID(Act,31437713) and UseHeartlanddraco() then
     return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Act,01621413,UseRequiem,2) then 
+    return Activate() -- Requiem Dragon
   end
   return nil
  end
@@ -606,7 +612,25 @@ function SummonExtraDeck(cards,prio)
       return PendulumSummon(i)
     end
   end
-
+-- Speedroid engine
+  if HasID(SpSum,81275020,SummonTerrortop,1) then
+    return SpSummon()
+  end
+  if HasID(SpSum,53932291,SummonTaketomborg,1) then
+    return SpSummon()
+  end
+  if HasID(Sum,81275020,SummonTerrortop,2) then
+    return Summon()
+  end
+  if HasID(Sum,81275020,SummonTerrortop,3) then
+    return Summon()
+  end
+  if HasID(Sum,53932291,SummonTaketomborg,2) then
+    return Summon()
+  end
+  if HasIDNotNegated(Act,53932291,UseTaketomborg,1) then
+    return Activate()
+  end
   
 -- if the opponent still has stronger monsters, use Raigeki  
   if HasID(Act,12580477) and UseRaigeki2() then
@@ -650,6 +674,90 @@ function SummonExtraDeck(cards,prio)
     end
   end
   return nil
+end
+function RequiemFilter(c,source)
+  return Targetable(c,TYPE_MONSTER)
+  and Affected(c,TYPE_MONSTER,5)
+  and CanDealBattleDamage(source,{c})
+end
+function UseRequiem(c,mode)
+  if mode == 1 -- can finish game with attack
+  then
+    for i,target in pairs(SubGroup(OppMon(),RequiemFilter,c)) do
+      if CanFinishGame(c,target,nil,target.base_attack,target.attack) then
+        GlobalTargetSet(target)
+        GlobalCardMode = 1
+        return true
+      end
+    end
+  end
+  if mode == 2
+  and OppHasStrongestMonster()
+  and CardsMatchingFilter(OppMon(),RequiemFilter)>0
+  then
+    return true
+  end
+end
+function SummonTerrortop(c,mode)
+  if mode == 1 -- special summon
+  and NotNegated(c)
+  and HasID(UseLists(AIHand(),AIDeck()),53932291,true) -- Taketomborg
+  and CardsMatchingFilter(AIExtra(),FilterRank,3)>0
+  and SpaceCheck(LOCATION_MZONE)>1
+  and OPTCheck(c.id)
+  then
+    return true
+  end
+  if mode == 2 -- normal summon
+  and NotNegated(c)
+  and HasID(UseLists(AIHand(),AIDeck()),53932291,true) -- Taketomborg
+  and CardsMatchingFilter(AIExtra(),FilterRank,3)>0
+  and SpaceCheck(LOCATION_MZONE)>1
+  and OPTCheck(c.id)
+  then
+    return true
+  end
+  if mode == 3 -- normal summon
+  and FieldCheck(3)==1
+  and CardsMatchingFilter(AIExtra(),FilterRank,3)>0
+  then
+    return true
+  end
+end
+function SummonTaketomborg(c,mode)
+  if mode == 1 -- special summon
+  and FieldCheck(3)==1
+  and CardsMatchingFilter(AIExtra(),FilterRank,3)>0
+  then
+    return true
+  end
+  if mode == 2 -- normal summon
+  and FieldCheck(3)==1
+  and CardsMatchingFilter(AIExtra(),FilterRank,3)>0
+  then
+    return true
+  end
+end
+function TaketomborgFilter(card,targets)
+  for i,c in pairs(targets) do
+    if FilterType(card,TYPE_SYNCHRO)
+    and FilterAttribute(card,ATTRIBUTE_WIND)
+    --and c.level+3==card.level
+    then
+      return true
+    end
+  end
+  return false
+end
+function UseTaketomborg(c,mode)
+  local targets = SubGroup(AIDeck(),FilterTuner)
+  targets = SubGroup(targets,FilterAttribute,ATTRIBUTE_WIND)
+  if mode == 1
+  and FieldCheck(3)>1
+  and CardsMatchingFilter(AIExtra(),TaketomborgFilter,targets)>0
+  then
+    return true
+  end
 end
 function TERFilter(c)
   return Affected(c,TYPE_MONSTER,1)
@@ -1940,6 +2048,37 @@ function ChainFiendish(card)
   end
   return false
 end
+function ChainFogBlade(card)
+  if FilterLocation(card,LOCATION_SZONE) then
+    local c = ChainCardNegation(card,true,false,FilterType,TYPE_MONSTER)
+    if c and Affected(c,TYPE_TRAP) then
+      GlobalTargetSet(c,OppMon())
+      return true
+    end
+    if IsBattlePhase() and Duel.GetTurnPlayer()~=player_ai then
+      local source = Duel.GetAttacker()
+      local target = Duel.GetAttackTarget()
+      if source and target and WinsBattle(source,target) 
+      and Targetable(source,TYPE_TRAP) and Affected(source,TYPE_TRAP)
+      and UnchainableCheck(25542642)
+      and not FilterAffected(source,EFFECT_DISABLE)
+      and not FilterType(source,TYPE_NORMAL)
+      then
+        GlobalTargetSet(source)
+        return true
+      end
+      if source and CanFinishGame(source) and #AIMon()==0 
+      and Targetable(source,TYPE_TRAP) and Affected(source,TYPE_TRAP)
+      and UnchainableCheck(25542642)
+      and not FilterAffected(source,EFFECT_DISABLE)
+      and not FilterType(source,TYPE_NORMAL)
+      then
+        GlobalTargetSet(source)
+        return true
+      end
+    end
+  end
+end
 function ChainSkillDrain(card)
   if AI.GetPlayerLP(1)<=1000 then
     return false
@@ -2344,7 +2483,7 @@ function PriorityChain(cards) -- chain these before anything else
   if HasID(cards,61257789,false,nil,LOCATION_MZONE,ChainNegation) then -- Stardust AM
     return {1,CurrentIndex}
   end
-  if HasIDNotNegated(cards,63767246,ChainNegation) then -- Titanic Galaxy
+  if HasIDNotNegated(cards,63767246,ChainNegation,2) then -- Titanic Galaxy
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,35952884,false,nil,LOCATION_MZONE,ChainNegation) then -- Quasar
@@ -2363,6 +2502,9 @@ function PriorityChain(cards) -- chain these before anything else
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,27346636,ChainNegation) then -- Heraklinos
+    return {1,CurrentIndex}
+  end
+  if HasIDNotNegated(cards,01621413,ChainNegation) then -- Requiem Dragon
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,29616929,ChainNegation) then -- Traptrix Trap Hole Nighmare
@@ -2427,6 +2569,9 @@ function PriorityChain(cards) -- chain these before anything else
   end
   if HasIDNotNegated(cards,78474168,ChainBTS) then
     return {1,CurrentIndex}
+  end
+  if HasIDNotNegated(cards,25542642,ChainFogBlade) then
+    return Chain()
   end
   if HasIDNotNegated(cards,50078509,ChainFiendish) then
     return {1,CurrentIndex}
@@ -2496,6 +2641,10 @@ function GenericChain(cards)
   end
   if HasID(cards,73176465,false,nil,LOCATION_GRAVE) then -- Felis
     return {1,CurrentIndex}
+  end
+  if HasIDNotNegated(cards,81275020) then -- Speedroid Terrortop
+    OPTSet(81275020)
+    return Chain()
   end
   return nil
 end
@@ -2732,6 +2881,30 @@ end
 function PendulumSummonTarget(cards,max)
   return BestTargets(cards,max,TARGET_PROTECT,FilterLocation,LOCATION_EXTRA)
 end
+function FogBladeTarget(cards,source)
+  result = GlobalTargetGet(cards,true)
+  if result == nil then 
+    if LocCheck(cards,LOCATION_ONFIELD) then
+      return BestTargets(cards,1,TARGET_OTHER)
+    else
+      return Add(cards,PRIO_TOFIELD)
+    end
+  end
+  return result
+end
+function RequiemTarget(cards,min)
+  if LocCheck(cards,LOCATION_OVERLAY) then
+    return Add(cards,LOCATION_GRAVE,min,ExcludeID,16195942)
+  end
+  if LocCheck(cards,LOCATION_GRAVE) then
+    return Add(cards,PRIO_TOFIELD)
+  end
+  if GlobalCardMode == 1 then
+    GlobalCardMode = nil
+    return BestTargets(cards,1,TARGET_OTHER,FilterGlobalTarget)
+  end
+  return BestTargets(cards,1,TARGET_OTHER)
+end
 function GenericCard(cards,min,max,id,c)
   if c then
     id = c.id
@@ -2742,6 +2915,9 @@ function GenericCard(cards,min,max,id,c)
   end
   if id == 63519819 then
     return TERTarget(cards)
+  end
+  if id == 01621413 then
+    return RequiemTarget(cards,min)
   end
   if id == 43898403 then
     return TwinTwisterTarget(cards)
@@ -2839,6 +3015,12 @@ function GenericCard(cards,min,max,id,c)
   if id == 99590524 then -- Treacherous
     return BestTargets(cards,min,TARGET_DESTROY)
   end
+  if id == 81275020 then -- Terrortop
+    return Add(cards)
+  end
+  if id == 25542642 then
+    return FogBladeTarget(cards)
+  end
   return nil
 end
 
@@ -2867,6 +3049,10 @@ function GenericEffectYesNo(id,card)
   end
   if id == 63767246 and ChainTitanicGalaxy(card) then
     result = 1
+  end
+  if id == 81275020 then -- Speedroid Terrortop
+    OPTSet(id)
+    return 1
   end
   return result
 end

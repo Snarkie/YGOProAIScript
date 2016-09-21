@@ -175,7 +175,16 @@ function FrogFilter(c,exclude)
   return IsSetCode(c.setcode,0x12) and (exclude == nil or c.id~=exclude)
 end
 function MonarchMonsterFilter(c,exclude)
-  return false --?
+  local check = true
+  if exclude then
+    if type(exclude)=="table" then
+      check = not CardsEqual(c,exclude)
+    elseif type(exclude)=="number" then
+      check = (c.id ~= exclude)
+    end
+  end
+  return (FilterAttack(c,2400) or FilterAttack(c,2800))
+  and FilterDefense(c,1000) and check
 end
 function TributeCount(mega)
   local result = 0
@@ -270,7 +279,9 @@ function StormforthFilter(c,filter)
      return not CardsEqual(c,card) and filter(card) 
     end)>0
   end
-  return Affected(c,TYPE_SPELL) and not FilterAffected(c,EFFECT_UNRELEASABLE_SUM) and check
+  return Affected(c,TYPE_SPELL) 
+  and not FilterAffected(c,EFFECT_UNRELEASABLE_SUM) 
+  and check
 end
 function UseStormforth(c)
   if CardsMatchingFilter(OppMon(),StormforthFilter)>0 

@@ -93,7 +93,6 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
   ResetOncePerTurnGlobals()
   GlobalBPAllowed = to_bp_allowed
   SurrenderCheck()
-  
   ---------------------------------------
   -- Don't do anything if the AI controls
   -- a face-up Light and Darkness Dragon.
@@ -143,7 +142,6 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
       end
     end
   end
-
   --------------------------------------------------
   -- Storing these lists of cards in local variables
   -- for faster access and gameplay.
@@ -163,7 +161,6 @@ function OnSelectInitCommand(cards, to_bp_allowed, to_ep_allowed)
       return COMMAND_ACTIVATE,i
     end
   end
-  
  -------------------------------------------------
 -- **********************************************
 --        Functions for specific decks
@@ -191,7 +188,6 @@ end
 if HasID(SpSummonableCards,80696379,SummonMeteorburst,1) then
   return SynchroSummon()
 end
-
 -- If the AI can attack for game, attempt to do so first
 
 -- opp has no monsters to defend
@@ -232,7 +228,6 @@ for i,source in pairs(AIMon()) do
     end
   end
 end
-  
 if d and d.Init then
   DeckCommand,DeckCommand2 = d.Init(cards,to_bp_allowed,to_ep_allowed)
 end
@@ -345,14 +340,14 @@ if not (DeckCheck(DECK_BUJIN) or DeckCheck(DECK_TELLARKNIGHT) or DeckCheck(DECK_
     return DeckCommand[1],DeckCommand[2]
   end
 end
-if not ExtraCheck then 
+--[[if not ExtraCheck then 
   DeckCommand = BAInit(cards)
   if DeckCommand ~= nil and (d == 0 
   or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
   then
     return DeckCommand[1],DeckCommand[2]
   end
-end
+end]]
 if not ExtraCheck then 
   DeckCommand = DarkWorldInit(cards)
   if DeckCommand ~= nil and (d == 0 
@@ -2055,7 +2050,9 @@ end
       and SetBlacklist(setCards[i].id)==0 
       and (bit32.band(setCards[i].type,TYPE_TRAP) > 0 
       or bit32.band(setCards[i].type,TYPE_QUICKPLAY) > 0 )
-      and not HasID(AIST(),92512625,true) then
+      and not HasID(AIST(),92512625,true) 
+      and DiscardCheck()
+      then
         return COMMAND_SET_ST,i
       end
     end
@@ -2076,6 +2073,7 @@ end
       if FilterType(c,TYPE_SPELL) and not FilterType(c,TYPE_FIELD)
       and SetBlacklist(c.id)==0 and Get_Card_Count(AIST()) < 2
       and not HasID(AIST(),92512625,true) -- Solemn Advice
+      and DiscardCheck()
       then
         return COMMAND_SET_ST,i
       end

@@ -78,6 +78,15 @@ function OnSelectChain(cards,only_chains_by_player,forced)
   end
   
   local result,result2 = nil,nil
+  result = PriorityChain(cards)
+  if result ~= nil then
+    if type(result)=="table" then
+      return result[1],result[2]
+    else
+      return result,result2
+    end
+  end
+  
   local d = DeckCheck()
   if d and d.Chain then
     result,result2 = d.Chain(cards,only_chains_by_player)
@@ -93,7 +102,7 @@ function OnSelectChain(cards,only_chains_by_player,forced)
 local backup = CopyTable(cards)
 local d = DeckCheck()
 local SelectChainFunctions = {
-PriorityChain,FireFistOnChain,HeraldicOnSelectChain,
+FireFistOnChain,HeraldicOnSelectChain,
 GadgetOnSelectChain,BujinOnSelectChain,MermailOnSelectChain,
 SatellarknightOnSelectChain,
 ChaosDragonOnSelectChain,HATChain,QliphortChain,

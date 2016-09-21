@@ -318,6 +318,7 @@ NSBL={
 81992475,59438930,01050186, -- BA Barbar, Ghost Ogre, Satellarknight Unukalhai
 29888389,47106439,53180020,27796375, -- Gishki Shadow, Vision, Nekroz Exa, Sorcerer
 67696066,68819554,44635489, -- Trick Clown, Damage Juggler, Siat
+81275020,53932291, -- Speedroid Terrortop, Taketomborg
 }
 function NormalSummonBlacklist(CardId) 
   for i=1,#NSBL do
@@ -424,7 +425,8 @@ SSBL={
 18326736,58069384,10443957, -- Planetellarknight Ptolemaios, Cyber Dragon Nova, Infinity
 27552504,18386170,65305468, -- Beatrice, Pilgrim, F0
 56840427,16051717,30100551, -- Utopia Ray, Raikiri, Minerva
-31292357,44635489, -- Hat Tricker, Siat
+31292357,44635489,01621413, -- Hat Tricker, Siat, Requiem Dragon
+81275020,53932291, -- Speedroid Terrortop, Taketomborg
 }
 
 
@@ -912,7 +914,7 @@ ScriptedCards ={
 01050186,19508728,27796375,53180020, -- Satellarknight Unukalhai, Moon Mirror Shield, Nekroz Exa, Sorcerer
 29888389,47106439,68819554,67696066, -- Gishki Shadow, Vision, Performage Damage Juggler, Trick Clown
 43898403,63519819,60082869,27346636, -- Twin Twister, Thousand-Eyes Restrict, Dust Tornado, Gladbeast Heraklinos
-63767246, -- Titanic Galaxy
+63767246,81275020,53932291,01621413, -- Titanic Galaxy, Speedroid Terrortop, Taketomborg, Requiem Dragon
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do

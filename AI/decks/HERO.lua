@@ -656,7 +656,6 @@ function UseUpstart(c,mode)
     return false
   end
   if mode == 1 then
-    --print(SummonBubbleCheck())
     return not (HasIDNotNegated(AICards(),00423585,true)
     or SummonBubbleCheck() or not NormalSummonCheck())
   end
@@ -726,33 +725,27 @@ function NotBubbleFilter(c)
   and c.id~=79979666
 end
 function SummonBubbleCheck()
-  --print("bubble check")
   local count=2
   local summons = 1
   if NormalSummonCheck() then 
-    --print("alreadys normal summoned, reducing count")
     count=1 
   end
   if not HasBubble() then 
-    --print("no bubble available, abort")
     return false 
   end
   if CardsMatchingFilter(AIHand(),FilterType,TYPE_SPELL+TYPE_TRAP)>SpaceCheck(LOCATION_SZONE)
   then 
-    --print("not enough S/T space, abort")
     return false
   end
   if NormalSummonCheck() 
   and CardsMatchingFilter(AIHand(),NotBubbleFilter)>0
   or CardsMatchingFilter(AIHand(),NotBubbleFilter)>1
   then 
-    --print("too many monsters in hand, abort")
     return false 
   end
   if not NormalSummonCheck() 
   and CardsMatchingFilter(UseLists(AIHand(),AIST()),BubbleCheckFilter)>0 
   then 
-    --print("bubble + another monster available, summons +1")
     summons = 2 
   end
   if FieldCheck(4)+summons<=4 
@@ -760,10 +753,8 @@ function SummonBubbleCheck()
   or FieldCheck(4)+summons>1 
   and not CanSummonDarkLaw())
   then  
-    --print("bubble okay")
     return true
   end
-  --print("don't summon bubble")
   return false
 end
 function SetShadowMist(c)

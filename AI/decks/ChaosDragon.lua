@@ -485,7 +485,7 @@ end
 function UsePSZ()
   return SummonPSZ() and #AIHand()>4
 end
-function UseAllure()
+function UseAllureCD()
   return PriorityCheck(AIHand(),PRIO_BANISH,1,FilterAttribute,ATTRIBUTE_DARK)>4
 end
 
@@ -512,7 +512,7 @@ function UseCaius()
    return CardsMatchingFilter(OppField(),CaiusFilter)>0
    or AI.GetPlayerLP(2)<=1000
 end
-function SummonCaius(c,mode)
+function SummonCaiusCD(c,mode)
   if mode == 1 then
     return AI.GetPlayerLP(2)<=1000
   elseif mode == 2 then
@@ -551,10 +551,10 @@ function ChaosDragonOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(Activatable,00691925) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Activatable,01475311) and UseAllure() then
+  if HasID(Activatable,01475311) and UseAllureCD() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasIDNotNegated(Summonable,09748752,SummonCaius,1) then
+  if HasIDNotNegated(Summonable,09748752,SummonCaiusCD,1) then
     return {COMMAND_SUMMON,CurrentIndex}
   end
   if HasID(SpSummonable,65192027) and SummonDAD() then
@@ -665,7 +665,7 @@ function ChaosDragonOnSelectInit(cards, to_bp_allowed, to_ep_allowed)
   if HasID(SpSummonable,30100551,SummonMinerva,1) then
     return SpSummon()
   end
-  if HasIDNotNegated(Summonable,09748752,SummonCaius,2) then
+  if HasIDNotNegated(Summonable,09748752,SummonCaiusCD,2) then
     return {COMMAND_SUMMON,CurrentIndex}
   end
   if HasID(Summonable,10802915) and SummonTourguide() and DeckCheck(DECK_CHAOSDRAGON) then
