@@ -1371,11 +1371,15 @@ function SummonCowboyAtt()
   and BattlePhaseCheck() and not(CanUseHand())
 end
 function SkyblasterFilter(c)
-  return bit32.band(c.position,POS_FACEUP)>0 and c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
+  return Affected(c,TYPE_MONSTER,4)
+  and Targetable(c,TYPE_MONSTER)
+  and FilterPosition(c,POS_FACEUP)
 end
 function SummonSkyblaster()
-  return OppHasStrongestMonster() and CardsMatchingFilter(OppMon(),SkyblasterFilter)>0 
-  and HasID(AIExtra(),82633039,true) and MP2Check()
+  return OppHasStrongestMonster()
+  and CardsMatchingFilter(OppMon(),SkyblasterFilter)>0 
+  and HasID(AIExtra(),82633039,true) 
+  and MP2Check()
 end
 function UseSkyblaster()
   return CardsMatchingFilter(OppField(),SkyblasterFilter)>0
@@ -1732,8 +1736,9 @@ function SummonUtopiaLightningFinish(c,mode)
 end
 function LightningFilter(c,source)
   if NotNegated(source)
-  and source.xyz_material_count>1
+  and (source.xyz_material_count>1
   and CardsMatchingFilter(source.xyz_materials,FilterSet,0x7f)>0
+  or FilterLocation(source,LOCATION_EXTRA))
   then 
     source.attack=5000 
   end
@@ -1742,20 +1747,22 @@ end
 function LightningPrioFilter(c,source)
   return LightningFilter(c,source) 
   and NotNegated(source)
-  and (c.id == 27279764
+  and (c.id == 27279764 -- Towers
+  or c.id == 40061558 -- Skybase
+  --or c.id == 86221741 -- Ultimate Falcon
   or CardsMatchingFilter(AIMon(),function(card) 
     return SelectAttackConditions(c,card) 
-    and not FilterID(card,56832966)
+    and not FilterID(card,56832966) -- Utopia Lightning
    end)==0
-  or FilterPrivate(c)
+  --or FilterPrivate(c)
   or FilterAttackMin(c,2500) 
   and not Targetable(c,TYPE_MONSTER)
   or CanFinishGame(source,c))
 end
 function SummonUtopiaLightning(c,mode)
   if mode == 1 
-  and HasID(AIMon(),84013237,true) 
-  or HasID(AIMon(),56840427,true)
+  and (HasID(AIMon(),84013237,true) 
+  or HasID(AIMon(),56840427,true))
   then
     return true
   end
@@ -1768,6 +1775,7 @@ function SummonUtopiaLightning(c,mode)
   if mode == 3 and OppHasStrongestMonster() 
   and CardsMatchingFilter(OppMon(),LightningFilter,c)>0
   and BattlePhaseCheck()
+  and not HasIDNotNegated(AIMon(),65305468,true) -- F0
   then
     return true
   end
@@ -2498,6 +2506,9 @@ function PriorityChain(cards) -- chain these before anything else
   if HasIDNotNegated(cards,99188141,ChainNegation) then -- THRIO
     return {1,CurrentIndex}
   end
+  if HasIDNotNegated(cards,66994718,ChainNegation) then -- Raptor's Gust
+    return {1,CurrentIndex}
+  end
   if HasID(cards,74822425,false,nil,LOCATION_MZONE,ChainNegation) then -- Shekinaga
     return {1,CurrentIndex}
   end
@@ -2905,6 +2916,9 @@ function RequiemTarget(cards,min)
   end
   return BestTargets(cards,1,TARGET_OTHER)
 end
+function LightningTarget(cards,min)
+  return Add(cards,PRIO_TOGRAVE,min,ExcludeID,84013237)
+end
 function GenericCard(cards,min,max,id,c)
   if c then
     id = c.id
@@ -2912,6 +2926,9 @@ function GenericCard(cards,min,max,id,c)
   if GlobalPendulumSummon then
     GlobalPendulumSummon = nil
     return PendulumSummonTarget(cards,max)
+  end
+  if id == 56832966 then
+    return LightningTarget(cards,min)
   end
   if id == 63519819 then
     return TERTarget(cards)

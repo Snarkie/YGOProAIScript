@@ -880,6 +880,10 @@ function BAInit(cards)
   if HasID(SpSum,85252081,SummonLeviairBA,1) then
     return SpSummon()
   end
+  if HasID(Act,83531441,UseDante) then
+    GlobalActivatedCardID = 83531441
+    return Activate()
+  end
   if HasID(SpSum,83531441) and SummonDanteBA() then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
@@ -1695,7 +1699,7 @@ function ChainTraveler(c)
     return true
   end
   if Duel.GetTurnPlayer() == 1-player_ai
-  and Duel.GetCurrentPhase() == PHASE_BATTLE
+  and IsBattlePhase()
   and #AIMon()==0
   and ExpectedDamage(1)>=0.7*AI.GetPlayerLP(1)
   then
@@ -1744,7 +1748,7 @@ function ChainPainfulEscape(card)
   if RemovalCheckCard(card) then
     return true
   end
-  if Duel.GetCurrentPhase()==PHASE_BATTLE
+  if IsBattlePhase()
   and Duel.GetTurnPlayer()==1-player_ai
   then
     local aimon,oppmon = GetBattlingMons()

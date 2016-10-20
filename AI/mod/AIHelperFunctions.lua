@@ -1993,6 +1993,7 @@ function ResetOncePerTurnGlobals()
   if GlobalTurn == Duel.GetTurnCount() then 
     return
   end
+  GlobalSummonRestriction = nil
   GlobalTurn = Duel.GetTurnCount() 
   Global1PTLylaST  = nil
   Global1PTGenome  = nil

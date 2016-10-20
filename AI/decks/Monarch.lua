@@ -107,7 +107,7 @@ function TreebornCond(loc,c)
     then
       return 9
     elseif CardsMatchingFilter(cards,FilterID,12538374)==1 then
-      return 7
+      --return 7
     else
       return 5
     end
@@ -486,6 +486,23 @@ function SummonVeiler(c,mode)
   end
   return false
 end
+function SummonTreeborn(c,mode)
+  if mode==1 then
+    if CardsMatchingFilter(AIMon(),FilterTuner,1)==1
+    and HasIDNotNegated(AIExtra(),50091196,true) -- Formula
+    and DualityCheck()
+    then
+      return true
+    end
+    if FieldCheck(1)>0
+    and (HasIDNotNegated(AIExtra(),46895036,SummonDullahan,1)
+    or HasIDNotNegated(AIExtra(),46895036,SummonDullahan,2))
+    then
+      return true
+    end
+  end
+  return false
+end
 function SummonRonin(c,mode)
   local cards = UseLists(AIMon(),AIGrave(),AIMaterials())
   if mode == 1 then
@@ -747,7 +764,10 @@ function MonarchInit(cards)
   if HasID(SpSum,53334641,SummonAngel) then
     return COMMAND_SPECIAL_SUMMON,CurrentIndex
   end
-  if HasIDNotNegated(Sum,97268402,SummonVeiler,1) then
+  if HasID(Sum,12538374,SummonTreeborn,1) then
+    return COMMAND_SUMMON,CurrentIndex
+  end
+  if HasID(Sum,97268402,SummonVeiler,1) then
     return COMMAND_SUMMON,CurrentIndex
   end
   if HasID(SpSum,50091196,SummonFormula) then

@@ -301,8 +301,11 @@ function OppGetWeakestAttDef()
   return result
 end
 function OppHasStrongestMonster(skipbonus)
-  return #OppMon()>0 and ((AIGetStrongestAttack(skipbonus) <= OppGetStrongestAttDef()) 
-  or HasID(AIMon(),68535320,true) and FireHandCheck() or HasID(AIMon(),95929069,true) and IceHandCheck())
+  return #OppMon()>0 
+  and ((AIGetStrongestAttack(skipbonus) <= OppGetStrongestAttDef()) 
+  or HasID(AIMon(),68535320,true) and FireHandCheck() 
+  or HasID(AIMon(),95929069,true) and IceHandCheck())
+  and not HasIDNotNegated(AIMon(),65305468,true)
 end
 function OppHasFacedownMonster()
   local cards=OppMon()
@@ -701,10 +704,12 @@ function BestTargets(cards,count,target,filter,opt,immuneCheck,source)
           c.prio = 2
         end
       else  
-        if FilterPosition(c,POS_FACEUP) then
-          c.prio = 4
-        else
+        if FilterPosition(c,POS_FACEUP)
+        and not FilterType(c,TYPE_PENDULUM)
+        then
           c.prio = 3
+        else
+          c.prio = 4
         end
       end
       if c.prio>0 then
@@ -749,6 +754,9 @@ function BestTargets(cards,count,target,filter,opt,immuneCheck,source)
     end
     if CurrentOwner(c) == 1 then 
       c.prio = -1 * c.prio
+    end
+    if not ShouldRemove(c) then
+      c.prio = -1
     end
     if target == TARGET_PROTECT then 
       c.prio = -1 * c.prio
@@ -1151,7 +1159,7 @@ function FilterDefenseMin(c,defense)
   else
     def = c.defense
   end
-  return FilterType(c,TYPE_MONSTER) and def<=defense
+  return FilterType(c,TYPE_MONSTER) and def>=defense
 end
 function FilterDefenseMax(c,defense)
   local def = 0
@@ -1181,6 +1189,10 @@ function ExcludeOriginalID(c,id)
   return c.original_id~=id
 end
 function FilterPosition(c,pos)
+  if pos == nil then
+    print("Warning: FilterPosition null pos")
+    PrintCallingFunction()
+  end
   if c.GetCode then
     return c:IsPosition(pos)
   else
@@ -1234,7 +1246,7 @@ function FilterPublic(c)
   return STATUS_IS_PUBLIC and FilterStatus(c,STATUS_IS_PUBLIC)
   or c.is_public and c:is_public()
   or FilterPosition(c,POS_FACEUP)
-  or FilterSummon(c,SUMMON_TYPE_SPECIAL) -- TODO: find better check
+  or FilterSummon(c,SUMMON_TYPE_SPECIAL)
 end
 function FilterPrivate(c)
   return not FilterPublic(c)
@@ -1369,6 +1381,28 @@ function FilterFlipFaceup(c,checkopt)
   and FilterType(c,TYPE_FLIP)
   and FilterPosition(c,POS_FACEUP)
   and (not checkopt or OPTCheck(c.id))
+end
+function FilterInvert(c,args)
+  -- invert another filter, pass either the filter,
+  -- or a list containing filter + arguments
+  local filter = args
+  local opt = nil
+  if type(filter) == "table" then
+    filter = args[1]
+    opt = args[2]
+  end
+  return not FilterCheck(c,filter,opt)
+end
+GlobalSummonRestriction = nil
+function FilterSummonRestriction(c)
+  local filter = GlobalSummonRestriction
+  if not filter then
+    return true
+  end
+  if type(filter) == "number" then
+    return FilterSet(c,filter)
+  end
+  return filter(c)
 end
 GlobalTargetList = {}
 -- function to prevent multiple cards to target the same card in the same chain
@@ -2170,7 +2204,7 @@ function CanChangePos(c)
 end
 function CanAttack(c,direct,filter,opt)
   return (FilterPosition(c,POS_FACEUP_ATTACK)
-  or FilterPosition(c,POS_DEFENSE) and CanChangePos(c))
+  or (FilterPosition(c,POS_DEFENSE) and CanChangePos(c) and not IsBattlePhase()))
   and AvailableAttacks(c)>0
   and not FilterAffected(c,EFFECT_CANNOT_ATTACK)
   and (not direct or not FilterAffected(c,EFFECT_CANNOT_DIRECT_ATTACK))
@@ -2805,8 +2839,15 @@ function NegateDragonRuler(c,e,source,link)
   return nil
 end
 
+function NegateUpstart(c,e,source,link)
+  if GetBurnDamage(nil,link) then
+    return nil
+  end
+  return 0
+end
+
 NegatePriority={
-[70368879] = 0, -- Upstart
+[70368879] = NegateUpstart, -- Upstart
 [32807846] = 0, -- RotA
 [12538374] = 0, -- Treeborn
 [19748583] = 0, -- Gwen
@@ -2839,6 +2880,12 @@ function AdjustMonsterPrio(target,prio)
   then
     prio=prio+1
   end
+  if FilterType(target,TYPE_XYZ) then
+    if target.xyz_material_count>0
+    then
+      prio=prio+1
+    end
+  end
   if target.attack>=2000 then
     prio=prio+1
   end
@@ -2848,7 +2895,7 @@ function AdjustMonsterPrio(target,prio)
   if target.attack<500 then
     prio=prio-1
   end
-  if atk>0 and target.attack>=atk then
+  if atk>=1200 and target.attack>=atk then
     prio=prio+1
   end
   return prio
@@ -2967,6 +3014,18 @@ function GetNegatePriority(source,link,targeted)
         end
       end
     end
+    local burn = GetBurnDamage(nil,link)
+    if burn then
+      if burn >= 2000 then
+        prio=prio+2
+      end
+      if AI.GetPlayerLP(1)-burn<=800 then
+        prio=prio+4
+      end
+      if burn>AI.GetPlayerLP(1) then
+        prio=prio+100
+      end
+    end
   else
     local targets = SubGroup(OppMon(),FilterStatus,STATUS_SUMMONING)
     if targets and #targets>0 then 
@@ -2988,10 +3047,10 @@ function GetNegatePriority(source,link,targeted)
   local check = NegatePriority[id]
   if prio>-1 and check then
     if type(check) == "function" then
-      if check(c,e,source) then
-        prio=check(c,e,source)
+      if check(c,e,source,link) then
+        prio=check(c,e,source,link)
       else
-        prio=-1
+        --prio=-1
       end
     else
       prio=check
@@ -3188,8 +3247,62 @@ function ShouldRemove(c)
   end
   return true
 end
+--[[
+TODO: revisit, once burn gets a player check
+Burn={
 
+}
+function BurnById(id)
+  return 1000 -- default
+end
 
+function ExpectedBurn(link,player)
+  -- Approximates the expected burn from the current chain
+  local result = 0
+  local start = link or 1
+  local end = link or Duel.GetCurrentChain()
+  player = player or player_ai
+  for link=start,end do
+    if EffectCheck(1-player,link) then
+      local e,c,id=EffectCheck(nil,link)
+      c=GetCardFromScript(c)
+      if CheckNegated(link) 
+      and IsHasCategory(CATEGORY_DAMAGE)
+      then
+        
+      end 
+end
+]]
 
+function GetBurnDamage(player,start,stop)
+  -- returns the total burn damage expected to be dealt to the player 
+  -- in the current chain
+  player=player or player_ai
+  start = start or 1
+  stop = stop or start or Duel.GetCurrentChain()
+  local result = 0
 
+  for i=start,stop do
+    local e1=Duel.IsPlayerAffectedByEffect(player,EFFECT_REVERSE_DAMAGE)
+    local e2=Duel.IsPlayerAffectedByEffect(player,EFFECT_REVERSE_RECOVER)
+    local rd=e1 and not e2
+    local rr=not e1 and e2
+    local ex,cg,ct,cp,cv=Duel.GetOperationInfo(i,CATEGORY_DAMAGE)
+    if ex and (cp==player or cp==PLAYER_ALL) and not rd 
+    and not Duel.IsPlayerAffectedByEffect(player,EFFECT_NO_EFFECT_DAMAGE) 
+    then
+      result = result + cv
+    end
+    ex,cg,ct,cp,cv=Duel.GetOperationInfo(i,CATEGORY_RECOVER)
+    if ex and (cp==player or cp==PLAYER_ALL) and rr 
+    and not Duel.IsPlayerAffectedByEffect(player,EFFECT_NO_EFFECT_DAMAGE)
+    then
+      result = result + cv
+    end
+  end
+  if result>0 then
+    return result
+  end
+  return false
+end
 

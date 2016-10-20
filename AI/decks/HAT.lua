@@ -57,6 +57,7 @@ function MoralltachFilter(c)
   and c:is_affected_by(EFFECT_INDESTRUCTABLE_EFFECT)==0
   and bit32.band(c.status,STATUS_LEAVE_CONFIRMED)==0
   and not DestroyBlacklist(c)
+  and Affected(c,TYPE_MONSTER,5)
 end
 function MoralltachCond(loc)
   if loc == PRIO_TOHAND then
@@ -489,11 +490,11 @@ function ArtifactCheckGrave(sanctum)
   local BeagalltachCheck = HasID(AIGrave(),12697630,true) and HasID(AIST(),85103922,true) 
   and Duel.GetTurnPlayer()==1-player_ai and WindaCheck()
   if BeagalltachCheck then
-    GlobalTargetSet(FindID(12697630),AIGrave())
+    GlobalTargetSet(FindID(12697630,AIGrave()))
     return true
   end
   if MoralltachCheck then
-    GlobalTargetSet(FindID(85103922),AIGrave())
+    GlobalTargetSet(FindID(85103922,AIGrave()))
     return true
   end
   return false
@@ -526,7 +527,7 @@ function ChainCotH(card)
     end
     if MyrmeleoCheck then
       GlobalCardMode = 1
-      GlobalTargetSet(FindID(91812341),AIGrave())
+      GlobalTargetSet(FindID(91812341,AIGrave()))
       return true
     end
     return true -- return true anyways to avoid destruction effects that only destroy face-down cards
@@ -560,13 +561,13 @@ function ChainCotH(card)
     end
     if MyrmeleoCheck and CardsMatchingFilter(OppST(),MSTEndPhaseFilter)>0 then
       GlobalCardMode = 1
-      GlobalTargetSet(FindID(91812341),AIGrave())
+      GlobalTargetSet(FindID(91812341,AIGrave()))
       return true
     end
   end
   if ScytheCheck() and HasID(AIGrave(),20292186,true) then
     GlobalCardMode = 1
-    GlobalTargetSet(FindID(20292186),AIGrave())
+    GlobalTargetSet(FindID(20292186,AIGrave()))
     return true
   end
   return false

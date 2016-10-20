@@ -930,7 +930,7 @@ function ChainWickedwitch(c,mode)
     end
     if not UnchainableCheck(c.id) then return false end
     local aimon,oppmon = GetBattlingMons()
-    if Duel.GetCurrentPhase()==PHASE_BATTLE
+    if IsBattlePhase()
     and WinsBattle(oppmon,aimon) 
     and CardsEqual(c,aimon)
     then
@@ -975,7 +975,7 @@ function ChainEtele(c)
     return true
   end
   local aimon,oppmon=GetBattlingMons()
-  if Duel.GetCurrentPhase()==PHASE_BATTLE
+  if IsBattlePhase()
   and Duel.GetTurnPlayer()==player_ai
   and HasID(AIDeck(),31061682,true)
   and CanDealBattleDamage(FindID(31061682,AIDeck()),OppMon())
@@ -1080,7 +1080,7 @@ function ChainCotHKozmo(c)
     end
   end
   local aimon,oppmon=GetBattlingMons()
-  if Duel.GetCurrentPhase()==PHASE_BATTLE
+  if IsBattlePhase()
   and Duel.GetTurnPlayer()==player_ai
   and HasID(AIGrave(),31061682,true)
   and CanDealBattleDamage(FindID(31061682,AIGrave()),OppMon())
@@ -1230,7 +1230,7 @@ function KozmoPosition(id,available)
   for i=1,#KozmoVary do
     if KozmoVary[i]==id 
     then 
-      if (BattlePhaseCheck() or Duel.GetCurrentPhase()==PHASE_BATTLE)
+      if (BattlePhaseCheck() or IsBattlePhase())
       and Duel.GetTurnPlayer()==player_ai 
       then 
         result=POS_FACEUP_ATTACK

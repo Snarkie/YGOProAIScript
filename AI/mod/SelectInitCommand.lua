@@ -1907,6 +1907,60 @@ end
     end
   end
   
+  -- force a synchro or xyz summon, if AI still controls Norden and a target
+  if TurnEndCheck()
+  and HasID(AIMon(),17412721,true)
+  then
+    local norden = FindID(17412721,AIMon())
+    local target = nil
+    if CardTargetCheck(norden) then
+      target = GetCardFromScript(GetScriptFromCard(norden):GetCardTarget())
+    end
+    if FilterTuner(target) then
+      for i,c in pairs(SpSummonableCards) do
+        if FilterType(c,TYPE_SYNCHRO) 
+        and FilterLevel(c,norden.level+target.level)
+        then
+          GlobalMaterial = true
+          GlobalSSCardID = c.id
+          return COMMAND_SPECIAL_SUMMON,i
+        end
+      end
+    end
+    if FilterLevel(target,4) then
+      for i,c in pairs(SpSummonableCards) do
+        if FilterType(c,TYPE_XYZ) 
+        and FilterRank(c,4)
+        then
+          GlobalMaterial = true
+          GlobalSSCardID = c.id
+          return COMMAND_SPECIAL_SUMMON,i
+        end
+      end
+    end
+  end
+       
+
+  
+ --[[ function CardTargetCheck(c,target)
+  if c==nil then return nil end
+  c=GetScriptFromCard(c)
+  if c==nil then return nil end
+  local result = 0
+  if not c:IsPosition(POS_FACEUP) then return nil end
+  if target then
+    target=GetScriptFromCard(target)
+    return c:IsHasCardTarget(target)
+  end
+  for i=1,#Field() do
+    local tc=GetScriptFromCard(Field()[i])
+    if tc and c:IsHasCardTarget(tc) then
+      result = result +1
+    end
+  end
+  return result
+end]]
+  
   ---------------------------------------------------
   -- If an in-hand monster has a flip effect, set it.
   ---------------------------------------------------

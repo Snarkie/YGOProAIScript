@@ -1044,8 +1044,8 @@ function OppDownBackrowFilter(c)
   and SpecterDestroyFilter(c)
   and not (DestroyBlacklist(c)
   and (bit32.band(c.position, POS_FACEUP)>0 
-  or bit32.band(c.status,STATUS_IS_PUBLIC)>0))
-  and not FilterStatus(c,STATUS_IS_PUBLIC)
+  or FilterPublic(c))
+  and not FilterPublic(c))
 --  and not FilterType(c,TYPE_FIELD)
 end
 
@@ -1329,7 +1329,7 @@ end
 function SpecterTornadoFilter4(c)
   if (EnemyHasFireflux() or EnemyHasPPalOrOddEyes()
   or EnemyHasStargazer() or EnemyHasTimegazer())
-  and Duel.GetCurrentPhase() == PHASE_BATTLE then
+  and IsBattlePhase() then
     return c.attack > SpecterAIGetWeakestAttDef()
     and FilterPosition(c,POS_FACEUP_ATTACK)
 	and SpecterTornadoFilter(c)
@@ -1360,7 +1360,7 @@ function SpecterTornadoFilter7(c)
   and (FilterAffected(c,EFFECT_CANNOT_BE_BATTLE_TARGET)
   or FilterAffected(c,EFFECT_INDESTRUCTABLE_BATTLE))
   and (FilterPosition(c,POS_FACEUP)
-  or FilterStatus(c,STATUS_IS_PUBLIC))
+  or FilterPublic(c))
 end
 
 function ChainSpecterTornado()
@@ -1391,7 +1391,7 @@ function ChainSpecterTornado3()
 end
 
 function ChainSpecterTornado4()
-  if Duel.GetCurrentPhase() == PHASE_BATTLE and Duel.GetTurnPlayer()==1-player_ai then
+  if IsBattlePhase() and Duel.GetTurnPlayer()==1-player_ai then
 		local source = Duel.GetAttacker()
 		local target = Duel.GetAttackTarget()
     if source and target then
@@ -1426,14 +1426,14 @@ end
 function ChainSpecterTornado6()
   return CardsMatchingFilter(OppMon(),SpecterTornadoFilter4)>0
   and Duel.GetTurnPlayer()==1-player_ai
-  and Duel.GetCurrentPhase() == PHASE_BATTLE
+  and IsBattlePhase()
   and UnchainableCheck(36183881)
 end
 
 function ChainSpecterTornado7()
   return CardsMatchingFilter(OppMon(),SpecterTornadoFilter5)>0
   and Duel.GetTurnPlayer()==1-player_ai
-  and Duel.GetCurrentPhase() == PHASE_BATTLE
+  and IsBattlePhase()
   and UnchainableCheck(36183881)
 end
 
@@ -1453,7 +1453,7 @@ function ChainSpecterTornado8()
   and CardsMatchingFilter(AIMon(),MajespecterAttack)>4
   and CardsMatchingFilter(UseLists({AIHand(),AIST()}),UsableFreelyBackrowFilter)>2
   and CardsMatchingFilter(AIMon(),SpecterMonsterFilter)>3))
-  and Duel.GetCurrentPhase() == PHASE_BATTLE
+  and IsBattlePhase()
   and Duel.GetTurnPlayer()==player_ai
   and UnchainableCheck(36183881)
 end
@@ -1548,7 +1548,7 @@ end
 function SpecterCycloneFilter4(c)
   if (EnemyHasFireflux() or EnemyHasPPalOrOddEyes()
   or EnemyHasStargazer() or EnemyHasTimegazer())
-  and Duel.GetCurrentPhase() == PHASE_BATTLE then
+  and IsBattlePhase() then
     return c.attack > SpecterAIGetWeakestAttDef()
     and FilterPosition(c,POS_FACEUP_ATTACK)
 	and SpecterCycloneFilter(c)
@@ -1580,7 +1580,7 @@ function SpecterCycloneFilter7(c)
   and (FilterAffected(c,EFFECT_CANNOT_BE_BATTLE_TARGET)
   or FilterAffected(c,EFFECT_INDESTRUCTABLE_BATTLE))
   and (FilterPosition(c,POS_FACEUP)
-  or FilterStatus(c,STATUS_IS_PUBLIC))
+  or FilterPublic(c))
 end
 
 function ChainSpecterCyclone()
@@ -1611,7 +1611,7 @@ function ChainSpecterCyclone3()
 end
 
 function ChainSpecterCyclone4()
-  if Duel.GetCurrentPhase() == PHASE_BATTLE and Duel.GetTurnPlayer()==1-player_ai then
+  if IsBattlePhase() and Duel.GetTurnPlayer()==1-player_ai then
 		local source = Duel.GetAttacker()
 		local target = Duel.GetAttackTarget()
     if source and target then
@@ -1647,14 +1647,14 @@ end
 function ChainSpecterCyclone6()
   return CardsMatchingFilter(OppMon(),SpecterCycloneFilter4)>0
   and Duel.GetTurnPlayer()==1-player_ai
-  and Duel.GetCurrentPhase() == PHASE_BATTLE
+  and IsBattlePhase()
   and UnchainableCheck(49366157)
 end
 
 function ChainSpecterCyclone7()
   return CardsMatchingFilter(OppMon(),SpecterCycloneFilter5)>0
   and Duel.GetTurnPlayer()==1-player_ai
-  and Duel.GetCurrentPhase() == PHASE_BATTLE
+  and IsBattlePhase()
   and UnchainableCheck(49366157)
 end
 
@@ -1674,7 +1674,7 @@ function ChainSpecterCyclone8()
   and CardsMatchingFilter(AIMon(),MajespecterAttack)>4
   and CardsMatchingFilter(UseLists({AIHand(),AIST()}),UsableFreelyBackrowFilter)>2
   and CardsMatchingFilter(AIMon(),SpecterMonsterFilter)>3))
-  and Duel.GetCurrentPhase() == PHASE_BATTLE
+  and IsBattlePhase()
   and Duel.GetTurnPlayer()==player_ai
   and UnchainableCheck(49366157)
 end
@@ -1759,7 +1759,7 @@ function SpecterEffectNegateFilter(c,card)
   if id == 09411399 and HasID(OppGrave(),09411399,true) then -- Don't negate Malicious if there is already a second in the graveyard.
     return false
   end
-  if id == 37445295 and #OppHand()>2 and not Duel.GetCurrentPhase() == PHASE_BATTLE then -- Falco
+  if id == 37445295 and #OppHand()>2 and not IsBattlePhase() then -- Falco
     return false
   end
   if id == 33420078 and #OppHand()>0 then --Plaguespreader
@@ -2416,7 +2416,7 @@ function SpecterTarOrDesMon()
 end
 
 function Specter21Filter(c)
-  return FilterPosition(c,POS_DEFENCE)
+  return FilterPosition(c,POS_DEFENSE)
   and FilterAffected(c,EFFECT_INDESTRUCTABLE_EFFECT)
 end
 
@@ -2434,7 +2434,7 @@ function SpecterZereortCheck()
 end
 
 function SpecterCorebageFilter(c)
-  return FilterPosition(c,POS_DEFENCE)
+  return FilterPosition(c,POS_DEFENSE)
   and Targetable(c,TYPE_MONSTER)
 end
 
@@ -2453,7 +2453,7 @@ end
 
 function Specter19Filter(c)
   return FilterStatus(c,STATUS_SUMMONING)
-  and FilterPosition(c,POS_FACEUP_DEFENCE)
+  and FilterPosition(c,POS_FACEUP_DEFENSE)
   and c.id==55067058
 end
 
@@ -2530,7 +2530,7 @@ function SpecterTemtempoFilter1(c) --Honor Ark, Honor Dark, Full-Armored Lancer,
   and (c.id==48739166
   or c.id==12744567
   or c.id==25853045
-  or (c.id==12014404 and FilterPosition(c,POS_FACEUP_DEFENCE) and AI.GetPlayerLP(1)<=800)
+  or (c.id==12014404 and FilterPosition(c,POS_FACEUP_DEFENSE) and AI.GetPlayerLP(1)<=800)
   or c.id==03989465
   or c.id==78156759
   or c.id==36776089
@@ -3045,7 +3045,7 @@ function ChainSpecterAbyss()
 	end
   end
   if EnableShadollFunctions() then
-    if Duel.GetCurrentPhase() == PHASE_BATTLE then
+    if IsBattlePhase() then
     local source = Duel.GetAttacker()
 	local target = Duel.GetAttackTarget()
       if source and target then
@@ -3079,7 +3079,7 @@ function ChainSpecterAbyss()
 	end
   end
   if EnableBAFunctions() then
-    if Duel.GetCurrentPhase() == PHASE_BATTLE then
+    if IsBattlePhase() then
     local source = Duel.GetAttacker()
 	local target = Duel.GetAttackTarget()
       if source and target then
@@ -3130,7 +3130,7 @@ function ChainSpecterAbyss()
     return true
   end
   if CardsMatchingFilter(OppMon(),SpecterGraveyardEffectBattleFilter)>0 then
-    if Duel.GetCurrentPhase() == PHASE_BATTLE then
+    if IsBattlePhase() then
     local source = Duel.GetAttacker()
 	local target = Duel.GetAttackTarget()
       if source and target then
@@ -3536,7 +3536,7 @@ end
 
 function UsedUtopiaLightning()
   return CardsMatchingFilter(AIMon(),UsedUtopiaLightningFilter)>0
-  and Duel.GetCurrentPhase() == PHASE_BATTLE
+  and IsBattlePhase()
 end
 
 function UsedUtopiaLightning2()
@@ -5572,7 +5572,7 @@ function EnemyHasReverseBuster()
 end
 
 function SpecterFacedownFilter(c)
-  return FilterPosition(c,POS_FACEDOWN_DEFENCE)
+  return FilterPosition(c,POS_FACEDOWN_DEFENSE)
 end
 
 function EnemyHasStargazer()
@@ -5822,8 +5822,8 @@ function SpecterAIGetWeakestAttDef()
     if cards[i] and cards[i]:is_affected_by(EFFECT_CANNOT_BE_BATTLE_TARGET)==0 then
       if bit32.band(cards[i].position,POS_ATTACK)>0 and cards[i].attack<result then
         result=cards[i].attack-cards[i].bonus
-      elseif bit32.band(cards[i].position,POS_DEFENCE)>0 and cards[i].defense<result 
-      and (bit32.band(cards[i].position,POS_FACEUP)>0 or bit32.band(cards[i].status,STATUS_IS_PUBLIC)>0)
+      elseif bit32.band(cards[i].position,POS_DEFENSE)>0 and cards[i].defense<result 
+      and (bit32.band(cards[i].position,POS_FACEUP)>0 or FilterPublic(cards[i]))
       then
         result=cards[i].defense
       end
@@ -6236,7 +6236,7 @@ function SpecterGraveyardEffectBattleFilter(c) --Anything always above 2000, ass
   or c.id==94667532
   or c.id==44481227
   or c.id==24025620
-  or (c.id==70271583 and FilterPosition(c,POS_FACEUP_DEFENCE))
+  or (c.id==70271583 and FilterPosition(c,POS_FACEUP_DEFENSE))
   or c.id==66500065
   or c.id==45045866
   or c.id==29834183
@@ -6310,7 +6310,7 @@ function SpecterGraveyardEffectBattleFilter(c) --Anything always above 2000, ass
   or c.id==91662792
   or c.id==18489208
   or c.id==28332833
-  or (c.id==76865611 and FilterPosition(c,POS_FACEUP_DEFENCE))
+  or (c.id==76865611 and FilterPosition(c,POS_FACEUP_DEFENSE))
   or c.id==93749093
   or c.id==50732780
   or c.id==93451636
@@ -6737,7 +6737,7 @@ function SpecterInit(cards)
     GlobalCardMode = 1
     return COMMAND_ACTIVATE,CurrentIndex
   end
-  if HasIDNotNegated(Act,12014404,SpecterUseCowboyDef,nil,LOCATION_MZONE,POS_FACEUP_DEFENCE) then
+  if HasIDNotNegated(Act,12014404,SpecterUseCowboyDef,nil,LOCATION_MZONE,POS_FACEUP_DEFENSE) then
     return COMMAND_ACTIVATE,CurrentIndex
   end
   if HasIDNotNegated(SpSum,12014404,SpecterSummonCowboyDef) then
@@ -7179,13 +7179,13 @@ function SpecterInit(cards)
   if HasIDNotNegated(Rep,68395509,CrowChangeToDefence,nil,LOCATION_MZONE,POS_FACEUP_ATTACK) then
     return COMMAND_CHANGE_POS,CurrentIndex
   end
-  if HasIDNotNegated(Rep,68395509,CrowChangeToAttack,nil,LOCATION_MZONE,POS_FACEUP_DEFENCE) then
+  if HasIDNotNegated(Rep,68395509,CrowChangeToAttack,nil,LOCATION_MZONE,POS_FACEUP_DEFENSE) then
     return COMMAND_CHANGE_POS,CurrentIndex
   end
   if HasIDNotNegated(Rep,88722973,MajesterChangeToDefence,nil,LOCATION_MZONE,POS_FACEUP_ATTACK) then
     return COMMAND_CHANGE_POS,CurrentIndex
   end
-  if HasIDNotNegated(Rep,88722973,MajesterChangeToAttack,nil,LOCATION_MZONE,POS_FACEUP_DEFENCE) then
+  if HasIDNotNegated(Rep,88722973,MajesterChangeToAttack,nil,LOCATION_MZONE,POS_FACEUP_DEFENSE) then
     return COMMAND_CHANGE_POS,CurrentIndex
   end
   if HasIDNotNegated(Rep,05506791,CatChangeToDefence,nil,LOCATION_MZONE,POS_FACEUP_ATTACK) then
@@ -8285,21 +8285,21 @@ function SpecterPosition(id,available)
   for i=1,#SpecterDef do
     if SpecterDef[i]==id
     then
-      result=POS_FACEUP_DEFENCE
+      result=POS_FACEUP_DEFENSE
     end
   end
   if id == 68395509 then
     if CrowAttack() then
 	  result=POS_FACEUP_ATTACK
 	else
-	  result=POS_FACEUP_DEFENCE
+	  result=POS_FACEUP_DEFENSE
 	end
   end
   if id == 88722973 then
     if MajesterAttack() then
 	  result=POS_FACEUP_ATTACK
 	else
-	  result=POS_FACEUP_DEFENCE
+	  result=POS_FACEUP_DEFENSE
 	end
   end
  return result
@@ -8655,7 +8655,7 @@ function SpecterLightningAttackTarget(cards,source,ignorebonus,filter,opt)
         c.prio = c.attack * -1
       end
     end
-    if FilterPosition(c,POS_DEFENCE) then
+    if FilterPosition(c,POS_DEFENSE) then
       c.prio = -99999
     end
     if filter and (opt and not filter(c,opt) or opt==nil and  not filter(c)) 

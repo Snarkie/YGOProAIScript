@@ -1564,7 +1564,7 @@ function ChainMaskChange(c)
   local heroes = SubGroup(AIMon(),HEROFilter)
   heroes = SubGroup(heroes,FilterPosition,POS_FACEUP)
   local mheroes = SubGroup(AIExtra(),MHEROFilter)
-  if RemovalCheckCard(c) then
+  if RemovalCheckCard(c,nil,nil,true) then
     return true
   end
   if not UnchainableCheck(21143940) then
@@ -1659,7 +1659,7 @@ function ChainCotHHERO(c)
   if HasIDNotNegated(AICards(),21143940,true)
   and #OppMon()==0
   and ExpectedDamage()==0
-  and Duel.GetCurrentPhase()==PHASE_BATTLE
+  and IsBattlePhase()
   and Duel.GetTurnPlayer==player_ai
   then
     return true

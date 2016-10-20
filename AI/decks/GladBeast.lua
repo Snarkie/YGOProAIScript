@@ -339,7 +339,7 @@ function UsePrisma(c,mode)
   and HasIDNotNegated(AIExtra(),27346636,true) -- Heraklinos
   then
     GlobalCardMode = 1
-    GlobalTargetSet(FindID(AIExtra(),27346636))
+    GlobalTargetSet(FindID(27346636,AIExtra()))
     return true
   end
 end
@@ -1263,7 +1263,7 @@ function GladBeastPosition(id,available)
   for i=1,#GladBeastVary do
     if GladBeastVary[i]==id 
     then 
-      if (BattlePhaseCheck() or Duel.GetCurrentPhase()==PHASE_BATTLE)
+      if (BattlePhaseCheck() or IsBattlePhase())
       and Duel.GetTurnPlayer()==player_ai 
       then 
         result=POS_FACEUP_ATTACK

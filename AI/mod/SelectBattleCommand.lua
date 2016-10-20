@@ -145,6 +145,7 @@ function BestAttackTarget(cards,source,ignorebonus,filter,opt)
       then 
         if atk-bonus<=c.attack
         and CanWinBattle(source,cards,nil,true)
+        and AIGetStrongestAttack(true)>c.attack
         then
           c.prio = 1
         else
@@ -459,7 +460,7 @@ function OnSelectBattleCommand(cards,activatable)
   if #targets>0 and #cards>0 then
     for i=1,#cards do
       if CanAttackSafely(cards[i],targets) then
-        return Attack(i)
+        --return Attack(i)
       end
     end
   end
@@ -587,6 +588,10 @@ function AttackF0(c,source)
   or StareaterCheck(source) 
   or not Affected(source,TYPE_MONSTER,c.level)
 end
+function AttackFirstOfDragons(c,source)
+  return FilterType(source,TYPE_NORMAL)
+  or Negated(c)
+end
 function SelectAttackConditions(c,source) 
   if c.id == 95929069 then
     return AttackIceHand(c,source)
@@ -614,6 +619,9 @@ function SelectAttackConditions(c,source)
   end
   if c.id == 65305468 then
     return AttackF0(c,source)
+  end
+  if c.id == 10817524 then
+    return AttackFirstOfDragons(c,source)
   end
   return true
 end

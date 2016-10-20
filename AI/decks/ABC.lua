@@ -980,9 +980,9 @@ function ABCChain(cards)
   if HasID(cards,01561110,false,01561110*16+1,ChainABC,2) then
     return Chain()
   end
-  for i,v in pairs(ABCChainFunctions) do
-    if id == i and HasID(cards,id,v,c) then
-      return chain
+  for id,v in pairs(ABCChainFunctions) do
+    if HasID(cards,id,v) then
+      return Chain()
     end
   end
   return nil
@@ -1047,19 +1047,19 @@ function ABCPosition(id,available)
   for i=1,#ABCVary do
     if ABCVary[i]==id 
     then 
-      if (BattlePhaseCheck() or Duel.GetCurrentPhase()==PHASE_BATTLE)
+      if (BattlePhaseCheck() or IsBattlePhase())
       and Duel.GetTurnPlayer()==player_ai 
       then 
         result=POS_FACEUP_ATTACK
       else 
-        result=POS_FACEUP_DEFENCE 
+        result=POS_FACEUP_DEFENSE 
       end
     end
   end
   for i=1,#ABCDef do
     if ABCDef[i]==id 
     then 
-      result=POS_FACEUP_DEFENCE 
+      result=POS_FACEUP_DEFENSE 
     end
   end
   return result
