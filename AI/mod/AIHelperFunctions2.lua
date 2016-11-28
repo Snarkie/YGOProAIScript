@@ -2264,6 +2264,9 @@ end
 -- function to determine, if a card can attack for game 
 -- on an opponent's monster, or directly
 function CanFinishGame(c,target,atk,bonus,malus)
+  if FilterPosition(c,POS_DEFENSE) then
+    return false
+  end
   if not bonus then
     bonus = 0
   end
