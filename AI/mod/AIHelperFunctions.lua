@@ -1901,6 +1901,7 @@ function ApplyATKBoosts(Cards)
     end
   end
   
+ 
   -- Shrink
   if HasIDNotNegated(AICards(),55713623,true) then
     for i=1,#Cards do
@@ -2016,6 +2017,7 @@ function ResetOncePerTurnGlobals()
   GlobalSummonedThisTurn = 0
   GlobalSoulExchangeActivated = 0
   GlobalCostDownActivated = 0
+  GlobalInfiniteLoopCheck = {}
  end
 
  function Globals()

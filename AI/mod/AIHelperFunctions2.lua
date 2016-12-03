@@ -787,7 +787,8 @@ function BestTargets(cards,count,target,filter,opt,immuneCheck,source)
   return result
 end
 function RandomTargets(cards,count,filter,opt)
-  result={}
+  local count = count or 1
+  local result={}
   for i=1,#cards do
     local c = cards[i]
     c.index = i
@@ -993,51 +994,56 @@ function NotNegated(c)
     id = c.id
     player = CurrentMonOwner(c.cardid)
   end
+  local check = nil 
   if not GlobalNegatedLoop then
     GlobalNegatedLoop = true
-    if FilterType(c,TYPE_SPELL) and id~=61740673
-    and (HasIDNotNegated(Field(),84636823,true,nil,nil,POS_FACEUP) -- Spell Canceller
-    or HasIDNotNegated(Field(),61740673,true,nil,nil,POS_FACEUP)   -- Imperial Order
-    or HasIDNotNegated(OppMon(),33198837,true,nil,nil,POS_FACEUP)  -- Naturia Beast
-    or HasIDNotNegated(OppMon(),99916754,true,nil,nil,POS_FACEUP)) -- Naturia Exterio
-    then
+    check = NotNegated
+  end
+  if FilterType(c,TYPE_SPELL) and id~=61740673
+  and (HasID(Field(),84636823,true,nil,nil,POS_FACEUP,check) -- Spell Canceller
+  or HasID(Field(),61740673,true,nil,nil,POS_FACEUP,check)   -- Imperial Order
+  or HasID(OppMon(),33198837,true,nil,nil,POS_FACEUP,check)  -- Naturia Beast
+  or HasID(OppMon(),99916754,true,nil,nil,POS_FACEUP,check)) -- Naturia Exterio
+  then
+    return false
+  end
+  if FilterType(c,TYPE_TRAP) and id~=51452091
+  and (HasID(Field(),77585513,true,nil,nil,POS_FACEUP,check) -- Jinzo
+  or HasID(Field(),51452091,true,nil,nil,POS_FACEUP,check)  -- Royal Decree
+  or HasID(OppMon(),02956282,true,nil,nil,POS_FACEUP,check) and #OppGrave()>1 -- Naturia Barkion
+  or HasID(OppMon(),99916754,true,nil,nil,POS_FACEUP,check)) -- Naturia Exterio
+  or GlobalTrapStun == Duel.GetTurnCount()
+  then
+    return false
+  end
+  if FilterType(c,TYPE_MONSTER) 
+  then
+    if Duel.GetTurnCount()==GlobalFeatherStorm then
       return false
     end
-    if FilterType(c,TYPE_TRAP) and id~=51452091
-    and (HasIDNotNegated(Field(),77585513,true,nil,nil,POS_FACEUP) -- Jinzo
-    or HasIDNotNegated(Field(),51452091,true,nil,nil,POS_FACEUP)  -- Royal Decree
-    or HasIDNotNegated(OppMon(),02956282,true,nil,nil,POS_FACEUP) and #OppGrave()>1 -- Naturia Barkion
-    or HasIDNotNegated(OppMon(),99916754,true,nil,nil,POS_FACEUP)) -- Naturia Exterio
-    or GlobalTrapStun == Duel.GetTurnCount()
-    then
+    if SkillDrainCheck() then
       return false
     end
-    if FilterType(c,TYPE_MONSTER) 
+    if HasID(Field(),33746252,true,nil,nil,POS_FACEUP,check) then -- Majesty's Fiend
+      return false
+    end
+    if HasID(Field(),56784842,true,nil,nil,POS_FACEUP,check) then -- Angel 07
+      return false
+    end
+    if HasID(Field(),53341729,true,nil,nil,POS_FACEUP,check) then -- Light-Imprisoning Mirror
+      return not FilterAttribute(c,ATTRIBUTE_LIGHT)
+    end
+    if HasID(Field(),99735427,true,nil,nil,POS_FACEUP,check) then -- Shadow-Imprisoning Mirror
+      return not FilterAttribute(c,ATTRIBUTE_DARK)
+    end
+    if FilterLocation(c,LOCATION_EXTRA) 
+    and HasID(Field(),89463537,true,nil,nil,POS_FACEUP,check) -- Necroz Unicore
+    then 
+      return false
+    end
+    if GlobalCoinormaTurn == Duel.GetTurnCount()
     then
-      if SkillDrainCheck() then
-        return false
-      end
-      if HasIDNotNegated(Field(),33746252,true,nil,nil,POS_FACEUP) then -- Majesty's Fiend
-        return false
-      end
-      if HasIDNotNegated(Field(),56784842,true,nil,nil,POS_FACEUP) then -- Angel 07
-        return false
-      end
-      if HasIDNotNegated(Field(),53341729,true,nil,nil,POS_FACEUP) then -- Light-Imprisoning Mirror
-        return not FilterAttribute(c,ATTRIBUTE_LIGHT)
-      end
-      if HasIDNotNegated(Field(),99735427,true,nil,nil,POS_FACEUP) then -- Shadow-Imprisoning Mirror
-        return not FilterAttribute(c,ATTRIBUTE_DARK)
-      end
-      if FilterLocation(c,LOCATION_EXTRA) 
-      and HasIDNotNegated(Field(),89463537,true,nil,nil,POS_FACEUP) -- Necroz Unicore
-      then 
-        return false
-      end
-      if GlobalCoinormaTurn == Duel.GetTurnCount()
-      then
-        return PredictionPrincessFilter(c)
-      end
+      return PredictionPrincessFilter(c)
     end
   end
   GlobalNegatedLoop=false
@@ -1404,6 +1410,34 @@ function FilterSummonRestriction(c)
   end
   return filter(c)
 end
+function FilterCrippled(c)
+  -- check, if a targed is crippled in any way
+  -- negated, cannot attack, face-down and cannot change position, stuff like that
+  if not FilterLocation(c,LOCATION_ONFIELD) then
+    return false
+  end
+  if Negated(c) 
+  and not SkillDrainCheck()
+  and c.attack<2200 -- negated beatstick still useful
+  then
+    return true
+  end
+  if c.base_attack>=1500 -- don't consider crippled, if the ATK is low to begin with
+  and (c.attack<=0.5*c.base_attack 
+  or FilterAffected(c,EFFECT_CANNOT_ATTACK))
+  then
+    return true
+  end
+  if FilterPosition(c,POS_FACEDOWN)
+  and FilterAffected(c,EFFECT_CANNOT_CHANGE_POSITION)
+  then
+    return true
+  end
+  return false
+end
+function FilterNotCrippled(c)
+  return not FilterCrippled(c)
+end
 GlobalTargetList = {}
 -- function to prevent multiple cards to target the same card in the same chain
 function TargetCheck(card)
@@ -1705,10 +1739,12 @@ function PriorityTarget(c,destroycheck,loc,filter,opt) -- preferred target for r
   if loc == nil then loc = LOCATION_ONFIELD end
   if loc == LOCATION_ONFIELD then
     if FilterType(c,TYPE_MONSTER) 
-    and (bit32.band(c.type,TYPE_FUSION+TYPE_RITUAL+TYPE_XYZ+TYPE_SYNCHRO)>0 
+    and (bit32.band(c.type,TYPE_FUSION+TYPE_RITUAL+TYPE_SYNCHRO)>0 
     or c.level>4 and c.attack>2000
-    or c.attack>=2500)
+    or c.attack>=2500
+    or FilterType(c,TYPE_XYZ) and c.xyz_material_count>0)
     and not (FiendishCheck(c) and AIGetStrongestAttack()>c.attack)
+    and not FilterCrippled(c)
     then
       result = true
     end
@@ -1758,7 +1794,7 @@ end
 -- Function to determine, if a player can special summon
 -- true = player can special summon
 GlobalDuality = 0
-function DualityCheck(player)
+function DualityCheck(player,skipmaxx)
   local cards = UseLists(AIField(),OppField())
   if player == nil then player = 1 end
   if player == 1 and Duel.GetTurnCount()==GlobalDuality then
@@ -1785,7 +1821,14 @@ function DualityCheck(player)
   if player == 2 and HasIDNotNegated(AIMon(),72634965,true,nil,nil,POS_FACEUP) then 
     return false -- Vanity's Ruler
   end
+  if player == 1 and not skipmaxx and MaxxCheck() then -- Maxx "C"
+    return false 
+  end
   return true
+end
+
+function CanSpecialSummon(player,skipmaxx) -- better name? 
+  return DualityCheck(player,skipmaxx)     -- keep old name for backwards compatibility
 end
 
 -- Function to determine, if a player's cards are being banished 
@@ -2506,13 +2549,7 @@ function CardTargetCheck(c,target)
     target=GetScriptFromCard(target)
     return c:IsHasCardTarget(target)
   end
-  for i=1,#Field() do
-    local tc=GetScriptFromCard(Field()[i])
-    if tc and c:IsHasCardTarget(tc) then
-      result = result +1
-    end
-  end
-  return result
+  return GetScriptFromCard(c):GetCardTargetCount()>0
 end
 function FiendishCheck(target)
   for i=1,#Field() do
@@ -3308,4 +3345,17 @@ function GetBurnDamage(player,start,stop)
   end
   return false
 end
-
+GlobalInfiniteLoopCheck={}
+function InfiniteLoopCheck(c,threshold)
+  threshold = threshold or 5
+  local id = c.description
+  if not id or id == 0 then
+    id = c.id
+  end
+  GlobalInfiniteLoopCheck[id]=GlobalInfiniteLoopCheck[id] or 0
+  GlobalInfiniteLoopCheck[id]=GlobalInfiniteLoopCheck[id]+1
+  return GlobalInfiniteLoopCheck[id]<=threshold
+end
+function MaxxCheck()
+  return GlobalMaxxC~=Duel.GetTurnCount()
+end

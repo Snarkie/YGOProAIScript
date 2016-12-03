@@ -346,7 +346,7 @@ ABCDragons={
 03405259, -- C-Crush Wyvern
 }
 function UseDai(c,mode)
-  return true
+  return MaxxCheck()
 end
 function EnableABC(cards,count)
   -- checks, if the list has the remaining cards to allow ABC Buster to be summoned
@@ -369,6 +369,7 @@ function EnableABC(cards,count)
   and not HasID(AIMon(),01561110,true)
 end
 function UseBrilliantFusion(c,mode)
+  if not MaxxCheck() then return false end
   if mode == 1
   and (FilterLocation(c,LOCATION_HAND)
   or FilterPosition(c,POS_FACEDOWN))
@@ -472,6 +473,7 @@ function ABCMaterials(cards)
   return false
 end
 function SummonABC(c,mode)
+  if not MaxxCheck() then return false end
   if mode == 1
   and ABCMaterials(AIGrave())
   then

@@ -1,50 +1,45 @@
 require("ai.decks.Fluffal.FluffalFilter")
 require("ai.decks.Fluffal.FluffalCond")
 require("ai.decks.Fluffal.FluffalSummon")
+require("ai.decks.Fluffal.FluffalMaterial")
 require("ai.decks.Fluffal.FluffalUse")
 require("ai.decks.Fluffal.FluffalTarget")
 require("ai.decks.Fluffal.FluffalChain")
 require("ai.decks.Fluffal.FluffalBattle")
 
 function FluffalStartup(deck)
-  print("AI_Fluffal v0.0.0.6.7 by neftalimich.")
-  AI.Chat("Duel!")
-
-  deck.Init                 = FluffalInit
-  deck.Card                 = FluffalCard
-  deck.Chain                = FluffalChain
+  print("AI_Fluffal v0.0.2.0.1 by neftalimich.")
+  deck.Init					= FluffalInit
+  deck.Card					= FluffalCard
+  deck.Chain				= FluffalChain
   deck.ChainOrder			= FluffalChainOrder
   deck.EffectYesNo			= FluffalEffectYesNo
   deck.YesNo				= FluffalYesNo
-  deck.Position             = FluffalPosition
-  deck.BattleCommand        = FluffalBattleCommand
-  deck.AttackTarget         = FluffalAttackTarget
+  deck.Position				= FluffalPosition
+  deck.BattleCommand		= FluffalBattleCommand
+  deck.AttackTarget			= FluffalAttackTarget
   deck.AttackBoost			= FluffalAttackBoost
 
-  deck.ActivateBlacklist    = FluffalActivateBlacklist
-  deck.SummonBlacklist      = FluffalSummonBlacklist
-  deck.SetBlacklist         = FluffalSetBlacklist
-  deck.RepositionBlacklist  = FluffalRepoBlacklist
-  deck.Unchainable          = FluffalUnchainable
-
-  deck.PriorityList         = FluffalPriorityList
-
   --[[
-  Other, more obscure functions, in case you need them. Same as before,
-  not defining a function or returning nil causes default logic to take over
 
-  deck.YesNo
   deck.Option
   deck.Sum
   deck.Tribute
-  deck.BattleCommand
-  deck.AttackTarget
   deck.DeclareCard
   deck.Number
   deck.Attribute
   deck.MonsterType
   ]]
 
+  deck.ActivateBlacklist	= FluffalActivateBlacklist
+  deck.SummonBlacklist		= FluffalSummonBlacklist
+  deck.SetBlacklist			= FluffalSetBlacklist
+  deck.RepositionBlacklist	= FluffalRepositionBlacklist
+  deck.Unchainable			= FluffalUnchainable
+
+  deck.PriorityList         = FluffalPriorityList
+
+  -- DEBUG
   --[[
   local e0=Effect.GlobalEffect()
 	e0:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
@@ -68,38 +63,173 @@ function FluffalStartup(deck)
   --]]
 end
 
-DECK_FLUFFAL = NewDeck("Fluffal",{03841833,72413000},FluffalStartup)
+FluffalIdentifier = {03841833,72413000}
 
+DECK_FLUFFAL = NewDeck("Fluffal",FluffalIdentifier,FluffalStartup)
+
+FluffalActivateBlacklist={
+39246582, -- Fluffal Dog
+13241004, -- Fluffal Penguin
+03841833, -- Fluffal Bear
+65331686, -- Fluffal Owl
+98280324, -- Fluffal Sheep
+87246309, -- Fluffal Octo
+02729285, -- Fluffal Cat
+38124994, -- Fluffal Rabit
+06142488, -- Fluffal Mouse
+72413000, -- Fluffal Wings
+81481818, -- Fluffal Patchwork
+
+97567736, -- Edge Imp Tomahawk
+61173621, -- Edge Imp Chain
+30068120, -- Edge Imp Sabres
+10802915, -- Tour Guide from the Underworld
+79109599, -- King of the Swamp
+06205579, -- Parasite Fusioner
+67441435, -- Glow-Up Bulb
+
+70245411, -- Toy Vendor
+06077601, -- Frightfur Fusion
+43698897, -- Frightfur Factory
+34773082, -- Frightfur Patchwork
+100214101,-- Frightfur Reborn (BETA)
+01845204, -- Instant Fusion
+24094653, -- Polymerization
+94820406, -- Dark Fusion
+05133471, -- Galaxy Cyclone
+35726888, -- Foolish Burial of Belongings
+43455065, -- Magical Spring
+43898403, -- Twin Twister
+12580477, -- Raigeki
+
+66127916, -- Fusion Reserve
+98954106, -- Jar of Avarice
+51452091, -- Royal Decree
+
+80889750, -- Frightfur Sabre-Tooth
+40636712, -- Frightfur Kraken
+10383554, -- Frightfur Leo
+85545073, -- Frightfur Bear
+11039171, -- Frightfur Wolf
+00464362, -- Frightfur Tiger
+57477163, -- Frightfur Sheep
+41209827, -- Starve Venom Fusion Dragon
+42110604, -- Hi-Speedroid Chanbara
+90809975, -- Toadally Awesome
+83531441, -- Dante
+}
+FluffalSummonBlacklist={
+39246582, -- Fluffal Dog
+13241004, -- Fluffal Penguin
+03841833, -- Fluffal Bear
+65331686, -- Fluffal Owl
+98280324, -- Fluffal Sheep
+87246309, -- Fluffal Octo
+02729285, -- Fluffal Cat
+38124994, -- Fluffal Rabit
+06142488, -- Fluffal Mouse
+72413000, -- Fluffal Wings
+81481818, -- Fluffal Patchwork
+97567736, -- Edge Imp Tomahawk
+61173621, -- Edge Imp Chain
+30068120, -- Edge Imp Sabres
+10802915, -- Tour Guide from the Underworld
+79109599, -- King of the Swamp
+06205579, -- Parasite Fusioner
+67441435, -- Glow-Up Bulb
+
+80889750, -- Frightfur Sabre-Tooth
+40636712, -- Frightfur Kraken
+10383554, -- Frightfur Leo
+85545073, -- Frightfur Bear
+11039171, -- Frightfur Wolf
+00464362, -- Frightfur Tiger
+57477163, -- Frightfur Sheep
+41209827, -- Starve Venom Fusion Dragon
+42110604, -- Hi-Speedroid Chanbara
+83531441, -- Dante
+}
+FluffalSetBlacklist={
+70245411, -- Toy Vendor
+06077601, -- Frightfur Fusion
+43698897, -- Frightfur Factory
+34773082, -- Frightfur Patchwork
+100214101,-- Frightfur Reborn (BETA)
+01845204, -- Instant Fusion
+24094653, -- Polymerization
+94820406, -- Dark Fusion
+05133471, -- Galaxy Cyclone
+35726888, -- Foolish Burial of Belongings
+12580477, -- Raigeki
+
+51452091, -- Royal Decree
+}
+FluffalRepositionBlacklist={
+98280324, -- Fluffal Sheep
+02729285, -- Fluffal Cat
+38124994, -- Fluffal Rabit
+06142488, -- Fluffal Mouse
+72413000, -- Fluffal Wings
+81481818, -- Fluffal Patchwork
+87246309, -- Fluffal Octo
+79109599, -- King of the Swamp
+06205579, -- Parasite Fusioner
+67441435, -- Glow-Up Bulb
+}
+FluffalUnchainable={
+43455065, -- Magical Spring
+66127916, -- Fusion Reserve
+98954106, -- Jar of Avarice
+}
+
+GlobalFluffalPercent = 0.0
+GlobalCanFusionSummon = false
 function FluffalInit(cards,to_bp_allowed,to_ep_allowed) -- FLUFFAL INIT
+  local Act = cards.activatable_cards
+  local Sum = cards.summonable_cards
+  local SpSum = cards.spsummonable_cards
+  local Rep = cards.repositionable_cards
+  local SetMon = cards.monster_setable_cards
+  local SetST = cards.st_setable_cards
 
-  --GLOBAL
-  GlobalSheep = 0
-  GlobalRabit = 0
-  GlobalOcto = 0
+  -- GLOBAL
+  GlobalPenguin = 0
+  GlobalOwl = 0
   GlobalSabres = 0
-  GlogalFSabreTooth = 0
-  GlobalToyVendor = 0
-  GlobalFusionPerform = 0
+  GlobalTVendor = 0
+  GlobalActivatedCardID = 0
+  GlobalSummonId = 0
   GlobalFusionId = 0
   GlobalPolymerization = 0
   GlobalDFusion = 0
   GlobalFFusion = 0
-  GlobalMaterialF = 0
-  GlobalMaterialE = 0
+  GlobalFluffalMaterial = 0
+  GlobalEdgeImpMaterial = 0
+  GlobalCanFusionSummon = false
 
   -- GLOBAL INIT
+  print("--1")
   GlobalFluffalPercent = CountFluffal(AIDeck()) / #AIDeck()
-  print("FluffalPercent: "..(GlobalFluffalPercent * 100).." %")
-
+  print("FluffalPercent: ",(GlobalFluffalPercent * 100).." %")
+  if CardsMatchingFilter(Act,FluffalFusionSTFilter2) > 0
+  then
+    GlobalCanFusionSummon = true
+  end
+  print("--2")
+  -- FLUFFAL KAIJU
+  if CardsMatchingFilter(OppMon(),BossMonFilter) > 0 then
+    FluffalSpSumKaiju(cards.spsummonable_cards)
+  end
+  print("--3")
   -- FLUFFAL VS VANITY'S EMPTINESS
-  if CardsMatchingFilter(OppST(),VanityFilter) > 0 then -- VANITY
+  if CardsMatchingFilter(OppST(),VanityFilter) > 0 then
     local vanity = FluffalVsVanity(cards,to_bp_allowed,to_ep_allowed)
 	if vanity then
 	  return {vanity[1],vanity[2]}
     end
 	return nil
   end
-
+  print("--4")
   -- FLUFFAL VS DARKLAW
   GlobalDarkLaw = 0
   if HasID(OppMon(),50720316,true) -- ShadowMist
@@ -123,18 +253,132 @@ function FluffalInit(cards,to_bp_allowed,to_ep_allowed) -- FLUFFAL INIT
     end
 	return nil
   end
-
-  -- FLUFFAL VS TRUE MONARCHS
-
+  print("--5")
+  -- FLUFFAL VS MACRO
+  --if MacroCheck() then -- Is not working
+    --local macro = FluffalVsMacro(cards,to_bp_allowed,to_ep_allowed)
+	--if macro then
+	  --return {macro[1],macro[2]}
+    --end
+  --end
+  print("--6")
+  -- FLUFFAL VS EXTRA DECK BLOCKED
+  if CardsMatchingFilter(OppField(),ExtraDeckBlockedFilter) > 0 then
+    local extra = FluffalVsExtraBlocked(cards,to_bp_allowed,to_ep_allowed)
+	if extra then
+	  return {extra[1],extra[2]}
+    end
+	return nil
+  end
+  print("--7")
   -- FLUFFAL PRINCIPAL
   local principal = FluffalPrincipal(cards,to_bp_allowed,to_ep_allowed)
   if principal then
     return {principal[1],principal[2]}
   end
-
+  print("--8")
+  -- FLUFFAL REPOSITION
+  if HasIDNotNegated(Rep,40636712,RepFKraken) then
+    return {COMMAND_CHANGE_POS,CurrentIndex}
+  end
+  if HasIDNotNegated(Rep,57477163,RepFSheep) then
+    return {COMMAND_CHANGE_POS,CurrentIndex}
+  end
+  if HasIDNotNegated(Rep,83531441,RepDante) then
+    return {COMMAND_CHANGE_POS,CurrentIndex}
+  end
+  print("--9")
+  -- TURN END
+  if TurnEndCheck() then
+    -- ACTIVE END
+	if HasIDNotNegated(SpSum,98280324,SpSummonSheepEnd) then
+      return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+    end
+	if HasIDNotNegated(Act,98280324,UseSheepEnd) then
+      return {COMMAND_ACTIVATE,CurrentIndex}
+    end
+	if HasIDNotNegated(Act,03841833,UseBearPoly) then
+      return {COMMAND_ACTIVATE,CurrentIndex}
+    end
+    -- SET ST END
+    if HasID(SetST,66127916) then -- FReserve
+	  return {COMMAND_SET_ST,CurrentIndex}
+	end
+	if HasID(SetST,51452091,SetRDecree) then
+      return {COMMAND_SET_ST,CurrentIndex}
+    end
+	-- SET MON END
+	if HasIDNotNegated(SetMon,61173621,SetChain) then
+      return {COMMAND_SET_MONSTER,CurrentIndex}
+    end
+	if HasIDNotNegated(SetMon,30068120,SetSabres) then
+      return {COMMAND_SET_MONSTER,CurrentIndex}
+    end
+	if HasIDNotNegated(SetMon,72413000,SetFluffal) then -- Wings
+      return {COMMAND_SET_MONSTER,CurrentIndex}
+    end
+	if HasIDNotNegated(SetMon,98280324,SetFluffal) -- Sheep
+	and AI.GetPlayerLP(1) < 6000
+	then
+      return {COMMAND_SET_MONSTER,CurrentIndex}
+    end
+  end
+  print("--END")
   return nil
 end
 
+--[[
+39246582, -- Fluffal Dog
+13241004, -- Fluffal Penguin
+03841833, -- Fluffal Bear
+65331686, -- Fluffal Owl
+98280324, -- Fluffal Sheep
+02729285, -- Fluffal Cat
+38124994, -- Fluffal Rabit
+06142488, -- Fluffal Mouse
+72413000, -- Fluffal Wings
+81481818, -- Fluffal Patchwork
+87246309, -- Fluffal Octo
+97567736, -- Edge Imp Tomahawk
+61173621, -- Edge Imp Chain
+30068120, -- Edge Imp Sabres
+10802915, -- Tour Guide from the Underworld
+79109599, -- King of the Swamp
+06205579, -- Parasite Fusioner
+67441435, -- Glow-Up Bulb
+
+70245411, -- Toy Vendor
+06077601, -- Frightfur Fusion
+43698897, -- Frightfur Factory
+34773082, -- Frightfur Patchwork
+100214101,-- Frightfur Reborn (BETA)
+01845204, -- Instant Fusion
+24094653, -- Polymerization
+94820406, -- Dark Fusion
+05133471, -- Galaxy Cyclone
+35726888, -- Foolish Burial of Belongings
+43455065, -- Magical Spring
+43898403, -- Twin Twister
+12580477, -- Raigeki
+
+66127916, -- Fusion Reserve
+98954106, -- Jar of Avarice
+51452091, -- Royal Decree
+
+80889750, -- Frightfur Sabre-Tooth
+40636712, -- Frightfur Kraken
+10383554, -- Frightfur Leo
+85545073, -- Frightfur Bear
+11039171, -- Frightfur Wolf
+00464362, -- Frightfur Tiger
+57477163, -- Frightfur Sheep
+41209827, -- Starve Venom Fusion Dragon
+42110604, -- Hi-Speedroid Chanbara
+83531441, -- Dante
+]]
+------------------------
+------- PRINCIPAL ------
+------------------------
 function FluffalPrincipal(cards,to_bp_allowed,to_ep_allowed)
   --print("PRINCIPAL")
   local Act = cards.activatable_cards
@@ -144,18 +388,9 @@ function FluffalPrincipal(cards,to_bp_allowed,to_ep_allowed)
   local SetMon = cards.monster_setable_cards
   local SetST = cards.st_setable_cards
 
-  -- ACTIVE EFFECT 1
+  -- ACTIVE 0
+  print("---7.0")
   if HasIDNotNegated(Act,10383554,UseFLeo) then
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
-
-  if HasID(Act,05133471,nil,nil,LOCATION_GRAVE)
-  and UseGalaxyCyclone(2)
-  and (
-    not FlootGateCheatCheck()
-	or CardsMatchingFilter(OppST(),FlootGateFilter) > 0
-  )
-  then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Act,05133471,nil,nil,LOCATION_HAND+LOCATION_ONFIELD)
@@ -163,173 +398,222 @@ function FluffalPrincipal(cards,to_bp_allowed,to_ep_allowed)
   then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
-  if HasIDNotNegated(Act,41209827,UseStarve) then
+  if HasIDNotNegated(Act,41209827,UseFStarve) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
-  if HasIDNotNegated(Act,00007620,UseFKrakenSend) then
+  if HasIDNotNegated(Act,40636712,UseFKrakenSend) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
-  if HasIDNotNegated(Act,30068120,UseSabres) then
+  if HasIDNotNegated(Act,00440556,UseBahamutFluffal) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
+  if HasIDNotNegated(SpSum,00440556,SpSummonBahamutFluffal) then
+    return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasIDNotNegated(Act,30068120,UseSabresFPatchwork) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Act,30068120,UseSabresMouse) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   if HasIDNotNegated(Act,06142488,UseMouse) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
-  if HasIDNotNegated(Act,97567736,false,1561083776,UseTomahawkDamage)
+  if HasIDNotNegated(Act,34773082,UseFPatchwork) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  print("---7.1")
+  -- ACTIVE EFFECT PRINCIPAL
+  if HasIDNotNegated(Act,97567736,false,(97567736*16),UseTomahawkDamage)
   then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
-  if HasIDNotNegated(Act,97567736,false,1561083777,UseTomahawkCopy) then
+  if HasIDNotNegated(Act,97567736,false,(97567736*16+1),UseTomahawkCopy) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
   if HasIDNotNegated(Act,12580477) and UseRaigeki()
   then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
+  if HasIDNotNegated(Act,43455065,UseMSpring) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   if HasIDNotNegated(SpSum,83531441,SpSummonDante)
-  and not SpSummonStarve()
+  and not (
+    FSummonFStarve()
+	and HasID(UseLists({AIHand(),AIST()}),24094653,true)
+  )
   then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-
+  if HasIDNotNegated(Act,13241004,UsePenguin) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   if HasIDNotNegated(Act,98280324,UseSheep) then
-    GlobalSheep = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
-  if HasIDNotNegated(Act,30068120,UseSabres2) then
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
-
   if HasIDNotNegated(Act,66127916,UseFReserve) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
-  if HasIDNotNegated(Act,79109599,UseKoS) then
+  if HasIDNotNegated(Act,24094653,false,nil,LOCATION_GRAVE)
+  and UseFSubstituteGrave(Act[CurrentIndex])
+  then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
-  if HasIDNotNegated(Act,03841833,UseFluffalBear,1) then
+  if HasIDNotNegated(Act,30068120,UseSabresNoEdgeImp) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
+  print("---7.2")
   -- NORMAL SUMMON NO DOG
-  if HasIDNotNegated(Sum,65331686,SummonOwlNoFusion) then
-    return {COMMAND_SUMMON,CurrentIndex}
+  if HasIDNotNegated(Sum,65331686,SummonOwlNoFusionST) then
+    local CurrentIndexAux = CurrentIndex
+    if HasIDNotNegated(Sum,13241004,SummonPenguin)
+    then
+      return {COMMAND_SUMMON,CurrentIndex}
+    end
+    return {COMMAND_SUMMON,CurrentIndexAux}
   end
-
   if HasIDNotNegated(Sum,10802915,SummonTGuide)
-  and not HasID(AIHand(),39246582,true)
+  and not HasID(Sum,39246582,true)
   then
     return {COMMAND_SUMMON,CurrentIndex}
   end
-
-  if HasIDNotNegated(Sum,00007614,SummonOcto)
-  and not HasID(AIHand(),39246582,true) then
-    return {COMMAND_SUMMON,CurrentIndex}
-  end
-
-  if HasIDNotNegated(Sum,65331686,SummonOwl)
-  and not HasID(AIHand(),39246582,true) then
-    return {COMMAND_SUMMON,CurrentIndex}
-  end
-
-  -- ACTIVE EFFECT TOY VENDOR & WINGS
-  if HasIDNotNegated(Act,70245411,UseToyVendor,1,LOCATION_SZONE,POS_FACEUP) then
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
-
-  if HasIDNotNegated(Act,70245411,ActiveToyVendor,1,LOCATION_SZONE,POS_FACEDOWN)
+  if HasIDNotNegated(Sum,87246309,SummonOcto)
+  and not HasID(Sum,39246582,true)
   then
+    local CurrentIndexAux = CurrentIndex
+    if HasIDNotNegated(Sum,13241004,SummonPenguin)
+    then
+      return {COMMAND_SUMMON,CurrentIndex}
+    end
+    return {COMMAND_SUMMON,CurrentIndexAux}
+  end
+  print("---7.3")
+  -- ACTIVE TOY VENDOR PRINCIPAL
+  if HasIDNotNegated(Act,03841833,UseBearDiscard,1) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
+  if HasIDNotNegated(Act,35726888) and BattlePhaseCheck() then -- FBoB
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Act,70245411,nil,nil,LOCATION_SZONE,POS_FACEUP) -- TVendor
+  then
+    if UseTVendor(Act[CurrentIndex],true) then
+      return {COMMAND_ACTIVATE,CurrentIndex}
+	end
+  end
+  if HasIDNotNegated(Act,70245411,nil,nil,LOCATION_SZONE,POS_FACEDOWN)
+  then
+    if ActiveTVendor(Act[CurrentIndex],true) then
+      return {COMMAND_ACTIVATE,CurrentIndex}
+	end
+  end
   if HasIDNotNegated(Act,72413000,UseWings) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
-  if HasIDNotNegated(Act,70245411,ActiveToyVendor,1,LOCATION_HAND)
+  if HasIDNotNegated(Act,70245411,nil,nil,LOCATION_HAND)
   then
-    return {COMMAND_ACTIVATE,CurrentIndex}
+    if ActiveTVendor(Act[CurrentIndex],1) then
+      return {COMMAND_ACTIVATE,CurrentIndex}
+	end
   end
-
-  -- NORMAL SUMMON 2
+  print("---7.4")
+  -- NORMAL SUMMON PRINCIPAL
   if HasID(Act,43898403,UseTwinTwister) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
   if HasIDNotNegated(Sum,39246582,SummonDog) then
+    local CurrentIndexAux = CurrentIndex
+    if HasIDNotNegated(Sum,13241004,SummonPenguin)
+    then
+      return {COMMAND_SUMMON,CurrentIndex}
+    end
+    return {COMMAND_SUMMON,CurrentIndexAux}
+  end
+  if HasIDNotNegated(Sum,13241004,SummonPenguinAwesome)
+  then
     return {COMMAND_SUMMON,CurrentIndex}
   end
-
   if HasIDNotNegated(Sum,65331686,SummonOwl) then
-    return {COMMAND_SUMMON,CurrentIndex}
+    local CurrentIndexAux = CurrentIndex
+    if HasIDNotNegated(Sum,13241004,SummonPenguin)
+    then
+      return {COMMAND_SUMMON,CurrentIndex}
+    end
+    return {COMMAND_SUMMON,CurrentIndexAux}
   end
-
-  -- ACTIVE EFFECT 3
+  print("---7.5")
+  -- ACTIVE 2
   if HasIDNotNegated(Act,83531441,UseDanteFluffal) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
-  if HasIDNotNegated(Act,72413000,UseWings2) then
+  if HasIDNotNegated(Act,72413000,UseWingsDisadvantage) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
-  if HasIDNotNegated(Act,79109599,UseKoSDiscard) then
-	return {COMMAND_ACTIVATE,CurrentIndex}
+  if HasIDNotNegated(Act,79109599,UseKoS) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
   if HasIDNotNegated(Act,03841833,UseBearPoly) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
-  -- NORMAL SUMMON 3
+  print("---7.6")
+  -- NORMAL SUMMON 2
   if HasIDNotNegated(Sum,10802915,SummonTGuide) then
     return {COMMAND_SUMMON,CurrentIndex}
   end
-
-  if HasIDNotNegated(Sum,00007614,SummonOcto) then
-    return {COMMAND_SUMMON,CurrentIndex}
+  if HasIDNotNegated(Sum,87246309,SummonOcto) then
+    local CurrentIndexAux = CurrentIndex
+    if HasIDNotNegated(Sum,13241004,SummonPenguin)
+    then
+      return {COMMAND_SUMMON,CurrentIndex}
+    end
+    return {COMMAND_SUMMON,CurrentIndexAux}
   end
-
   if HasIDNotNegated(Sum,97567736,SummonTomahawk) then
     return {COMMAND_SUMMON,CurrentIndex}
   end
-
   if HasIDNotNegated(Sum,06142488)
   and SummonMouse(2)
   then
-    return {COMMAND_SUMMON,CurrentIndex}
+    local CurrentIndexAux = CurrentIndex
+    if HasIDNotNegated(Sum,13241004,SummonPenguin)
+    then
+      return {COMMAND_SUMMON,CurrentIndex}
+    end
+    return {COMMAND_SUMMON,CurrentIndexAux}
   end
-
   if HasIDNotNegated(Sum,81481818,SummonPatchwork) then
     return {COMMAND_SUMMON,CurrentIndex}
   end
-
   if HasIDNotNegated(Sum,06142488)
   and SummonMouse(1)
   then
-    return {COMMAND_SUMMON,CurrentIndex}
+    local CurrentIndexAux = CurrentIndex
+    if HasIDNotNegated(Sum,13241004,SummonPenguin)
+    then
+      return {COMMAND_SUMMON,CurrentIndex}
+    end
+    return {COMMAND_SUMMON,CurrentIndexAux}
   end
-
-  if HasIDNotNegated(Sum,00007614,SummonOcto2) then
-    return {COMMAND_SUMMON,CurrentIndex}
+  if HasIDNotNegated(Sum,87246309,SummonOctoDiscard) then
+    local CurrentIndexAux = CurrentIndex
+    if HasIDNotNegated(Sum,13241004,SummonPenguin)
+    then
+      return {COMMAND_SUMMON,CurrentIndex}
+    end
+    return {COMMAND_SUMMON,CurrentIndexAux}
   end
-  if HasIDNotNegated(Sum,39246582,SummonDog2) then
-    return {COMMAND_SUMMON,CurrentIndex}
+  if HasIDNotNegated(Sum,39246582,SummonDogEnd) then
+    local CurrentIndexAux = CurrentIndex
+    if HasIDNotNegated(Sum,13241004,SummonPenguin)
+    then
+      return {COMMAND_SUMMON,CurrentIndex}
+    end
+    return {COMMAND_SUMMON,CurrentIndexAux}
   end
-
-
+  print("---7.7")
   -- ACTIVE EFFECT SHEEP
-  if HasIDNotNegated(UseLists({AIHand(),AIMon()}),98280324,true)
+  if HasIDNotNegated(UseLists({AIHand(),AIMon()}),98280324,true) -- Sheep
   and #AIMon() <= 3
   and SpSummonSheepEnd()
   and CountFluffal(AIMon()) == 0
@@ -340,163 +624,152 @@ function FluffalPrincipal(cards,to_bp_allowed,to_ep_allowed)
 	  end
     end
   end
-
+  print("---7.8")
   -- SPECIAL SUMMON 1
   if HasIDNotNegated(SpSum,98280324,SpSummonSheep) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-
   if HasIDNotNegated(Act,67441435,UseBulb) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
   if HasIDNotNegated(SpSum,33198837,SpSummonNaturiaBeast) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-
   if HasIDNotNegated(SpSum,42110604,SpSummonChanbara) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-
+  print("---7.9")
+  -- PREFUSION SUMMON
+  if HasIDNotNegated(Act,17194258) and BattlePhaseCheck() then -- FConscription
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  print("---7.10")
   -- ACTIVE EFFECT TOY VENDOR 2
-  if HasIDNotNegated(Act,70245411,UseToyVendor,2,LOCATION_SZONE,POS_FACEUP) then
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
-
-  if HasIDNotNegated(Act,70245411,ActiveToyVendor,2,LOCATION_SZONE,POS_FACEDOWN)
+  if HasIDNotNegated(Act,70245411,nil,nil,LOCATION_SZONE,POS_FACEUP)
   then
-    return {COMMAND_ACTIVATE,CurrentIndex}
+    if UseTVendor(Act[CurrentIndex],false) then
+      return {COMMAND_ACTIVATE,CurrentIndex}
+	end
   end
-
-  if HasIDNotNegated(Act,70245411,ActiveToyVendor,2,LOCATION_HAND)
+  if HasIDNotNegated(Act,70245411,nil,nil,LOCATION_SZONE,POS_FACEDOWN)
   then
-    return {COMMAND_ACTIVATE,CurrentIndex}
+    if ActiveTVendor(Act[CurrentIndex],false) then
+      return {COMMAND_ACTIVATE,CurrentIndex}
+	end
   end
-
-
-  -- ACTIVE EFFECT FUSION
-  if HasIDNotNegated(Act,65331686,UseOwl) then
-    return {COMMAND_ACTIVATE,CurrentIndex}
+  if HasIDNotNegated(Act,70245411,nil,nil,LOCATION_HAND)
+  then
+    if ActiveTVendor(Act[CurrentIndex],2) then
+      return {COMMAND_ACTIVATE,CurrentIndex}
+	end
   end
-
+  print("---7.11")
+  -- ACTIVE EFFECT FUSION PRINCIPAL
   if HasIDNotNegated(Act,01845204,UseIFusion) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
+  if HasIDNotNegated(Act,65331686,UseOwlFusion) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   if HasIDNotNegated(Act,43698897,UseFFactory)
   and HasID(AIGrave(),06077601,true) -- FFusion
   then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
   if HasIDNotNegated(Act,43698897,ActiveFFactory)
   and HasID(AIGrave(),06077601,true) -- FFusion
   then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
   if HasIDNotNegated(Act,94820406,UseDFusion) then
-    if SpSummonFSabreTooth() then
+    if MaterialFSabreTooth() then
 	  return {COMMAND_ACTIVATE,CurrentIndex}
 	end
   end
-
+  if HasIDNotNegated(Act,24094653,false,nil,LOCATION_HAND+LOCATION_SZONE)
+  and UseFSubstitute(Act[CurrentIndex])
+  then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   if HasIDNotNegated(Act,24094653,UsePolymerization) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
   if HasIDNotNegated(Act,94820406,UseDFusion) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
-  if HasIDNotNegated(Act,43698897,UseFFactory) then
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
-
-  if HasIDNotNegated(Act,43698897,ActiveFFactory) then
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
-
+  print("---7.12")
   -- ACTIVE EFFECT POST FUSION
-  if HasIDNotNegated(Act,66127916,UseFReserve2) then
+  if HasIDNotNegated(Act,66127916,UseFReserveDisadvantage) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasIDNotNegated(Act,98954106,UseJAvarice) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
+  print("---7.13")
   -- ACTIVE EFFECT SHEEP TOMAHAWK
   if HasIDNotNegated(Act,98280324,UseSheepTomahawk) then
     GlobalSheep = 1
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
   if HasIDNotNegated(SpSum,98280324,SpSummonSheepTomahawk) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
-
+  print("---7.14")
   -- ACTIVE EFFECT FUSION 2
   if HasIDNotNegated(Act,06077601,UseFFusion)
   and AI.GetCurrentPhase() == PHASE_MAIN1
   then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
-  -- NORMAL SUMMON 4
-  if HasIDNotNegated(Sum,67441435,SummonBulb) then
+  if HasIDNotNegated(Act,43698897,UseFFactory) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Act,43698897,ActiveFFactory) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  print("---7.15")
+  -- ACTIVE END
+  if HasID(Act,05133471,nil,nil,LOCATION_GRAVE)
+  and UseGalaxyCyclone(2)
+  and (
+    not FlootGateCheatCheck()
+	or CardsMatchingFilter(OppST(),FluffalFlootGateFilter) > 0
+  )
+  then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Act,100214101,UseFReborn)
+  and AI.GetCurrentPhase() == PHASE_MAIN1
+  then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  print("---7.16")
+  -- NORMAL SUMMON END
+  if HasIDNotNegated(Sum,61173621,SummonChain) then
     return {COMMAND_SUMMON,CurrentIndex}
   end
-  if HasIDNotNegated(Sum,61173621,SummonChain) then
+  if HasIDNotNegated(Sum,67441435,SummonBulb) then
     return {COMMAND_SUMMON,CurrentIndex}
   end
   if HasIDNotNegated(Sum,30068120,SummonSabres) then
     return {COMMAND_SUMMON,CurrentIndex}
   end
-
-  -- REPOSITION 1
-  if HasIDNotNegated(Rep,00007620,RepFKraken) then
-    return {COMMAND_CHANGE_POS,CurrentIndex}
-  end
-
-  if HasIDNotNegated(Rep,57477163,RepFSheep) then
-    return {COMMAND_CHANGE_POS,CurrentIndex}
-  end
-
-  if HasIDNotNegated(Rep,83531441,RepDante) then
-    return {COMMAND_CHANGE_POS,CurrentIndex}
-  end
-
-  -- TURN END CHECK
-  if TurnEndCheck() then
-    -- ACTIVE EFFECT
-    if HasIDNotNegated(SpSum,98280324,SpSummonSheep2) then
-      return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
-    end
-	if HasIDNotNegated(Act,98280324,UseSheep2) then -- Sheep
-      GlobalSheep = 1
-      return {COMMAND_ACTIVATE,CurrentIndex}
-    end
-	if HasIDNotNegated(Act,03841833,UseBearPoly2) then
-      return {COMMAND_ACTIVATE,CurrentIndex}
-    end
-	if HasID(SetST,42110604,SetFReserve) then
-      return {COMMAND_SET_ST,CurrentIndex}
-    end
-	if HasID(SetST,51452091,SetRDecree) then
-      return {COMMAND_SET_ST,CurrentIndex}
-    end
-	if HasIDNotNegated(SetMon,61173621,SetChain) then
-      return {COMMAND_SET_MONSTER,CurrentIndex}
-    end
-	if HasIDNotNegated(SetMon,30068120,SetSabres) then
-      return {COMMAND_SET_MONSTER,CurrentIndex}
-    end
-	if HasIDNotNegated(SetMon,72413000,SetWings) then
-      return {COMMAND_SET_MONSTER,CurrentIndex}
-    end
-  end
+  GlobalIFusion = 0
+  print("---7 END")
 end
 
+------------------------
+------ ALTERNATIVE -----
+------------------------
+function FluffalSpSumKaiju(SpSum)
+  for i=1,#SpSum do
+    local c = SpSum[i]
+	if FilterSet(c,0xD3) then -- Kaiju
+	   GlobalKaiju = 1
+	   return {COMMAND_SPECIAL_SUMMON,i}
+	end
+  end
+end
 function FluffalVsVanity(cards,to_bp_allowed,to_ep_allowed)
   --print("VANITY")
   local Act = cards.activatable_cards
@@ -506,13 +779,8 @@ function FluffalVsVanity(cards,to_bp_allowed,to_ep_allowed)
   local SetMon = cards.monster_setable_cards
   local SetST = cards.st_setable_cards
 
-
-  -- VANITY ACTIVE EFFECT 1
+  -- VANITY ACTIVE 0
   if HasIDNotNegated(Act,12580477) and UseRaigeki()
-  then
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
-  if HasID(Act,05133471,nil,nil,LOCATION_GRAVE)
   then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -521,88 +789,113 @@ function FluffalVsVanity(cards,to_bp_allowed,to_ep_allowed)
   then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+  if HasID(Act,05133471,nil,nil,LOCATION_GRAVE)
+  and UseGalaxyCyclone(2)
+  and (
+    not FlootGateCheatCheck()
+	or CardsMatchingFilter(OppST(),FluffalFlootGateFilter) > 0
+  )
+  then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   if HasID(Act,43898403,UseTwinTwister) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
-  -- VANITY ACTIVE EFFECT TOY VENDOR & WINGS
-  if HasIDNotNegated(Act,03841833,UseFluffalBear,1) then
+  if HasIDNotNegated(Act,35726888) then -- FBoB
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
-  if HasIDNotNegated(Act,70245411,UseToyVendor,1,LOCATION_SZONE,POS_FACEUP) then
+  if HasIDNotNegated(Act,10383554,UseFLeo) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
-  if HasIDNotNegated(Act,70245411,ActiveToyVendor,1,LOCATION_SZONE,POS_FACEDOWN)
+  if HasIDNotNegated(Act,41209827,UseFStarve) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Act,40636712,UseFKrakenSend) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  -- ACTIVE EFFECT VANITY
+  if HasIDNotNegated(Act,34773082,UseFPatchwork) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Act,97567736,false,(97567736*16),UseTomahawkDamage)
   then
     return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Act,97567736,false,(97567736*16+1),UseTomahawkCopy) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Act,66127916,UseFReserve) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Act,17194258) and BattlePhaseCheck() then -- FConscription
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  -- VANITY ACTIVE TOY VENDOR
+  if HasIDNotNegated(Act,03841833,UseBearDiscard,1) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Act,70245411,nil,nil,LOCATION_SZONE,POS_FACEUP) -- TVendor
+  then
+    if UseTVendor(Act[CurrentIndex],1) then
+      return {COMMAND_ACTIVATE,CurrentIndex}
+	end
+  end
+  if HasIDNotNegated(Act,70245411,nil,nil,LOCATION_SZONE,POS_FACEDOWN)
+  then
+    if ActiveTVendor(Act[CurrentIndex],false) then
+      return {COMMAND_ACTIVATE,CurrentIndex}
+	end
   end
   if HasIDNotNegated(Act,72413000,UseWings) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
-  if HasIDNotNegated(Act,70245411,ActiveToyVendor,1,LOCATION_HAND)
+  if HasIDNotNegated(Act,70245411,nil,nil,LOCATION_HAND)
   then
-    return {COMMAND_ACTIVATE,CurrentIndex}
+    if ActiveTVendor(Act[CurrentIndex],false) then
+      return {COMMAND_ACTIVATE,CurrentIndex}
+	end
   end
-
-  -- VANITY NORMAL SUMMON 1
+  -- VANITY NORMAL SUMMON
   if HasIDNotNegated(Sum,39246582,SummonDog) then
     return {COMMAND_SUMMON,CurrentIndex}
   end
-
   if HasIDNotNegated(Sum,97567736,SummonTomahawk) then
     return {COMMAND_SUMMON,CurrentIndex}
   end
-  if HasIDNotNegated(Sum,00007614,SummonOcto2) then
+  -- VANITY ACTIVE 2
+  if HasIDNotNegated(Act,83531441,UseDanteFluffal) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Act,72413000,UseWingsDisadvantage) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Act,79109599,UseKoS) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  -- VANITY NORMAL SUMMON 2
+  if HasIDNotNegated(Sum,87246309,SummonOcto) then
     return {COMMAND_SUMMON,CurrentIndex}
   end
-
-  -- REPOSITION 1
-  if HasIDNotNegated(Rep,00007620,RepFKraken) then
-    return {COMMAND_CHANGE_POS,CurrentIndex}
+  if HasIDNotNegated(Sum,87246309,SummonOctoDiscard) then
+    return {COMMAND_SUMMON,CurrentIndex}
   end
-
-  if HasIDNotNegated(Rep,57477163,RepFSheep) then
-    return {COMMAND_CHANGE_POS,CurrentIndex}
+  if HasIDNotNegated(Sum,39246582,SummonDogEnd) then
+    return {COMMAND_SUMMON,CurrentIndex}
   end
-
-  if HasIDNotNegated(Rep,83531441,false,nil,LOCATION_MZONE,POS_FACEDOWN) then
-    return {COMMAND_CHANGE_POS,CurrentIndex}
+  -- VANITY NORMAL SUMMON END
+  if HasIDNotNegated(Sum,13241004,SummonEdgeImp) -- Penguin
+  then
+    return {COMMAND_SUMMON,CurrentIndex}
   end
-
-  -- END TURN
-  if TurnEndCheck() then
-    -- ACTIVE EFFECT
-	if HasID(SetST,42110604,SetFReserve) then
-      return {COMMAND_SET_ST,CurrentIndex}
-    end
-	if HasID(SetST,51452091,SetRDecree) then
-      return {COMMAND_SET_ST,CurrentIndex}
-    end
-	if HasIDNotNegated(SetMon,61173621,SetChain) then
-      return {COMMAND_SET_MONSTER,CurrentIndex}
-    end
-	if HasIDNotNegated(SetMon,30068120,SetSabres) then
-      return {COMMAND_SET_MONSTER,CurrentIndex}
-    end
-	if HasIDNotNegated(SetMon,72413000,SetWings) then
-      return {COMMAND_SET_MONSTER,CurrentIndex}
-    end
-
-	if OppGetStrongestAttack() > AIGetStrongestAttack() then
-	  if HasID(Rep,80889750,false,nil,LOCATION_MZONE,POS_FACEUP_ATTACK)
-	  then
-	    print("RepFSabre")
-	    return {COMMAND_CHANGE_POS,CurrentIndex}
-	  end
-	end
+  if HasIDNotNegated(Sum,61173621,SummonChain) then
+    return {COMMAND_SUMMON,CurrentIndex}
   end
-
+  if HasIDNotNegated(Sum,30068120,SummonSabres) then
+    return {COMMAND_SUMMON,CurrentIndex}
+  end
+  print("END VANITY")
   return nil
 end
-
 function FluffalVsDarkLaw(cards,to_bp_allowed,to_ep_allowed)
   --print("DARKLAW")
   local Act = cards.activatable_cards
@@ -612,6 +905,10 @@ function FluffalVsDarkLaw(cards,to_bp_allowed,to_ep_allowed)
   local SetMon = cards.monster_setable_cards
   local SetST = cards.st_setable_cards
 
+  if HasIDNotNegated(Act,12580477) -- Raigeki
+  then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   if OppGetStrongestAttack() < AIGetStrongestAttack() then
 	if AI.GetCurrentPhase() == PHASE_MAIN1 and to_bp_allowed then
       return {COMMAND_TO_NEXT_PHASE,1}
@@ -622,159 +919,50 @@ function FluffalVsDarkLaw(cards,to_bp_allowed,to_ep_allowed)
   then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Act,78474168,nil,nil,LOCATION_HAND+LOCATION_ONFIELD) -- BreakthroughSkill
+  if HasID(Act,78474168,nil,nil,LOCATION_ONFIELD) -- BreakthroughSkill
   then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
-  if HasIDNotNegated(Act,12580477) -- Raigeki
+  if HasIDNotNegated(Act,24094653,false,nil,LOCATION_HAND+LOCATION_SZONE)
+  and UseFSubstitute(Act[CurrentIndex])
   then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
   if HasIDNotNegated(Act,24094653,UsePolymerization)
   then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
   if HasIDNotNegated(Act,94820406,UseDFusion)
   then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
   if HasIDNotNegated(Act,06077601,UseFFusion)
   then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-
   if HasIDNotNegated(Act,79109599,UseKoS) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
 
-  -- REPOSITION 1
-  if HasIDNotNegated(Rep,00007620,RepFKraken) then
+  -- FLUFFAL REPOSITION
+  if HasIDNotNegated(Rep,40636712,RepFKraken) then
     return {COMMAND_CHANGE_POS,CurrentIndex}
   end
-
   if HasIDNotNegated(Rep,57477163,RepFSheep) then
     return {COMMAND_CHANGE_POS,CurrentIndex}
   end
-
-  if HasIDNotNegated(Rep,83531441,false,nil,LOCATION_MZONE,POS_FACEDOWN) then
+  if HasIDNotNegated(Rep,83531441,RepDante) then
     return {COMMAND_CHANGE_POS,CurrentIndex}
   end
 
   return nil
 end
-
-FluffalActivateBlacklist={
--- Blacklist of cards to never activate or chain their effects by the default AI logic
--- Anything you add here should be handled by your script, otherwise the cards will never activate
-
-39246582, -- Fluffal Dog
-03841833, -- Fluffal Bear
-65331686, -- Fluffal Owl
-98280324, -- Fluffal Sheep
-02729285, -- Fluffal Cat
-38124994, -- Fluffal Rabit
-06142488, -- Fluffal Mouse
-72413000, -- Fluffal Wings
-81481818, -- Fluffal Patchwork (BETA)
-00007614, -- Fluffal Octo (BETA)
-97567736, -- Edge Imp Tomahawk
-61173621, -- Edge Imp Chain
-30068120, -- Edge Imp Sabres
-10802915, -- Tour Guide from the Underworld
-79109599, -- King of the Swamp
-67441435, -- Glow-Up Bulb
-
-06077601, -- Frightfur Fusion
-43698897, -- Frightfur Factory
-70245411, -- Toy Vendor
-01845204, -- Instant Fusion
-24094653, -- Polymerization
-94820406, -- Dark Fusion
-05133471, -- Galaxy Cyclone
-43898403, -- Twin Twister
-12580477, -- Raigeki
-
-66127916, -- Fusion Reserve
-98954106, -- Jar of Avarice
-51452091, -- Royal Decree
-
-80889750, -- Frightfur Sabre-Tooth
-00007620, -- Frightfur Kraken (BETA)
-10383554, -- Frightfur Leo
-85545073, -- Frightfur Bear
-11039171, -- Frightfur Wolf
-00464362, -- Frightfur Tiger
-57477163, -- Frightfur Sheep
-41209827, -- Starve Venom Fusion Dragon
---33198837, -- Naturia Beast
-42110604, -- Hi-Speedroid Chanbara
-82633039, -- Castel
-83531441, -- Dante
-}
-FluffalSummonBlacklist={
--- Blacklist of cards to never be normal summoned or set by the default AI logic (apparently this includes special summoning?)
-39246582, -- Fluffal Dog
-03841833, -- Fluffal Bear
-65331686, -- Fluffal Owl
-98280324, -- Fluffal Sheep
-02729285, -- Fluffal Cat
-38124994, -- Fluffal Rabit
-06142488, -- Fluffal Mouse
-72413000, -- Fluffal Wings
-81481818, -- Fluffal Patchwork (BETA)
-00007614, -- Fluffal Octo (BETA)
-97567736, -- Edge Imp Tomahawk
-61173621, -- Edge Imp Chain
-30068120, -- Edge Imp Sabres
-79109599, -- King of the Swamp
-10802915, -- Tour Guide from the Underworld
-67441435, -- Glow-Up Bulb
-
-80889750, -- Frightfur Sabre-Tooth
-00007620, -- Frightfur Kraken (BETA)
-10383554, -- Frightfur Leo
-85545073, -- Frightfur Bear
-11039171, -- Frightfur Wolf
-00464362, -- Frightfur Tiger
-57477163, -- Frightfur Sheep
-41209827, -- Starve Venom Fusion Dragon
-33198837, -- Naturia Beast
-42110604, -- Hi-Speedroid Chanbara
-82633039, -- Castel
-83531441, -- Dante
-}
-FluffalSetBlacklist={
--- Blacklist for cards to never set to the S/T Zone to chain or as a bluff
-06077601, -- Frightfur Fusion
-43698897, -- Frightfur Factory
-70245411, -- Toy Vendor
-01845204, -- Instant Fusion
-24094653, -- Polymerization
-94820406, -- Dark Fusion
-05133471, -- Galaxy Cyclone
-
-51452091, -- Royal Decree
-}
-FluffalRepoBlacklist={
--- Blacklist for cards to never be repositioned
-98280324, -- Fluffal Sheep
-02729285, -- Fluffal Cat
-38124994, -- Fluffal Rabit
-06142488, -- Fluffal Mouse
-72413000, -- Fluffal Wings
-81481818, -- Fluffal Patchwork (BETA)
-79109599, -- King of the Swamp
-67441435, -- Glow-Up Bulb
-}
-FluffalUnchainable={
--- Blacklist for cards to not chain multiple copies in the same chain
-66127916, -- Fusion Reserve
-98954106, -- Jar of Avarice
-}
+function FluffalVsMacro(cards,to_bp_allowed,to_ep_allowed)
+  return nil
+end
+function FluffalVsExtraBlocked(cards,to_bp_allowed,to_ep_allowed)
+  return nil
+end
 
 -- FluffalM
 -- EdgeImp
@@ -796,7 +984,7 @@ function PrioFluffalMaterial(c,mode)
   if mode == 1
   then
     if FilterLocation(c,LOCATION_MZONE)
-    and #AIMon() == 5
+    and #AIMon() == 5 and GlobalFusionId == 80889750 -- FKraken
     then
 	  result = 4
 	elseif FilterLocation(c,LOCATION_MZONE)
@@ -847,10 +1035,10 @@ function PrioFrightfurMaterial(c,mode)
   return result
 end
 
-function FluffalPrioMode(mode)
+function FluffalPrioMode(safemode)
   local minPrio = 3 -- PrioDiscard
 
-  if mode == nil then mode = 1 end
+  if safemode == nil then safemode = true end
 
   if AI.GetPlayerLP(1) <= 4500
   or OppGetStrongestAttack() >= AI.GetPlayerLP(1)
@@ -869,13 +1057,27 @@ function FluffalPrioMode(mode)
     minPrio = minPrio - 1
   end
 
-  if mode == 1 and minPrio < 1 then
+  if safemode and minPrio < 1 then
     minPrio = 1
   end
 
   return minPrio
 end
 
+function RoundCustom(num, idp)
+  local mult = 10^(idp or 0)
+  return math.floor(num * mult + 0.5) / mult
+end
+
+function FluffalSafeSpSummon(mode)
+  if GlobalOppMaxxC == Duel.GetTurnCount()
+  then
+    if AIGetStrongestAttack() > OppGetStrongestAttack() then
+	  return false
+	end
+  end
+  return true
+end
 ------------------------
 -------- FILTER --------
 ------------------------
@@ -889,12 +1091,16 @@ end
 ------------------------
 
 ------------------------
-------- SUMMON ---------
+-------- SUMMON --------
 ------------------------
 
------------------------
-------- TARGET --------
------------------------
+------------------------
+------- MATERIAL -------
+------------------------
+
+------------------------
+-------- TARGET --------
+------------------------
 
 ------------------------
 -------- CHAIN ---------

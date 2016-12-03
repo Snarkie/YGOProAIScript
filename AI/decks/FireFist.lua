@@ -790,8 +790,8 @@ function ChainTenken()
 end
 function ChainMaxxC()
   for i=1,Duel.GetCurrentChain() do
-    if Duel.GetOperationInfo(Duel.GetCurrentChain(), CATEGORY_SPECIAL_SUMMON) 
-    and  Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_PLAYER)~=player_ai 
+    if Duel.GetOperationInfo(1,CATEGORY_SPECIAL_SUMMON) 
+    and  Duel.GetChainInfo(1,CHAININFO_TRIGGERING_PLAYER)~=player_ai 
     then
       return true
     end

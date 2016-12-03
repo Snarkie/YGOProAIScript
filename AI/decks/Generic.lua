@@ -155,6 +155,8 @@ function SummonExtraDeck(cards,prio)
 ---- 
 -- summon certain monsters before anything else
 ----   
+  if MaxxCheck() then
+  
   if HasIDNotNegated(SpSum,12014404) and SummonCowboyDef() then          
     return XYZSummon()
   end
@@ -202,6 +204,8 @@ function SummonExtraDeck(cards,prio)
   end
   if HasIDNotNegated(SpSum,84013237,SummonUtopiaLightningFinish,1) then
     return XYZSummon()
+  end
+  
   end
 ---- 
 -- activate removal effects before progressing
@@ -282,7 +286,7 @@ function SummonExtraDeck(cards,prio)
   end
   return nil
  end
- 
+ if MaxxCheck() then
  -- summon Gaia Dragon after removal effects
    if HasIDNotNegated(SpSum,91949988,SummonGaiaDragonFinish) then
     return XYZSummon()
@@ -306,7 +310,6 @@ function SummonExtraDeck(cards,prio)
   if HasID(Act,01845204,ShaddollUseInstantFusion,1) then
     return Activate()
   end
-  
   if HasID(SpSum,08561192,SummonLeoh) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
   end
@@ -631,11 +634,12 @@ function SummonExtraDeck(cards,prio)
   if HasIDNotNegated(Act,53932291,UseTaketomborg,1) then
     return Activate()
   end
-  
+ end
 -- if the opponent still has stronger monsters, use Raigeki  
   if HasID(Act,12580477) and UseRaigeki2() then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end 
+ if MaxxCheck() then 
 -- use Soul Charge when other plays have been exhausted
   if HasID(Act,54447022) and UseSoulCharge() then
     return {COMMAND_ACTIVATE,CurrentIndex}
@@ -652,6 +656,7 @@ function SummonExtraDeck(cards,prio)
   if HasIDNotNegated(Act,01845204,UseInstantFusion,3) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+ end
   if HasIDNotNegated(Act,98645731)  -- Duality
   and not DeckCheck(DECK_HAT) and not DeckCheck(DECK_BUJIN) 
   then
@@ -1856,13 +1861,14 @@ function NodenTunerFilter(c,level)
   and FilterType(c,TYPE_TUNER)
 end
 function UseInstantFusion(c,mode)
-  if not (WindaCheck() and DualityCheck) then return false end
+  if not (WindaCheck() and DualityCheck()) then return false end
+  local b = (HasIDNotNegated(AIExtra(),17412721,true))
   if mode == 1 
   and CardsMatchingFilter(AIGrave(),NodenFilter,4)>0 
-  and HasIDNotNegated(AIExtra(),17412721,true) -- Norden
+  and b
+  and SpaceCheck()>1
   and (FieldCheck(4)==1 and OverExtendCheck(2,6) 
-  or #AIMon()==0 and #OppMon()>0
-  or DeckCheck(DECK_TELLARKNIGHT) and FieldCheck(4)==1 and DestroyCheck(OppField())>0) 
+  or #AIMon()==0 and #OppMon()>0 and FieldCheck(4)==1 and DestroyCheck(OppField())>0)
   then
     GlobalCardMode = nil
     return true
@@ -1887,7 +1893,7 @@ function UseInstantFusion(c,mode)
   end
   if mode == 5
   and HasIDNotNegated(AIExtra(),17412721,true) -- Norden
-  and LocCheck()>1
+  and SpaceCheck()>1
   and (OverExtendCheck(2,6)
   or #AIMon()==0)
   then
@@ -2548,6 +2554,9 @@ function PriorityChain(cards) -- chain these before anything else
   if HasIDNotNegated(cards,49010598,ChainNegation,5) then -- Divine Wrath
     return {1,CurrentIndex}
   end
+  if HasIDNotNegated(cards,58851034,ChainNegation) then -- Cursed Seal
+    return {1,CurrentIndex}
+  end
   if HasIDNotNegated(cards,77414722,ChainNegation) then -- Magic Jammer
     return {1,CurrentIndex}
   end
@@ -2559,6 +2568,9 @@ function PriorityChain(cards) -- chain these before anything else
   end
   if HasIDNotNegated(cards,50323155,ChainNegation) then -- Black Horn of Heaven
     return {1,CurrentIndex}
+  end
+  if HasIDNotNegated(cards,04810828,ChainNegation) then -- Sauravis
+    return Chain()
   end
   if HasIDNotNegated(cards,40605147,ChainNegation) and AI.GetPlayerLP(1)>1500 then -- Solemn Notice
     return {1,CurrentIndex}

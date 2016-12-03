@@ -1,20 +1,27 @@
 ------------------------
 --------- USE ----------
 ------------------------
-
--- FluffalM Use
-function UseFluffalBear(c,mode)
-  if (
-    CardsMatchingFilter(AIST(),ToyVendorCheckFilter,true) == 0
-	or CardsMatchingFilter(OppST(),FilterPosition,POS_FACEDOWN) == 0
-  )
+-- Fluffal USE
+function UsePenguin(c)
+  if CardsMatchingFilter(AIHand(),PenguinFilter) > 0
+  then
+    GlobalPenguin = 1
+	OPTSet(c.cardid)
+    return true
+  end
+  return false
+end
+function UseBearDiscard(c,mode)
+  --CountPrioTarget(AIHand(),PRIO_DISCARD,1,nil,nil,nil,"DISCARD")
+  if CardsMatchingFilter(AIST(),TVendorCheckFilter,true) == 0
+  or CardsMatchingFilter(OppST(),FilterPosition,POS_FACEDOWN) == 0
   then
     if HasID(AIHand(),72413000,true) -- Wings
     or HasID(AIHand(),67441435,true) -- Bulb
     then
 	  OPTSet(c.id)
       return true
-    elseif CountToyVendorDiscardTarget(mode) > 0
+    elseif PriorityCheck(AIHand(),PRIO_DISCARD) > FluffalPrioMode(mode)
     and (
       #AIHand() > 2
 	  or OppGetStrongestAttack() >= AIGetStrongestAttack()
@@ -23,28 +30,24 @@ function UseFluffalBear(c,mode)
 	then
 	  OPTSet(c.id)
 	  return true
-	elseif
-	(
-	  not NormalSummonCheck()
-	  and (
-	    HasID(AIHand(),39246582,true) and OPTCheck(39246582) -- Dog
-		or
-		HasID(AIHand(),00007614,true) and SummonOcto() -- Octo
-	  )
+	elseif not NormalSummonCheck()
+	and (
+	  HasID(AIHand(),39246582,true) and OPTCheck(39246582) -- Dog
+	  or
+	  HasID(AIHand(),87246309,true) and SummonOcto() -- Octo
 	)
-	or
-	(
-      CardsMatchingFilter(AIST(),ToyVendorCheckFilter,false) > 0 -- ToyVendor
-	  and HasID(AIGrave(),72413000,true) -- Wings
-	  and OPTCheck(72413000)
-    )
+	then
+	  OPTSet(c.id)
+	  return true
+	elseif CardsMatchingFilter(AIST(),TVendorCheckFilter,false) > 0 -- TVendor
+	and HasID(AIGrave(),72413000,true) -- Wings
+	and OPTCheck(72413000)
 	then
 	  OPTSet(c.id)
 	  return true
 	end
-  else
-    return false
   end
+  return false
 end
 function UseBearPoly(c)
   if FilterLocation(c,LOCATION_MZONE)
@@ -56,35 +59,51 @@ function UseBearPoly(c)
     return false
   end
 end
-function UseBearPoly2(c)
-  if FilterLocation(c,LOCATION_MZONE) then
-    OPTSet(c.id)
-    return true
-  else
+function UseOwlPoly()
+  if CardsMatchingFilter(OppField(),SpellBlockedFilter) > 0
+  or
+  HasID(UseLists({AIHand(),AIMon()}),61173621,true) -- Chain
+  and OPTCheck(61173621)
+  then
     return false
   end
+  if
+  CardsMatchingFilter(AIDeck(),FilterID,24094653) -- Polymerization
+  >
+  CardsMatchingFilter(UseLists({AIDeck(),AIHand(),AIST()}),FilterID,34773082) -- FPatchwork
+  or
+  CardsMatchingFilter(AIDeck(),CountFPatchworkTarget) == 0
+  then
+    return true
+  end
+  return false
 end
-function UseOwl(c)
-  GlobalMaterialF = CountMaterialFTarget(UseLists({AIHand(),AIMon()}),MATERIAL_TOGRAVE)
-  GlobalMaterialE = CountMaterialETarget(UseLists({AIHand(),AIMon()}),MATERIAL_TOGRAVE)
-  local countF = CountFusionTarget()
-  if countF > 0 then
-    OPTSet(c.id)
-    return true
-  else
+function UseOwlFusion(c)
+  if AI.GetPlayerLP(1) <= 500 then
     return false
   end
+  GlobalOwl = 1
+  GlobalFluffalMaterial = CountFluffalMaterial(UseLists({AIMon(),AIHand()}),MATERIAL_TOGRAVE)
+  GlobalEdgeImpMaterial = CountEdgeImpMaterial(UseLists({AIMon(),AIHand()}),MATERIAL_TOGRAVE)
+  local countF = CountFrighturFusion()
+  GlobalOwl = 0
+  if countF > 0
+  then
+    GlobalOwl = 1
+    return true
+  end
+  return false
 end
 function UseSheep(c)
-  if CountEgdeImp(AIGrave()) > 0 then
+  if CountEdgeImp(AIGrave()) > 0 then
     OPTSet(c.id)
     return true
   else
     return false
   end
 end
-function UseSheep2(c)
-  if CountEgdeImp(UseLists({AIGrave(),AIHand()})) > 0
+function UseSheepEnd(c)
+  if CountEdgeImp(UseLists({AIGrave(),AIHand()})) > 0
   then
     OPTSet(c.id)
     return true
@@ -94,6 +113,7 @@ function UseSheep2(c)
 end
 function UseSheepTomahawk(c)
   if HasID(AIHand(),97567736,true) -- Tomahawk
+  and OPTCheck(97567736 + 1)
   then
     OPTSet(c.id)
     return true
@@ -101,16 +121,51 @@ function UseSheepTomahawk(c)
     return false
   end
 end
-function UseMouse(c)
-  OPTSet(c.id)
-  OPDSet(c.cardid)
+function CanUseSheep(includeHand)
+  if not HasIDNotNegated(UseLists({AIHand(),AIMon()}),98280324,true)
+  or not OPTCheck(98280324)
+  then
+    return 1
+  end
+  local edgeImpGrave = 0
+  if includeHand then
+    edgeImpGrave = CountEdgeImp(UseLists({AIHand(),AIGrave()}))
+  else
+    edgeImpGrave = CountEdgeImp(AIGrave())
+  end
+
+  if CardsMatchingFilter(OppField(),VanityFilter) == 0
+  and CountFluffal(UseLists({AIHand(),AIMon()})) > 0
+  and edgeImpGrave > 0
+  then
+    return true
+  end
+  return false
+end
+function UseOcto()
+  local edgeImpGrave = CountEdgeImp(AIGrave())
+  local fluffalGrave = CountFluffal(AIGrave())
   return
-    OPTCheck(10802915) -- TGuide
-    and OPTCheck(67441435) -- Bulb
+    OPTCheck(87246309)
+    and (edgeImpGrave + fluffalGrave) > 0
+	and (
+	  not HasID(AIGrave(),72413000,true) -- Wings
+	  or not OPTCheck(72413000)
+	  or fluffalGrave > 2
+	  or edgeImpGrave > 0
+	)
+end
+function UseMouse(c)
+  if OPTCheck(10802915) and OPTCheck(67441435) then
+    OPTSet(c.id)
+    OPDSet(c.cardid)
+	return true
+  end
+  return false
 end
 function UseWings(c)
-  if CountWingsTarget() > 0
-  and CardsMatchingFilter(AIST(),ToyVendorCheckFilter,false) > 0
+  if PriorityCheck(AIGrave(),PRIO_BANISH) > 1
+  and CardsMatchingFilter(AIST(),TVendorCheckFilter,false) > 0
   then
     OPTSet(c.id)
 	return true
@@ -118,9 +173,10 @@ function UseWings(c)
     return false
   end
 end
-function UseWings2(c)
+function UseWingsDisadvantage(c)
   if ExpectedDamage(1) >= AI.GetPlayerLP(1)
   and #AIMon() == 0
+  and not NormalSummonCheck()
   then
     OPTSet(c.id)
 	return true
@@ -128,117 +184,106 @@ function UseWings2(c)
     return false
   end
 end
-
--- EdgeImp Use
+-- EdgeImp USE
 function UseTomahawkCopy(c)
+  OPTCheck(c.id + 1)
   return true
 end
 function UseTomahawkDamage(c)
-  if #AIHand() > 4
-  or HasID(AIHand(),98280324,true) -- Sheep
-  or AI.GetPlayerLP(2) <= 800
+  if
+  #AIHand() > 5
+  or
+  HasID(UseLists({AIHand(),AIMon()}),98280324,true) -- Sheep
+  and OPTCheck(98280324)
+  or
+  AI.GetPlayerLP(2) <= 800
+  or
+  HasID(AIHand(),61173621,true) -- Chain
+  and OPTCheck(61173621)
   then
+    OPTCheck(c.id)
     return true
-  else
-    return false
   end
+  return false
 end
-function UseSabres(c)
+function UseSabresNoEdgeImp(c)
+  if PriorityCheck(AIHand(),PRIO_DISCARD) > 5
+  and CountEdgeImp(UseLists({AIHand(),AIMon()})) == 0
+  and #AIHand() > 5
+  and CardsMatchingFilter(UseLists({AIHand(),AIST()}),FluffalFusionSTFilter) > 0
+  then
+    OPTSet(c.id)
+    return true
+  end
+  return false
+end
+function UseSabresMouse(c)
   if HasID(AIHand(),06142488,true) -- Mouse Hand
   and HasID(AIMon(),06142488,true) -- Mouse Field
   and #AIMon() < 4
   then
-    OPTSet(30068120)
+    GlobalSabres = 1
+    OPTSet(c.id)
     return true
   else
     return false
   end
 end
-function UseSabres2(c)
-  local countDiscart = CountPrioTarget(AIHand(),PRIO_DISCARD,3)
-  local hand = #AIHand()
-
-  if HasID(AIExtra(),83531441,true) -- Dante
-  and OPTCheck(06142488) -- Mouse
-  and countDiscart > 0
-  and FieldCheck(3) > 0
-  and OppGetStrongestAttDef() < 2500
-  then
-    OPTSet(30068120)
-    return true
-  elseif HasID(AIExtra(),41209827,true) -- Starve
-  and OPTCheck(06142488) -- Mouse
-  and countDiscart > 0
-  and hand > 5
-  and SpSummonStarve()
+function UseSabresFPatchwork(c)
+  if HasID(UseLists({AIHand(),AIST()}),34773082,true) -- FPatchwork
+  and OPTCheck(34773082)
+  and CountFPatchworkTarget() == 0
   and (
-    HasID(UseLists({AIHand(),AIST()}),24094653,true) -- Polymerization
-	or HasID(UseLists({AIHand(),AIST()}),94820406,true) -- DFusion
+    CountEdgeImp(AIHand()) > 0
+	or HasID(AIHand(),24094653,true) -- Polymerization
   )
   then
-    OPTSet(30068120)
+    GlobalSabres = 2
+	OPTSet(c.id)
     return true
-  elseif CountEgdeImp(UseLists({AIHand(),AIMon()})) == 0
-  and not HasID(UseLists({AIHand(),AIMon()}),79109599,true)
-  and countDiscart > 1
-  and hand > 5
-  and (
-    HasID(UseLists({AIHand(),AIST()}),24094653,true) -- Polymerization
-	or HasID(UseLists({AIHand(),AIST()}),94820406,true) -- DFusion
-  )
-  then
-    OPTSet(30068120)
-	return true
-  else
-    return false
   end
+  return false
 end
-
--- Other Use
+-- Other USE
 function UseKoS(c)
-  if not HasID(UseLists({AIHand(),AIST()}),24094653,true) -- Polymerization
-  and not HasID(UseLists({AIHand(),AIST()}),94820406,true) -- DFusion
-  and not HasID(AIST(),43698897,true) -- FFactory
-  and (
-    Get_Card_Count_ID(UseLists({AIHand(),AIMon()}),c.id) > 1
-	or HasID(UseLists({AIHand(),AIST()}),01845204,true) -- IFusion
-	or HasID(UseLists({AIHand(),AIMon()}),30068120,true) -- Sabres
-	or HasID(UseLists({AIHand(),AIMon()}),61173621,true) -- Chain
-	or
-	CountFrightfurMon(AIMon()) > 0
-	and CountFluffalGraveTarget(UseLists({AIHand(),AIMon()})) > 1
-  )
+  if CardsMatchingFilter(UseLists({AIHand(),AIST()}),FluffalFusionSTFilter2) <= 1
   and not (
     HasID(AIHand(),65331686,true) -- Owl
 	and not NormalSummonCheck()
   )
+  and CardsMatchingFilter(UseLists({AIHand(),AIMon()}),FluffalFusionMonFilter) > 1
+  and BattlePhaseCheck()
   then
-    return true
-  else
-    return false
+    if
+    CardsMatchingFilter(AIDeck(),FilterID,24094653) -- Polymerization
+    >
+    CardsMatchingFilter(UseLists({AIDeck(),AIHand(),AIST()}),FilterID,34773082) -- FPatchwork
+    or
+    CardsMatchingFilter(AIDeck(),CountFPatchworkTarget) == 0
+	or
+	#OppField() < 2
+    then
+      return true
+	end
   end
+  return false
 end
-
 function UseKoSDiscard(c)
-  if CountToyVendorDiscardTarget(1) == 0
-  and (
-    CardsMatchingFilter(AIST(),ToyVendorCheckFilter,true) > 0
-	or HasID(AIHand(),70245411,true) -- ToyVendor
-  )
-  and (
-    #AIHand() > 3
-    or OPTCheck(72413000) -- Wings
-  )
-  and (
-    CountEgdeImp(UseLists({AIHand(),AIMon()})) > 0
-	or HasID(AIHand(),24094653,true) -- Polymerization
-  )
-  and Duel.GetTurnCount() > 1
+  if CountFPatchworkTarget() == 0
   then
     return true
-  else
-    return false
   end
+  return false
+end
+function UsePFusioner(c)
+  GlobalPolymerization = 1
+
+  GlobalFluffalMaterial = CountFluffalMaterial(AIMon(),MATERIAL_TOGRAVE)
+  GlobalEdgeImpMaterial = CountEdgeImpMaterial(AIMon(),MATERIAL_TOGRAVE)
+
+  GlobalPolymerization = 0
+
+  return true
 end
 function UseBulb(c)
   if FieldCheck(4) > 0
@@ -256,18 +301,22 @@ function UseBulb(c)
     return false
   end
 end
-
--- FluffalS Use
-GlobalFluffalPercent = 0.0
-function ActiveToyVendor(c,mode)
+-- FluffalS USE
+function ActiveTVendor(c,mode)
+  --CountPrioTarget(AIHand(),PRIO_DISCARD,1,nil,nil,nil,"DISCARD")
   if HasID(AIHand(),72413000,true) -- Wings
   then
 	return true
+  elseif HasID(AIHand(),61173621,true) -- Chain
+  and OPTCheck(61173621)
+  and OPTCheck(34773082) -- FPatchwork
+  then
+    return true
   elseif not NormalSummonCheck()
   and (
     HasID(AIHand(),39246582,true) and OPTCheck(39246582) -- Dog
 	or
-	HasID(AIHand(),00007614,true) and SummonOcto() -- Octo
+	HasID(AIHand(),87246309,true) and SummonOcto() -- Octo
   )
   and OPTCheck(72413000) and not HasID(AIGrave(),72413000,true) -- Wings
   then
@@ -275,9 +324,9 @@ function ActiveToyVendor(c,mode)
   elseif HasID(AIHand(),67441435,true) -- Bulb
   then
     return true
-  elseif CountToyVendorDiscardTarget(mode) > 0
+  elseif PriorityCheck(AIHand(),PRIO_DISCARD) > FluffalPrioMode(mode)
   and (
-    CardsMatchingFilter(AIST(),ToyVendorCheckFilter,true) == 0
+    CardsMatchingFilter(AIST(),TVendorCheckFilter,true) == 0
 	or FilterLocation(c,LOCATION_SZONE)
   )
   and (
@@ -286,32 +335,36 @@ function ActiveToyVendor(c,mode)
 	or GlobalFluffalPercent >= 0.45
 	or OppGetStrongestAttack() >= AIGetStrongestAttack()
   )
+  and (
+    OPTCheck(72413000) -- Wings
+	or GlobalFluffalPercent >= 0.40
+  )
   and not (
-    #AIMon() == 5 and (
-      HasID(UseLists({AIHand(),AIST()}),24094653,true) -- Polymerization
-	  or HasID(UseLists({AIHand(),AIST()}),94820406,true) -- DFusion
-	  or HasID(UseLists({AIHand(),AIST()}),43698897,true) -- FFactory
-	  or HasID(UseLists({AIHand(),AIST()}),06077601,true) -- FFusion
-	)
+    #AIMon() == 5
+	and CardsMatchingFilter(UseLists({AIHand(),AIST()}),FluffalFusionSTFilter2) > 0
   )
   then
 	return true
-  else
-    return false
   end
   return false
 end
-
-function UseToyVendor(c,mode)
+function UseTVendor(c,mode)
+  --CountPrioTarget(AIHand(),PRIO_DISCARD,1,nil,nil,nil,"DISCARD")
   if HasID(AIHand(),72413000,true) -- Wings
   then
     OPTSet(c.cardid)
 	return true
+  elseif HasID(AIHand(),61173621,true) -- Chain
+  and OPTCheck(61173621)
+  and OPTCheck(34773082) -- FPatchwork
+  then
+	OPTSet(c.cardid)
+    return true
   elseif not NormalSummonCheck()
   and (
     HasID(AIHand(),39246582,true) and OPTCheck(39246582) -- Dog
 	or
-	HasID(AIHand(),00007614,true) and SummonOcto() -- Octo
+	HasID(AIHand(),87246309,true) and SummonOcto() -- Octo
   )
   and OPTCheck(72413000) and not HasID(AIGrave(),72413000,true) -- Wings
   then
@@ -320,19 +373,19 @@ function UseToyVendor(c,mode)
   then
 	OPTSet(c.cardid)
     return true
-  elseif CountToyVendorDiscardTarget(mode) > 0
+  elseif PriorityCheck(AIHand(),PRIO_DISCARD) > FluffalPrioMode(mode)
   and (
     #AIHand() > 2
 	or GlobalFluffalPercent >= 0.45
 	or OppGetStrongestAttack() >= AIGetStrongestAttack()
   )
+  and (
+    OPTCheck(72413000) -- Wings
+	or GlobalFluffalPercent >= 0.40
+  )
   and not (
-    #AIMon() == 5 and (
-      HasID(UseLists({AIHand(),AIST()}),24094653,true) -- Polymerization
-	  or HasID(UseLists({AIHand(),AIST()}),94820406,true) -- DFusion
-	  or HasID(UseLists({AIHand(),AIST()}),43698897,true) -- FFactory
-	  or HasID(UseLists({AIHand(),AIST()}),06077601,true) -- FFusion
-	)
+    #AIMon() == 5
+	and CardsMatchingFilter(UseLists({AIHand(),AIST()}),FluffalFusionSTFilter2) > 0
   )
   then
     OPTSet(c.cardid)
@@ -342,63 +395,80 @@ function UseToyVendor(c,mode)
   end
   return false
 end
-
-function ActiveFFactory(c)
-  return FilterLocation(c,LOCATION_HAND) and UseFFactory(c)
+function ActiveFFactory(c,safemode)
+  return FilterLocation(c,LOCATION_HAND) and UseFFactory(c,safemode)
 end
-function UseFFactory(c)
-  if HasID(AIGrave(),06077601,true) -- FFusion
-  or HasID(AIGrave(),01845204,true) -- IFusion
-  or HasID(AIGrave(),94820406,true) -- DFusion
-  or Get_Card_Count_ID(AIGrave(),24094653) > 1 -- Polymerization
+function UseFFactory(c,safemode)
+  if UseFFactoryAux(safemode)
   or
-  #AIMon() == 5
-  and HasID(AIGrave(),24094653,true) -- Polymerization
-  and (
-    not HasID(UseLists({AIHand(),AIST()}),06077601,true) -- FFusion
-    or not OPTCheck(06077601)
-  )
-  or #OppField() <= 2
-  and HasID(AIGrave(),24094653,true) -- Polymerization
-  and (
-    not HasID(UseLists({AIHand(),AIST()}),06077601,true) -- FFusion
-    or not OPTCheck(06077601)
-  )
+  #OppField() <= 2
+  and UseFFactoryAux(false)
+  and BattlePhaseCheck()
   then
-    GlobalMaterialF = CountMaterialFTarget(UseLists({AIHand(),AIMon()}),MATERIAL_TOGRAVE)
-    GlobalMaterialE = CountMaterialETarget(UseLists({AIHand(),AIMon()}),MATERIAL_TOGRAVE)
-	local countF = CountFusionTarget()
-    if countF > 0 then
-      OPTSet(c.id)
+    GlobalFluffalMaterial = CountFluffalMaterial(UseLists({AIMon(),AIHand()}),MATERIAL_TOGRAVE)
+    GlobalEdgeImpMaterial = CountEdgeImpMaterial(UseLists({AIMon(),AIHand()}),MATERIAL_TOGRAVE)
+    local countF = CountFrighturFusion()
+    if countF > 0
+    then
+	  OPTSet(c.id)
       return true
-    else
-      return false
     end
-  else
-	return false
   end
-  return false
 end
-
--- Spell Use
+function UseFFactoryAux(safemode)
+  if safemode == nil then safemode = true end
+  local fusionGrave = CardsMatchingFilter(AIGrave(),FusionArchetypeFilter)
+  if HasID(AIGrave(),24094653,true) -- Polymerization
+  and safemode
+  then
+	return fusionGrave > 1
+  else
+    return fusionGrave > 0
+  end
+end
+function UseFPatchwork(c)
+  OPTSet(c.id)
+  return true
+end
+function CanUseFPatchwork()
+  return
+    HasID(UseLists({AIHand(),AIST()}),34773082,true)
+    and OPTSet(34773082)
+	and CountFPatchworkTarget() > 0
+end
+function UseFReborn(c)
+  return true
+end
+-- Spell USE
 function UseIFusion(c)
   if AI.GetPlayerLP(1) <= 1000 then
     return false
   end
+  -- Toadally Awesome
+  local waterMon = SubGroup(UseLists({AIGrave(),AIMon()}),FilterAttribute,ATTRIBUTE_WATER)
+  if CardsMatchingFilter(waterMon,FilterLevel,4) > 0
+  and HasID(AIExtra(),17412721,true) -- Norden
+  and HasID(AIExtra(),00440556,true) -- Bahamut
+  and OPTCheck(00440556)
+  and HasID(AIExtra(),90809975,true) -- Toadally
+  and #AIMon() <= 3
+  then
+    GlobalActivatedCardID = c.id
+    OPTSet(c.id)
+    return true
+  end
+  -- FSabreTooth
   if HasID(AIExtra(),80889750,true) -- FSabreTooth
   --and not HasID(AIMon(),57477163,true) -- FSheep
   and (
-    HasID(UseLists({AIHand(),AIST()}),24094653,true) -- Polymerization
-	or HasID(UseLists({AIHand(),AIST()}),94820406,true) -- DFusion
+    CardsMatchingFilter(UseLists({AIHand(),AIST()}),FluffalFusionSTFilter) > 0
 	or HasID(UseLists({AIHand(),AIST()}),43698897,true) -- FFactory
   )
   and (
-    CountMaterialFTarget(UseLists({AIHand(),AIMon()}),MATERIAL_TOGRAVE)
-	+ CountEgdeImp(UseLists({AIHand(),AIMon()}))
+    CountFluffalMaterial(UseLists({AIHand(),AIMon()}),MATERIAL_TOGRAVE)
+	+ CountEdgeImpMaterial(UseLists({AIHand(),AIMon()}),MATERIAL_TOGRAVE)
   )	> 1
-  --and Duel.GetTurnCount() ~= 1
   then
-    GlobalActivatedCardID = c.id
     OPTSet(c.id)
     return true
   elseif not HasID(AIMon(),80889750,true) -- FSabreTooth
@@ -412,72 +482,117 @@ function UseIFusion(c)
     return false
   end
 end
+function UseMSpring(c)
+  local countOppSTFaceUp = CardsMatchingFilter(OppST(),FilterPosition,POS_FACEUP)
+  local countOppSTFaceDown = CardsMatchingFilter(OppST(),FilterPosition,POS_FACEDOWN)
 
--- FUSION USE
-GlobalMaterialF = 0
-GlobalMaterialE = 0
-function UsePolymerization(c)
-  GlobalPolymerization = 1
+  local countAISTFaceUp = CardsMatchingFilter(AIST(),FilterPosition,POS_FACEUP)
 
-  GlobalMaterialF = CountMaterialFTarget(UseLists({AIHand(),AIMon()}),MATERIAL_TOGRAVE)
-  GlobalMaterialE = CountMaterialETarget(UseLists({AIHand(),AIMon()}),MATERIAL_TOGRAVE)
-  local countF = CountFusionTarget()
-
-  GlobalPolymerization = 0
-
-  if countF > 0
+  if countAISTFaceUp < 2
+  and (
+    (countOppSTFaceUp - countAISTFaceUp) > 1
+	and countOppSTFaceDown == 0
+    or
+	(countOppSTFaceUp - countAISTFaceUp) > 2
+  )
+  and (
+	#OppPendulum() == 2
+	or
+	(countOppSTFaceUp - countAISTFaceUp) > 2
+  )
+  and not HasID(OppST(),05851097,true) -- Vanity
   then
     return true
   else
     return false
   end
+end
+-- FUSION USE
+GlobalFluffalMaterial = 0
+GlobalEdgeImpMaterial = 0
+function UsePolymerization(c)
+  if c.original_id == 74335036 then -- FSubstitute
+    return false
+  end
+  GlobalPolymerization = 1
+  GlobalFluffalMaterial = CountFluffalMaterial(UseLists({AIMon(),AIHand()}),MATERIAL_TOGRAVE)
+  GlobalEdgeImpMaterial = CountEdgeImpMaterial(UseLists({AIMon(),AIHand()}),MATERIAL_TOGRAVE)
+  local countF = CountFrighturFusion()
+  GlobalPolymerization = 0
+  if countF > 0
+  then
+    return true
+  end
+  return false
+end
+function UseFSubstitute(c)
+  if c.original_id == 74335036 -- FSubstitute
+  and not FilterLocation(c,LOCATION_GRAVE)
+  then
+    GlobalPolymerization = 1
+    GlobalFluffalMaterial = CountFluffalMaterial(AIMon(),MATERIAL_TOGRAVE)
+    GlobalEdgeImpMaterial = CountEdgeImpMaterial(AIMon(),MATERIAL_TOGRAVE)
+    local countF = CountFrighturFusion()
+    GlobalPolymerization = 0
+    if countF > 0
+    then
+      return true
+    end
+  end
+  return false
+end
+function UseFSubstituteGrave(c)
+  if c.original_id == 74335036
+  and FilterLocation(c,LOCATION_GRAVE)
+  then
+    return true
+  end
+  return false
 end
 function UseDFusion(c)
   GlobalDFusion = 1
 
-  GlobalMaterialF = CountMaterialFTarget(UseLists({AIHand(),AIMon()}),MATERIAL_TOGRAVE)
-  GlobalMaterialE = CountMaterialETarget(UseLists({AIHand(),AIMon()}),MATERIAL_TOGRAVE)
-  local countF = CountFusionTarget()
+  GlobalFluffalMaterial = CountFluffalMaterial(UseLists({AIMon(),AIHand()}),MATERIAL_TOGRAVE)
+  GlobalEdgeImpMaterial = CountEdgeImpMaterial(UseLists({AIMon(),AIHand()}),MATERIAL_TOGRAVE)
+  local countF = CountFrighturFusion()
 
   GlobalDFusion = 0
 
   if countF > 0
-  and (Duel.GetTurnCount() > 1 or GlogalFSabreTooth > 0)
   then
     return true
-  else
-    return false
   end
+  return false
 end
-
 function UseFFusion(c)
   GlobalFFusion = 1
 
-  GlobalMaterialF = CountMaterialFTarget(UseLists({AIMon(),AIGrave()}),PRIO_BANISH)
-  GlobalMaterialE = CountMaterialETarget(UseLists({AIMon(),AIGrave()}),PRIO_BANISH)
-  local countF = CountFusionTarget()
+  GlobalFluffalMaterial = CountFluffalMaterial(UseLists({AIMon(),AIGrave()}),PRIO_BANISH)
+  GlobalEdgeImpMaterial = CountEdgeImpMaterial(UseLists({AIMon(),AIGrave()}),PRIO_BANISH)
+  local countF = CountFrighturFusion()
 
   GlobalFFusion = 0
 
-  if countF > 0 and Duel.GetTurnCount() > 1 then
+  if countF > 0
+  then
     OPTSet(c.id)
     return true
-  else
-    return false
   end
+  return false
 end
 
--- Trap Use
+-- Trap USE
 function UseFReserve(c)
   return HasID(AIGrave(),24094653,true)
 end
-function UseFReserve2(c)
+function UseFReserveDisadvantage(c)
   return
     AI.GetPlayerLP(1) <= 2000
 	or
-	AI.GetPlayerLP(1) <= 5000 and #AIMon() == 0
+	AI.GetPlayerLP(1) <= 5000
+	and #AIMon() == 0
+	and not NormalSummonCheck()
 end
-
 function UseJAvarice(c)
   local countFluffal = CountFluffal(AIGrave())
   local countGrave = #AIGrave()
@@ -493,8 +608,8 @@ function UseJAvarice(c)
   return false
 end
 
--- Frightfur Use
-function UseFSabre(c)
+-- Frightfur USE
+function UseFSabreTooth(c)
   return true
 end
 function UseFKrakenSend(c)
@@ -503,8 +618,30 @@ function UseFKrakenSend(c)
     return true
   end
   local fkrakenCanSend = CardsMatchingFilter(OppMon(),FKrakenSendFilter)
-  local fkrakenCanAttak = CanAttackAttackMax(OppMon(),false,c.attack-1)
-  if CardsMatchingFilter(OppMon(),FilterAffected,EFFECT_INDESTRUCTABLE) > 0
+  local frightfurAtk = 2200 + FrightfurBoost(c.id)
+  local fkrakenCanAttak = FluffalCanAttack(OppMon(),frightfurAtk)
+  local countOppMon = #OppMon()
+  local canSummonFSabres = false
+  if HasID(AIExtra(),80889750,true) -- FSabreTooth
+  and CardsMatchingFilter(AIMon(),FilterID,80889750) <= 2
+  and CardsMatchingFilter(UseLists({AIHand(),AIST()}),FluffalFusionSTFilter) > 0
+  and (
+	CountEdgeImp(UseLists({AIHand(),AIMon()}))
+    + CountFluffalMaterial(UseLists({AIHand(),AIMon()}),MATERIAL_TOGRAVE,true)
+  ) >= 2
+  then
+    canSummonFSabres = true
+  end
+  if countOppMon > 2
+  and fkrakenCanSend > 0
+  then
+    OPTSet(c.id)
+    return true
+  elseif canSummonFSabres then
+    OPTSet(c.id)
+    return true
+  elseif CardsMatchingFilter(OppMon(),FilterAffected,EFFECT_INDESTRUCTABLE) > 0
+  and fkrakenCanSend > 0
   then
     OPTSet(c.id)
     return true
@@ -513,120 +650,79 @@ function UseFKrakenSend(c)
   then
     OPTSet(c.id)
     return true
-  elseif #OppMon() > 2
-  and fkrakenCanSend > 0
-  then
-    OPTSet(c.id)
-    return true
   elseif fkrakenCanAttak <= 2
-  and not (
-    HasID(UseLists({AIHand(),AIST()}),24094653,true) -- Polymerization
-    or HasID(UseLists({AIHand(),AIST()}),94820406,true) -- DFusion
-	or HasID(UseLists({AIHand(),AIST()}),43698897,true) -- FFactory
-  )
   then
     return false
   else
-    OPTSet(c.id)
-	return true
+	OPTSet(c.id)
+    return true
   end
 end
 function UseFKrakenRepo(c)
+  if Negated(c) then
+    return false
+  end
   if c.attack <= 3500
   then
     return true
-  else
-    return false
   end
+  return false
 end
-
 function UseFLeo(c)
   OPTSet(c.id)
   return true
 end
-
 function UseFTiger(c)
   if CardsMatchingFilter(OppField(),FTigerDestroyFilter) > 0 then
 	return true
   end
+  return false
 end
-
--- Other Fusion Use
-function UseStarve(c)
+-- Other Fusion USE
+function UseFStarve(c)
   GlobalActivatedCardID = c.id
   OPDSet(c.id)
   return true
 end
--- Other XYZ Use
+-- Other XYZ USE
+function UseBahamutFluffal(c)
+  OPTSet(c.id)
+  return true
+end
 function UseDanteFluffal(c)
   GlobalActivatedCardID = c.id
   OPDSet(c.id)
   return true
 end
 
---39246582, -- Fluffal Dog
---03841833, -- Fluffal Bear
---65331686, -- Fluffal Owl
---98280324, -- Fluffal Sheep
---02729285, -- Fluffal Cat
---38124994, -- Fluffal Rabit
---06142488, -- Fluffal Mouse
---72413000, -- Fluffal Wings
---81481818, -- Fluffal Patchwork (BETA)
---00007614, -- Fluffal Octo (BETA)
---97567736, -- Edge Imp Tomahawk
---61173621, -- Edge Imp Chain
---30068120, -- Edge Imp Sabres
---10802915, -- Tour Guide from the Underworld
---79109599, -- King of the Swamp
---67441435, -- Glow-Up Bulb
-
---70245411, -- Toy Vendor
---06077601, -- Frightfur Fusion
---43698897, -- Frightfur Factory
---01845204, -- Instant Fusion
---24094653, -- Polymerization
---94820406, -- Dark Fusion
---05133471, -- Galaxy Cyclone
---43898403, -- Twin Twister
-
---66127916, -- Fusion Reserve
-
---80889750, -- Frightfur Sabre-Tooth
---00007620, -- Frightfur Kraken (BETA)
---10383554, -- Frightfur Leo
---85545073, -- Frightfur Bear
---11039171, -- Frightfur Wolf
---00464362, -- Frightfur Tiger
---57477163, -- Frightfur Sheep
---41209827, -- Starve Venom Fusion Dragon
---33198837, -- Naturia Beast
---42110604, -- Hi-Speedroid Chanbara
---82633039, -- Castel
---83531441, -- Dante
-
-function FluffalEffectYesNo(id,card) -- FLUFFAL EFFECT YES/NO
-  print("EffectYesNo - Cardid: "..card.id.." - desc: "..card.description)
+function FluffalEffectYesNo(id,card) -- FLUFFAL EFFECT YESNO
+  if card then
+    print("EffectYesNo - Cardid: "..card.id.." - desc: "..card.description)
+  end
   local result = nil
 
   if id == 39246582 then -- Dog
 	result = 1
   end
-  if id == 65331686 then -- Owl
+  if id == 13241004  then -- Penguin
+    id = id + 1 -- Material
+	result = 1
+  end
+  if id == 65331686 and UseOwlPoly() then -- Owl
+	result = 1
+  end
+  if id == 87246309  then -- Octo
+    if (card.description/16) == id then
+	  id = id
+	else -- Material
+	  id = id + 1
+	end
 	result = 1
   end
   if id == 02729285 then -- Cat
 	result = 1
   end
   if id == 38124994 then -- Rabit
-	result = 1
-  end
-  if id == 00007614  then -- Octo
-    if card.description == 121824 then
-	  id = id
-	else -- Material
-	  id = id + 1
-	end
 	result = 1
   end
 
@@ -637,18 +733,21 @@ function FluffalEffectYesNo(id,card) -- FLUFFAL EFFECT YES/NO
   if id == 10802915 then -- TourGuide
 	result = 1
   end
+  if id == 06205579 and UsePFusioner(card) then -- PFusioner
+    result = 1
+  end
 
   if id == 43698897 then -- FFactory
 	result = 1
   end
-  if id == 70245411 then -- ToyVendor
+  if id == 70245411 then -- TVendor
 	result = 1
   end
 
   if id == 80889750 then -- FSabreTooth
 	result = 1
   end
-  if id == 00007620 and UseFKrakenRepo(card) then -- FKraken
+  if id == 40636712 and UseFKrakenRepo(card) then -- FKraken
 	result = 1
   end
   if id == 85545073 then -- FBear
@@ -661,8 +760,23 @@ function FluffalEffectYesNo(id,card) -- FLUFFAL EFFECT YES/NO
     result = 1
   end
 
-  if id == 41209827 then -- Starve
+  if id == 41209827 then -- FStarve
     result = 1
+  end
+  
+  if id == 90809975 then -- Toadally
+    local toadallyEffect = card.description - (90809975*16)
+    id = 90809975 + toadallyEffect
+	if toadallyEffect == 0 then
+	elseif toadallyEffect == 1 then
+	  result = 0
+	elseif toadallyEffect == 2 then
+	  result = 1
+	elseif toadallyEffect == 3 then
+	  result = 0
+	elseif toadallyEffect == 4 then
+	  result = 0
+	end
   end
 
   if result then
@@ -674,16 +788,67 @@ function FluffalEffectYesNo(id,card) -- FLUFFAL EFFECT YES/NO
   return result
 end
 
-function FluffalYesNo(desc) -- FLUFFAL YES/NO
-  print("YesNo: "..desc)
-  if desc == 1561083776 then -- Tomahawk Desc 1
-    return 1
+function FluffalYesNo(desc) -- FLUFFAL YESNO
+  if (desc / 16) > 99999 then
+    print("YesNo - id: "..(desc/16).." - desc: "..desc)
+  else
+    print("YesNo - desc: "..desc)
   end
-  if desc == 1561083777 then -- Tomahawk Desc 2
-    return 1
-  end
-  if desc == 93 then -- Choose material?
+  if desc == 93 then -- Choose material?
+    if GlobalFusionId == 80889750 then
+	  return 1
+	end
     return 0
   end
   return nil
 end
+
+--[[
+39246582, -- Fluffal Dog
+13241004, -- Fluffal Penguin
+03841833, -- Fluffal Bear
+65331686, -- Fluffal Owl
+98280324, -- Fluffal Sheep
+87246309, -- Fluffal Octo
+02729285, -- Fluffal Cat
+38124994, -- Fluffal Rabit
+06142488, -- Fluffal Mouse
+72413000, -- Fluffal Wings
+81481818, -- Fluffal Patchwork
+97567736, -- Edge Imp Tomahawk
+61173621, -- Edge Imp Chain
+30068120, -- Edge Imp Sabres
+10802915, -- Tour Guide from the Underworld
+79109599, -- King of the Swamp
+06205579, -- Parasite Fusioner
+67441435, -- Glow-Up Bulb
+
+70245411, -- Toy Vendor
+06077601, -- Frightfur Fusion
+43698897, -- Frightfur Factory
+34773082, -- Frightfur Patchwork
+100214101,-- Frightfur Reborn (BETA)
+01845204, -- Instant Fusion
+24094653, -- Polymerization
+94820406, -- Dark Fusion
+05133471, -- Galaxy Cyclone
+35726888, -- Foolish Burial of Belongings
+43455065, -- Magical Spring
+43898403, -- Twin Twister
+12580477, -- Raigeki
+
+66127916, -- Fusion Reserve
+98954106, -- Jar of Avarice
+51452091, -- Royal Decree
+
+80889750, -- Frightfur Sabre-Tooth
+40636712, -- Frightfur Kraken
+10383554, -- Frightfur Leo
+85545073, -- Frightfur Bear
+11039171, -- Frightfur Wolf
+00464362, -- Frightfur Tiger
+57477163, -- Frightfur Sheep
+41209827, -- Starve Venom Fusion Dragon
+42110604, -- Hi-Speedroid Chanbara
+83531441, -- Dante
+]]

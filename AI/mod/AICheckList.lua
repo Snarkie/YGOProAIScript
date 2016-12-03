@@ -915,7 +915,7 @@ ScriptedCards ={
 29888389,47106439,68819554,67696066, -- Gishki Shadow, Vision, Performage Damage Juggler, Trick Clown
 43898403,63519819,60082869,27346636, -- Twin Twister, Thousand-Eyes Restrict, Dust Tornado, Gladbeast Heraklinos
 63767246,81275020,53932291,01621413, -- Titanic Galaxy, Speedroid Terrortop, Taketomborg, Requiem Dragon
-66994718, -- Raptor's Gust
+66994718,77414722,58851034, -- Raptor's Gust, Magic Jammer, Cursed Seal
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do

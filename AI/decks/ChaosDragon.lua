@@ -348,18 +348,18 @@ end
 function SummonBLS()
   return OverExtendCheck() and #OppMon()>0 and ChaosSummonCheck()>4
 end
-function BLSFilter(c)
+function BLSEnvoyFilter(c)
   return bit32.band(c.status,STATUS_LEAVE_CONFIRMED)==0
   and c:is_affected_by(EFFECT_CANNOT_BE_EFFECT_TARGET)==0
 end
 function BLSFilter2(c)
-  return BLSFilter(c)
+  return BLSEnvoyFilter(c)
   and (c.attack>=3000 or c:is_affected_by(EFFECT_CANNOT_BE_BATTLE_TARGET)==1 
   or c:is_affected_by(EFFECT_INDESTRUCTABLE)==1 or bit32.band(c.position,POS_FACEDOWN)>0)
 end
 function UseBLS()
   return CardsMatchingFilter(OppMon(),BLSFilter2)>0 or ((OppHasStrongestMonster() 
-  or AI.GetCurrentPhase() == PHASE_MAIN2) and CardsMatchingFilter(OppMon(),BLSFilter)>0)
+  or AI.GetCurrentPhase() == PHASE_MAIN2) and CardsMatchingFilter(OppMon(),BLSEnvoyFilter)>0)
 end
 function REDMDFilter(c)
   return bit32.band(c.race,RACE_DRAGON)>0 and c:is_affected_by(EFFECT_SPSUMMON_CONDITION)==0 and c.id~=51858306

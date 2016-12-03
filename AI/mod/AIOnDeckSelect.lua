@@ -323,8 +323,8 @@ function AssignPriority(cards,loc,filter,opt)
     end
     if loc==PRIO_TOGRAVE and FilterLocation(c,LOCATION_ONFIELD)
     then
-      if Negated(c) then 
-        c.prio=c.prio+3
+      if FilterCrippled(c) then 
+        c.prio=c.prio+5
       end
       if FilterPosition(c,POS_DEFENSE)
       and c.turnid==Duel.GetTurnCount()

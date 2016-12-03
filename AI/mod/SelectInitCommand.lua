@@ -182,7 +182,11 @@ DeckCommand = SummonExtraDeck(cards,true)
 if DeckCommand ~= nil and (d == 0 
 or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
 then
-  return DeckCommand[1],DeckCommand[2]
+  if DeckCommand[1]~=COMMAND_ACTIVATE 
+  or InfiniteLoopCheck(ActivatableCards[DeckCommand[2]])
+  then
+    return DeckCommand[1],DeckCommand[2]
+  end
 end
 
 if HasID(SpSummonableCards,80696379,SummonMeteorburst,1) then
@@ -240,7 +244,11 @@ if DeckCommand ~= nil then
       PrintCallingFunction()
     end
     --print("executing deck command: "..DeckCommand[1]..", "..DeckCommand[2])
-    return DeckCommand[1],DeckCommand[2]
+    if DeckCommand[1]~=COMMAND_ACTIVATE 
+    or InfiniteLoopCheck(ActivatableCards[DeckCommand[2]])
+    then
+      return DeckCommand[1],DeckCommand[2]
+    end
   else
     if DeckCommand2==0
     then
@@ -249,7 +257,11 @@ if DeckCommand ~= nil then
       PrintCallingFunction()
     end
     --print("executing deck command: "..DeckCommand..", "..DeckCommand2)
-    return DeckCommand,DeckCommand2
+    if DeckCommand~=COMMAND_ACTIVATE 
+    or InfiniteLoopCheck(ActivatableCards[DeckCommand2])
+    then
+      return DeckCommand,DeckCommand2
+    end
   end
 end
 if not ExtraCheck then 
@@ -257,7 +269,11 @@ if not ExtraCheck then
   if DeckCommand ~= nil and (d == 0 
   or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
   then
-    return DeckCommand[1],DeckCommand[2]
+    if DeckCommand[1]~=COMMAND_ACTIVATE 
+    or InfiniteLoopCheck(ActivatableCards[DeckCommand[2]])
+    then
+      return DeckCommand[1],DeckCommand[2]
+    end
   end
 end
 if not ExtraCheck then 
@@ -265,7 +281,11 @@ if not ExtraCheck then
   if DeckCommand ~= nil and (d == 0 
   or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
   then
-    return DeckCommand[1],DeckCommand[2]
+    if DeckCommand[1]~=COMMAND_ACTIVATE 
+    or InfiniteLoopCheck(ActivatableCards[DeckCommand[2]])
+    then
+      return DeckCommand[1],DeckCommand[2]
+    end
   end
 end
 if not ExtraCheck then 
@@ -273,7 +293,11 @@ if not ExtraCheck then
   if DeckCommand ~= nil and (d == 0 
   or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
   then
-    return DeckCommand[1],DeckCommand[2]
+    if DeckCommand[1]~=COMMAND_ACTIVATE 
+    or InfiniteLoopCheck(ActivatableCards[DeckCommand[2]])
+    then
+      return DeckCommand[1],DeckCommand[2]
+    end
   end
 end
 if not ExtraCheck then 
@@ -281,7 +305,11 @@ if not ExtraCheck then
   if DeckCommand ~= nil and (d == 0 
   or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
   then
-    return DeckCommand[1],DeckCommand[2]
+    if DeckCommand[1]~=COMMAND_ACTIVATE 
+    or InfiniteLoopCheck(ActivatableCards[DeckCommand[2]])
+    then
+      return DeckCommand[1],DeckCommand[2]
+    end
   end
 end
 if not DeckCheck(DECK_TELLARKNIGHT) then 
@@ -289,7 +317,11 @@ if not DeckCheck(DECK_TELLARKNIGHT) then
   if DeckCommand ~= nil and (d == 0 
   or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
   then
-    return DeckCommand[1],DeckCommand[2]
+    if DeckCommand[1]~=COMMAND_ACTIVATE 
+    or InfiniteLoopCheck(ActivatableCards[DeckCommand[2]])
+    then
+      return DeckCommand[1],DeckCommand[2]
+    end
   end
 end
 if not ExtraCheck then 
@@ -297,7 +329,11 @@ if not ExtraCheck then
   if DeckCommand ~= nil and (d == 0 
   or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
   then
-    return DeckCommand[1],DeckCommand[2]
+    if DeckCommand[1]~=COMMAND_ACTIVATE 
+    or InfiniteLoopCheck(ActivatableCards[DeckCommand[2]])
+    then
+      return DeckCommand[1],DeckCommand[2]
+    end
   end
 end
 if not DeckCheck(DECK_BUJIN) then 
@@ -305,7 +341,11 @@ if not DeckCheck(DECK_BUJIN) then
   if DeckCommand ~= nil and (d == 0 
   or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
   then
-    return DeckCommand[1],DeckCommand[2]
+    if DeckCommand[1]~=COMMAND_ACTIVATE 
+    or InfiniteLoopCheck(ActivatableCards[DeckCommand[2]])
+    then
+      return DeckCommand[1],DeckCommand[2]
+    end
   end
 end  
 if not ExtraCheck then 
@@ -313,7 +353,11 @@ if not ExtraCheck then
   if DeckCommand ~= nil and (d == 0 
   or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
   then
-    return DeckCommand[1],DeckCommand[2]
+    if DeckCommand[1]~=COMMAND_ACTIVATE 
+    or InfiniteLoopCheck(ActivatableCards[DeckCommand[2]])
+    then
+      return DeckCommand[1],DeckCommand[2]
+    end
   end
 end
 if not ExtraCheck then 
@@ -321,7 +365,11 @@ if not ExtraCheck then
   if DeckCommand ~= nil and (d == 0 
   or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
   then
-    return DeckCommand[1],DeckCommand[2]
+    if DeckCommand[1]~=COMMAND_ACTIVATE 
+    or InfiniteLoopCheck(ActivatableCards[DeckCommand[2]])
+    then
+      return DeckCommand[1],DeckCommand[2]
+    end
   end
 end
 if not (DeckCheck(DECK_BUJIN) or DeckCheck(DECK_TELLARKNIGHT) or DeckCheck(DECK_NEKROZ)) then 
@@ -329,7 +377,11 @@ if not (DeckCheck(DECK_BUJIN) or DeckCheck(DECK_TELLARKNIGHT) or DeckCheck(DECK_
   if DeckCommand ~= nil and (d == 0 
   or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
   then
-    return DeckCommand[1],DeckCommand[2]
+    if DeckCommand[1]~=COMMAND_ACTIVATE 
+    or InfiniteLoopCheck(ActivatableCards[DeckCommand[2]])
+    then
+      return DeckCommand[1],DeckCommand[2]
+    end
   end
 end
 if not (DeckCheck(DECK_BUJIN) or DeckCheck(DECK_TELLARKNIGHT) or DeckCheck(DECK_NOBLEKNIGHT)) then 
@@ -337,7 +389,11 @@ if not (DeckCheck(DECK_BUJIN) or DeckCheck(DECK_TELLARKNIGHT) or DeckCheck(DECK_
   if DeckCommand ~= nil and (d == 0 
   or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
   then
-    return DeckCommand[1],DeckCommand[2]
+    if DeckCommand[1]~=COMMAND_ACTIVATE 
+    or InfiniteLoopCheck(ActivatableCards[DeckCommand[2]])
+    then
+      return DeckCommand[1],DeckCommand[2]
+    end
   end
 end
 --[[if not ExtraCheck then 
@@ -353,7 +409,11 @@ if not ExtraCheck then
   if DeckCommand ~= nil and (d == 0 
   or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
   then
-    return DeckCommand[1],DeckCommand[2]
+    if DeckCommand[1]~=COMMAND_ACTIVATE 
+    or InfiniteLoopCheck(ActivatableCards[DeckCommand[2]])
+    then
+      return DeckCommand[1],DeckCommand[2]
+    end
   end
 end
 if not ExtraCheck then 
@@ -361,7 +421,11 @@ if not ExtraCheck then
   if DeckCommand ~= nil and (d == 0 
   or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
   then
-    return DeckCommand[1],DeckCommand[2]
+    if DeckCommand[1]~=COMMAND_ACTIVATE 
+    or InfiniteLoopCheck(ActivatableCards[DeckCommand[2]])
+    then
+      return DeckCommand[1],DeckCommand[2]
+    end
   end
 end
 if not ExtraCheck then 
@@ -369,7 +433,11 @@ if not ExtraCheck then
   if DeckCommand ~= nil and (d == 0 
   or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
   then
-    return DeckCommand[1],DeckCommand[2]
+    if DeckCommand[1]~=COMMAND_ACTIVATE 
+    or InfiniteLoopCheck(ActivatableCards[DeckCommand[2]])
+    then
+      return DeckCommand[1],DeckCommand[2]
+    end
   end
 end
 if not ExtraCheck then 
@@ -377,7 +445,11 @@ if not ExtraCheck then
   if DeckCommand ~= nil and (d == 0 
   or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
   then
-    return DeckCommand[1],DeckCommand[2]
+    if DeckCommand[1]~=COMMAND_ACTIVATE 
+    or InfiniteLoopCheck(ActivatableCards[DeckCommand[2]])
+    then
+      return DeckCommand[1],DeckCommand[2]
+    end
   end
 end
 if not ExtraCheck then 
@@ -385,7 +457,11 @@ if not ExtraCheck then
   if DeckCommand ~= nil and (d == 0 
   or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
   then
-    return DeckCommand[1],DeckCommand[2]
+    if DeckCommand[1]~=COMMAND_ACTIVATE 
+    or InfiniteLoopCheck(ActivatableCards[DeckCommand[2]])
+    then
+      return DeckCommand[1],DeckCommand[2]
+    end
   end
 end
 if not ExtraCheck then 
@@ -393,10 +469,13 @@ if not ExtraCheck then
   if DeckCommand ~= nil and (d == 0 
   or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
   then
-    return DeckCommand[1],DeckCommand[2]
+    if DeckCommand[1]~=COMMAND_ACTIVATE 
+    or InfiniteLoopCheck(ActivatableCards[DeckCommand[2]])
+    then
+      return DeckCommand[1],DeckCommand[2]
+    end
   end
 end
-
 
 --
 -------------------------------------------------
@@ -1364,6 +1443,7 @@ end
     and CardIsScripted(c.id) == 0
     and NotNegated(c) 
     and c.description ~= 1160 -- Pendulum scale activation
+    and InfiniteLoopCheck(c)
     then
       GlobalActivatedCardID = c.id
       return COMMAND_ACTIVATE,i
@@ -1914,9 +1994,9 @@ end
     local norden = FindID(17412721,AIMon())
     local target = nil
     if CardTargetCheck(norden) then
-      target = GetCardFromScript(GetScriptFromCard(norden):GetCardTarget())
+      target = GetCardFromScript(GetScriptFromCard(norden):GetCardTarget():GetFirst())
     end
-    if FilterTuner(target) then
+    if target and FilterTuner(target) then
       for i,c in pairs(SpSummonableCards) do
         if FilterType(c,TYPE_SYNCHRO) 
         and FilterLevel(c,norden.level+target.level)
@@ -1927,7 +2007,7 @@ end
         end
       end
     end
-    if FilterLevel(target,4) then
+    if target and FilterLevel(target,4) then
       for i,c in pairs(SpSummonableCards) do
         if FilterType(c,TYPE_XYZ) 
         and FilterRank(c,4)
@@ -1940,26 +2020,6 @@ end
     end
   end
        
-
-  
- --[[ function CardTargetCheck(c,target)
-  if c==nil then return nil end
-  c=GetScriptFromCard(c)
-  if c==nil then return nil end
-  local result = 0
-  if not c:IsPosition(POS_FACEUP) then return nil end
-  if target then
-    target=GetScriptFromCard(target)
-    return c:IsHasCardTarget(target)
-  end
-  for i=1,#Field() do
-    local tc=GetScriptFromCard(Field()[i])
-    if tc and c:IsHasCardTarget(tc) then
-      result = result +1
-    end
-  end
-  return result
-end]]
   
   ---------------------------------------------------
   -- If an in-hand monster has a flip effect, set it.
