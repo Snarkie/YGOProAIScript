@@ -108,6 +108,7 @@ ABCSummonBlacklist={
 70271583, -- Karakuri Watchdog
 66625883, -- Karakuri Strategist
 81846636, -- Gem-Knight Lazuli
+55063751, -- Gameciel
 
 01561110, -- ABC Dragon Buster
 03113836, -- Gem-Knight Seraphinite
@@ -115,6 +116,8 @@ ABCSummonBlacklist={
 23874409, -- Karakuri Burei
 
 63767246, -- Titanic Galaxy
+48905153, -- Drancia
+85115440, -- Bullhorn
 }
 ABCSetBlacklist={
 }
@@ -136,13 +139,33 @@ function KarakuriFilter(c,exclude)
   return FilterSet(c,0x11) and check
 end
 
+function FilterABC(c,exclude)
+  local check = true
+  if exclude then
+    if type(exclude)=="table" then
+      check = not CardsEqual(c,exclude)
+    elseif type(exclude)=="number" then
+      check = (c.id ~= exclude)
+    end
+  end
+  return (FilterID(c,30012506) -- A
+  or FilterID(c,77411244) -- B
+  or FilterID(c,03405259)) -- C
+  and check
+end
 
 function ACond(loc,c)
   local prio = 1
   if loc == PRIO_TOHAND then
+    if HasID(AIHand(),c.id) then
+      return 0
+    end
     return not HasAccess(c.id)
   end
   if loc == PRIO_TOFIELD then
+    if FilterLocation(c,LOCATION_HAND) then
+      return not HasID(Merge(AIField(),AIGrave()),c.id,true)
+    end
     return not HasAccess(c.id)
   end
   if loc == PRIO_TOGRAVE then
@@ -155,7 +178,10 @@ function ACond(loc,c)
     if not HasID(AIGrave(),c.id,true) then
       prio = 3
     end
-    if not HasAccess(c.id) then
+    if not HasAccess(c.id)
+    or FilterLocation(c,LOCATION_OVERLAY)
+    and not HasID(AIGrave(),c.id,true)
+    then
       prio = 5
     end
     if FilterLocation(c,LOCATION_ONFIELD) 
@@ -173,9 +199,18 @@ end
 function BCond(loc,c)
   local prio = 1
   if loc == PRIO_TOHAND then
+    if HasID(AIHand(),c.id) then
+      return 0
+    end
     return not HasAccess(c.id)
   end
   if loc == PRIO_TOFIELD then
+    if FilterLocation(c,LOCATION_HAND) then
+      return not HasID(Merge(AIField(),AIGrave()),c.id,true)
+    end
+    if GlobalEquip then
+      return true
+    end
     return not HasAccess(c.id)
   end
   if loc == PRIO_TOGRAVE then
@@ -188,7 +223,10 @@ function BCond(loc,c)
     if not HasID(AIGrave(),c.id,true) then
       prio = 2
     end
-    if not HasAccess(c.id) then
+    if not HasAccess(c.id)
+    or FilterLocation(c,LOCATION_OVERLAY)
+    and not HasID(AIGrave(),c.id,true)
+    then
       prio = 5
     end
     if FilterLocation(c,LOCATION_ONFIELD) 
@@ -205,9 +243,15 @@ end
 function CCond(loc,c)
   local prio = 1
   if loc == PRIO_TOHAND then
+    if HasID(AIHand(),c.id) then
+      return 0
+    end
     return not HasAccess(c.id)
   end
   if loc == PRIO_TOFIELD then
+    if FilterLocation(c,LOCATION_HAND) then
+      return not HasID(Merge(AIField(),AIGrave()),c.id,true)
+    end
     return not HasAccess(c.id)
   end
   if loc == PRIO_TOGRAVE then
@@ -220,7 +264,10 @@ function CCond(loc,c)
     if not HasID(AIGrave(),c.id,true) then
       prio = 2
     end
-    if not HasAccess(c.id) then
+    if not HasAccess(c.id)
+    or FilterLocation(c,LOCATION_OVERLAY)
+    and not HasID(AIGrave(),c.id,true)
+    then
       prio = 5
     end
     if FilterLocation(c,LOCATION_ONFIELD) 
@@ -271,6 +318,23 @@ function GoldGagdetCond(loc,c)
     return true
   end
 end
+function SilverGagdetCond(loc,c)
+  if loc == PRIO_TOHAND then
+    if not HasID(AIHand(),c.id,true) then
+      if FilterLocation(c,LOCATION_GRAVE) then 
+        return 5
+      end
+      return true
+    end
+    return false
+  end
+  if loc == PRIO_TOFIELD then
+    if FilterLocation(c,LOCATION_HAND) then
+      return OPTCheck(c.id) and CardsMatchingFilter(AIHand(),FilterRace,RACE_MACHINE)>1
+    end
+    return true
+  end
+end
 function HangarCond(loc,c)
   if loc == PRIO_TOGRAVE then
     if FilterLocation(c,LOCATION_HAND)
@@ -309,17 +373,24 @@ function BrilliantFusionCond(loc,c)
   end
   return true
 end
+function TsukuyomiCond(loc,c)
+  if loc == PRIO_TOGRAVE then
+    return c.xyz_material_count==0
+  end
+  return true
+end
 ABCPriorityList={                      
 --[12345678] = {1,1,1,1,1,1,1,1,1,1,XXXCond},  -- Format
 
 -- ABC
 
-[30012506] = {6,1,6,1,6,1,1,1,4,1,ACond}, -- A-Assault Core
-[77411244] = {7,1,7,1,5,1,1,1,4,1,BCond}, -- B-Buster Drake
-[03405259] = {8,1,8,1,5,1,1,1,4,1,CCond}, -- C-Crush Wyvern
+[30012506] = {8,1,6,1,6,1,1,1,4,1,ACond}, -- A-Assault Core
+[77411244] = {7,1,8,1,5,1,1,1,4,1,BCond}, -- B-Buster Drake
+[03405259] = {6,1,7,1,5,1,1,1,4,1,CCond}, -- C-Crush Wyvern
 
-[55010259] = {5,3,5,3,3,1,1,1,1,1,}, -- Golden Gadget
-[29021114] = {4,2,4,2,3,1,1,1,1,1,}, -- Silver Gadget
+[55010259] = {5,3,9,3,3,1,1,1,1,1,GoldGagdetCond}, -- Golden Gadget
+[29021114] = {4,2,9,2,3,1,1,1,1,1,SilverGagdetCond}, -- Silver Gadget
+[65367484] = {2,1,2,1,4,1,1,1,1,1,}, -- Thrasher
 
 [70271583] = {1,1,5,1,5,1,1,1,1,1,WatchdogCond}, -- Karakuri Watchdog
 [66625883] = {1,1,4,1,5,1,1,1,1,1,StrategistCond}, -- Karakuri Strategist
@@ -332,12 +403,21 @@ ABCPriorityList={
 [00911883] = {1,1,1,1,8,1,1,1,1,1,DaiCond}, -- Unexpected Dai
 [05288597] = {1,1,1,1,8,1,1,1,1,1,TransmodifyCond}, -- Transmodify
 [07394770] = {1,1,1,1,8,1,1,1,1,1,BrilliantFusionCond}, -- Brilliant Fusion
-[66399653] = {1,1,1,1,4,2,1,1,1,1,HangarCond}, -- Union Hangar
+[66399653] = {1,1,1,1,3,2,1,1,1,1,HangarCond}, -- Union Hangar
+
+[83326048] = {1,1,1,1,1,1,1,1,1,1,}, -- Dimensional Barrier
 
 [01561110] = {1,1,1,1,1,1,1,1,1,1,}, -- ABC Dragon Buster
 [03113836] = {1,1,1,1,1,1,1,1,1,1,}, -- Gem-Knight Seraphinite
 [66976526] = {1,1,1,1,1,1,1,1,1,1,}, -- Karakuri Bureido
 [23874409] = {1,1,1,1,1,1,1,1,1,1,}, -- Karakuri Burei
+[73289035] = {1,1,1,1,5,1,1,1,1,1,TsukuyomiCond}, -- Tsukuyomi
+
+[23434538] = {1,1,1,1,3,1,1,1,1,1,}, -- Maxx C
+[73628505] = {1,1,1,1,5,1,1,1,1,1,}, -- Terraforming
+[32807846] = {1,1,1,1,6,1,1,1,1,1,}, -- Rota
+[70368879] = {1,1,1,1,7,1,1,1,1,1,}, -- Upstart
+[55063751] = {1,1,1,1,4,1,1,1,1,1,}, -- Upstart
 
 } 
 ABCDragons={
@@ -348,11 +428,11 @@ ABCDragons={
 function UseDai(c,mode)
   return MaxxCheck()
 end
-function EnableABC(cards,count)
+function EnableABC(cards,count,available)
   -- checks, if the list has the remaining cards to allow ABC Buster to be summoned
   count = count or 1
   cards = cards or AIHand()
-  local available = UseLists(AIField(),AIGrave())
+  available = available or UseLists(AIField(),AIGrave())
   local result = 0
   local result2 = 0
   for i,id in pairs(ABCDragons) do
@@ -364,7 +444,7 @@ function EnableABC(cards,count)
       end
     end
   end
-  return result + result2 ==3 and result2==count
+  return result + result2 ==3 and (count==0 and result2>0 or result2==count)
   and HasID(AIExtra(),01561110,true)
   and not HasID(AIMon(),01561110,true)
 end
@@ -387,11 +467,16 @@ function UseHangar(c,mode)
   if mode == 1
   and CardsMatchingFilter(AIST(),FilterType,TYPE_FIELD)==0
   then
+    GlobalCardMode = 1
     return true
   end
   if mode == 2
   and CardsMatchingFilter(AIDeck(),HangarFilter)>0
+  and (not HasIDNotNegated(AIST(),c.id,true,OPTCheck)
+  or NormalSummonsAvailable==0
+  or CardsMatchingFilter(AIHand(),FilterABC)==0)
   then
+    GlobalCardMode = 1
     return true
   end
 end
@@ -421,6 +506,11 @@ function SummonA(c,mode)
   end
   if mode == 4
   and HasIDNotNegated(AIST(),66399653,true) -- Hangar
+  then
+    return true
+  end
+  if mode == 7
+  and not HasID(Merge(AIField(),AIGrave()),c.id)
   then
     return true
   end
@@ -479,17 +569,19 @@ function SummonABC(c,mode)
   then
     GlobalMaterial = true
     GlobalSSCardID = c.id
+    GlobalCardMode = 3
     return true
   end
   if mode == 2
   then
     GlobalMaterial = true
     GlobalSSCardID = c.id
+    GlobalCardMode = 3
     return true
   end
 end
 function ABCFilter(c)
-  return Affected(c,TYPE_MONSTER,4)
+  return Affected(c,TYPE_MONSTER,8)
   and Targetable(c,TYPE_MONSTER)
   and ShouldRemove(c)
 end
@@ -624,6 +716,235 @@ function SummonTitanicABC(c)
   return #mats>1
   and MP2Check()
 end
+function UseTerraformingABC(c,mode)
+  if mode == 1
+  and not HasID(AICards(),66399653,true) -- Union Hangar
+  then
+    return true
+  end
+  if mode == 2
+  then
+    return true
+  end
+end
+function FilterEquipped(c,id)
+
+  return CardsMatchingFilter(c:get_equipped_cards(),FilterID,id)>0
+end
+function UseTsukuyomiABC(c,mode)
+  local st = CardsMatchingFilter(AIHand(),function(c) 
+    return FilterType(c,TYPE_SPELL+TYPE_TRAP) 
+    and not FilterType(c,TYPE_FIELD) 
+    end)
+  local mons = CardsMatchingFilter(AIHand(),FilterType,TYPE_MONSTER)
+  local space = SpaceCheck(LOCATION_SZONE)-3
+  if mode == 1
+  and #AIHand()<4
+  and (st==0 or space==0 or #AIHand()==1 
+  and CardsMatchingFilter(AIMon(),FilterEquipped,77411244)==0)
+  and OPTCheck(c)
+  then
+    OPTSet(c)
+    return true
+  end
+  if mode == 2
+  and (st-space)+mons<4
+  and (#AIHand()>1 or CardsMatchingFilter(AIMon(),FilterEquipped,77411244)>0) -- B
+  and OPTCheck(c)
+  then
+    return true
+  end
+end
+function SummonTsukuyomiABC(c,mode)
+  local st = CardsMatchingFilter(AIHand(),FilterType,TYPE_SPELL+TYPE_TRAP)
+  local mons = CardsMatchingFilter(AIHand(),FilterType,TYPE_MONSTER)
+             + CardsMatchingFilter(AIMon(),FilterEquipped,77411244) -- B
+             + CardsMatchingFilter(AIMon(),FilterEquipped,30012506) -- A
+  local space = math.min(st,SpaceCheck(LOCATION_SZONE))
+  if mode == 1
+  and (st-space)+mons<4
+  and CanSpecialSummon()
+  then
+    return true
+  end
+end
+function SummonThrasherABC(c,mode)
+  if mode == 1 then
+    return true
+  end
+end
+function UseRotaABC(c,mode)
+  if mode == 1 
+  and not HasID(AICards(),65367484,true) -- Thrasher
+  and not HasIDNotNegated(AIMon(),73289035,true,OPTCheck) -- Tsukuyomi
+  then
+    return true
+  end
+  if mode == 2
+  then
+    return true
+  end
+end
+function UseDDWABC(c,mode)
+  if mode == 1
+  and CardsMatchingFilter(OppField(),DDWFilter)>0
+  and CardsMatchingFilter(c.xyz_materials,FilterABC)>1
+  then
+    return true
+  end
+  if mode == 2
+  and CardsMatchingFilter(OppField(),DDWFilter,true)>0
+  then
+    return true
+  end
+  if mode == 3
+  and CardsMatchingFilter(OppField(),DDWFilter)>0
+  and OppHasStrongestMonster()
+  then
+    return true
+  end
+  if mode == 4
+  and MP2Check()
+  and CardsMatchingFilter(OppField(),DDWFilter)>0
+  then
+    return true
+  end
+end
+function SummonDDWABC(c,mode)
+  if mode == 1
+  and (CardsMatchingFilter(AIMon(),FilterABC)>1
+  or EnableABC(AIField(),0,AIGrave()))
+  and CardsMatchingFilter(OppField(),DDWFilter)>0
+  then
+    return true
+  end
+  if mode == 2
+  and CardsMatchingFilter(OppField(),DDWFilter,true)>0
+  then
+    return true
+  end
+  if mode == 3
+  and MP2Check()
+  and CardsMatchingFilter(OppField(),DDWFilter,true)>0
+  then
+    return true
+  end
+end
+function UseGGXABC(c,mode)
+  if mode == 1
+  and (not HasIDNotNegated(AIMon(),73289035,true,HasMaterials)
+  or #AIHand()==0)
+  then
+    return true
+  end
+  if mode == 2
+  then
+    return true
+  end
+end
+function SummonGGXABC(c,mode)
+  if mode == 1
+  and EnableABC(AIField(),1,AIGrave())
+  then
+    return true
+  end
+  if mode == 2
+  and EnableABC(AIField(),0,AIGrave())
+  then
+    return true
+  end
+end
+function SummonDwellerABC(c,mode)
+  if mode == 1
+  and EnableABC(AIField(),1,AIGrave())
+  then
+    return true
+  end
+end
+function UseDwellerABC(c,mode)
+  if mode == 1
+  and EnableABC(c.xyz_materials,1,AIGrave())
+  then
+    return true
+  end
+end
+function SummonBullhornABC(c,mode)
+  if mode == 1
+  and MaxxCheck()
+  and HasIDNotNegated(AIExtra(),48905153,true)
+  and EnableABC(AIST(),1,AIGrave())
+  then
+    return true
+  end
+  if mode == 2
+  and MaxxCheck()
+  and HasIDNotNegated(AIExtra(),48905153,true)
+  and EnableABC(AIST(),0,AIGrave())
+  then
+    return true
+  end
+end
+function GamecielFilter(c,source)
+  local result = false
+  if NotNegated(c) 
+  and FilterID(c,10443957) -- CyDra Infinity
+  and HasMaterials(c)
+  then
+    result = true
+  end
+  if NotNegated(c) 
+  and FilterID(c,85909450) -- HPPD
+  and HasMaterials(c)
+  then
+    result = true
+  end
+  if NotNegated(c) 
+  and FilterID(c,01561110) -- ABC Dragon Buster
+  then
+    result = true
+  end
+  if NotNegated(c) 
+  and FilterID(c,50954680) -- Crystal Wing
+  then
+    result = true
+  end
+  if c.attack>3000 
+  or (c.attack>2500 or not BattleTargetCheck(c,source))
+  and not (Targetable(c,TYPE_MONSTER) 
+  and Affected(c,TYPE_MONSTER,8))
+  then
+    result = true
+  end
+  return result
+end
+function SummonGameciel(c,mode)
+  if mode == 1
+  and MaxxCheck()
+  and CardsMatchingFilter(OppMon(),GamecielFilter,c)>0
+  and CardsMatchingFilter(OppMon(),FilterSet,0xd3)==0
+  then
+    GlobalMaterial = true
+    GlobalSSCardID = c.id
+    return true
+  end
+  if mode == 2
+  and MaxxCheck()
+  and AIGetStrongestAttack()>c.attack
+  and OppHasStrongestMonster()
+  and CardsMatchingFilter(OppMon(),FilterSet,0xd3)==0
+  then
+    GlobalMaterial = true
+    GlobalSSCardID = c.id
+    return true
+  end
+  if mode == 3
+  and MaxxCheck()
+  and CardsMatchingFilter(OppMon(),FilterSet,0xd3)>0
+  and OppHasStrongestMonster()
+  then
+    return true
+  end
+end
 function ABCInit(cards)
   local Act = cards.activatable_cards
   local Sum = cards.summonable_cards
@@ -631,13 +952,37 @@ function ABCInit(cards)
   local Rep = cards.repositionable_cards
   local SetMon = cards.monster_setable_cards
   local SetST = cards.st_setable_cards
+  if HasID(Act,00691925) then -- Solar Recharge, test
+    return Activate()
+  end
+  if HasID(SpSum,55063751,SummonGameciel,1) then
+    return SpSummon()
+  end
+  if HasID(SpSum,56832966,SummonUtopiaLightning,1) then
+    return XYZSummon()
+  end
+  if HasID(SpSum,84013237,SummonUtopia,1) then
+    return XYZSummon()
+  end
+  if HasIDNotNegated(SpSum,48905153,SummonDrancia,1) then
+    return SpSummon()
+  end
   if HasID(SpSum,10443957,SummonInfinity) then
     return XYZSummon()
   end
   if HasID(SpSum,58069384,SummonNova) then
     return XYZSummon()
   end
-  if HasID(Act,73628505) then -- Terraforming
+  if HasID(Act,95169481,UseDDWABC,1) then
+    return Activate()
+  end
+  if HasID(Act,73628505,UseTerraformingABC,1) then
+    return Activate()
+  end
+  if HasID(Act,28912357,UseGGXABC,1) then
+    return Activate()
+  end
+  if HasID(Act,32807846,UseRotaABC,1) then
     return Activate()
   end
   if HasID(Act,01561110,UseABC,1) then
@@ -652,11 +997,12 @@ function ABCInit(cards)
   if HasID(Act,66399653,UseHangar,1) then
     return Activate()
   end
-  if HasID(Act,66399653,UseHangar,2) then
-    return Activate()
-  end
+
   if HasID(Act,05288597,UseTransmodify,1) then
     return Activate()
+  end
+  if HasID(SpSum,65367484,SummonThrasherABC,1) then
+    return SpSummon()
   end
   if HasID(Sum,55010259,SummonGoldGadget,1) then
     return Summon()
@@ -664,19 +1010,31 @@ function ABCInit(cards)
   if HasID(Sum,29021114,SummonSilverGadget,1) then
     return Summon()
   end
-  if HasID(Sum,30012506,UseA,1) then
+  if HasID(Sum,30012506,SummonA,7) then
     return Summon()
   end
-  if HasID(Sum,77411244,UseB,1) then
+  if HasID(Sum,77411244,SummonB,7) then
     return Summon()
   end
-  if HasID(Sum,03405259,UseC,1) then
+  if HasID(Sum,03405259,SummonC,7) then
+    return Summon()
+  end
+  if HasID(Act,30012506,UseA,1) then
+    return Activate()
+  end
+  if HasID(Act,77411244,UseB,1) then
+    return Activate()
+  end
+  if HasID(Act,03405259,UseC,1) then
+    return Activate()
+  end
+  if HasID(Act,66399653,UseHangar,2) then
+    return Activate()
+  end
+  if HasID(Sum,30012506,SummonA,2) then
     return Summon()
   end
   if HasID(Sum,03405259,SummonC,5) then
-    return Summon()
-  end
-  if HasID(Sum,30012506,SummonA,2) then
     return Summon()
   end
   if HasID(Sum,77411244,SummonB,2) then
@@ -684,6 +1042,58 @@ function ABCInit(cards)
   end
   if HasID(Sum,03405259,SummonC,2) then
     return Summon()
+  end
+  if HasIDNotNegated(Act,73289035,true,UseTsukuyomiABC,2) then
+    for i,c in pairs(SetST) do
+      if not FilterType(c,TYPE_FIELD) then
+        return SetSpell(i)
+      end
+    end
+  end
+  if HasIDNotNegated(Act,73289035,UseTsukuyomiABC,1) then
+    return Activate()
+  end
+  if HasIDNotNegated(SpSum,73289035,SummonTsukuyomiABC,1) then
+    return XYZSummon()
+  end
+  if HasID(Act,28912357,UseGGXABC,2) then
+    return Activate()
+  end
+  if HasID(Act,73628505,UseTerraformingABC,2) then
+    return Activate()
+  end
+  if HasID(Act,32807846,UseRotaABC,2) then
+    return Activate()
+  end
+  if HasID(Act,95169481,UseDDWABC,2) then
+    return Activate()
+  end
+  if HasID(Act,95169481,UseDDWABC,3) then
+    return Activate()
+  end
+  if HasIDNotNegated(SpSum,85115440,SummonBullhornABC,1) then
+    return XYZSummon()
+  end
+  if HasIDNotNegated(SpSum,95169481,SummonDDWABC,1) then
+    return XYZSummon()
+  end
+  if HasIDNotNegated(SpSum,28912357,SummonGGXABC,1) then
+    return XYZSummon()
+  end
+  if HasIDNotNegated(Act,21044178,UseDwellerABC,1) then
+    return Activate()
+  end
+  if HasIDNotNegated(SpSum,21044178,SummonDwellerABC,1) then
+    return XYZSummon()
+  end
+  if HasIDNotNegated(SpSum,85115440,SummonBullhornABC,2) then
+    return XYZSummon()
+  end
+  if HasIDNotNegated(SpSum,95169481,SummonDDWABC,2) then
+    return XYZSummon()
+  end
+  if HasIDNotNegated(SpSum,28912357,SummonGGXABC,2) then
+    return XYZSummon()
   end
   if HasID(SpSum,66976526,SummonBureido,1) then
     return SynchroSummon()
@@ -703,6 +1113,12 @@ function ABCInit(cards)
   if HasID(Act,46659709,UseGalaxySoldier,2) then
     return Activate()
   end
+  if HasIDNotNegated(SpSum,85115440,SummonBullhorn,1) then
+    return XYZSummon()
+  end
+  if HasIDNotNegated(SpSum,85115440,SummonBullhorn,2) then
+    return XYZSummon()
+  end  
   if HasID(Sum,03405259,SummonC,6) then
     return Summon()
   end
@@ -754,6 +1170,12 @@ function ABCInit(cards)
   if HasID(SpSum,23874409,SummonBurei,1) then
     return SynchroSummon()
   end
+  if HasIDNotNegated(SpSum,95169481,SummonDDWABC,2) then
+    return XYZSummon()
+  end
+  if HasIDNotNegated(SpSum,95169481,SummonDDWABC,3) then
+    return XYZSummon()
+  end
   if HasID(SpSum,01561110,SummonABC,1) then
     return SpSummon()
   end
@@ -766,6 +1188,9 @@ function ABCInit(cards)
   if HasID(Act,46659709,UseGalaxySoldier,4) then
     return Activate()
   end
+  if HasID(Act,95169481,UseDDWABC,4) then
+    return Activate()
+  end
   if HasID(SetMon,77411244,SetB) then
     return Set()
   end
@@ -773,6 +1198,12 @@ function ABCInit(cards)
     return Set()
   end
   if HasID(SpSum,01561110,SummonABC,2) then
+    return SpSummon()
+  end
+  if HasID(SpSum,55063751,SummonGameciel,2) then
+    return SpSummon()
+  end
+  if HasID(SpSum,55063751,SummonGameciel,3) then
     return SpSummon()
   end
   return nil
@@ -793,7 +1224,7 @@ function ABCTarget(cards,c,min)
   if LocCheck(cards,LOCATION_HAND) then
     return Add(cards,PRIO_TOGRAVE)
   end
-  return BestTargets(cards,min,TARGET_BANISH)
+  return BestTargets(cards,min,TARGET_BANISH,ABCFilter)
 end
 function GoldGadgetTarget(cards)
   return Add(cards,PRIO_TOFIELD)
@@ -847,7 +1278,21 @@ function HangarTarget(cards)
     return Add(cards)
   end
   GlobalEquip = true
-  return Add(cards,PRIO_TOFIELD)
+  local result = Add(cards,PRIO_TOFIELD)
+  GlobalEquip = nil
+  return result
+end
+function TsukuyomiTargetABC(cards)
+  if LocCheck(cards,LOCATION_OVERLAY) then
+    return Add(cards,PRIO_TOGRAVE)
+  end
+  return Add(cards)
+end
+function GGXTarget(cards)
+  if LocCheck(cards,LOCATION_OVERLAY) then
+    return Add(cards,PRIO_TOGRAVE)
+  end
+  return Add(cards)
 end
 ABCTargetFunctions = {
 [46659709] = GalaxySoldierTarget,     -- Galaxy Soldier
@@ -866,6 +1311,9 @@ ABCTargetFunctions = {
 [01561110] = ABCTarget,               -- ABC Dragon Buster
 [66976526] = BureidoTarget,           -- Karakuri Bureido
 [23874409] = BureiTarget,             -- Karakuri Burei   
+[95169481] = DDWTarget,               -- DDW
+[73289035] = TsukuyomiTargetABC,      -- Tsukuyomi
+[28912357] = GGXTarget,               -- GGX
 }
 function ABCCard(cards,min,max,id,c)
   for i,v in pairs(ABCTargetFunctions) do
@@ -942,6 +1390,7 @@ function ChainBurei(c)
   return true
 end
 function ChainHangar(c)
+  OPTSet(c)
   return true
 end
 function ChainLazuli(c)
@@ -999,7 +1448,19 @@ function ABCEffectYesNo(id,card)
 end
 function ABCMaterial(cards,min,max,id)
   if id == 01561110 then
+    if GlobalCardMode and GlobalCardMode>0 then
+      GlobalCardMode = GlobalCardMode-1
+      if GlobalCardMode>0 then
+        GlobalMaterial = true
+        GlobalSSCardID = id
+      else
+        GlobalCardMode = nil
+      end
+    end
     return Add(cards,PRIO_BANISH,min,FilterLocation,LOCATION_GRAVE)
+  end
+  if id == 55063751 then
+    return BestTargets(cards,1,TARGET_TOGRAVE,GamecielFilter)
   end
 end
 function ABCYesNo(desc)
@@ -1034,9 +1495,12 @@ ABCVary={
 03405259, -- C-Crush Wyvern
 55010259, -- Golden Gadget
 29021114, -- Silver Gadget
+73289035, -- Tsukuyomi
 }
 ABCDef={
 81846636, -- Gem-Knight Lazuli
+85115440, -- Zodiac Beast Bullhorn
+48905153, -- Zodiac Beast Drancia
 }
 function ABCPosition(id,available)
   result = nil

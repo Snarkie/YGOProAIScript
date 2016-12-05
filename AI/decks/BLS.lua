@@ -389,59 +389,7 @@ function UseBeginning(c,mode)
     return true
   end
 end
-function SummonBullhornBLS(c,mode)
-  if not MaxxCheck() then return false end
-  if mode == 1
-  and HasIDNotNegated(AIExtra(),48905153,true,SummonDranciaBLS,2)
-  then
-    return true
-  end
-  if mode == 2
-  and HasIDNotNegated(AIExtra(),48905153,true,SummonDranciaBLS,3)
-  then
-    return true
-  end
-end
-function BLSDranciaFilter(c,prio)
-  return Affected(c,TYPE_MONSTER,4)
-  and Targetable(c,TYPE_MONSTER)
-  and FilterPosition(c,POS_FACEUP)
-  and DestroyFilterIgnore(c)
-  and not prio or PriorityTarget(c)
-end
-function UseDranciaBLS(c,mode)
-  if mode == 1
-  and CardsMatchingFilter(OppField(),BLSDranciaFilter(c,true))>0
-  then
-    return true
-  end
-  if mode == 2
-  and MP2Check()
-  and CardsMatchingFilter(OppField(),BLSDranciaFilter(c))>0
-  and c.xyz_material_count>1 
-  then
-    return true
-  end
-end
-function SummonDranciaBLS(c,mode)
-  if not MaxxCheck() then return false end
-  if mode == 1
-  and HasID(AIMon(),85115440,true)
-  then
-    return true
-  end
-  if mode == 2
-  and CardsMatchingFilter(OppField(),BLSDranciaFilter)>0
-  and MP2Check()
-  then
-    return true
-  end
-  if mode == 3
-  and MP2Check()
-  then
-    return true
-  end
-end
+
 function DDWFilter(c,backrow)
   return Affected(c,TYPE_MONSTER,4)
   and Targetable(c,TYPE_MONSTER)
@@ -455,10 +403,11 @@ function SummonDDWBLS(c,mode)
   if mode == 1
   and CardsMatchingFilter(OppField(),DDWFilter)>0
   and ChaosSummonCheck()<4
-  and (HasID(AIHand(),72989439,true)
-  or HasID(AIGrave(),14094090,true) 
-  and (HasID(AIHand(),05405694,true)
-  or HasID(AIHand(),54484652,true)))
+  and (HasID(AIHand(),72989439,true) -- BLS Envoy
+  or HasID(AIGrave(),14094090,true)  -- SS Ritual
+  and (HasID(AIHand(),05405694,true) -- BLS Vanilla
+  or HasID(AIHand(),54484652,true))) -- BLSSS
+  and not HasID(AIMon(),54484652,true,FilterNotCrippled) -- BLSSS
   then
     return true
   end
@@ -642,13 +591,13 @@ function BLSInit(cards)
   if HasID(SpSum,21501505,SummonCairngorgon) then
     return XYZSummon()
   end
-  if HasIDNotNegated(SpSum,48905153,SummonDranciaBLS,1) then
+  if HasIDNotNegated(SpSum,48905153,SummonDrancia,1) then
     return SpSummon()
   end
-  if HasIDNotNegated(SpSum,85115440,SummonBullhornBLS,1) then
+  if HasIDNotNegated(SpSum,85115440,SummonBullhorn,1) then
     return XYZSummon()
   end
-  if HasIDNotNegated(SpSum,85115440,SummonBullhornBLS,2) then
+  if HasIDNotNegated(SpSum,85115440,SummonBullhorn,2) then
     return XYZSummon()
   end  
   if HasIDNotNegated(SpSum,21044178,SummonDweller,1) then
@@ -780,18 +729,9 @@ function DDWTarget(cards,c)
   if LocCheck(cards,LOCATION_OVERLAY) then
     return Add(cards,PRIO_TOGRAVE)
   end
-  return BestTargets(cards,1,TARGET_DESTROY)
+  return BestTargets(cards,1,TARGET_DESTROY,FilterID,c.id)
 end
-function DranciaTarget(cards,c)
-  if LocCheck(cards,LOCATION_OVERLAY) then
-    return Add(cards,PRIO_TOGRAVE)
-  end
-  if GlobalCardMode == 1 then
-    GlobalCardMode = nil
-    return GlobalTargetGet(cards,true)
-  end
-  return BestTargets(cards,1,TARGET_DESTROY)
-end
+
 BLSTargetFunctions={
 [45948430] = SSOriginTarget,
 [54484652] = BLSSSTarget,
@@ -860,48 +800,6 @@ function ChainBeginning(c)
   if Duel.GetTurnPlayer()==1-player_ai
   and Duel.CheckTiming(TIMING_END_PHASE)
   and Duel.GetCurrentChain()==0
-  then
-    return true
-  end
-end
-function ChainDrancia(c)
-  local targets = CardsMatchingFilter(OppField(),BLSDranciaFilter)
-  local targets2 = CardsMatchingFilter(OppField(),BLSDranciaFilter,true)
-  if RemovalCheckCard(c) 
-  or NegateCheckCard(c)
-  then
-    return true
-  end
-  if not UnchainableCheck(48905153) then
-    return false
-  end
-  if targets2 and targets2 > 0 
-  and (AIGetStrongestAttack()<=OppGetStrongestAttDef(BLSDranciaFilter,true) 
-  or TurnEndCheck() or Duel.GetTurnPlayer()==1-player_ai)
-  then
-    return true
-  end
-  if targets and targets == 1 and #OppMon()==1 and BattlePhaseCheck()
-  and Duel.GetTurnPlayer()==player_ai
-  and ExpectedDamage(2)>=AI.GetPlayerLP(2) then
-    return true
-  end
-  if IsBattlePhase() 
-  and Duel.GetTurnPlayer()~=player_ai 
-  and targets>0 then
-    local aimon,oppmon = GetBattlingMons()
-    if aimon and oppmon 
-    and (WinsBattle(oppmon,aimon) 
-    and BLSDranciaFilter(oppmon))
-    then
-      GlobalCardMode = 1
-      GlobalTargetSet(oppmon)
-      return true
-    end
-  end
-  if Duel.GetTurnPlayer()==1-player_ai 
-  and Duel.CheckTiming(TIMING_END_PHASE)
-  and targets>0
   then
     return true
   end

@@ -1089,13 +1089,19 @@ function FilterRace(c,race)
   end
 end
 function FilterLevel(c,level)
-  return FilterType(c,TYPE_MONSTER) and c.level==level
+  return FilterType(c,TYPE_MONSTER) 
+  and not FilterType(c,TYPE_XYZ)
+  and c.level==level
 end
 function FilterLevelMin(c,level)
-  return FilterType(c,TYPE_MONSTER) and c.level>=level
+  return FilterType(c,TYPE_MONSTER) 
+  and not FilterType(c,TYPE_XYZ)
+  and c.level>=level
 end
 function FilterLevelMax(c,level)
-  return FilterType(c,TYPE_MONSTER) and c.level<=level
+  return FilterType(c,TYPE_MONSTER) 
+  and not FilterType(c,TYPE_XYZ)
+  and c.level<=level
 end
 function FilterRank(c,rank)
   if c.GetCode then
@@ -1329,11 +1335,11 @@ function Scale(c) -- backwards compatibility
   return c.lscale
 end
 function ScaleCheck(p)
-  local cards=AIST()
+  local cards=AIPendulum()
   local result = 0
   local count = 0
   if p == 2 then
-    cards=OppST()
+    cards=OppPendulum()
   end
   for i=1,#cards do
     if bit32.band(cards[i].type,TYPE_PENDULUM)>0 then
@@ -1349,6 +1355,25 @@ function ScaleCheck(p)
     return true
   end
   return nil
+end
+function GetScales(p)
+  p=p or 1
+  local result={}
+  for i,c in pairs(AllPendulum()) do
+    if FilterType(c,TYPE_PENDULUM) 
+    and FilterController(c,p)
+    then
+      result[#result+1]=c
+    end
+  end
+  if #result==0 then
+    return false
+  end
+  return result[1],result[2]
+end
+function CanPendulumSummon(p)
+  local l,r = GetScales(p)
+  return l and r and math.abs(Scale(l)-Scale(r))>1 
 end
 function FilterController(c,player)
   if not player then player = 1 end
@@ -1821,7 +1846,7 @@ function DualityCheck(player,skipmaxx)
   if player == 2 and HasIDNotNegated(AIMon(),72634965,true,nil,nil,POS_FACEUP) then 
     return false -- Vanity's Ruler
   end
-  if player == 1 and not skipmaxx and MaxxCheck() then -- Maxx "C"
+  if player == 1 and not skipmaxx and not MaxxCheck() then -- Maxx "C"
     return false 
   end
   return true
@@ -1966,6 +1991,7 @@ end
 function BattleTargetCheck(c,source)
   return c:is_affected_by(EFFECT_INDESTRUCTABLE_BATTLE)==0
   and c:is_affected_by(EFFECT_CANNOT_BE_BATTLE_TARGET)==0
+  and c:is_affected_by(EFFECT_CANNOT_SELECT_BATTLE_TARGET)==0
   and DestroyCountCheck(c,TYPE_MONSTER,true)
   and AttackBlacklistCheck(c,source)
 end
@@ -2115,6 +2141,9 @@ function CrashCheck(c)
   end
   if c.id == 29357956 and not FilterLocation(c,LOCATION_MZONE) then
     return true -- Nerokius
+  end
+  if FilterSet(c,0xd3) then -- Kaiju
+    return true
   end
   if CurrentMonOwner(c.cardid) ~= c.owner 
   and StrongerAttackerCheck(c,AIMon())
@@ -2906,6 +2935,8 @@ NegatePriority={
 [26400609] = NegateDragonRuler,
 [89399912] = NegateDragonRuler,
 [90411554] = NegateDragonRuler,
+
+[65367484] = 3 -- Thrasher
 }
 function AdjustMonsterPrio(target,prio)
   if not FilterType(target,TYPE_MONSTER) then
@@ -3079,6 +3110,18 @@ function GetNegatePriority(source,link,targeted)
         target=targets[1]
         prio = prio + 3
         prio=AdjustMonsterPrio(target,prio)
+        local check = NegatePriority[target.id]
+        if prio>-1 and check then
+          if type(check) == "function" then
+            if check(c,e,source,link) then
+              prio=check(c,e,source,link)
+            else
+              --prio=-1
+            end
+          else
+            prio=check
+          end
+        end
       end
     else
       prio = -1

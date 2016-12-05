@@ -386,6 +386,7 @@ function Add(cards,loc,count,filter,opt)
   for i=1,count do
     result[i]=cards[i].index
   end
+  --PrintList(cards,true)
   if #result<count then 
     for i=#result+1,count do
       result[i]=i

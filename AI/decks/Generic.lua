@@ -284,6 +284,12 @@ function SummonExtraDeck(cards,prio)
   if HasIDNotNegated(Act,01621413,UseRequiem,2) then 
     return Activate() -- Requiem Dragon
   end
+  if HasIDNotNegated(Act,48905153,UseDrancia,1) then 
+    return Activate()
+  end
+  if HasIDNotNegated(Act,48905153,UseDrancia,2) then 
+    return Activate()
+  end
   return nil
  end
  if MaxxCheck() then
@@ -457,6 +463,15 @@ function SummonExtraDeck(cards,prio)
   if HasIDNotNegated(SpSum,82633039) and SummonSkyblaster() then 
     return XYZSummon()
   end
+  if HasIDNotNegated(SpSum,48905153,SummonDrancia,1) then
+    return SpSummon()
+  end
+  if HasIDNotNegated(SpSum,85115440,SummonBullhorn,1) then
+    return XYZSummon()
+  end
+  if HasIDNotNegated(SpSum,85115440,SummonBullhorn,2) then
+    return XYZSummon()
+  end  
   if HasID(SpSum,26329679,SummonConstellarOmega) then 
     return XYZSummon()
   end
@@ -679,6 +694,59 @@ function SummonExtraDeck(cards,prio)
     end
   end
   return nil
+end
+function SummonBullhorn(c,mode)
+  if not MaxxCheck() then return false end
+  if mode == 1
+  and HasIDNotNegated(AIExtra(),48905153,true,SummonDrancia,2)
+  then
+    return true
+  end
+  if mode == 2
+  and HasIDNotNegated(AIExtra(),48905153,true,SummonDrancia,3)
+  then
+    return true
+  end
+end
+function DranciaFilter(c,prio)
+  return Affected(c,TYPE_MONSTER,4)
+  and Targetable(c,TYPE_MONSTER)
+  and FilterPosition(c,POS_FACEUP)
+  and DestroyFilterIgnore(c)
+  and not prio or PriorityTarget(c)
+end
+function UseDrancia(c,mode)
+  if mode == 1
+  and CardsMatchingFilter(OppField(),DranciaFilter,true)>0
+  then
+    return true
+  end
+  if mode == 2
+  and MP2Check()
+  and CardsMatchingFilter(OppField(),DranciaFilter)>0
+  and c.xyz_material_count>1 
+  then
+    return true
+  end
+end
+function SummonDrancia(c,mode)
+  if not MaxxCheck() then return false end
+  if mode == 1
+  and HasID(AIMon(),85115440,true)
+  then
+    return true
+  end
+  if mode == 2
+  and CardsMatchingFilter(OppField(),DranciaFilter)>0
+  and MP2Check()
+  then
+    return true
+  end
+  if mode == 3
+  and MP2Check()
+  then
+    return true
+  end
 end
 function RequiemFilter(c,source)
   return Targetable(c,TYPE_MONSTER)
@@ -1761,7 +1829,7 @@ function LightningPrioFilter(c,source)
    end)==0
   --or FilterPrivate(c)
   or FilterAttackMin(c,2500) 
-  and not Targetable(c,TYPE_MONSTER)
+  and not (Targetable(c,TYPE_MONSTER) and Affected(c,TYPE_MONSTER,4))
   or CanFinishGame(source,c))
 end
 function SummonUtopiaLightning(c,mode)
@@ -2475,6 +2543,118 @@ function ChainTitanicGalaxy(c)
     return true
   end
 end
+function ChainDrancia(c)
+  local targets = CardsMatchingFilter(OppField(),DranciaFilter)
+  local targets2 = CardsMatchingFilter(OppField(),DranciaFilter,true)
+  if RemovalCheckCard(c) 
+  or NegateCheckCard(c)
+  then
+    return true
+  end
+  if not UnchainableCheck(48905153) then
+    return false
+  end
+  if targets2 and targets2 > 0 
+  and (AIGetStrongestAttack()<=OppGetStrongestAttDef(DranciaFilter,true) 
+  or TurnEndCheck() or Duel.GetTurnPlayer()==1-player_ai)
+  then
+    return true
+  end
+  if targets and targets == 1 and #OppMon()==1 and BattlePhaseCheck()
+  and Duel.GetTurnPlayer()==player_ai
+  and ExpectedDamage(2)>=AI.GetPlayerLP(2) then
+    return true
+  end
+  if IsBattlePhase() 
+  and Duel.GetTurnPlayer()~=player_ai 
+  and targets>0 then
+    local aimon,oppmon = GetBattlingMons()
+    if aimon and oppmon 
+    and (WinsBattle(oppmon,aimon) 
+    and DranciaFilter(oppmon))
+    then
+      GlobalCardMode = 1
+      GlobalTargetSet(oppmon)
+      return true
+    end
+  end
+  if Duel.GetTurnPlayer()==1-player_ai 
+  and Duel.CheckTiming(TIMING_END_PHASE)
+  and targets>0
+  then
+    return true
+  end
+end
+GlobalDimensionalBarrier = nil
+function ChainDimensionalBarrier(source)
+  if not UnchainableCheck(source.id)
+  and not RemovalCheckCard(source)
+  then
+    return false
+  end
+  local c,link = ChainCardNegation(source,false,0,nil,nil,true)
+  if c and Duel.GetOperationInfo(link,CATEGORY_SPECIAL_SUMMON) then
+    local e = Duel.GetChainInfo(link, CHAININFO_TRIGGERING_EFFECT)
+    if FilterType(c,TYPE_SPELL+TYPE_TRAP) 
+    and FilterType(c,TYPE_RITUAL)
+    then
+      GlobalDimensionalBarrier = TYPE_RITUAL -- Ritual summon
+      SetNegated(link)
+      return true
+    end
+    if FilterSet(c,0x95) -- Rank-Up Magic
+    then
+      GlobalDimensionalBarrier = TYPE_XYZ -- Rank-Up XYZ summon
+      SetNegated(link)
+      return true
+    end 
+    if e:IsHasCategory(CATEGORY_FUSION_SUMMON)
+    then
+      GlobalDimensionalBarrier = TYPE_FUSION -- Fusion summon
+      SetNegated(link)
+      return true
+    end
+  end
+  if Duel.GetCurrentChain()==0 or RemovalCheckCard(source) then
+    if CardsMatchingFilter(OppMon(),FilterTuner)>0
+    and CardsMatchingFilter(OppMon(),FilterNonTuner)>0
+    then
+      GlobalDimensionalBarrier = TYPE_SYNCHRO -- Synchro summon
+      return true
+    end
+    for i,c in pairs(OppMon()) do
+      if CardsMatchingFilter(OppMon(),FilterLevel,c.level)>1 
+      then
+        GlobalDimensionalBarrier = TYPE_XYZ -- XYZ summon
+        return true
+      end
+    end
+    if CanPendulumSummon(2) then
+      GlobalDimensionalBarrier = TYPE_PENDULUM -- Pendulum summon
+      return true
+    end
+  end
+  local c,link = ChainCardNegation(source,false,4,nil,nil,true)
+  if c and FilterType(c,TYPE_MONSTER)
+  and Affected(c,TYPE_TRAP)
+  then
+    local types={TYPE_RITUAL,TYPE_FUSION,TYPE_SYNCHRO,TYPE_XYZ,TYPE_PENDULUM}
+    for i,v in pairs(types) do
+      if FilterType(c,v) 
+      and FilterLocation(c,LOCATION_ONFIELD)
+      and NotNegated(c)
+      then
+        GlobalDimensionalBarrier = v
+        SetNegated(link)
+        return true
+      end
+    end
+  end
+  if RemovalCheckCard(source) then
+    GlobalDimensionalBarrier = true
+    return true
+  end
+end
 function PriorityChain(cards) -- chain these before anything else
   if HasIDNotNegated(cards,58120309,ChainNegation) then -- Starlight Road
     return {1,CurrentIndex}
@@ -2504,6 +2684,9 @@ function PriorityChain(cards) -- chain these before anything else
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,24696097,ChainNegation) then -- Shooting Star
+    return {1,CurrentIndex}
+  end
+  if HasIDNotNegated(cards,55063751,ChainNegation) then -- Gameciel
     return {1,CurrentIndex}
   end
   if HasIDNotNegated(cards,10443957,ChainNegation) then -- Infinity
@@ -2618,6 +2801,10 @@ function PriorityChain(cards) -- chain these before anything else
     return {1,CurrentIndex}
   end
   
+  if HasIDNotNegated(cards,83326048,ChainDimensionalBarrier) then
+    return Activate()
+  end
+  
   if HasIDNotNegated(cards,99590524,ChainTreacherous) then
     return {1,CurrentIndex}
   end
@@ -2635,6 +2822,9 @@ function PriorityChain(cards) -- chain these before anything else
   return nil
 end
 function GenericChain(cards)
+  if HasID(cards,48905153,ChainDrancia) then
+    return Chain()
+  end
   if HasID(cards,43898403,ChainTwinTwister) then
     return Chain()
   end
@@ -2931,6 +3121,19 @@ end
 function LightningTarget(cards,min)
   return Add(cards,PRIO_TOGRAVE,min,ExcludeID,84013237)
 end
+function DranciaTarget(cards,c)
+  if LocCheck(cards,LOCATION_OVERLAY) then
+    return Add(cards,PRIO_TOGRAVE)
+  end
+  if GlobalCardMode == 1 then
+    GlobalCardMode = nil
+    return GlobalTargetGet(cards,true)
+  end
+  return BestTargets(cards,1,TARGET_DESTROY)
+end
+GenericTargetFunctions = {
+[48905153] = DranciaTarget,
+}
 function GenericCard(cards,min,max,id,c)
   if c then
     id = c.id
@@ -2938,6 +3141,11 @@ function GenericCard(cards,min,max,id,c)
   if GlobalPendulumSummon then
     GlobalPendulumSummon = nil
     return PendulumSummonTarget(cards,max)
+  end
+  for i,v in pairs(GenericTargetFunctions) do
+    if id == i then
+      return v(cards,c,min,max)
+    end
   end
   if id == 56832966 then
     return LightningTarget(cards,min)
