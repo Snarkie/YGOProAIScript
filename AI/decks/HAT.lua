@@ -1,6 +1,8 @@
 function TrapHoleFilter(c)
-  return bit32.band(c.type,TYPE_TRAP)>0 
-  and (IsSetCode(c.setcode,0x4c) or IsSetCode(c.setcode,0x89))
+  return FilterType(c,TYPE_TRAP)
+  --and FilterType(c,TYPE_NORMAL)
+  and(FilterSet(c,0x4c)
+  or FilterSet(c,0x89))
 end
 function TraptrixFilter(c)
   return bit32.band(c.type,TYPE_MONSTER)>0 and IsSetCode(c.setcode,0x108a)
@@ -722,6 +724,7 @@ function ChainDPrison()
   return false
 end
 function BottomlessFilter(c,type)
+  type=type or TYPE_TRAP
   return DestroyFilter(c,true,true)
   and Affected(c,type,4)
   and (type~=TYPE_TRAP or not TraptrixFilter(c))

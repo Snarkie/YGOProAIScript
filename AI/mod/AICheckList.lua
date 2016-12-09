@@ -315,7 +315,7 @@ NSBL={
 69884162,25259669,63060238,50720316, -- Neos Alius, Goblindbergh, Blazeman,Shadow Mist
 79979666,21565445,47826112,13073850, -- Bubbleman, Atlantean Neptabyss, Poseidra, Qli Stealth
 51194046,18326736,58069384,10443957, -- Qli Monolith, Planetellarknight Ptolemaios, Cyber Dragon Nova, Infinity
-81992475,59438930,01050186, -- BA Barbar, Ghost Ogre, Satellarknight Unukalhai
+81992475,59438930,01050186,16947147, -- BA Barbar, Ghost Ogre, Satellarknight Unukalhai, Speedroid Menko
 29888389,47106439,53180020,27796375, -- Gishki Shadow, Vision, Nekroz Exa, Sorcerer
 67696066,68819554,44635489, -- Trick Clown, Damage Juggler, Siat
 81275020,53932291, -- Speedroid Terrortop, Taketomborg
@@ -426,7 +426,7 @@ SSBL={
 27552504,18386170,65305468, -- Beatrice, Pilgrim, F0
 56840427,16051717,30100551, -- Utopia Ray, Raikiri, Minerva
 31292357,44635489,01621413, -- Hat Tricker, Siat, Requiem Dragon
-81275020,53932291, -- Speedroid Terrortop, Taketomborg
+81275020,53932291,91949988, -- Speedroid Terrortop, Taketomborg, Gaia Dragon
 85115440,48905153, -- Zodiac Beast Drancia,Bullhorn
 }
 
@@ -693,7 +693,8 @@ Unchainable={
 84536654,50608164,06511113,30575681, -- Form Change, Koga, Rafflesia, Treacherous, Bedwyr
 27552504,18386170,60743819,20036055, -- Beatrice, Pilgrim, Fiend Griefing, Traveler
 36553319,65305468,20513882,31222701, -- Farfa, F0, Painful Escape, Wavering Eyes
-43898403,60082869,83326048, -- Twin Twister, Dust Tornado, Dimensional Barrier
+43898403,60082869,83326048,69599136, -- Twin Twister, Dust Tornado, Dimensional Barrier, Floodgate Trap Hole
+16947147, -- Speedroid Menko
 }
 function isUnchainableTogether(CardId)
   for i=1,#Unchainable do
@@ -917,7 +918,7 @@ ScriptedCards ={
 43898403,63519819,60082869,27346636, -- Twin Twister, Thousand-Eyes Restrict, Dust Tornado, Gladbeast Heraklinos
 63767246,81275020,53932291,01621413, -- Titanic Galaxy, Speedroid Terrortop, Taketomborg, Requiem Dragon
 66994718,77414722,58851034,83326048, -- Raptor's Gust, Magic Jammer, Cursed Seal, Dimensional Barrier
-85115440,48905153, -- Zodiac Beast Drancia,Bullhorn
+85115440,48905153,69599136,43422537, -- Zodiac Beast Drancia,Bullhorn, Floodgate Trap Hole, Double Summon
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do

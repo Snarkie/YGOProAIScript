@@ -489,10 +489,10 @@ function RemovalCheckCard(target,category,cardtype,targeted,chainlink,filter,opt
   CATEGORY_TOGRAVE,CATEGORY_TOHAND,
   CATEGORY_TODECK,CATEGORY_CONTROL,
   CATEGORY_CUSTOM_FACEDOWN,CATEGORY_CUSTOM_ATTACH}
-  if target and not FilterCheck(target,filter,opt)
+  --[[if target and not FilterCheck(target,filter,opt)
   then
     return false
-  end
+  end]]
   if category then 
     if type(category)=="table" then
       cat=category
@@ -518,7 +518,8 @@ function RemovalCheckCard(target,category,cardtype,targeted,chainlink,filter,opt
           return false
         end
         if e and e:GetHandler()
-        and Negated(e:GetHandler())
+        and (Negated(e:GetHandler())
+        or not FilterCheck(e:GetHandler()))
         then
           return false
         end
@@ -1331,6 +1332,11 @@ function FilterNonTuner(c,level)
   and not FilterType(c,TYPE_TUNER)
   and (not level or FilterLevel(c,level))
 end
+function FilterBackrow(c)
+  return FilterType(c,TYPE_SPELL+TYPE_TRAP)
+  and FilterPosition(c,POS_FACEDOWN)
+  and FilterLocation(c,LOCATION_SZONE)
+end
 function Scale(c) -- backwards compatibility
   return c.lscale
 end
@@ -1609,14 +1615,19 @@ function NormalSummonCount(player)
   if player == nil then player = player_ai end
   return Duel.GetActivityCount(player,ACTIVITY_NORMALSUMMON)
 end
+GlobalExtraSummons={}
 function NormalSummonsAvailable(player)
   player = player or player_ai
   local summons = NormalSummonCount(player)
-  local available = 1
+  local available = (GlobalExtraSummons[Duel.GetTurnCount] or 0) + 1
   if HasIDNotNegated(AIMon(),03113836,true) then -- Seraphinite
     available = 2
   end
   return available-summons
+end
+function NormalSummonAdd(amount)
+  amount=amount or 1
+  GlobalExtraSummons[Duel.GetTurnCount()]=(GlobalExtraSummons[Duel.GetTurnCount()] or 0)+1
 end
 function SpecialSummonCheck(player)
   if player == nil then player = player_ai end
@@ -3004,6 +3015,9 @@ function GetNegatePriority(source,link,targeted)
       return -1
     end
     if not CheckNegated(link) then
+      return -1
+    end
+    if Negated(c) then
       return -1
     end
     if FilterLocation(c,LOCATION_ONFIELD) 

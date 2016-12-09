@@ -452,18 +452,18 @@ if not ExtraCheck then
     end
   end
 end
-if not ExtraCheck then 
+--[[if not ExtraCheck then 
   DeckCommand = HEROInit(cards)
   if DeckCommand ~= nil and (d == 0 
   or BlacklistCheckInit(DeckCommand[1],DeckCommand[2],d,backup))
   then
     if DeckCommand[1]~=COMMAND_ACTIVATE 
-    or InfiniteLoopCheck(ActivatableCards[DeckCommand[2]])
+    or InfiniteLoopCheck(ActivatableCards[DeckCommand[2] ])
     then
       return DeckCommand[1],DeckCommand[2]
     end
   end
-end
+end]]
 if not ExtraCheck then 
   DeckCommand = SummonExtraDeck(cards)
   if DeckCommand ~= nil and (d == 0 

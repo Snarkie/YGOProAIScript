@@ -116,7 +116,8 @@ function PrioritySetup()
   --HEROPriority()
   --BAPriority()
   NekrozPriority()
-
+  GadgetPriority()
+  
 AddPriority({
 -- HERO
 
@@ -217,7 +218,6 @@ AddPriority({
 [08561192] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Leoh, Keeper of the Sacred Tree
 })
 
-
 AddPriority({
 -- HAT
 [91812341] = {6,3,5,1,1,1,1,1,1,1,MyrmeleoCond},      -- Traptrix Myrmeleo
@@ -244,6 +244,7 @@ AddPriority({
 [91499077] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Gagaga Samurai
 [63746411] = {1,1,1,1,1,1,1,1,1,1,nil},               -- Giant Hand
 })
+
 AddPriority({
 --for backwards compatibility
 [05361647] = {1,1,1,1,9,1,1,1,1,1,nil},               -- Battlin' Boxer Glassjaw
@@ -256,6 +257,7 @@ AddPriority({
 [33396948] = {1,1,-1,-1,-1,-1,-1,-1,1,1,nil},
 
 [05133471] = {1,1,1,1,4,1,1,1,1,1,nil},               -- Galaxy Cyclone
+
 })
 
   local deck = GetDeck()
@@ -273,6 +275,7 @@ function AddPriority(list,override)
   end
 end
 function GetPriority(card,loc)
+  card.prio=0
   local id=card.id      
   if id == 76812113 then
     id=card.original_id
@@ -295,7 +298,9 @@ function GetPriority(card,loc)
     end
   else
     --print("no priority defined for id: "..id..", defaulting to 0")
+    return 0
   end
+  --print("got priority: "..result.." for "..GetName(card))
   return result
 end
 function AssignPriority(cards,loc,filter,opt)
@@ -362,6 +367,7 @@ function AssignPriority(cards,loc,filter,opt)
         c.prio=11
       end
     end
+    c.prio=c.prio or 0
     if not FilterCheck(c,filter,opt) then
       c.prio=c.prio-9999
     end

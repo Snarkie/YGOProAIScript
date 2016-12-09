@@ -1997,7 +1997,10 @@ function TributeCond(loc,c)
 end
 function AvengeCond(loc,c)
   if loc == PRIO_TOHAND then
-    return HasID(AIHand(),46589034,true) -- Pain Lanius
+    if HasID(AIHand(),46589034,true) then -- Pain Lanius
+      return true
+    end
+    return false
   end
 end
 function VanishingCond(loc,c)

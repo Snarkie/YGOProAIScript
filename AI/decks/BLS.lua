@@ -729,7 +729,10 @@ function DDWTarget(cards,c)
   if LocCheck(cards,LOCATION_OVERLAY) then
     return Add(cards,PRIO_TOGRAVE)
   end
-  return BestTargets(cards,1,TARGET_DESTROY,FilterID,c.id)
+  if FilterController(cards[1],1) then
+    return BestTargets(cards,1,TARGET_DESTROY,FilterID,c.id)
+  end
+  return BestTargets(cards,1,TARGET_DESTROY,DDWFilter)
 end
 
 BLSTargetFunctions={

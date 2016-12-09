@@ -301,40 +301,6 @@ function StrategistCond(loc,c)
     end
   end
 end
-function GoldGagdetCond(loc,c)
-  if loc == PRIO_TOHAND then
-    if not HasID(AIHand(),c.id,true) then
-      if FilterLocation(c,LOCATION_GRAVE) then 
-        return 6
-      end
-      return true
-    end
-    return false
-  end
-  if loc == PRIO_TOFIELD then
-    if FilterLocation(c,LOCATION_HAND) then
-      return OPTCheck(c.id) and CardsMatchingFilter(AIHand(),FilterRace,RACE_MACHINE)>1
-    end
-    return true
-  end
-end
-function SilverGagdetCond(loc,c)
-  if loc == PRIO_TOHAND then
-    if not HasID(AIHand(),c.id,true) then
-      if FilterLocation(c,LOCATION_GRAVE) then 
-        return 5
-      end
-      return true
-    end
-    return false
-  end
-  if loc == PRIO_TOFIELD then
-    if FilterLocation(c,LOCATION_HAND) then
-      return OPTCheck(c.id) and CardsMatchingFilter(AIHand(),FilterRace,RACE_MACHINE)>1
-    end
-    return true
-  end
-end
 function HangarCond(loc,c)
   if loc == PRIO_TOGRAVE then
     if FilterLocation(c,LOCATION_HAND)
@@ -763,6 +729,7 @@ function SummonTsukuyomiABC(c,mode)
   local space = math.min(st,SpaceCheck(LOCATION_SZONE))
   if mode == 1
   and (st-space)+mons<4
+  and st+mons>0
   and CanSpecialSummon()
   then
     return true
@@ -952,9 +919,6 @@ function ABCInit(cards)
   local Rep = cards.repositionable_cards
   local SetMon = cards.monster_setable_cards
   local SetST = cards.st_setable_cards
-  if HasID(Act,00691925) then -- Solar Recharge, test
-    return Activate()
-  end
   if HasID(SpSum,55063751,SummonGameciel,1) then
     return SpSummon()
   end
@@ -1227,9 +1191,19 @@ function ABCTarget(cards,c,min)
   return BestTargets(cards,min,TARGET_BANISH,ABCFilter)
 end
 function GoldGadgetTarget(cards)
+  if Duel.GetTurnPlayer()==1-player_ai 
+  and OPTCheck(29021114)
+  then
+    return Add(cards,PRIO_TOFIELD,1,FilterID,29021114)
+  end
   return Add(cards,PRIO_TOFIELD)
 end
 function SilverGadgetTarget(cards)
+  if Duel.GetTurnPlayer()==1-player_ai 
+  and OPTCheck(55010259)
+  then
+    return Add(cards,PRIO_TOFIELD,1,FilterID,55010259)
+  end
   return Add(cards,PRIO_TOFIELD)
 end
 function GalaxySoldierTarget(cards)
