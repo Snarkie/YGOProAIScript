@@ -1673,6 +1673,9 @@ function ZodiacBeastChain(cards)
 	GlobalZBSummonId = 1 -- For DettachTargets
     return {1,CurrentIndex}
   end
+  if HasIDNotNegated(cards,83326048,ChainDimensionalBarrier) then
+    return Activate()
+  end
   if HasIDNotNegated(cards,40605147,ChainNegation,4) and AI.GetPlayerLP(1)>1500 then -- Solemn Notice
     return {1,CurrentIndex}
   end

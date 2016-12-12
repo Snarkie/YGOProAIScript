@@ -22,18 +22,26 @@ function SummonPenguin()
   return false
 end
 function SummonPenguinAwesome(c)
-  if HasID(UseLists({AIHand(),AIST()}),01845204,true) -- IFusion
-  and OPTCheck(01845204)
-  and HasID(AIExtra(),17412721,true) -- Norden
-  and HasID(AIExtra(),00440556,true) -- Bahamut
-  and OPTCheck(00440556)
-  and HasID(AIExtra(),90809975,true) -- Toadally
+  local waterMon = SubGroup(AIMon(),FilterAttribute,ATTRIBUTE_WATER)
+  if (
+    HasID(UseLists({AIHand(),AIST()}),01845204,true) -- IFusion
+	and OPTCheck(01845204)
+	and HasID(AIExtra(),17412721,true) -- Norden
+	or
+	CardsMatchingFilter(waterMon,FilterLevel,4) > 0
+  )
+  and ToadallyPlayCheck()
   and #AIMon() <= 3
   then
     return true
+  elseif CardsMatchingFilter(AIHand(),FilterID,c.id) >= 2
+  and HasIDNotNegated(AIMon(),03113836,true) -- GK Seraphinite
+  then
+    return true
   end
+  return false
 end
-function SummonOwl()
+function SummonOwl(c)
   return
     OPTCheck(65331686) -- Own
 	and CardsMatchingFilter(OppField(),ExtraDeckBlockedFilter) == 0
@@ -43,11 +51,11 @@ function SummonOwl()
 	 CardsMatchingFilter(AIMon(),FrightfurMonFilter)
 	) > 0
 end
-function SummonOwlNoFusionST()
+function SummonOwlNoFusionST(c)
   return
     OPTCheck(65331686) -- Own
 	and CardsMatchingFilter(UseLists({AIHand(),AIST()}),FluffalFusionSTFilter) == 0
-	and UseOwlPoly()
+	and UseOwlPoly(c)
 	and not OPTCheck(72413000) -- Wings
 	and CardsMatchingFilter(OppField(),ExtraDeckBlockedFilter) == 0
 end
@@ -214,8 +222,9 @@ function FSummonFSabreTooth(c)
   then
     return true
   else
-    if CardsMatchingFilter(AIMon(),FilterID,80889750) == 2 
+    if CardsMatchingFilter(AIMon(),FilterID,80889750) == 2
 	or not BattlePhaseCheck()
+	or #AIMon() <= 4
 	then
 	  return 1
 	end
@@ -360,7 +369,8 @@ function FSummonFTiger(c)
   if not HasIDNotNegated(AIMon(),00464362,true) -- FTiger
   and BattlePhaseCheck()
   then
-    if GlobalDarkLaw > 0 then
+	if CardsMatchingFilter(OppField(),FTigerAdvantageFilter) > 0
+	then
 	  return 11
 	end
     return
@@ -464,7 +474,7 @@ end
 --------- SET ----------
 ------------------------
 function SetChain(c)
-  return SetFluffal(c)
+  return not HasID(AIMon(),c.id,true)
 end
 function SetSabres(c)
   return SetFluffal(c)

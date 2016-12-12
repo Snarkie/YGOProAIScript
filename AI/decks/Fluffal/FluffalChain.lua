@@ -24,7 +24,6 @@ function ChainMSpring(c)
   else
     return false
   end
-
   return false
 end
 -- Trap CHAIN
@@ -61,6 +60,7 @@ function FluffalChain(cards)  -- FLUFFAL CHAIN
   --print("Fluffal Chain")
   if HasIDNotNegated(cards,90809975,false,(90809975*16)+1,ChainNegation) -- Toadally
   then
+    OPTSet(cards[CurrentIndex].cardid)
     return {1,CurrentIndex}
   end
   if HasID(cards,40636712,UseFKrakenRepo) then
@@ -84,25 +84,25 @@ function FluffalChain(cards)  -- FLUFFAL CHAIN
   if HasIDNotNegated(cards,51452091,false) then -- RDecree
     return {1,CurrentIndex}
   end
-  
+
   -- Opp Maxx "C"
-  if GlobalOppMaxxC ~= Duel.GetTurnCount() then
-    for i=1,Duel.GetCurrentChain() do
-	  local p = Duel.GetChainInfo(i, CHAININFO_TRIGGERING_PLAYER)
-      local e = Duel.GetChainInfo(i, CHAININFO_TRIGGERING_EFFECT)
-	  local c = nil
-	  if e and p and (p == 1- player_ai) then
-        c=e:GetHandler()
-	    if c then
-		  if c:GetCode() == 23434538 then
+  --if GlobalOppMaxxC ~= Duel.GetTurnCount() then
+    --for i=1,Duel.GetCurrentChain() do
+	  --local p = Duel.GetChainInfo(i, CHAININFO_TRIGGERING_PLAYER)
+      --local e = Duel.GetChainInfo(i, CHAININFO_TRIGGERING_EFFECT)
+	  --local c = nil
+	  --if e and p and (p == 1- player_ai) then
+        --c=e:GetHandler()
+	    --if c then
+		  --if c:GetCode() == 23434538 then
 		    --print("OppMaxxC")
-		    GlobalOppMaxxC = Duel.GetTurnCount()
-		  end
-	    end
-      end
-    end
-  end
-  
+		    --GlobalOppMaxxC = Duel.GetTurnCount()
+		  --end
+	    --end
+      --end
+    --end
+  --end
+
   return nil
 end
 
@@ -112,7 +112,7 @@ function FluffalChainOrder(cards) -- FLUFFAL CHAIN ORDER
 
   for i=1,#cards do
     local c = cards[i]
-    if c.level > 5 then
+    if c.level > 4 then -- To protect Frightfur
       result[#result + 1] = i
     end
   end
@@ -130,9 +130,18 @@ function FluffalChainOrder(cards) -- FLUFFAL CHAIN ORDER
   end
   for i=1,#cards do
     local c=cards[i]
-    if not (c.level > 5)
+    if c.level < 5
+	and c.level > 0
 	and not (c.id == 39246582) -- Exclude Dog
 	and not (c.id == 13241004) -- Exclude Penguin
+	then
+      result[#result + 1] = i
+    end
+  end
+  -- ST
+  for i=1,#cards do
+    local c=cards[i]
+    if c.level < 1
 	then
       result[#result + 1] = i
     end

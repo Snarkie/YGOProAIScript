@@ -13,9 +13,9 @@ function MaterialFSabreTooth(cards)
   )
   and (
     GlobalEdgeImpMaterial + GlobalFluffalMaterial > 1
-	or 
+	or
 	GlobalEdgeImpMaterial + GlobalFluffalMaterial > 0
-	and #OppField() < 2 
+	and #OppField() < 2
 	and BattlePhaseCheck()
   )
   then

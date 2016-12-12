@@ -59,7 +59,7 @@ function UseBearPoly(c)
     return false
   end
 end
-function UseOwlPoly()
+function UseOwlPoly(c)
   if CardsMatchingFilter(OppField(),SpellBlockedFilter) > 0
   or
   HasID(UseLists({AIHand(),AIMon()}),61173621,true) -- Chain
@@ -67,13 +67,17 @@ function UseOwlPoly()
   then
     return false
   end
-  if
-  CardsMatchingFilter(AIDeck(),FilterID,24094653) -- Polymerization
-  >
-  CardsMatchingFilter(UseLists({AIDeck(),AIHand(),AIST()}),FilterID,34773082) -- FPatchwork
-  or
-  CardsMatchingFilter(AIDeck(),CountFPatchworkTarget) == 0
+  if CardsMatchingFilter(AIDeck(),FilterID,24094653) > 1 -- Polymerization
   then
+    OPTSet(c.id)
+    return true
+  elseif CardsMatchingFilter(UseLists({AIDeck(),AIHand(),AIST()}),FilterID,34773082) == 0 -- FPatchwork
+  then
+    OPTSet(c.id)
+    return true
+  elseif CardsMatchingFilter(AIDeck(),CountFPatchworkTarget) == 0
+  then
+    OPTSet(c.id)
     return true
   end
   return false
@@ -149,7 +153,7 @@ function UseOcto()
     OPTCheck(87246309)
     and (edgeImpGrave + fluffalGrave) > 0
 	and (
-	  not HasID(AIGrave(),72413000,true) -- Wings
+	  not HasID(UseLists({AIHand(),AIGrave()}),72413000,true) -- Wings
 	  or not OPTCheck(72413000)
 	  or fluffalGrave > 2
 	  or edgeImpGrave > 0
@@ -211,6 +215,7 @@ function UseSabresNoEdgeImp(c)
   and CountEdgeImp(UseLists({AIHand(),AIMon()})) == 0
   and #AIHand() > 5
   and CardsMatchingFilter(UseLists({AIHand(),AIST()}),FluffalFusionSTFilter) > 0
+  and BattlePhaseCheck()
   then
     OPTSet(c.id)
     return true
@@ -444,20 +449,6 @@ function UseIFusion(c)
   if AI.GetPlayerLP(1) <= 1000 then
     return false
   end
-  -- Toadally Awesome
-  local waterMon = SubGroup(UseLists({AIGrave(),AIMon()}),FilterAttribute,ATTRIBUTE_WATER)
-  if CardsMatchingFilter(waterMon,FilterLevel,4) > 0
-  and HasID(AIExtra(),17412721,true) -- Norden
-  and HasID(AIExtra(),00440556,true) -- Bahamut
-  and OPTCheck(00440556)
-  and HasID(AIExtra(),90809975,true) -- Toadally
-  and #AIMon() <= 3
-  then
-    GlobalActivatedCardID = c.id
-    OPTSet(c.id)
-    return true
-  end
-  -- FSabreTooth
   if HasID(AIExtra(),80889750,true) -- FSabreTooth
   --and not HasID(AIMon(),57477163,true) -- FSheep
   and (
@@ -481,6 +472,30 @@ function UseIFusion(c)
   else
     return false
   end
+end
+function UseIFusionAwesome(c)
+  if AI.GetPlayerLP(1) <= 1000 then
+    return false
+  end
+  local waterMon = SubGroup(UseLists({AIGrave(),AIMon()}),FilterAttribute,ATTRIBUTE_WATER)
+  local graveMon = SubGroup(AIGrave(),FilterType,TYPE_MONSTER)
+  if CardsMatchingFilter(waterMon,FilterLevel,4) > 0
+  and HasID(AIExtra(),17412721,true) -- Norden
+  and ToadallyPlayCheck()
+  and #AIMon() <= 3
+  and CardsMatchingFilter(graveMon,FilterLevelMax,4) > 0
+  then
+    OPTSet(c.id)
+    return true
+  end
+end
+function UseBFusion()
+  if CardsMatchingFilter(AIHand(),FilterID,13241004) > 1 -- Penguin
+  or HasID(AIHand(),39246582,true) -- Dog
+  then
+    return true
+  end
+  return false
 end
 function UseMSpring(c)
   local countOppSTFaceUp = CardsMatchingFilter(OppST(),FilterPosition,POS_FACEUP)
@@ -697,7 +712,7 @@ end
 
 function FluffalEffectYesNo(id,card) -- FLUFFAL EFFECT YESNO
   if card then
-    print("EffectYesNo - Cardid: "..card.id.." - desc: "..card.description)
+    --print("EffectYesNo - Cardid: "..card.id.." - desc: "..card.description)
   end
   local result = nil
 
@@ -708,7 +723,7 @@ function FluffalEffectYesNo(id,card) -- FLUFFAL EFFECT YESNO
     id = id + 1 -- Material
 	result = 1
   end
-  if id == 65331686 and UseOwlPoly() then -- Owl
+  if id == 65331686 and UseOwlPoly(card) then -- Owl
 	result = 1
   end
   if id == 87246309  then -- Octo
@@ -763,7 +778,7 @@ function FluffalEffectYesNo(id,card) -- FLUFFAL EFFECT YESNO
   if id == 41209827 then -- FStarve
     result = 1
   end
-  
+
   if id == 90809975 then -- Toadally
     local toadallyEffect = card.description - (90809975*16)
     id = 90809975 + toadallyEffect
@@ -790,9 +805,9 @@ end
 
 function FluffalYesNo(desc) -- FLUFFAL YESNO
   if (desc / 16) > 99999 then
-    print("YesNo - id: "..(desc/16).." - desc: "..desc)
+    --print("YesNo - id: "..(desc/16).." - desc: "..desc)
   else
-    print("YesNo - desc: "..desc)
+    --print("YesNo - desc: "..desc)
   end
   if desc == 93 then -- Choose material?
     if GlobalFusionId == 80889750 then

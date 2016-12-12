@@ -91,6 +91,11 @@ function FluffalPosition(id,available) -- FLUFFAL POSITION
     result = 4 -- POS_FACEUP_DEFENSE?
   end
 
+  if id == 03113836 -- GKSeraphinite
+  and GlobalEffectId == 07394770 -- BFusion
+  then
+    result = 4
+  end
   return result
 end
 

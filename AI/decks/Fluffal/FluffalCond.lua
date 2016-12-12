@@ -49,9 +49,9 @@ function DogCond(loc,c)
 	    OPTCheck(c.id)
 		and SummonDog()
 	end
-	if FilterLocation(c,LOCATION_DECK) 
+	if FilterLocation(c,LOCATION_DECK)
 	or FilterLocation(c,LOCATION_GRAVE)
-	or FilterLocation(c,LOCATION_REMOVED) 
+	or FilterLocation(c,LOCATION_REMOVED)
 	then
 	  return false
 	end
@@ -60,7 +60,7 @@ function DogCond(loc,c)
     if FilterLocation(c,LOCATION_HAND) then
 	  return not OPTCheck(c.id) or CardsMatchingFilter(AIHand(),FilterID,c.id) > 1
 	end
-	if FilterLocation(c,LOCATION_DECK) 
+	if FilterLocation(c,LOCATION_DECK)
 	or FilterLocation(c,LOCATION_OVERLAY)
 	or FilterLocation(c,LOCATION_ONFIELD)
 	then
@@ -122,9 +122,22 @@ function PenguinCond(loc,c)
 	  return 1
 	end
     if FilterLocation(c,LOCATION_DECK)
-	or FilterLocation(c,LOCATION_GRAVE) 
+	or FilterLocation(c,LOCATION_GRAVE)
 	or FilterLocation(c,LOCATION_REMOVED)
 	then
+	  -- Toadally
+	  if ToadallyPlayCheck() then
+	    if HasID(AIHand(),01845204,true) -- IFusion
+		then
+		  return 9
+		end
+		local waterMon = SubGroup(AIMon(),FilterAttribute,ATTRIBUTE_WATER)
+		if CardsMatchingFilter(waterMon,FilterLevel,4) > 0
+		and not NormalSummonCheck()
+		then
+		  return 10
+		end
+	  end
 	  if CardsMatchingFilter(AIHand(),PenguinFilter) > 0
 	  and not NormalSummonCheck()
 	  and OPTCheck(c.id + 1)
@@ -149,7 +162,7 @@ function PenguinCond(loc,c)
 	end
   end
   if loc == PRIO_TOFIELD then
-    if FilterLocation(c,LOCATION_HAND) 
+    if FilterLocation(c,LOCATION_HAND)
 	or FilterLocation(c,LOCATION_DECK)
 	or FilterLocation(c,LOCATION_GRAVE)
 	or FilterLocation(c,LOCATION_REMOVED)
@@ -364,7 +377,7 @@ function OwlCond(loc,c)
 		end
 	  end
 	end
-	if FilterLocation(c,LOCATION_GRAVE) 
+	if FilterLocation(c,LOCATION_GRAVE)
 	or FilterLocation(c,LOCATION_REMOVED)
 	then
 	  return 6
@@ -381,7 +394,7 @@ function OwlCond(loc,c)
 	  end
 	  return true
 	end
-	if FilterLocation(c,LOCATION_DECK) 
+	if FilterLocation(c,LOCATION_DECK)
 	or FilterLocation(c,LOCATION_GRAVE)
 	or FilterLocation(c,LOCATION_REMOVED)
 	then
@@ -470,7 +483,7 @@ function SheepCond(loc,c)
 	end
   end
   if loc == PRIO_TOFIELD then
-    if FilterLocation(c,LOCATION_HAND) 
+    if FilterLocation(c,LOCATION_HAND)
 	or FilterLocation(c,LOCATION_DECK)
 	or FilterLocation(c,LOCATION_GRAVE)
 	or FilterLocation(c,LOCATION_REMOVED)
@@ -557,7 +570,7 @@ function OctoCond(loc,c)
 	    return 6
 	  end
 	end
-	if FilterLocation(c,LOCATION_GRAVE) 
+	if FilterLocation(c,LOCATION_GRAVE)
 	or FilterLocation(c,LOCATION_REMOVED)
 	then
 	  if OPTCheck(c.id + 1) then
@@ -646,8 +659,12 @@ function CatCond(loc,c)
 	  then
 	    return 1
 	  end
-	  if HasID(UseLists({AIHand(),AIST()}),24094653,true) -- Polymerization
-	  or HasID(AIHand(),79109599,true) -- KoS
+	  local polyCount = CardsMatchingFilter(UseLists({AIHand(),AIST()}),FilterID,24094653)
+	  if polyCount > 1 
+	  and not HasID(UseLists({AIHand(),AIMon()}),13241004,true) -- Penguin
+	  then
+	    return 5
+	  elseif polyCount > 0
 	  then
 	    return true
 	  else
@@ -659,7 +676,7 @@ function CatCond(loc,c)
 	    return 3
 	  end
 	end
-	if FilterLocation(c,LOCATION_GRAVE) 
+	if FilterLocation(c,LOCATION_GRAVE)
 	or FilterLocation(c,LOCATION_REMOVED)
 	then
 	  return 9
@@ -745,7 +762,7 @@ function RabitCond(loc,c)
 	    return 4
 	  end
 	end
-	if FilterLocation(c,LOCATION_GRAVE) 
+	if FilterLocation(c,LOCATION_GRAVE)
 	or FilterLocation(c,LOCATION_REMOVED)
 	then
 	  return 10
@@ -831,7 +848,7 @@ function MouseCond(loc,c)
 	    return 1
       end
 	end
-	if FilterLocation(c,LOCATION_GRAVE) 
+	if FilterLocation(c,LOCATION_GRAVE)
 	or FilterLocation(c,LOCATION_REMOVED)
 	then
 	  return false
@@ -920,6 +937,10 @@ function WingsCond(loc,c)
 	  end
 	  if HasID(AIHand(),70245411,true) -- TVendor HAND
 	  or
+	  HasID(AIHand(),03841833,true) -- Bear
+	  and OPTCheck(03841833)
+	  and HasID(AIDeck(),70245411,true) -- TVendor
+	  or
 	  CardsMatchingFilter(AIST(),TVendorCheckFilter,true) > 0 -- TVendor
 	  or
 	  HasIDNotNegated(AIST(),70245411,true) -- TVendor
@@ -944,7 +965,7 @@ function WingsCond(loc,c)
 	end
   end
   if loc == PRIO_TOFIELD then
-    if FilterLocation(c,LOCATION_HAND) 
+    if FilterLocation(c,LOCATION_HAND)
 	or FilterLocation(c,LOCATION_DECK)
 	then
 	  return true
@@ -957,7 +978,7 @@ function WingsCond(loc,c)
 	end
   end
   if loc == PRIO_TOGRAVE then
-    if FilterLocation(c,LOCATION_HAND) 
+    if FilterLocation(c,LOCATION_HAND)
 	or FilterLocation(c,LOCATION_DECK)
 	or FilterLocation(c,LOCATION_OVERLAY)
 	or FilterLocation(c,LOCATION_ONFIELD)
@@ -1007,7 +1028,7 @@ function PatchworkCond(loc,c)
 	if FilterLocation(c,LOCATION_ONFIELD) then
 	  return 2
 	end
-	if FilterLocation(c,LOCATION_GRAVE) 
+	if FilterLocation(c,LOCATION_GRAVE)
 	or FilterLocation(c,LOCATION_REMOVED)
 	then
 	  return true
@@ -1026,7 +1047,7 @@ function PatchworkCond(loc,c)
     if FilterLocation(c,LOCATION_HAND) then
 	  return Get_Card_Count_ID(AIHand(),c.id) > 1
 	end
-	if FilterLocation(c,LOCATION_DECK) 
+	if FilterLocation(c,LOCATION_DECK)
 	or FilterLocation(c,LOCATION_OVERLAY)
 	then
 	  return true
@@ -1081,7 +1102,7 @@ function TomahawkCond(loc,c)
 	if FilterLocation(c,LOCATION_ONFIELD) then
 	  return true
 	end
-	if FilterLocation(c,LOCATION_GRAVE) 
+	if FilterLocation(c,LOCATION_GRAVE)
 	or FilterLocation(c,LOCATION_REMOVED)
 	then
 	  return OPTCheck(c.id + 1) and not HasID(AIHand(),c.id,true)
@@ -1097,7 +1118,7 @@ function TomahawkCond(loc,c)
 	end
   end
   if loc == PRIO_TOGRAVE then
-    if FilterLocation(c,LOCATION_HAND) 
+    if FilterLocation(c,LOCATION_HAND)
 	or FilterLocation(c,LOCATION_DECK)
 	or FilterLocation(c,LOCATION_OVERLAY)
 	or FilterLocation(c,LOCATION_ONFIELD)
@@ -1175,8 +1196,8 @@ function ChainCond(loc,c)
 	end
   end
   if loc == PRIO_TOFIELD then
-    if FilterLocation(c,LOCATION_HAND) 
-	or FilterLocation(c,LOCATION_DECK) 
+    if FilterLocation(c,LOCATION_HAND)
+	or FilterLocation(c,LOCATION_DECK)
 	or FilterLocation(c,LOCATION_GRAVE)
 	or FilterLocation(c,LOCATION_REMOVED)
 	then
@@ -1191,7 +1212,7 @@ function ChainCond(loc,c)
 	end
   end
   if loc == PRIO_TOGRAVE then
-    if FilterLocation(c,LOCATION_HAND) 
+    if FilterLocation(c,LOCATION_HAND)
 	or FilterLocation(c,LOCATION_ONFIELD)
 	then
 	  return not OPTCheck(c.id)
@@ -1299,7 +1320,7 @@ function SabresCond(loc,c)
 	end
   end
   if loc == PRIO_TOGRAVE then
-    if FilterLocation(c,LOCATION_HAND) 
+    if FilterLocation(c,LOCATION_HAND)
 	or FilterLocation(c,LOCATION_DECK)
 	or FilterLocation(c,LOCATION_OVERLAY)
 	or FilterLocation(c,LOCATION_ONFIELD)
@@ -1387,7 +1408,7 @@ function KoSCond(loc,c)
 	end
   end
   if loc == PRIO_TOGRAVE then
-    if FilterLocation(c,LOCATION_HAND) 
+    if FilterLocation(c,LOCATION_HAND)
 	or FilterLocation(c,LOCATION_DECK)
 	or FilterLocation(c,LOCATION_OVERLAY)
 	or FilterLocation(c,LOCATION_ONFIELD)
@@ -1458,7 +1479,7 @@ function PFusionerCond(loc,c)
 	end
   end
   if loc == PRIO_TOGRAVE then
-    if FilterLocation(c,LOCATION_HAND) 
+    if FilterLocation(c,LOCATION_HAND)
 	or FilterLocation(c,LOCATION_DECK)
 	or FilterLocation(c,LOCATION_ONFIELD)
 	then
@@ -1662,7 +1683,7 @@ function FPatchworkCond(loc,c)
 	    return 1
 	  end
 	end
-	if FilterLocation(c,LOCATION_ONFIELD) 
+	if FilterLocation(c,LOCATION_ONFIELD)
 	or FilterLocation(c,LOCATION_GRAVE)
 	or FilterLocation(c,LOCATION_REMOVED)
 	then
@@ -1670,7 +1691,7 @@ function FPatchworkCond(loc,c)
 	end
   end
   if loc == PRIO_TOGRAVE then
-    if FilterLocation(c,LOCATION_HAND) 
+    if FilterLocation(c,LOCATION_HAND)
 	or FilterLocation(c,LOCATION_DECK)
 	or FilterLocation(c,LOCATION_ONFIELD)
 	then
@@ -1711,14 +1732,14 @@ function FRebornCond(loc,c)
 	if FilterLocation(c,LOCATION_ONFIELD) then
 	  return true
 	end
-	if FilterLocation(c,LOCATION_GRAVE) 
+	if FilterLocation(c,LOCATION_GRAVE)
 	or FilterLocation(c,LOCATION_REMOVED)
 	then
 	  return CardsMatchingFilter(AIGrave(),FrightfurMonFilter) > 0
 	end
   end
   if loc == PRIO_TOGRAVE then
-    if FilterLocation(c,LOCATION_HAND) 
+    if FilterLocation(c,LOCATION_HAND)
 	or FilterLocation(c,LOCATION_DECK)
 	or FilterLocation(c,LOCATION_ONFIELD)
 	then
@@ -1828,7 +1849,7 @@ function PolyCond(loc,c)
     if FilterLocation(c,LOCATION_HAND) then
 	  return CardsMatchingFilter(UseLists({AIHand(),AIST()}),FilterID,c.id) > 1
 	end
-	if FilterLocation(c,LOCATION_DECK) 
+	if FilterLocation(c,LOCATION_DECK)
 	or FilterLocation(c,LOCATION_OVERLAY)
 	or FilterLocation(c,LOCATION_ONFIELD)
 	or FilterLocation(c,LOCATION_REMOVED)
@@ -1879,7 +1900,7 @@ function DFusionCond(loc,c)
     if FilterLocation(c,LOCATION_HAND) then
 	  return CardsMatchingFilter(UseLists({AIHand(),AIST()}),FilterID,c.id) > 1
 	end
-	if FilterLocation(c,LOCATION_DECK) 
+	if FilterLocation(c,LOCATION_DECK)
 	or FilterLocation(c,LOCATION_ONFIELD)
 	then
 	  return false
@@ -2555,12 +2576,13 @@ function FNordenCond(loc,c)
   if loc == PRIO_TOFIELD then
     if FilterLocation(c,LOCATION_EXTRA) then
 	  local waterMon = SubGroup(UseLists({AIGrave(),AIMon()}),FilterAttribute,ATTRIBUTE_WATER)
+	  --local graveMon = SubGroup(AIGrave(),FilterType,TYPE_MONSTER)
 	  if CardsMatchingFilter(waterMon,FilterLevel,4) > 0
 	  and HasID(AIExtra(),17412721,true) -- Norden
-      and HasID(AIExtra(),00440556,true) -- Bahamut
-      and OPTCheck(00440556)
-      and HasID(AIExtra(),90809975,true) -- Toadally
+      and ToadallyPlayCheck()
 	  and GlobalIFusion > 0
+	  and #AIMon() <= 3
+	  --and CardsMatchingFilter(graveMon,FilterLevelMax,4) > 0
 	  then
 	    GlobalIFusion = 0
 	    return 11
@@ -2583,6 +2605,35 @@ function FNordenCond(loc,c)
     return true
   end
   return true
+end
+function FTAwesomeCond(loc,c)
+  if loc == MATERIAL_TOGRAVE then
+    return true
+  end
+  if loc == PRIO_TOHAND then
+    return true
+  end
+  if loc == PRIO_TOFIELD then
+    if FilterLocation(c,LOCATION_EXTRA) then
+	return true
+  end
+  if loc == PRIO_TOGRAVE then
+    if FilterLocation(c,LOCATION_ONFIELD) then
+	  return not OPTCheck(c.cardid)
+	end
+	return true
+  end
+  if loc == PRIO_TODECK then
+    if FilterLocation(c,LOCATION_ONFIELD) then
+	  return not OPTCheck(c.cardid)
+	end
+    return true
+  end
+  if loc == PRIO_BANISH then
+    return true
+  end
+  return true
+end
 end
 
 MATERIAL_TOGRAVE = 21 -- Custom
@@ -2640,5 +2691,9 @@ FluffalPriorityList={
  [17412721] = {1,1,4,1,1,1,9,1,1,1,FNordenCond}, 	-- Elder Entity Norden
  [33198837] = {1,1,1,1,1,1,1,1,1,1,nil}, 			-- Naturia Beast
  [42110604] = {1,1,1,1,1,1,1,1,1,1,nil}, 			-- Hi-Speedroid Chanbara
+ [90809975] = {1,1,1,1,3,1,1,1,1,1,FTAwesomeCond},	-- Toadally Awesome
  [83531441] = {1,1,1,1,1,1,1,1,1,1,nil}, 			-- Dante
+
+ [07394770] = {1,1,1,1,4,3,7,3,1,1,nil}, 			-- Brilliant Fusion
+ [91731841] = {1,1,1,1,4,3,8,3,1,1,nil}, 			-- Gem-Knight Material
 }

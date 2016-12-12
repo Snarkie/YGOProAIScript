@@ -139,7 +139,7 @@ function FKrakenSendFilter(c)
 end
 -- Other Fusion FILTER
 function FluffalNordenFilter(c)
-  return 
+  return
     FilterAttribute(c,ATTRIBUTE_WATER)
 	and FilterLevel(c,4)
 end
@@ -150,11 +150,8 @@ function FluffalBahamutMaterialFilter(c)
 end
 
 -- Other Filter
-function FluffalDestroyFilter(c,nontarget)
-  return not FilterAffected(c,EFFECT_INDESTRUCTABLE_EFFECT)
-  and not FilterStatus(c,STATUS_LEAVE_CONFIRMED)
-  and (nontarget==true or not FilterAffected(c,EFFECT_CANNOT_BE_EFFECT_TARGET))
-  and not (DestroyBlacklist(c) and FilterPublic(c))
+function FluffalDestroyFilter(c,nontarget,skipblacklist,skipignore)
+  return DestroyFilter(c,nontarget,skipblacklist,skipignore)
   and not BypassDestroyFilter(c)
 end
 function FluffalSendFilter(c,nontarget)
@@ -276,6 +273,14 @@ end
 ------------------------
 -------- CHECK ---------
 ------------------------
+-- Xyz CHECK
+function ToadallyPlayCheck()
+  return
+    HasID(AIExtra(),00440556,true) -- Bahamut
+	and OPTCheck(00440556)
+    and HasID(AIExtra(),90809975,true) -- Toadally
+end
+-- Flootgate CHECK
 function FlootGateCheatCheck()
   if HasID(OppHand(),05851097,true) -- Vanity
   or HasID(OppHand(),30241314,true) -- MacroCosmos
@@ -339,6 +344,7 @@ function BossMonFilter(c)
 	  or c.id == 90809975 -- Treatoad
 	  or c.id == 01561110 -- BusterDragon
 	  or c.id == 10443957 -- Infinity
+	  or c.id == 48905153 -- Zodiac Beast Drancia
 	) and NotNegated(c)
 end
 function InfinityMonFilter(c)
@@ -349,6 +355,10 @@ function InfinityMonFilter(c)
 end
 
 -- Advantage Filter
+function FTigerAdvantageFilter(c)
+  return
+	BossMonFilter(c)
+end
 function FSheepAdvantageFilter(c)
   return
 	BAFilter(c)
@@ -368,7 +378,7 @@ function MaxxCAdvantageFilter(c)
   return
     MaxxCZBAdvantageFilter(c)
 	or (c.id == 58069384 and HasID(OppExtra(),10443957,true)) -- Cyber Dragon Nova
-	
+
 end
 
 function MaxxCZBAdvantageFilter(c)

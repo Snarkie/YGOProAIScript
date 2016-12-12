@@ -19,7 +19,6 @@ end
 function OwlTarget(cards,min,max,c)
   local result
   if GlobalOwl == 1 then
-    print("OwlTarget - Fusion Summon")
     result = FusionSummonTarget(cards,min,max,c,MATERIAL_TOGRAVE)
   else
     result = Add(cards)
@@ -38,7 +37,7 @@ function SheepTarget(cards,min,max,c)
 	end
 	local compare = function(a,b) return a.prio>b.prio end
 	table.sort(result,compare)
-    print("SheepTarget - MZONE to HAND")
+    --print("SheepTarget - MZONE to HAND")
     --return Add(cards,PRIO_TOHAND,max)
 	return {result[1].index}
   end
@@ -112,11 +111,13 @@ function SabresTarget(cards,min,max,c)
 	  return Add(cards,PRIO_DISCARD,min,FilterID,24094653) -- Polymerization
 	end
   end
-  if (CardsMatchingFilter(AIST(),TVendorCheckFilter,true) > 0
-  or HasID(AIHand(),70245411,true)) -- TVendor
+  if (
+    CardsMatchingFilter(AIST(),TVendorCheckFilter,true) > 0
+    or HasID(AIHand(),70245411,true) -- TVendor
+  )
   and PriorityCheck(AIHand(),PRIO_DISCARD) > 3
   then
-    return Add(cards,PRIO_TOFIELD,FluffalFilter)
+    return Add(cards,PRIO_TOFIELD,min,FluffalFilter)
   end
   return Add(cards,PRIO_DISCARD)
 end
@@ -138,18 +139,18 @@ end
 GlobalTVendor = 0
 function TVendorTarget(cards,min,max,c)
   if LocCheck(cards,LOCATION_DECK) then
-    print("TVendorTarget - DECK to HAND")
+    --print("TVendorTarget - DECK to HAND")
 	GlobalTVendor = 0
 	--CountPrioTarget(cards,PRIO_TOHAND,1,nil,nil,nil,"TVendorTarget - HAND")
     return Add(cards,PRIO_TOHAND)
   end
   if GlobalTVendor == 0 then
-    print("TVendorTarget - HAND to GRAVE")
+    --print("TVendorTarget - HAND to GRAVE")
 	GlobalTVendor = 1
     return Add(cards,PRIO_DISCARD)
   end
   if GlobalTVendor == 1 then
-    print("TVendorTarget - HAND to FIELD")
+    --print("TVendorTarget - HAND to FIELD")
 	GlobalTVendor = 2
 	--CountPrioTarget(cards,PRIO_TOFIELD,1,nil,nil,nil,"TVendorTarget - HAND to FIELD")
     return Add(cards,PRIO_TOFIELD)
@@ -260,7 +261,7 @@ function FLeoTarget(cards,min,max,c)
 end
 function FTigerTarget(cards,min,max,c)
   local maxTargets = CardsMatchingFilter(OppField(),FTigerDestroyFilter)
-  print("maxTargets: "..maxTargets)
+  --print("maxTargets: "..maxTargets)
   if maxTargets > max then
     maxTargets = max
   end
@@ -272,7 +273,11 @@ function FStarveTarget(cards,min,max,c)
   return BestTargets(cards,max,TARGET_DESTROY)
 end
 function FNordenTarget(cards,min,max,c)
-  return Add(cards,PRIO_TOFIELD,1,FluffalNordenFilter)
+  if CardsMatchingFilter(AIGrave(),FluffalNordenFilter) > 0 then
+    return Add(cards,PRIO_TOFIELD,max,FluffalNordenFilter)
+  else
+    return Add(cards,PRIO_TOFIELD,max)
+  end
 end
 -- Other TARGET
 function BossMonsterTarget(cards,min,max,c)
@@ -303,7 +308,7 @@ function MaxMaterials(fusionId,min,max)
   local result = 1
   if fusionId == 80889750 -- FSabreTooth
   and GlobalFusionPerform == 3
-  then 
+  then
     result = 2
   else
     result = 1
@@ -442,7 +447,7 @@ function FluffalCard(cards,min,max,id,c)  -- FLUFFAL CARD
     return ChainTarget(cards,min,max,c)
   end
   if id == 30068120 then -- Sabres
-    return SabresTarget(cards)
+    return SabresTarget(cards,min,max,c)
   end
   -- Other TARGET
   if id == 10802915 then -- TGuide
@@ -530,7 +535,7 @@ function FluffalCard(cards,min,max,id,c)  -- FLUFFAL CARD
   if GlobalSummonId == 00440556 then -- Bahamut Summon
     return Add(cards,PRIO_TOGRAVE,min,FluffalBahamutMaterialFilter)
   end
-  
+
   if GlobalKaiju == 1 then
     GlobajKaiju = 0
     return BossMonsterTarget(cards,min,max,c)
