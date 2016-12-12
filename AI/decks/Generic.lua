@@ -146,10 +146,16 @@ function SummonExtraDeck(cards,prio)
   if HasID(Act,05318639,nil,nil,LOCATION_SZONE,UseMST) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+  if HasID(Act,08267140,nil,nil,LOCATION_SZONE,UseCosmicCyclone) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   if HasID(Act,43898403,UseTwinTwister) then
     return Activate()
   end
   if HasID(Act,05318639,UseMST) then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasID(Act,08267140,UseCosmicCyclone) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   if HasID(Act,18326736,UsePtolemaios) then
@@ -1059,6 +1065,27 @@ function UseMST(c)
   end
   return false
 end
+function UseCosmicCyclone(c)
+  if AI.GetPlayerLP(1)<=1000 then
+    return false
+  end
+  local filter = function(c) 
+    return FilterPosition(c,POS_FACEDOWN)
+    and FilterPrivate(c)
+    and DestroyFilter(c)
+  end
+  local OppTargets=SubGroup(OppST(),filter)
+  if (#AIField()==0 
+  or #AIField()==CardsMatchingFilter(AIField(),FilterID,c.id))
+  and #OppTargets>0
+  and #OppTargets<=CardsMatchingFilter(AICards(),FilterID,c.id)
+  then
+    GlobalCardMode = 1
+    GlobalTargetSet(OppTargets[math.random(1,#OppTargets)])
+    return true
+  end
+  return false
+end
 function UseDustTornado(c)
   return UseMST(c)
 end
@@ -1936,7 +1963,7 @@ function InstantFusionFilter(c)
   or c.id==70908596 and NotNegated(c)
 end
 function NodenFilter(c,level)
-  return (level and c.level==level or c.level<=4)
+  return (level and c.level==level or not level and c.level<=4)
   and FilterType(c,TYPE_MONSTER)
   and FilterRevivable(c)
 end
@@ -2579,6 +2606,49 @@ end
 function ChainDustTornado(c)
   return ChainMST(c)
 end
+function CosmicCycloneFilter(c,ep)
+  return Targetable(c,TYPE_SPELL)
+  and Affected(c,TYPE_SPELL)
+  and (not ep or FilterStatus(c.STATUS_SET_TURN))
+end
+function ChainCosmicCyclone(c)
+  if AI.GetPlayerLP(1)<=1000 then
+    return false
+  end
+  local targets=CardsMatchingFilter(OppST(),CosmicCycloneFilter)
+  local targets2=CardsMatchingFilter(OppST(),CosmicCycloneFilter,true)
+  local e = Duel.GetChainInfo(Duel.GetCurrentChain(),CHAININFO_TRIGGERING_EFFECT)
+  if RemovalCheckCard(c) then
+    if e and e:GetHandler():IsCode(12697630) then -- Beagalltach
+      return false
+    end
+    if targets > 0 then
+      return true
+    end
+  end
+  if not UnchainableCheck(c.id) then
+    return false
+  end
+  if Duel.GetCurrentPhase()==PHASE_END then
+    if targets2 > 0 then
+      local cards = SubGroup(OppST(),CosmicCycloneFilter,true)
+      GlobalCardMode = 1
+      GlobalTargetSet(cards[math.random(#cards)],OppST())
+      return true
+    end
+  end
+  local target = RemoveOnActivation(nil,CosmicCycloneFilter)
+  if target then
+    GlobalCardMode = 1
+    GlobalTargetSet(target)
+    return true
+  end
+  if HasPriorityTarget(OppST(),true) 
+  and Duel.GetCurrentChain()==0 then
+    return true
+  end
+  return false
+end
 function ChainPanzerDragon(c)
   return DestroyCheck(OppField())>0
 end
@@ -2903,6 +2973,9 @@ function GenericChain(cards)
   if HasID(cards,05318639,ChainMST) then
     return {1,CurrentIndex}
   end
+  if HasID(cards,08267140,ChainCosmicCyclone) then
+    return {1,CurrentIndex}
+  end
   if HasID(cards,94192409) and ChainCompulse() then
     return {1,CurrentIndex}
   end
@@ -3089,6 +3162,14 @@ end
 function DustTornadoTarget(cards)
   return MSTTarget(cards)
 end
+function CosmicCycloneTarget(cards)
+  result = nil
+  if GlobalCardMode == 1 then
+    result=GlobalTargetGet(cards,true)
+    GlobalCardMode=nil
+  end
+  return BestTargets(cards,1,TARGET_BANISH,CosmicCycloneFilter)
+end
 function SoulChargeTarget(cards,min,max)
   local result={}
   local count = max
@@ -3164,14 +3245,18 @@ function PendulumSummonTarget(cards,max)
   return BestTargets(cards,max,TARGET_PROTECT,FilterLocation,LOCATION_EXTRA)
 end
 function FogBladeTarget(cards,source)
-  if GlobalCardMode == 1 then
-    GlobalCardMode = nil
-    return BestTargets(cards,1,TARGET_OTHER,FilterGlobalTarget,cards)
-  end
   if LocCheck(cards,LOCATION_ONFIELD) then
+    if GlobalCardMode == 1 then
+      GlobalCardMode = nil
+      return BestTargets(cards,1,TARGET_OTHER,FilterGlobalTarget,cards)
+    end
     return BestTargets(cards,1,TARGET_OTHER)
   end
-  return Add(cards,PRIO_TOFIELD)
+  if GlobalCardMode == 1 then
+    GlobalCardMode = nil
+    return Add(cards,PRIO_TOFIELD,1,FilterGlobalTarget,cards)
+  end
+  return Add(cards,PRIO_TOFIELD,1,PKNonXYZFilter)
 end
 function RequiemTarget(cards,min)
   if LocCheck(cards,LOCATION_OVERLAY) then

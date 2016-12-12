@@ -443,7 +443,9 @@ function SummonCir()
 end
 function SummonGraff()
   return  CardsMatchingFilter(AIMon(),NotBAMonsterFilter)==0 
-  and OverExtendCheck(3) and (FieldCheck(3)==1 or CardsMatchingFilter(AIMon(),BAMonsterFilter)==1) 
+  and OverExtendCheck(3) 
+  and (FieldCheck(3)==1 
+  or CardsMatchingFilter(AIMon(),BAMonsterFilter)==1) 
   --and CardsMatchingFilter(AIDeck(),BAMonsterFilter,20758643)>0 and OPTCheck(20758643)
 end
 function SummonScarm()
@@ -644,15 +646,14 @@ function UsePainfulEscape(c)
 end
 function SummonPKGlove(c,mode)
   if mode == 1 -- Boots in hand
-  and BAXYZSummonCheck()
+  and BAXYZSummonCheck(0)
   and HasID(AIHand(),36426778,true)
   then
     return true
   end
   if mode == 2 -- Level 3 on field
   and CardsMatchingFilter(AIMon(),BASelfDestructFilter)==0
-  and FieldCheck(3)==1
-  and CanXYZSummon(3)
+  and BAXYZSummonCheck(1)
   then
     return true
   end
@@ -660,9 +661,9 @@ end
 function UsePKGlove(c,mode)
   if mode == 1
   and CardsMatchingFilter(AIMon(),BASelfDestructFilter)==0
-  and (CardsMatchingFilter(AIGrave(),PKFilter,c)>1 
+  and (CardsMatchingFilter(AIGrave(),PKFilter,62709239)>2 
   and BAXYZSummonCheck(0)
-  or CardsMatchingFilter(AIGrave(),PKFilter,c)>0 
+  or CardsMatchingFilter(AIGrave(),PKFilter,62709239)>1
   and BAXYZSummonCheck())
   and HasID(AIDeck(),25542642,true,FilterOPT,true) -- Fog Blade
   and not HasID(AIGrave(),25542642,true) -- Fog Blade
@@ -688,19 +689,34 @@ function UsePKGlove(c,mode)
   and HasID(AIDeck(),90432163,true,FilterOPT,true) -- PK Cloak
   and HasID(AIDeck(),36426778,true,FilterOPT,true) -- PK Boots
   and HasID(AIGrave(),25542642,true,FilterOPT,true) -- Fog Blade
-  and CardsMatchingFilter(AIGrave(),PKFilter,c)>1
+  and CardsMatchingFilter(AIGrave(),PKFilter,62709239)>2
   and BAXYZSummonCheck(0)
   and MacroCheck()
   then
     GlobalPKGloveID = 90432163 -- PK Cloak
     return true
   end
+  if mode == 4
+  and HasID(AIDeck(),90432163,true,UsePKCloak)
+  and not HasID(AIGrave(),90432163,true)
+  and MacroCheck()
+  then
+    GlobalPKGloveID = 90432163 -- PK Cloak
+    return true
+  end
+  if mode == 5
+  and HasID(AIDeck(),36426778,true,UsePKBoots,0)
+  and not HasID(AIGrave(),36426778,true)
+  and MacroCheck()
+  then
+    GlobalPKGloveID = 36426778 -- PK Boots
+    return true
+  end
 end
 function SummonPKCloak(c,mode)
   if mode == 1 -- Boots in hand
   and CardsMatchingFilter(AIMon(),BASelfDestructFilter)==0
-  and FieldCheck(3)==0
-  and CanXYZSummon(3)
+  and BAXYZSummonCheck(0)
   and HasID(AIHand(),36426778,true)
   then
     return true
@@ -712,7 +728,12 @@ function SummonPKCloak(c,mode)
   end
 end
 function UsePKCloak(c,mode)
-  return CardsMatchingFilter(AIGrave(),PKFilter,c)>1
+  return CardsMatchingFilter(AIGrave(),PKFilter,62709239)>2
+  or (CardsMatchingFilter(AIHand(),PKMonsterFilter)==1
+  and NormalSummonsAvailable()>0
+  or CardsMatchingFilter(AIMon(),PKMonsterFilter)==1)
+  and HasIDNotNegated(AIDeck(),36426778,true,FilterOPT)
+  and BAXYZSummonCheck(0)
 end
 function SummonPKBoots(c,mode)
   if mode == 1 -- Special Summon
@@ -723,8 +744,7 @@ function SummonPKBoots(c,mode)
   end
   if mode == 2 -- another Boots in hand
   and CardsMatchingFilter(AIMon(),BASelfDestructFilter)==0
-  and FieldCheck(3)==0
-  and CanXYZSummon(3)
+  and BAXYZSummonCheck(0)
   and HasID(AIHand(),36426778,true,CardsNotEqual,c)
   then
     return true
@@ -736,7 +756,7 @@ function SummonPKBoots(c,mode)
   end
 end
 function UsePKBoots(c,mode)
-  if mode == 1 
+  if (mode == 1 or mode == 0)
   and HasID(AIMon(),16195942,true,FilterMaterials,0) -- Rebellion Dragon
   and DualityCheck()
   and HasIDNotNegated(AIDeck(),03298689,true) -- PK Launch
@@ -745,7 +765,7 @@ function UsePKBoots(c,mode)
     OPTSet(364267781)
     return true
   end
-  if mode == 2
+  if (mode == 2 or mode == 0)
   and TurnEndCheck()
   and HasID(AIDeck(),25542642,true) -- PK Fog Blade
   then  
@@ -774,6 +794,17 @@ function UsePKFogBlade(c,mode)
     and not NormalSummonCheck()
     or HasID(AIHand(),36426778,FilterOPT,true))
     then
+      return true
+    end
+    if mode == 3
+    and HasID(AIGrave(),62709239,true,FilterRevivable) -- BK Break Sword
+    and (HasIDNotNegated(AICards(),03298689,true) -- PK Launch
+    or HasIDNotNegated(AIDeck(),03298689,true) -- PK Launch
+    and (HasID(AIGrave(),36426778,true,FilterOPT) -- PK Boots
+    or HasID(AIGrave(),63821877,true))) -- PK Glove
+    then
+      GlobalCardMode = 1
+      GlobalTargetSet = FindID(62709239,AIGrave())
       return true
     end
   end
@@ -805,7 +836,7 @@ end
 function SummonPKBreakSword(c,mode)
   if mode == 1 -- Rank-Up play
   and OppHasStrongestMonster()
-  and CardsMatchingFilter(UseLists(AIMon(),AIGrave()),PKFilter)>1
+  and CardsMatchingFilter(UseLists(AIMon(),AIGrave()),PKNonXYZFilter)>1
   and HasID(UseLists(AIMon(),AIGrave()),36426778,true)
   and CardsMatchingFilter(OppCards(),PKBreakSwordFilter)>0
   and #OppCards()>1
@@ -1056,6 +1087,9 @@ function BAInit(cards)
   if HasID(Act,63821877,UsePKGlove,3) then
     return Activate()
   end
+  if HasID(Act,63821877,UsePKGlove,4) then
+    return Activate()
+  end
   if HasID(Act,90432163,UsePKCloak,1) then
     return Activate()
   end
@@ -1147,8 +1181,19 @@ function BAInit(cards)
     OPTSet(57143342)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+  if HasID(Act,84764038,false,nil,LOCATION_HAND,SSBA) then -- Scarm
+    OPTSet(84764038)
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasID(Act,57143342,false,nil,LOCATION_HAND,SSBA) then -- Cir
+    OPTSet(57143342)
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   if HasID(SpSum,65305468,SummonF0,2) then
     return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
+  end
+  if HasID(Act,63821877,UsePKGlove,5) then
+    return Activate()
   end
   if HasID(Act,36426778,UsePKBoots,2) then
     return Activate()

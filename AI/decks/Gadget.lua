@@ -472,6 +472,7 @@ end
 function UseInstantFusionGadget(c,mode)
   if not (WindaCheck() and CanSpecialSummon()) then return false end
   if mode == 1 
+  and DeckCheck(DECK_GADGET)
   and CardsMatchingFilter(AIGrave(),NodenFilter,4)>0 
   and HasIDNotNegated(AIExtra(),17412721,true) -- Norden
   and CardsMatchingFilter(AIExtra(),FilterRank,4)>0

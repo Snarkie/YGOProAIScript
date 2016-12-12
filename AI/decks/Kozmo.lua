@@ -223,12 +223,21 @@ function FarmgirlCond(loc,c)
     or not OppHasStrongestMonster())
   end
   if loc == PRIO_TOFIELD then
+    if IsBattlePhase()
+    and Duel.GetTurnPlayer()==player_ai
+    and (CanDealBattleDamage(c,OppMon()) 
+    or OppMon()==0)
+    and not GlobalSummonNegated
+    and not HasID(AIMon(),c.id,true)
+    then
+      return 9
+    end
     return Duel.GetTurnPlayer()==player_ai
     and (CanDealBattleDamage(c,OppMon())
     or not OppHasStrongestMonster())
     and OPTCheck(c.id)
     and not GlobalSummonNegated
-    and not HasID(AIMon(),31061682,true)
+    and not HasID(AIMon(),c.id,true)
     and BattlePhaseCheck()
   end
   return true
@@ -482,6 +491,14 @@ function DarkLadyCond(loc,c)
     return false
   end
   if loc == PRIO_TOGRAVE then
+    if HasIDNotNegated(AIMon(),01274455,true,FilterOPT) -- Soartrooper
+    and SpaceCheck()>0
+    and AI.GetPlayerLP(1)>3000
+    and not HasID(AIMon(),c.id,true)
+    and not HasID(AIGrave(),c.id,true)
+    then
+      return 9
+    end
     return not HasID(AIGrave(),c.id,true)
   end
   return true
@@ -519,11 +536,11 @@ KozmoPriorityList={
 [93302695] = {5,1,4,1,1,1,2,1,2,1,WickedwitchCond},  -- Wickedwitch
 [67050396] = {1,1,3,1,1,1,4,1,2,1,GoodwitchCond},  -- Goodwitch
 [31061682] = {4,2,4,2,1,1,1,1,1,1,FarmgirlCond},  -- Farmgirl
-[01274455] = {10,1,9,1,3,1,1,1,1,1,SoartrooperCond}, -- Soartrooper
-[56907986] = {9,1,8,1,5,1,3,1,1,1,StrawmanCond},  -- Strawman
+[01274455] = {10,1,8,1,3,1,1,1,1,1,SoartrooperCond}, -- Soartrooper
+[56907986] = {9,1,7,1,5,1,3,1,1,1,StrawmanCond},  -- Strawman
 [64280356] = {2,1,2,1,1,1,1,1,1,1,TincanCond},  -- Tincan
 [59496924] = {2,1,5,1,1,1,1,1,1,1,Landwalkercond},  -- Landwalker
-[12408276] = {7,1,7,3,4,2,1,1,1,1,DarkLadyCond},  -- Dark Lady
+[12408276] = {7,1,6,3,4,2,1,1,1,1,DarkLadyCond},  -- Dark Lady
 [37679169] = {1,1,2,1,1,1,1,1,1,1,DeltaShuttleCond},  -- Delta Shuttle
 
 [09929398] = {1,1,1,1,1,1,1,1,1,1},  -- Gofu
@@ -770,18 +787,21 @@ function UseRiderSummon(c)
   and (CardsMatchingFilter(AIHand(),KozmoShip)>1 
   or HasIDNotNegated(AIHand(),12408276,true)) -- Dark Lady
   and (c.id~=31061682 or not CanDealBattleDamage(c,OppMon())) -- Farmgirl
+  and MP2Check()
   then
     OPTSet(c.id)
     return true
   end
-  if CardsMatchingFilter(AIHand(),KozmoShip,55885348)>0 -- Dark Destroyer
-  or HasIDNotNegated(AIHand(),12408276,true) -- Dark Lady
+  if (CardsMatchingFilter(AIHand(),KozmoShip,55885348)>0 -- Dark Destroyer
+  or HasIDNotNegated(AIHand(),12408276,true)) -- Dark Lady
+  and MP2Check()
   then
     OPTSet(c.id)
     return true
   end
   if HandCheck(5,FilterRace,RACE_MACHINE)>0
   and FieldCheck(5,FilterRace,RACE_MACHINE) == 1
+  and MP2Check()
   then
     OPTSet(c.id)
     return true
@@ -1227,6 +1247,7 @@ function UseBreakSwordKozmo(c,mode)
   and fodder>0
   then
     return MP2Check(c)
+    or CardsMatchingFilter(OppST(),FilterBackrow)==0  
   end
 end
 function SummonGranpulseKozmo(c,mode)
@@ -1348,6 +1369,7 @@ function UseScrapKozmo(c,mode)
   and fodder>0
   then
     return MP2Check(c)
+    or CardsMatchingFilter(OppST(),FilterBackrow)==0
   end
 end
 function SummonScrapKozmo(c,mode)
@@ -1366,6 +1388,19 @@ function SummonScrapKozmo(c,mode)
   --and fodder>0
   then
     return true
+  end
+end
+function KozmoComboIntegrityCheck()
+  -- cancel a combo, if the player interrupts it
+  if GlobalKozmoCombo[Duel.GetTurnCount()] then
+    local cards = NegateCheckList(AIField(),nil,nil,function(c) return c:IsControler(1-player_ai) end)
+    if cards then
+      GlobalKozmoCombo[Duel.GetTurnCount()]=nil
+    end
+    cards = RemovalCheckList(AIField(),nil,nil,nil,nil,function(c) return c:IsControler(1-player_ai) end)
+    if cards then
+      GlobalKozmoCombo[Duel.GetTurnCount()]=nil
+    end
   end
 end
 GlobalKozmoCombo={}
@@ -1655,9 +1690,6 @@ function KozmoInit(cards)
   if HasID(Sum,56907986,SummonStrawman,1) then
     return Summon()
   end
-  if HasID(Sum,64280356,SummonTincan,1) then
-    return Summon()
-  end
   if HasID(Sum,67050396,SummonGoodWitch,1) then
     return Summon()
   end
@@ -1674,6 +1706,9 @@ function KozmoInit(cards)
     return Summon()
   end
   if HasID(Sum,56907986,SummonStrawman,2) then
+    return Summon()
+  end
+  if HasID(Sum,64280356,SummonTincan,1) then
     return Summon()
   end
   if HasID(Sum,64280356,SummonTincan,2) then
@@ -1704,7 +1739,7 @@ function KozmoInit(cards)
   if HasIDNotNegated(Act,93302695,false,93302695*16+1,UseWickedwitch,1) then
     return Activate()
   end
-  if HasID(Act,56907986,UseStrawman,2) then
+  if HasIDNotNegated(Act,56907986,UseStrawman,2) then
     OPTSet(56907986)
     return Activate()
   end
@@ -2099,7 +2134,7 @@ function LeviairTargetKozmo(cards)
   if LocCheck(cards,LOCATION_OVERLAY) then
     return Add(cards,PRIO_TOGRAVE)
   end
-  if KozmoComboCheck(1,4,6) then
+  if KozmoComboCheck(1,4,5,6) then
     return Add(cards,PRIO_TOFIELD,1,FilterID,56907986) -- Strawman
   end
   return Add(cards,PRIO_TOFIELD)
@@ -2255,7 +2290,7 @@ function ChainDestroyer(c)
     return true
   end
   if #OppMon()==0 
-  and HasIDNotNegated(AIDeck(),56907986,true)
+  and HasIDNotNegated(AIDeck(),56907986,true) -- Strawman
   and Duel.GetTurnPlayer()==player_ai
   and Duel.GetCurrentPhase()~=PHASE_END
   and not IsBattlePhase()
@@ -2306,7 +2341,7 @@ function ChainRiderSummon(c)
       return false
     end
     if not RemovalCheckCard(c,CATEGORY_DESTROY,nil,true) 
-    and CardsMatchingFilter(AIHand(),KozmoShip)>0
+    and CardsMatchingFilter(AIHand(),KozmoShip)==0
     then
       return false
     end
@@ -2334,7 +2369,7 @@ function ChainRiderSummon(c)
     end
     if Duel.GetTurnPlayer()==player_ai 
     and GlobalBPEnd and not aimon
-    and (AvailableAttacks(c)==0 or not CanWinBattle(c,OppMon()))
+    and (AvailableAttacks(c)==0 or #OppMon()>0 and not CanWinBattle(c,OppMon()))
     and(CardsMatchingFilter(AIHand(),CanWinBattle,OppMon())>0
     or #OppMon()==0)
     then
@@ -2648,6 +2683,7 @@ function KozmoChain(cards)
   if HasID(cards,66413481,ChainYaksha) then
     return Chain()
   end
+  KozmoComboIntegrityCheck()
   return nil
 end
 function KozmoEffectYesNo(id,card)

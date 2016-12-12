@@ -694,7 +694,7 @@ Unchainable={
 27552504,18386170,60743819,20036055, -- Beatrice, Pilgrim, Fiend Griefing, Traveler
 36553319,65305468,20513882,31222701, -- Farfa, F0, Painful Escape, Wavering Eyes
 43898403,60082869,83326048,69599136, -- Twin Twister, Dust Tornado, Dimensional Barrier, Floodgate Trap Hole
-16947147, -- Speedroid Menko
+16947147,08267140, -- Speedroid Menko, Cosmic Cyclone
 }
 function isUnchainableTogether(CardId)
   for i=1,#Unchainable do
@@ -919,6 +919,7 @@ ScriptedCards ={
 63767246,81275020,53932291,01621413, -- Titanic Galaxy, Speedroid Terrortop, Taketomborg, Requiem Dragon
 66994718,77414722,58851034,83326048, -- Raptor's Gust, Magic Jammer, Cursed Seal, Dimensional Barrier
 85115440,48905153,69599136,43422537, -- Zodiac Beast Drancia,Bullhorn, Floodgate Trap Hole, Double Summon
+08267140, -- Cosmic Cyclone
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do

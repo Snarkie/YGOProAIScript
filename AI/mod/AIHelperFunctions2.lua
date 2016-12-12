@@ -489,10 +489,6 @@ function RemovalCheckCard(target,category,cardtype,targeted,chainlink,filter,opt
   CATEGORY_TOGRAVE,CATEGORY_TOHAND,
   CATEGORY_TODECK,CATEGORY_CONTROL,
   CATEGORY_CUSTOM_FACEDOWN,CATEGORY_CUSTOM_ATTACH}
-  --[[if target and not FilterCheck(target,filter,opt)
-  then
-    return false
-  end]]
   if category then 
     if type(category)=="table" then
       cat=category
@@ -519,7 +515,7 @@ function RemovalCheckCard(target,category,cardtype,targeted,chainlink,filter,opt
         end
         if e and e:GetHandler()
         and (Negated(e:GetHandler())
-        or not FilterCheck(e:GetHandler()))
+        or not FilterCheck(e:GetHandler(),filter,opt))
         then
           return false
         end
@@ -529,7 +525,7 @@ function RemovalCheckCard(target,category,cardtype,targeted,chainlink,filter,opt
         if cg and target then
           local card=false
           cg:ForEach(function(c) 
-            local c=GetCardFromScript(c,Field())
+            local c=GetCardFromScript(c)
             if CardsEqual(c,target) then
               card=c
             end  end) 
@@ -588,11 +584,6 @@ function RemovalCheckList(cards,category,type,targeted,chainlink,filter,opt)
 end
 function NegateCheckCard(target,type,chainlink,filter,opt)
   if Duel.GetCurrentChain() == 0 then return false end
-  if card and filter and (opt and not filter(card,opt)
-  or opt==nil and not filter(card))
-  then
-    return false
-  end
   local a=1
   local b=Duel.GetCurrentChain()
   if chainlink then
@@ -606,6 +597,12 @@ function NegateCheckCard(target,type,chainlink,filter,opt)
     and CheckNegated(i) and (type==nil
     or e:GetHandler():IsType(type))
     then
+      if e and e:GetHandler()
+      and (Negated(e:GetHandler())
+      or not FilterCheck(e:GetHandler(),filter,opt))
+      then
+        return false
+      end
       if target==nil then 
         return g
       else
@@ -624,7 +621,7 @@ function NegateCheckCard(target,type,chainlink,filter,opt)
       if g and target then
         local card=false
         g:ForEach(function(c) 
-          local c=GetCardFromScript(c,Field())
+          local c=GetCardFromScript(c)
           if CardsEqual(c,target) then
             card=c
           end 
@@ -654,7 +651,9 @@ function NegateCheck(id)
     if id==nil then 
       return cg 
     end
-    if cg and id~=nil and cg:IsExists(function(c) return c:IsControler(player_ai) and c:IsCode(id) end, 1, nil) then
+    if cg and id~=nil 
+    and cg:IsExists(function(c) return c:IsControler(player_ai) and c:IsCode(id) end, 1, nil)
+    then
       return true
     end
   end
@@ -972,7 +971,8 @@ function WinsBattle(source,target)
   and not target:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE)
   and not source:IsHasEffect(EFFECT_CANNOT_ATTACK)
 end
-function NotNegated(c)
+function NotNegated(c,onfieldonly)
+  onfieldonly = onfieldonly or false
   local disabled = false
   local id
   local type
@@ -1023,7 +1023,7 @@ function NotNegated(c)
       return false
     end
     if SkillDrainCheck() then
-      return false
+      return onfieldonly
     end
     if HasID(Field(),33746252,true,nil,nil,POS_FACEUP,check) then -- Majesty's Fiend
       return false
@@ -1032,15 +1032,26 @@ function NotNegated(c)
       return false
     end
     if HasID(Field(),53341729,true,nil,nil,POS_FACEUP,check) then -- Light-Imprisoning Mirror
-      return not FilterAttribute(c,ATTRIBUTE_LIGHT)
+      return onfieldonly and not FilterAttribute(c,ATTRIBUTE_LIGHT) 
     end
     if HasID(Field(),99735427,true,nil,nil,POS_FACEUP,check) then -- Shadow-Imprisoning Mirror
-      return not FilterAttribute(c,ATTRIBUTE_DARK)
+      return onfieldonly and not FilterAttribute(c,ATTRIBUTE_DARK)
     end
-    if FilterLocation(c,LOCATION_EXTRA) 
+    if (FilterLocation(c,LOCATION_EXTRA) or FilterPreviousLocation(c,LOCATION_EXTRA))
     and HasID(Field(),89463537,true,nil,nil,POS_FACEUP,check) -- Necroz Unicore
     then 
-      return false
+      return onfieldonly and false
+    end
+    if disabled and onfieldonly then
+      if HasID(OppST(),50078509,true,CardTargetCheck,c) then -- Fiendish Chain
+        return true
+      end
+      if HasID(OppST(),25542642,true,CardTargetCheck,c) then -- Fog Blade
+        return true
+      end
+      if HasID(OppMon(),63746411,true,CardTargetCheck,c) then -- Giant Hand
+        return true
+      end
     end
     if GlobalCoinormaTurn == Duel.GetTurnCount()
     then
@@ -1224,6 +1235,7 @@ function FilterLocation(c,loc)
   end
 end
 function FilterPreviousLocation(c,loc)
+  c=GetCardFromScript(c)
   return bit32.band(c.previous_location,loc)>0
 end
 function FilterStatus(c,status)
@@ -2926,6 +2938,19 @@ function NegateUpstart(c,e,source,link)
   return 0
 end
 
+function NegateOTKStopper(c,e,source,link)
+  print("negate OTK stopper")
+  if (BattlePhaseCheck()
+  or IsBattlePhase())
+  and Duel.GetTurnPlayer()==player_ai
+  and #OppMon()==0
+  and ExpectedDamage(2)>=AI.GetPlayerLP(2)
+  then
+    return 4
+  end
+  return nil
+end
+
 NegatePriority={
 [70368879] = NegateUpstart, -- Upstart
 [32807846] = 0, -- RotA
@@ -2947,7 +2972,17 @@ NegatePriority={
 [89399912] = NegateDragonRuler,
 [90411554] = NegateDragonRuler,
 
-[65367484] = 3 -- Thrasher
+[65367484] = 3, -- Thrasher
+
+[16947147] = NegateOTKStopper, -- Menko
+[61318483] = NegateOTKStopper, -- Ghostrick Jackfrost
+[54512827] = NegateOTKStopper, -- Ghostrick Lantern
+[02830693] = NegateOTKStopper, -- Rainbow Kuriboh
+[18964575] = NegateOTKStopper, -- Swift Scarecrow
+[19665973] = NegateOTKStopper, -- Battle Fader
+[44330098] = NegateOTKStopper, -- Gorz
+[13313278] = NegateOTKStopper, -- BB Veil
+[25857246] = NegateOTKStopper, -- Nekroz Valkyrus
 }
 function AdjustMonsterPrio(target,prio)
   if not FilterType(target,TYPE_MONSTER) then
@@ -3110,6 +3145,13 @@ function GetNegatePriority(source,link,targeted)
       if burn>AI.GetPlayerLP(1) then
         prio=prio+100
       end
+    end
+    local aimon,oppmon = GetBattlingMons()
+    if Duel.GetTurnPlayer()==player_ai
+    and IsBattlePhase()
+    and aimon and CanFinishGame(aimon,oppmon)
+    then
+      prio=prio+4
     end
   else
     local targets = SubGroup(OppMon(),FilterStatus,STATUS_SUMMONING)
@@ -3344,32 +3386,6 @@ function ShouldRemove(c)
   end
   return true
 end
---[[
-TODO: revisit, once burn gets a player check
-Burn={
-
-}
-function BurnById(id)
-  return 1000 -- default
-end
-
-function ExpectedBurn(link,player)
-  -- Approximates the expected burn from the current chain
-  local result = 0
-  local start = link or 1
-  local end = link or Duel.GetCurrentChain()
-  player = player or player_ai
-  for link=start,end do
-    if EffectCheck(1-player,link) then
-      local e,c,id=EffectCheck(nil,link)
-      c=GetCardFromScript(c)
-      if CheckNegated(link) 
-      and IsHasCategory(CATEGORY_DAMAGE)
-      then
-        
-      end 
-end
-]]
 
 function GetBurnDamage(player,start,stop)
   -- returns the total burn damage expected to be dealt to the player 

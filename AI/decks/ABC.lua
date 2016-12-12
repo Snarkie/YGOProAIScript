@@ -122,6 +122,7 @@ ABCSummonBlacklist={
 ABCSetBlacklist={
 }
 ABCRepoBlacklist={
+73289035, -- Tsukuyomi
 }
 ABCUnchainable={
 01561110, -- ABC Dragon Buster
@@ -560,6 +561,7 @@ function UseABC(c,mode)
   or #targets>0 
   and (PriorityCheck(discards)>4
   or #discards>3))
+  and NotNegated(c)
   then
     return true
   end
@@ -731,9 +733,19 @@ function SummonTsukuyomiABC(c,mode)
   and (st-space)+mons<4
   and st+mons>0
   and CanSpecialSummon()
+  and MacroCheck()
   then
     return true
   end
+  --[[if mode == 2
+  and (st-space)+mons<4
+  and st+mons>0
+  and CanSpecialSummon()
+  and MacroCheck()
+  and EnableABC(Merge(st,mons),0)
+  then
+    return true
+  end]]
 end
 function SummonThrasherABC(c,mode)
   if mode == 1 then
@@ -910,6 +922,32 @@ function SummonGameciel(c,mode)
   and OppHasStrongestMonster()
   then
     return true
+  end
+end
+function RepoTsukoyomi(c)
+  if FilterPosition(c,POS_ATTACK) then
+    if not (BattlePhaseCheck() and CanAttack(c))
+    then
+      return true
+    end
+    if c.attack<1500
+    and #OppMon()>0
+    and not CanWinBattle(c,OppMon())
+    then
+      return true
+    end
+  end
+  if FilterPosition(c,POS_DEFENSE) then
+    if not (BattlePhaseCheck() and CanAttack(c))
+    then
+      return false
+    end
+    if c.attack>1500
+    and #OppMon()==0
+    or CanWinBattle(c,OppMon())
+    then
+      return true
+    end
   end
 end
 function ABCInit(cards)
@@ -1170,6 +1208,9 @@ function ABCInit(cards)
   if HasID(SpSum,55063751,SummonGameciel,3) then
     return SpSummon()
   end
+  if HasID(Rep,73289035,RepoTsukoyomi) then
+    return Repo()
+  end
   return nil
 end
 function ATarget(cards)
@@ -1299,9 +1340,15 @@ function ABCCard(cards,min,max,id,c)
 end
 function ChainABC(c,mode)
   if mode == 1 -- banish
+  and (NotNegated(c)
+  or NotNegated(c,true)
+  and Duel.GetTurnPlayer()==1-player_ai
+  and ABCMaterials(AIBanish())
+  and CanSpecialSummon()
+  and SpaceCheck()>1)
   then 
     local targets = SubGroup(OppField(),ABCFilter)
-    local prio = SubGroup(OppField(),FilterPriorityTarget)
+    local prio = SubGroup(targets,FilterPriorityTarget)
     local discards = AIHand()
     if (RemovalCheckCard(c)
     or NegateCheckCard(c))
@@ -1332,6 +1379,14 @@ function ChainABC(c,mode)
     if Duel.CheckTiming(TIMING_END_PHASE)
     and CardsMatchingFilter(AIExtra(),FilterID,c.id)>0
     and Duel.GetCurrentChain()==0
+    and NotNegated(c,true)
+    then
+      return true
+    end
+    if ChainCheck(c.id,player_ai,nil,CardsEqual,c)
+    and Negated(c)
+    and NotNegated(c,true)
+    --and CanSpecialSummon()
     then
       return true
     end
