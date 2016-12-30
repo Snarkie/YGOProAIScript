@@ -88,10 +88,14 @@ function OnSelectChain(cards,only_chains_by_player,forced)
       return 0,0
     end
   end
-  
+	
+  local backup = CopyTable(cards)
+  local d = DeckCheck()
   local result,result2 = nil,nil
   result = PriorityChain(cards)
-  if result ~= nil then
+  if result ~= nil and (d == 0 
+  or BlacklistCheckChain(result[1],result[2],d,backup))
+  then
     if type(result)=="table" then
       return result[1],result[2]
     else
@@ -99,7 +103,7 @@ function OnSelectChain(cards,only_chains_by_player,forced)
     end
   end
   
-  local d = DeckCheck()
+  --local d = DeckCheck()
   if d and d.Chain then
     result,result2 = d.Chain(cards,only_chains_by_player)
   end
@@ -120,7 +124,7 @@ function OnSelectChain(cards,only_chains_by_player,forced)
   end
   
 local backup = CopyTable(cards)
-local d = DeckCheck()
+--local d = DeckCheck()
 local SelectChainFunctions = {
 FireFistOnChain,HeraldicOnSelectChain,
 GadgetOnSelectChain,BujinOnSelectChain,MermailOnSelectChain,
