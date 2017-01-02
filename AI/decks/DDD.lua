@@ -236,6 +236,7 @@ end
 function SummonVoidOgre(c,mode)
 end
 function SummonCrystalWing(c,mode)
+  return true
 end
 function SummonSiegfried(c,mode)
 end

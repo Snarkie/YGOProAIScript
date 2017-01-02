@@ -412,7 +412,7 @@ end
 06077601, -- Frightfur Fusion
 43698897, -- Frightfur Factory
 34773082, -- Frightfur Patchwork
-100214101,-- Frightfur Reborn (BETA)
+28039390, -- Frightfur Reborn
 01845204, -- Instant Fusion
 24094653, -- Polymerization
 94820406, -- Dark Fusion

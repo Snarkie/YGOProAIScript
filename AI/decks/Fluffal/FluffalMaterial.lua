@@ -1,6 +1,23 @@
 ------------------------
 ------- MATERIAL -------
 ------------------------
+function MaterialFDaredevil(cards)
+  if cards == nil then
+    cards = UseLists({AIMon(),AIHand()})
+  end
+  if GlobalEdgeImpMaterial > 0
+  and GlobalFluffalMaterial > 0
+  then
+    return true
+  end
+  return false
+end
+function MaterialFDaredevilBanish(cards)
+  if cards == nil then
+    cards = UseLists({AIMon(),AIGrave()})
+  end
+  return MaterialFDaredevil(cards)
+end
 function MaterialFSabreTooth(cards)
   if cards == nil then
     cards = UseLists({AIMon(),AIHand()})
@@ -182,6 +199,7 @@ function MaterialFStarve()
 end
 
 --[[
+91034681, -- Frightfur Daredevil
 80889750, -- Frightfur Sabre-Tooth
 40636712, -- Frightfur Kraken
 10383554, -- Frightfur Leo

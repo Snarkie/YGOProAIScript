@@ -89,63 +89,73 @@ function OnSelectChain(cards,only_chains_by_player,forced)
     end
   end
   
+  local backup = CopyTable(cards)
+  local d = DeckCheck()
   local result,result2 = nil,nil
   result = PriorityChain(cards)
   if result ~= nil then
     if type(result)=="table" then
-      return result[1],result[2]
+      if (result[1]~=1 
+      or InfiniteLoopCheck(cards[result[2]]))
+      and BlacklistCheckChain(result[1],result[2],d,backup)
+      then
+        return result[1],result[2]
+      end
     else
-      return result,result2
+      if (result~=1 
+      or InfiniteLoopCheck(cards[result2]))
+      and BlacklistCheckChain(result,result2,d,backup)
+      then
+        return result,result2
+      end
     end
   end
-  
-  local d = DeckCheck()
   if d and d.Chain then
     result,result2 = d.Chain(cards,only_chains_by_player)
   end
   if result ~= nil then
     if type(result)=="table" then
-      if result[1]~=1 
-      or InfiniteLoopCheck(cards[result[2]])
+      if (result[1]~=1 
+      or InfiniteLoopCheck(cards[result[2]]))
       then
         return result[1],result[2]
       end
     else
-      if result~=1 
-      or InfiniteLoopCheck(cards[result2])
+      if (result~=1 
+      or InfiniteLoopCheck(cards[result2]))
       then
         return result,result2
       end
     end
   end
   
-local backup = CopyTable(cards)
-local d = DeckCheck()
-local SelectChainFunctions = {
-FireFistOnChain,HeraldicOnSelectChain,
-GadgetOnSelectChain,BujinOnSelectChain,MermailOnSelectChain,
-SatellarknightOnSelectChain,
-ChaosDragonOnSelectChain,HATChain,QliphortChain,
-NobleChain,NekrozChain,BAChain,DarkWorldChain,
-ConstellarChain,BlackwingChain,HarpieChain,
-HEROChain,GenericChain,
-}
-  
-for i=1,#SelectChainFunctions do
-  local func = SelectChainFunctions[i]
-  result = func(cards,only_chains_by_player)
-  if result ~= nil and (d == 0 
-  or BlacklistCheckChain(result[1],result[2],d,backup))
-  then
-    if result[1]~=1 
-    or InfiniteLoopCheck(cards[result[2]])
+  backup = CopyTable(cards)
+  d = DeckCheck()
+  local SelectChainFunctions = {
+  FireFistOnChain,HeraldicOnSelectChain,
+  GadgetOnSelectChain,BujinOnSelectChain,MermailOnSelectChain,
+  SatellarknightOnSelectChain,
+  ChaosDragonOnSelectChain,HATChain,QliphortChain,
+  NobleChain,NekrozChain,BAChain,DarkWorldChain,
+  ConstellarChain,BlackwingChain,HarpieChain,
+  HEROChain,GenericChain,
+  }
+    
+  for i=1,#SelectChainFunctions do
+    local func = SelectChainFunctions[i]
+    result = func(cards,only_chains_by_player)
+    if result ~= nil and (d == 0 
+    or BlacklistCheckChain(result[1],result[2],d,backup))
     then
-      return result[1],result[2]
+      if result[1]~=1 
+      or InfiniteLoopCheck(cards[result[2]])
+      then
+        return result[1],result[2]
+      end
     end
   end
-end
 
-result = 0
+  result = 0
 
  ---------------------------------------------
  -- Cocoon of Evolution on field turn counter

@@ -459,8 +459,14 @@ function OnSelectBattleCommand(cards,activatable)
   SortByATK(cards,true)
   if #targets>0 and #cards>0 then
     for i=1,#cards do
-      if CanAttackSafely(cards[i],targets) then
-        --return Attack(i)
+      if CanAttackSafely(cards[i],targets)
+      and CardsMatchingFilter(targets,function(c)
+        return not (FilterAffected(c,EFFECT_CANNOT_BE_BATTLE_TARGET)
+        or FilterAffected(c,EFFECT_CANNOT_SELECT_BATTLE_TARGET)
+        or FilterAffected(c,EFFECT_INDESTRUCTABLE_BATTLE))
+      end)>0
+      then
+        return Attack(i)
       end
     end
   end

@@ -1,5 +1,5 @@
 function ZodiacBeastStartup(deck)
-  print("ZodiacBeast v1.0 by neftalimich.")
+  print("ZodiacBeast v1.0.1 by neftalimich.")
   deck.Init					= ZodiacBeastInit
   deck.Card					= ZodiacBeastCard
   deck.Chain				= ZodiacBeastChain
@@ -116,7 +116,9 @@ ZodiacBeastSetBlacklist={
 ZodiacBeastUnchainable={
 31755044, -- ZBViper
 73881652, -- ZBDirection
-98954106,-- ZBJAvarice
+98954106, -- ZBJAvarice
+59438930, -- GO&SR
+83326048, -- DBarrier
 }
 
 ------------------------
@@ -200,7 +202,7 @@ function ZBThroughbladeCond(loc,c)
 	  )
 	  and (
 	    not HasID(AIHand(),c.id,true)
-	    or PriorityCheck(AIHand(),PRIO_DISCARD,2,ZBFilter) > 1
+	    or PriorityCheck(AIHand(),PRIO_DISCARD,2,ZBFilter) > 2
 	  )
 	  and #AIMon() < 5
 	  then
@@ -548,7 +550,7 @@ end
 
 ZodiacBeastPriorityList={                      
 [77150143] = {8,1,8,1,4,1,3,1,1,1,ZBThroughbladeCond},	-- ZBThroughblade
-[31755044] = {7,1,7,1,3,1,5,1,1,1,ZBViperCond},			-- ZBViper
+[31755044] = {7,1,7,1,3,1,2,1,1,1,ZBViperCond},			-- ZBViper
 [04367330] = {6,1,6,1,2,1,4,1,1,1,ZBRabbinaCond},		-- ZBRabbina
 [04145852] = {6,1,6,1,2,1,4,1,1,1,ZBRamCond},			-- ZBRam
 [78872731] = {9,1,9,1,5,1,6,1,1,1,ZBMolmoratCond},		-- ZBMolmorat
@@ -633,7 +635,6 @@ function ZodiacBeastInit(cards)
   if HasIDNotNegated(Act,96381979,false,(96381979*16+1),UseZBTigerKing) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  
   -- ZBMolmorat EFFECT
   for i=1, #Act do
     local c = Act[i]
@@ -642,15 +643,12 @@ function ZodiacBeastInit(cards)
 	  return {COMMAND_ACTIVATE,i}
 	end
   end
-  
   -- Tensu
   if HasIDNotNegated(Act,10719350) then -- Tensu
     OPTSet(10719350)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  
-  -- ACTIVE 1
-  
+  -- ACTIVE 1 
   if HasIDNotNegated(Act,48905153,false,(48905153*16+1),UseZBDrancia) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -668,8 +666,7 @@ function ZodiacBeastInit(cards)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   
-  
-  if GlobalOppMaxxC ~= Duel.GetTurnCount() then
+  if MaxxCheck() then
     -- TERROTOP
     if HasIDNotNegated(SpSum,81275020) then -- STerrotop
       return {COMMAND_SPECIAL_SUMMON,CurrentIndex}
@@ -677,6 +674,7 @@ function ZodiacBeastInit(cards)
     if HasIDNotNegated(Sum,81275020) -- STerrotop
     and HasID(UseLists({AIDeck(),AIHand()}),53932291,true)
 	and not HasID(AIMon(),81275020,true)
+	and CardsMatchingFilter(AIMon(),FilterLevel,3) > 0
     then
       return {COMMAND_SUMMON,CurrentIndex}
     end
@@ -753,6 +751,18 @@ function ZodiacBeastInit(cards)
     OPTSet(57103969)
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+   -- ZBTriangle
+  if HasIDNotNegated(Act,46060017,nil,nil,LOCATION_HAND,ActiveZBTriangle)
+  and MaxxCheck()
+  then
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasIDNotNegated(Act,46060017,nil,nil,LOCATION_SZONE,UseZBTriangle)
+  and MaxxCheck()
+  then
+    GlobalZBTriangle = 1
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   -- SUMMON 2
   if HasIDNotNegated(Sum,77150143,SummonZBThroughblade) then
     return {COMMAND_SUMMON,CurrentIndex}
@@ -770,24 +780,13 @@ function ZodiacBeastInit(cards)
   if HasIDNotNegated(Sum,31755044) then -- ZBViper
     return {COMMAND_SUMMON,CurrentIndex}
   end
-  -- ZBTriangle
-  if HasIDNotNegated(Act,46060017,nil,nil,LOCATION_HAND,ActiveZBTriangle)
-  then
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
-  if HasIDNotNegated(Act,46060017,nil,nil,LOCATION_SZONE,UseZBTriangle)
-  and GlobalOppMaxxC ~= Duel.GetTurnCount()
-  then
-    GlobalZBTriangle = 1
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
   -- ZBViper
   if HasIDNotNegated(Act,31755044,UseZBViper) then
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   
   -- Utopia
-  if GlobalOppMaxxC ~= Duel.GetTurnCount() then
+  if MaxxCheck() then
     if HasIDNotNegated(SpSum,56832966) then
       return XYZSummon()
     end
@@ -907,14 +906,12 @@ end
 function UseZBDrancia(c)
   local xyzmat = c.xyz_materials
   local countMatDetach = CardsMatchingFilter(xyzmat,ZBBestDetachFilter)
-  local oppMonFaceUp = SubGroup(OppMon(),FilterPosition,POS_FACEUP)
+  local oppMonFaceUp = SubGroup(OppField(),FilterPosition,POS_FACEUP)
+  local prio = SubGroup(oppMonFaceUp,FilterPriorityTarget)
   if countMatDetach > 0
   and DestroyCheck(oppMonFaceUp,false,false,false,ZBDranciaDestroyFilter) > 0
-  and (
-    OppGetStrongestAttack(nil,ZBDranciaDestroyFilter) > AIGetStrongestAttack()
-    or OppGetStrongestAttack(nil,ZBDranciaDestroyFilter) >= 2000
-  )
-  then 
+  and #prio > 0
+  then
     return true
   end
   return false
@@ -935,6 +932,7 @@ function UseZBTriangle(c)
     OPTSet(c.id)
     return true
   elseif #AIMon() <= 4
+  and OPTCheck(c.id)
   then
     OPTSet(c.id)
     return true
@@ -1476,11 +1474,15 @@ function ChainZBViper(c,aiTurn)
   return false
 end
 function ChainZBDranciaOppTurn(c)
-  if NegateCheckCard(c) then
+  local oppFieldFaceUp = SubGroup(OppField(),FilterPosition,POS_FACEUP)
+  if (RemovalCheckCard(c) or NegateCheckCard(c)) 
+  and #oppFieldFaceUp > 0
+  then
     OPTSet(c.id)
     return true
   end
-  local oppFieldFaceUp = SubGroup(OppField(),FilterPosition,POS_FACEUP)
+  local targets = SubGroup(oppFieldFaceUp,ZBDranciaDestroyFilter)
+  local prio = SubGroup(targets,FilterPriorityTarget)
   if DestroyCheck(oppFieldFaceUp,false,false,false,ZBDranciaDestroyFilter) > 0
   then
     local xyzmat = c.xyz_materials
@@ -1495,36 +1497,27 @@ function ChainZBDranciaOppTurn(c)
         return true
       end
 	end
-	local oppMonFaceUp = SubGroup(oppFieldFaceUp,FilterLocation,LOCATION_MZONE)
-    if DestroyCheck(oppMonFaceUp,false,false,false,ZBDranciaDestroyFilter) > 0
-    and (
-	  OppGetStrongestAttack(nil,ZBDranciaDestroyFilter) > AIGetStrongestAttack()
-	  and not HasID(UseLists({AIHand(),AIMon()}),31755044,true)
-      or 
-	  OppGetStrongestAttack(nil,ZBDranciaDestroyFilter) >= 2000
-	)
-    then
-      OPTSet(c.id)
-      return true
-    elseif Duel.GetCurrentPhase() == PHASE_END
-    and CardsMatchingFilter(xyzmat,ZBBestDetachFilter) > 0
-    then 
+	if #prio>0 then
 	  OPTSet(c.id)
       return true
-    elseif ZBRemovalCheckCard(c)
+	end
+	if Duel.CheckTiming(TIMING_END_PHASE)
+	and CardsMatchingFilter(xyzmat,ZBBestDetachFilter) > 0
     then
-      OPTSet(c.id)
+	  OPTSet(c.id)
       return true
     end
   end
   return false
 end
 function ChainZBDranciaAITurn(c)
-  if NegateCheckCard(c) then
+  local oppFieldFaceUp = SubGroup(OppField(),FilterPosition,POS_FACEUP)
+  if (RemovalCheckCard(c) or NegateCheckCard(c)) 
+  and #oppFieldFaceUp > 0
+  then
     OPTSet(c.id)
     return true
   end
-  local oppFieldFaceUp = SubGroup(OppField(),FilterPosition,POS_FACEUP)
   if DestroyCheck(oppFieldFaceUp,false,false,false,ZBDranciaDestroyFilter) > 0
   then
     local xyzmat = c.xyz_materials
@@ -1542,10 +1535,6 @@ function ChainZBDranciaAITurn(c)
     and CardsMatchingFilter(xyzmat,ZBBestDetachFilter) > 0
     then 
 	  OPTSet(c.id)
-      return true
-    elseif ZBRemovalCheckCard(c)
-    then
-      OPTSet(c.id)
       return true
     end
   end
@@ -1655,7 +1644,6 @@ function IsOppLastChainEffect()
   return false
 end
 
-GlobalOppMaxxC = 0
 function ZodiacBeastChain(cards)
   --for i=1, #cards do
     --local c = cards[i]
@@ -1717,24 +1705,7 @@ function ZodiacBeastChain(cards)
 	if HasIDNotNegated(cards,98954106,ChainZBJAvarice,true) then
       return {1,CurrentIndex}
     end
-  end
-  
-  -- Opp Maxx "C"
-  for i=1,Duel.GetCurrentChain() do
-	local p = Duel.GetChainInfo(i, CHAININFO_TRIGGERING_PLAYER)
-    local e = Duel.GetChainInfo(i, CHAININFO_TRIGGERING_EFFECT)
-	local c = nil
-	if e and p and (p == 1- player_ai) then
-      c=e:GetHandler()
-	  if c then
-		if c:GetCode() == 23434538 then
-		  --print("OppMaxxC")
-		  GlobalOppMaxxC = Duel.GetTurnCount()
-		end
-	  end
-    end
-  end
-  
+  end 
   
   return nil
 end

@@ -6,6 +6,7 @@ FluffalAtt={
 13241004, -- Fluffal Penguin
 97567736, -- Edge Imp Tomahawk
 
+91034681, -- Frightfur Daredevil
 80889750, -- Frightfur Sabre-Tooth
 40636712, -- Frightfur Kraken
 10383554, -- Frightfur Leo
@@ -53,6 +54,7 @@ function FluffalPosition(id,available) -- FLUFFAL POSITION
 	  --print("FSheep - Atk: "..frightfurAtk)
       if FluffalCanAttack(OppMon(),frightfurAtk) == 0
 	  and FluffalCannotAttack(OppMon(),frightfurAtk,FilterPosition,POS_FACEUP_ATTACK) > 0
+	  and frightfurAtk < 3200
 	  then
         result = 4 -- POS_FACEUP_DEFENSE?
 	  else
@@ -156,6 +158,12 @@ function FluffalBattleCommand(cards,activatable)  -- FLUFFAL BATTLE COMMAND
   )
   then
     return Attack(IndexByID(cards,57477163))
+  end
+  if HasIDNotNegated(cards,91034681) -- FDaredevil
+  and CanWinBattle(cards[CurrentIndex],targets,false,false)
+  and CardsMatchingFilter(targets,FilterPosition,POS_DEFENSE) == #targets
+  then
+    return Attack(IndexByID(cards,91034681))
   end
   if HasIDNotNegated(cards,80889750) -- FSabreTooth
   and CanWinBattle(cards[CurrentIndex],targets,false,false)

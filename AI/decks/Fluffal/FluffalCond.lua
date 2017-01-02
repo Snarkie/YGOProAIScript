@@ -368,12 +368,15 @@ function OwlCond(loc,c)
 	  end
 	end
 	if FilterLocation(c,LOCATION_ONFIELD) then
-	  if not HasID(AIHand(),c.id,true) then
-	    if OPTCheck(c.id) and not NormalSummonCheck()
+	  if not HasID(AIHand(),c.id,true) 
+	  then
+	    if not OPTCheck(c.id) then
+		  return 9
+		elseif not NormalSummonCheck() 
 		then
 		  return true
 		else
-		  return 9
+		  return false
 		end
 	  end
 	end
@@ -1950,6 +1953,71 @@ function GCycloneCond(loc,c)
   return true
 end
 -- FrightfurMon COND
+function FDaredevil(loc,c)
+  if loc == MATERIAL_TOGRAVE then
+    return 4 + PrioFrightfurMaterial(c,1)
+  end
+  if loc == PRIO_TOHAND then
+    if FilterLocation(c,LOCATION_EXTRA)
+	or FilterLocation(c,LOCATION_ONFIELD)
+	or FilterLocation(c,LOCATION_GRAVE)
+	or FilterLocation(c,LOCATION_REMOVED)
+	then
+	  return true
+	end
+  end
+  if loc == PRIO_TOFIELD then
+    if FilterLocation(c,LOCATION_EXTRA) then
+	  if not HasID(AIExtra(),c.id,true) then
+	    return 0
+	  end
+	  if GlobalFFusion > 0 then
+	    if MaterialFDaredevilBanish() then
+		  return
+		    FSummonFDaredevil(c)
+		end
+	  else
+	    if MaterialFDaredevil() then
+		  return FSummonFDaredevil(c)
+		end
+	  end
+	  return 1
+	end
+	if FilterLocation(c,LOCATION_GRAVE) then
+	  return SpSummonFDaredevil(c)
+	end
+	if FilterLocation(c,LOCATION_REMOVED) then
+	  return SpSummonFDaredevil(c)
+	end
+  end
+  if loc == PRIO_TOGRAVE then
+	if FilterLocation(c,LOCATION_EXTRA) 
+	or FilterLocation(c,LOCATION_OVERLAY)
+	or FilterLocation(c,LOCATION_ONFIELD)
+	then
+	  return true
+	end
+	if FilterLocation(c,LOCATION_REMOVED) then
+	  if not HasID(AIGrave(),c.id,true) then
+	    return 4
+	  else
+	    return 1
+	  end
+	end
+  end
+  if loc == PRIO_TODECK then
+    return true
+  end
+  if loc == PRIO_BANISH then
+    if FilterLocation(c,LOCATION_GRAVE) then
+	  return true
+	end
+    if FilterLocation(c,LOCATION_ONFIELD) then
+	  return false
+	end
+  end
+  return true
+end
 function FSabreToothCond(loc,c)
   if loc == MATERIAL_TOGRAVE then
     return 1 + PrioFrightfurMaterial(c,1)
@@ -2357,7 +2425,9 @@ function FTigerCond(loc,c)
   end
   if loc == PRIO_TOFIELD then
     if FilterLocation(c,LOCATION_EXTRA) then
-	  if not HasID(AIExtra(),c.id,true) then
+	  if not HasID(AIExtra(),c.id,true) 
+	  or HasID(AIMon(),c.id,true)
+	  then
 	    return 0
 	  end
 	  if GlobalFFusion > 0 then
@@ -2660,15 +2730,15 @@ FluffalPriorityList={
  [61173621] = {8,2,4,4,7,1,9,1,4,1,ChainCond},		-- Edge Imp Chain
  [30068120] = {7,3,4,3,6,3,5,3,5,1,SabresCond},		-- Edge Imp Sabres
  [10802915] = {1,1,1,1,9,1,8,1,9,8,TGuideCond},		-- Tour Guide
- [79109599] = {1,1,2,1,8,2,2,1,10,3,KoSCond},		-- King of the Swamp
- [06205579] = {1,1,8,1,2,1,2,1,10,3,PFusionerCond},	-- Parasite Fusioner
+ [79109599] = {1,1,2,1,8,2,2,1,3,2,KoSCond},		-- King of the Swamp
+ [06205579] = {1,1,8,1,2,1,2,1,3,2,PFusionerCond},	-- Parasite Fusioner
  [67441435] = {1,1,8,2,9,6,9,4,1,1,nil},			-- Glow-Up Bulb
 
  [70245411] = {9,5,1,1,4,1,2,0,1,1,TVendorCond},	-- Toy Vendor
  [06077601] = {6,1,1,1,3,1,3,0,9,1,FFusionCond},	-- Frightfur Fusion
  [43698897] = {7,3,1,1,2,1,1,0,1,1,FFactoryCond},	-- Frightfur Factory
  [34773082] = {8,4,1,1,5,1,9,0,7,1,FPatchworkCond},	-- Frightfur Patchwork
-[100214101] = {5,2,1,1,2,1,2,1,1,1,FRebornCond},	-- Frightfur Reborn (BETA)
+ [28039390] = {5,2,1,1,2,1,2,1,1,1,FRebornCond},	-- Frightfur Reborn
  [01845204] = {1,1,1,1,3,2,3,1,8,1,IFusionCond},	-- Instant Fusion
  [24094653] = {2,1,1,1,2,1,2,1,2,1,PolyCond},		-- Polymerization
  [94820406] = {1,1,1,1,2,1,2,1,1,1,DFusionCond},	-- Dark Fusion
@@ -2680,6 +2750,7 @@ FluffalPriorityList={
  [98954106] = {9,1,1,1,1,1,1,1,1,1,nil},			-- Jar of Avarice
  [51452091] = {1,1,1,1,1,1,1,1,1,1,nil},			-- Royal Decree
 
+ [91034681] = {1,1,8,4,1,1,1,1,5,1,FDaredevil},		-- Frightfur  Daredevil
  [80889750] = {1,1,9,3,1,1,1,1,5,1,FSabreToothCond},-- Frightfur Sabre-Tooth
  [40636712] = {1,1,8,5,5,3,1,1,2,1,FKrakenCond},	-- Frightfur Kraken
  [10383554] = {1,1,11,1,2,1,1,1,9,1,FLeoCond},		-- Frightfur Leo

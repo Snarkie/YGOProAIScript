@@ -325,6 +325,10 @@ function MaxMaterials(fusionId,min,max)
   end
 
   if fusionId == 00464362 then -- FTiger
+    if CardsMatchingFilter(OppField(),FTigerAdvantageFilter)
+	then
+	  return min
+	end
     if CardsMatchingFilter(UseLists({AIHand(),AIST()}),FluffalFusionSTFilter) > 0
 	then
 	  result = max - 2
@@ -466,7 +470,7 @@ function FluffalCard(cards,min,max,id,c)  -- FLUFFAL CARD
   if id == 34773082 then -- FPatchwork
     return FPatchworkTarget(cards,min,max,c)
   end
-  if id == 100214101 then -- FReborn
+  if id == 28039390 then -- FReborn
     return FRebornTarget(cards,min,max,c)
   end
   -- Fusion TARGET
@@ -568,7 +572,7 @@ end
 06077601, -- Frightfur Fusion
 43698897, -- Frightfur Factory
 34773082, -- Frightfur Patchwork
-100214101,-- Frightfur Reborn (BETA)
+28039390, -- Frightfur Reborn
 01845204, -- Instant Fusion
 24094653, -- Polymerization
 94820406, -- Dark Fusion
@@ -582,6 +586,7 @@ end
 98954106, -- Jar of Avarice
 51452091, -- Royal Decree
 
+91034681, -- Frightfur Daredevil
 80889750, -- Frightfur Sabre-Tooth
 40636712, -- Frightfur Kraken
 10383554, -- Frightfur Leo

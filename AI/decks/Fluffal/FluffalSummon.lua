@@ -207,6 +207,26 @@ function SummonBulb()
   return false
 end
 -- Frightfur SUMMON
+function FSummonFDaredevil(c)
+  return SpSummonFDaredevil(c)
+end
+function SpSummonFDaredevil(c)
+  local frightfurAtk = c.attack + FrightfurBoost(c.id)
+  local canAttack = FluffalCanAttack(OppMon(),frightfurAtk)
+  local frightfurGrave = CountFrightfurMon(UseLists({AIGrave(),AIMon()}))
+  
+  if (frightfurGrave + 1) * 500 >= AI.GetPlayerLP(2) 
+  or 
+  OppGetStrongestAttDef() >= AIGetStrongestAttack()
+  and frightfurAtk > OppGetStrongestAttDef()
+  and OppGetStrongestAttDef() > 3000
+  and Duel.GetTurnCount() > 1
+  then
+    return true
+  end
+  return false
+end
+
 function FSummonFSabreTooth(c)
   if not HasIDNotNegated(AIMon(),80889750,true) -- FSabreTooth
   then
@@ -248,6 +268,7 @@ function SpSummonFKraken(c)
   if not HasIDNotNegated(AIMon(),40636712,true) -- FKraken
   then
     if CardsMatchingFilter(OppMon(),FilterAffected,EFFECT_INDESTRUCTABLE) > 0
+	and CardsMatchingFilter(OppMon(),FilterAffected,EFFECT_IMMUNE_EFFECT) < #OppMon()
     or
 	CardsMatchingFilter(OppST(),FilterPosition,POS_FACEDOWN) < 2
 	and (
@@ -256,6 +277,7 @@ function SpSummonFKraken(c)
 	  #OppMon() == 1
 	  and CountFluffal(UseLists({AIHand(),AIMon()})) + CountEdgeImp(UseLists({AIHand(),AIMon()})) >= 2
 	  and CardsMatchingFilter(UseLists({AIHand(),AIST()}),FluffalFusionSTFilter) > 0
+	  and CardsMatchingFilter(OppMon(),FilterAffected,EFFECT_IMMUNE_EFFECT) < #OppMon()
 	  or
 	  #OppMon() == 2
 	  and canAttack > 0
@@ -335,6 +357,7 @@ function FWolfFinish()
 	#OppMon() <= 1
 	and HasIDNotNegated(AIMon(),00464362,true)
 	and CardsMatchingFilter(OppST(),FilterPosition,POS_FACEDOWN) == 0
+	and OppGetStrongestAttDef() < 3000
 	or
 	#OppField() == 0
 	and CountFluffal > 1
@@ -372,6 +395,25 @@ function FSummonFTiger(c)
 	if CardsMatchingFilter(OppField(),FTigerAdvantageFilter) > 0
 	then
 	  return 11
+	end
+	if GlobalFFusion > 0 
+	and CardsMatchingFilter(OppField(),FTigerDestroyFilter) > 3
+	then
+	  return 10
+	end
+	if OppGetStrongestAttDef() >= AIGetStrongestAttack()
+	and OppGetStrongestAttDef() > 3000
+	and CardsMatchingFilter(OppMon(),FilterAffected,EFFECT_IMMUNE_EFFECT) > 0
+	then
+	  if HasID(AIMon(),80889750,true) -- FSabreTooth
+	  then
+	    return 10
+	  elseif CardsMatchingFilter(OppField(),FTigerDestroyFilter) > 0
+	  then
+	    return 9
+	  else
+	    return 8
+	  end
 	end
     return
 	  CardsMatchingFilter(OppField(),FTigerDestroyFilter) > 1
@@ -498,6 +540,20 @@ end
 ------------------------
 ------ REPOSITION ------
 ------------------------
+function RepFSabreTooth(c)
+  if FilterPosition(c,POS_DEFENSE)
+  and CardsMatchingFilter(OppMon(),FilterAttackMax,c.attack) > 0
+  then
+    return true
+  elseif FilterPosition(c,POS_ATTACK)
+  and AI.GetCurrentPhase() == PHASE_MAIN2
+  and CardsMatchingFilter(OppMon(),FilterAttackMin,c.attack+1) > 0
+  then
+    return true
+  else
+    return false
+  end
+end
 function RepFKraken(c)
   if FilterPosition(c,POS_DEFENSE)
   and AI.GetCurrentPhase() == PHASE_MAIN1
@@ -606,7 +662,7 @@ end
 06077601, -- Frightfur Fusion
 43698897, -- Frightfur Factory
 34773082, -- Frightfur Patchwork
-100214101,-- Frightfur Reborn (BETA)
+28039390, -- Frightfur Reborn
 01845204, -- Instant Fusion
 24094653, -- Polymerization
 94820406, -- Dark Fusion
@@ -620,6 +676,7 @@ end
 98954106, -- Jar of Avarice
 51452091, -- Royal Decree
 
+91034681, -- Frightfur Daredevil
 80889750, -- Frightfur Sabre-Tooth
 40636712, -- Frightfur Kraken
 10383554, -- Frightfur Leo

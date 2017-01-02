@@ -7,7 +7,7 @@ function OnAIGoingFirstSecond(name)
   if name=="AI_Harpie"
   or name=="AI_Blackwing"
   or name=="AI_Shaddoll"
-  or name=="AI_Kozmo"
+  --or name=="AI_Kozmo"
   or name=="AI_Lightsworn"
   or name=="AI_GladiatorBeast"
   or name=="AI_Fluffal"
@@ -1213,6 +1213,10 @@ function ExcludeOriginalID(c,id)
   return c.original_id~=id
 end
 function FilterPosition(c,pos)
+  if c == nil then
+    print("Warning: FilterPosition null card")
+    PrintCallingFunction()
+  end
   if pos == nil then
     print("Warning: FilterPosition null pos")
     PrintCallingFunction()
@@ -2939,7 +2943,6 @@ function NegateUpstart(c,e,source,link)
 end
 
 function NegateOTKStopper(c,e,source,link)
-  print("negate OTK stopper")
   if (BattlePhaseCheck()
   or IsBattlePhase())
   and Duel.GetTurnPlayer()==player_ai
@@ -3084,6 +3087,9 @@ function GetNegatePriority(source,link,targeted)
         and FilterLocation(source,LOCATION_ONFIELD)
         then
           prio=prio+3
+          if FilterType(targets[1],TYPE_CONTINUOUS) then
+            prio=prio+1
+          end
         end 
         prio=AdjustMonsterPrio(target,prio)
       end
@@ -3431,4 +3437,18 @@ function InfiniteLoopCheck(c,threshold)
 end
 function MaxxCheck()
   return GlobalMaxxC~=Duel.GetTurnCount()
+end
+GlobalSummonLimit = {}
+function SetSummonLimit(filter)
+  GlobalSummonLimit[Duel.GetTurnCount()][#GlobalSummonLimit[Duel.GetTurnCount()]+1]=filter
+end
+function CheckSummonLimit(c)
+  if GlobalSummonLimit[Duel.GetTurnCount()] then
+    for i,filter in pairs(GlobalSummonLimit[Duel.GetTurnCount()]) do
+      if not filter(c) then
+        return false
+      end
+    end
+  end
+  return true
 end

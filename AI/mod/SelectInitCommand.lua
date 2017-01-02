@@ -561,47 +561,36 @@ end
     end
   end
 
-  -----------------------------------------------------
-  -- If the AI controls a set Field Spell, activate it.
-  -----------------------------------------------------
-  for i=1,#ActivatableCards do
-  if ActivatableCards[i].location == LOCATION_SZONE then 
-	if ActivatableCards[i].type == TYPE_SPELL + TYPE_FIELD and
-       ActivatableCards[i].position == POS_FACEDOWN then
-       GlobalActivatedCardID = ActivatableCards[i].id
-	    return COMMAND_ACTIVATE,i
-     end
-   end
- end
-
-
-  -----------------------------------
-  -- Activate a face-up field spell
-  -- effect if possible.
-  -----------------------------------
-  for i=1,#ActivatableCards do
-    if ActivatableCards[i].location == LOCATION_SZONE then
-      if ActivatableCards[i].type == TYPE_SPELL + TYPE_FIELD then
-        if CardId == 33017655 then
-           GlobalActivatedCardID = ActivatableCards[i].id
-          return COMMAND_ACTIVATE,i
-        end
-      end
+  
+  -- activate field spells already on the field
+  for i,c in pairs(ActivatableCards) do
+    if FilterType(c,TYPE_SPELL) 
+    and FilterType(c,TYPE_FIELD)
+    and FilterLocation(c,LOCATION_SZONE)
+    --and FilterPosition(c,POS_FACEDOWN)
+    and NecrovalleyCheck(c)       
+    and CardIsScripted(c.id) == 0
+    and NotNegated(c) 
+    and InfiniteLoopCheck(c)
+    then
+      return COMMAND_ACTIVATE,i
     end
   end
   
-  ---------------------------------------------------------
-  -- Set a field spell if the AI doesn't currently control
-  -- a field spell 
-  ---------------------------------------------------------
-  if CardsMatchingFilter(AIST(),FilterType,TYPE_FIELD)==0 then
-    for i=1,#cards.st_setable_cards do
-      local c = cards.st_setable_cards[i]
-      if FilterType(c,TYPE_SPELL) and FilterType(c,TYPE_FIELD) and CardIsScripted(c.id)==0 then
-        return COMMAND_SET_ST,i
-      end
+  -- activate field spells, if the AI doesn't control one already
+  for i,c in pairs(ActivatableCards) do
+    if FilterType(c,TYPE_SPELL) 
+    and FilterType(c,TYPE_FIELD)
+    and FilterLocation(c,LOCATION_HAND)
+    and CardsMatchingFilter(AIST(),FilterType,TYPE_FIELD)==0
+    and NecrovalleyCheck(c)       
+    and CardIsScripted(c.id) == 0
+    and NotNegated(c) 
+    and InfiniteLoopCheck(c)
+    then
+      return COMMAND_ACTIVATE,i
     end
-  end     
+  end 
     
   ------------------------------------------------
   -- Activate Soul Exchange only in Main Phase 1

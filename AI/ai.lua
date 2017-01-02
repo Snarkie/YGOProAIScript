@@ -1,4 +1,4 @@
-Version = "0.34f"
+Version = "0.34g"
 Experimental = true
 
 --[[
@@ -110,7 +110,8 @@ require("ai.decks.DDD")
 require("ai.decks.GladBeast")
 require("ai.decks.ABC")
 require("ai.decks.Raidraptor")
-require("ai.decks.ZodiacBeast")
+require("ai.decks.Eidolon")
+requireoptional("ai.decks.ZodiacBeast")
 requireoptional("ai.decks.Fluffal")
 requireoptional("ai.decks.Majespecter")
 requireoptional("ai.decks.Spellbook")

@@ -1651,8 +1651,9 @@ function ChainReadinessGrave(c,check)
     then
       return true
     end
-    local aimon,oppmon=GetBattlingMons
-    if CanFinishGame(oppmon,aimon)
+    local aimon,oppmon=GetBattlingMons()
+    if oppmon 
+    and CanFinishGame(oppmon,aimon)
     then 
       return true
     end

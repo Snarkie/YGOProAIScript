@@ -919,7 +919,7 @@ ScriptedCards ={
 63767246,81275020,53932291,01621413, -- Titanic Galaxy, Speedroid Terrortop, Taketomborg, Requiem Dragon
 66994718,77414722,58851034,83326048, -- Raptor's Gust, Magic Jammer, Cursed Seal, Dimensional Barrier
 85115440,48905153,69599136,43422537, -- Zodiac Beast Drancia,Bullhorn, Floodgate Trap Hole, Double Summon
-08267140, -- Cosmic Cyclone
+08267140,50954680,75286621,48229808, -- Cosmic Cyclone, Crystal Wing, Merkabah, Black Flame Horus
 }
 function CardIsScripted(CardId)
   for i=1,#ScriptedCards do
