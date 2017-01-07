@@ -695,10 +695,6 @@ function UseTerraformingABC(c,mode)
     return true
   end
 end
-function FilterEquipped(c,id)
-
-  return CardsMatchingFilter(c:get_equipped_cards(),FilterID,id)>0
-end
 function UseTsukuyomiABC(c,mode)
   local st = CardsMatchingFilter(AIHand(),function(c) 
     return FilterType(c,TYPE_SPELL+TYPE_TRAP) 

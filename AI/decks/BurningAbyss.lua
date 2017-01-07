@@ -490,6 +490,7 @@ function SSScarm()
 end
 function SummonDanteBA()
   return OppGetStrongestAttDef()<2500
+  or not HasID(AIMon(),83531441,true)
 end
 function SetBA()
   return #AIMon() == 0 and DeckCheck(DECK_BA)

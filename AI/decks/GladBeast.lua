@@ -1061,6 +1061,7 @@ function ChainCothGlad(c)
     end
     local aimon,oppmon=GetBattlingMons()
     if IsBattlePhase()
+    and aimon and oppmon
     and WinsBattle(oppmon,aimon)
     and GyzarusFilter(oppmon)
     and Duel.GetCurrentChain()==0
@@ -1070,6 +1071,7 @@ function ChainCothGlad(c)
       return true
     end
     if IsBattlePhase()
+    and oppmon
     and GyzarusFilter(oppmon)
     and #AIMon()==0
     and Duel.GetCurrentChain()==0

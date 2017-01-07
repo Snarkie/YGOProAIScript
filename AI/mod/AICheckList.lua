@@ -1084,3 +1084,21 @@ function GetGraveTargetPriority(c)
   return GraveTargetPriority[id] or 0
 end
 
+--[[RemoveOnSummonFilter={
+[82633039] = HasMaterials -- Castel
+
+}
+function RemoveOnSummon(c)
+  if Negated(c) then
+    return false
+  end
+  for id,filter in pairs(RemoveOnSummonFilter) do
+    if c.id == id and filter(c) then
+      return true
+    end
+  end
+end  ]]
+
+
+
+

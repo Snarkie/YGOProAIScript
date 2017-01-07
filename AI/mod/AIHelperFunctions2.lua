@@ -34,6 +34,7 @@ function OnPlayerGoingFirstSecond(decision)
   return
 end
 function Startup()
+  DeckCheck()
   if PRINT_DRAW and PRINT_DRAW == 1 then
     -- display draws in debug console
     local e4=Effect.GlobalEffect()
@@ -957,7 +958,7 @@ function Shuffle(t)
   return t
 end
 -- returns true, if the source is expected to win a battle against the target
-function WinsBattle(source,target)
+--[[function WinsBattle(source,target)
   if not (source and target) then return false end
   source=GetScriptFromCard(source)
   target=GetScriptFromCard(target)
@@ -970,6 +971,21 @@ function WinsBattle(source,target)
   and source:IsPosition(POS_FACEUP_ATTACK)
   and not target:IsHasEffect(EFFECT_INDESTRUCTABLE_BATTLE)
   and not source:IsHasEffect(EFFECT_CANNOT_ATTACK)
+end]]
+function WinsBattle(source,target)
+  if not (source and target) then return false end
+  source=GetCardFromScript(source)
+  target=GetCardFromScript(target)
+  ApplyATKBoosts({source,target})
+  return FilterLocation(source,LOCATION_MZONE)
+  and FilterLocation(target,LOCATION_MZONE)
+  and (FilterPosition(target,POS_FACEUP_ATTACK)
+  and source.attack>=target.attack
+  or FilterPosition(target,POS_FACEUP_DEFENSE)
+  and source.attack>target.defense)
+  and FilterPosition(source,POS_FACEUP_ATTACK)
+  and not FilterAffected(target,EFFECT_INDESTRUCTABLE_BATTLE)
+  and not FilterAffected(source,EFFECT_CANNOT_ATTACK)
 end
 function NotNegated(c,onfieldonly)
   onfieldonly = onfieldonly or false
@@ -1195,9 +1211,11 @@ function FilterDefenseMax(c,defense)
   return FilterType(c,TYPE_MONSTER) and def<=defense
 end
 function FilterID(c,id)
+  c=GetCardFromScript(c)
   return c.id==id
 end
 function ExcludeID(c,id)
+  c=GetCardFromScript(c)
   return c.id~=id
 end
 function FilterCard(c1,c2)
@@ -1207,9 +1225,11 @@ function ExcludeCard(c1,c2)
   return not CardsEqual(c1,c2)
 end
 function FilterOriginalID(c,id)
+  c=GetCardFromScript(c)
   return c.original_id==id
 end
 function ExcludeOriginalID(c,id)
+  c=GetCardFromScript(c)
   return c.original_id~=id
 end
 function FilterPosition(c,pos)
@@ -1484,6 +1504,9 @@ function FilterCrippled(c)
 end
 function FilterNotCrippled(c)
   return not FilterCrippled(c)
+end
+function FilterEquipped(c,id)
+  return CardsMatchingFilter(c:get_equipped_cards(),FilterID,id)>0
 end
 GlobalTargetList = {}
 -- function to prevent multiple cards to target the same card in the same chain
@@ -3347,6 +3370,22 @@ function IsBattlePhase()
   return result
 end
 
+function IsMainPhase()
+  local current=Duel.GetCurrentPhase()
+  local phases =
+  {
+    PHASE_MAIN1,
+    PHASE_MAIN2,
+  }
+  local result = false
+  for i,p in pairs(phases) do
+    if p and current == p then 
+      result = true
+    end
+  end
+  return result
+end
+
 function AITrashTalk(s) -- to make the AI comment its plays. Can be disabled in ai.lua
   if TRASHTALK then
     AI.Chat(s)
@@ -3440,6 +3479,7 @@ function MaxxCheck()
 end
 GlobalSummonLimit = {}
 function SetSummonLimit(filter)
+  GlobalSummonLimit[Duel.GetTurnCount()]=GlobalSummonLimit[Duel.GetTurnCount()] or {}
   GlobalSummonLimit[Duel.GetTurnCount()][#GlobalSummonLimit[Duel.GetTurnCount()]+1]=filter
 end
 function CheckSummonLimit(c)
@@ -3452,3 +3492,4 @@ function CheckSummonLimit(c)
   end
   return true
 end
+

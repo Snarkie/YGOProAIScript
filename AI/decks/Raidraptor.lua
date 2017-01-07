@@ -1710,7 +1710,7 @@ function ChainReadiness(c)
     return true
   end]]
 end
-function ChainBoM(card)
+function ChainBoMRR(card)
   local targets1 = CardsMatchingFilter(OppMon(),MoonOppFilter)
   local targets2 = CardsMatchingFilter(OppMon(),MoonPriorityFilter)
   local e=Duel.GetChainInfo(Duel.GetCurrentChain(), CHAININFO_TRIGGERING_EFFECT)

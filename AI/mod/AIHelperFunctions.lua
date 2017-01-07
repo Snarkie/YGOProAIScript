@@ -1956,6 +1956,20 @@ function ApplyATKBoosts(Cards)
     end
   end
   
+  -- Crystal Wing
+  for i,c in pairs(Cards) do
+    if c.id == 50954680 -- Crystal Wing
+    and NotNegated(c)
+    then
+      local targets = FilterController(c,1) and OppMon() or AIMon()
+      if CardsMatchingFilter(targets,CrystalWingFilter,c)>0
+      then
+        SortByATK(targets,true)
+        c.attack=(c.attack or 0)+targets[1].attack
+      end
+    end
+  end
+  
   -- unknown face-down monsters
   for i=1,#Cards do
     local c = Cards[i]

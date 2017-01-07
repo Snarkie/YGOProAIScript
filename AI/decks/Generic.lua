@@ -708,6 +708,16 @@ function SummonExtraDeck(cards,prio)
   end
   return nil
 end
+function SummonCrystalWing(c,mode)
+  return true
+end
+function CrystalWingFilter(c,attacker)
+  return NotNegated(attacker)
+  and c.level>4
+end
+function CrystalWingCheck(attacker,targets)
+  return CardsMatchingFilter(targets,CrystalWingFilter,attacker)>0
+end
 function SummonBullhorn(c,mode)
   if not MaxxCheck() then return false end
   if mode == 1
