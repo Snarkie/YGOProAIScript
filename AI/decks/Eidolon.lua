@@ -27,7 +27,7 @@
 49513164, -- Raideen
 13529466, -- Caligula
 50954680, -- Crystal Wing
-82044280, -- Clear Wing
+82044279, -- Clear Wing
 14577226, -- Wind Witch Winter Bell
 56832966, -- Utopia Lightning
 84013237, -- Utopia
@@ -88,7 +88,7 @@ EidolonActivateBlacklist={
 49513164, -- Raideen
 13529466, -- Caligula
 --50954680, -- Crystal Wing
-82044280, -- Clear Wing
+82044279, -- Clear Wing
 14577226, -- Wind Witch Winter Bell
 }
 EidolonSummonBlacklist={
@@ -108,10 +108,10 @@ EidolonSummonBlacklist={
 49513164, -- Raideen
 13529466, -- Caligula
 50954680, -- Crystal Wing
-82044280, -- Clear Wing
+82044279, -- Clear Wing
 14577226, -- Wind Witch Winter Bell
-56832966, -- Utopia Lightning
-84013237, -- Utopia
+--56832966, -- Utopia Lightning
+--84013237, -- Utopia
 }
 EidolonSetBlacklist={
 20292186, -- Artifact Scythe
@@ -206,11 +206,12 @@ end
 function SummonGlassBell(c,mode)
   if mode == 1 -- can make Crystal Wing somehow
   and CanSpecialSummon()
+  and not HasID(AIMon(),c.id,true)
   and (SpaceCheck()>1
   and #AIMon() == 1
   and HasID(AIMon(),43722862,true) -- Ice Bell
-  and HasID(Merge(AIDeck(),AIHand()),70117860,true)) -- Snow Bell
-  or (SpaceCheck()>0
+  and HasID(Merge(AIDeck(),AIHand()),70117860,true) -- Snow Bell
+  or SpaceCheck()>0
   and HasID(AIMon(),43722862,true) -- Ice Bell
   and HasID(AIMon(),70117860,true)) -- Snow Bell
   and HasIDNotNegated(AIExtra(),50954680,true) -- Crystal Wing
@@ -223,6 +224,7 @@ function SummonGlassBell(c,mode)
   end
   if mode == 2 -- search
   and CardsMatchingFilter(AIDeck(),WindWitchFilter,c.id)>0
+  and OPTCheck(c.id)
   then
     return true
   end
@@ -240,8 +242,8 @@ function SummonIceBell(c,mode)
   and (SpaceCheck()>1
   and #AIMon() == 1
   and HasID(AIMon(),71007216,true) -- Glass Bell
-  and HasID(AIHand(),70117860,true)) -- Snow Bell
-  or (SpaceCheck()>0
+  and HasID(AIHand(),70117860,true) -- Snow Bell
+  or SpaceCheck()>0
   and HasID(AIMon(),71007216,true) -- Glass Bell
   and HasID(AIMon(),70117860,true)) -- Snow Bell
   and HasIDNotNegated(AIExtra(),50954680,true) -- Crystal Wing
@@ -293,6 +295,7 @@ function SummonWinterBell(c,mode)
     return true
   end
   if mode == 3 -- beatstick
+  and CanSpecialSummon()
   and CanWinBattle(c,OppMon())
   then
     return true
@@ -307,7 +310,7 @@ function SummonClearWingEidolon(c,mode)
     return true
   end
   if mode == 2 -- just summon whenever
-  and CanSpecialSummon()
+  --and CanSpecialSummon()
   then
     return true
   end
@@ -317,6 +320,7 @@ function UseSnowBell(c,mode)
   and CanSpecialSummon()
   and not HasID(AIMon(),c.id,true)
   and HasIDNotNegated(AIExtra(),50954680,true) -- Crystal Wing
+  and CardsMatchingFilter(AIMon(),WindWitchFilter)==2
   then
     return true
   end
@@ -351,7 +355,11 @@ function RepoAleister(c,mode)
   end
 end
 function SummonAleister(c,mode)
-	return true
+  if mode == 1
+  and HasID(AIDeck(),74063034,true) -- Eidolon Magic
+  then
+    return true
+  end
 end
 function UseAleister(c,act)
 	if HasIDNotNegated(act,74063034,true,UseEidolonSummon,2)
@@ -403,73 +411,61 @@ function UseEidolonSummon(c,mode)
   then
     if HasID(AIExtra(),12307878,true,SummonPurgatorio,3)
     then
-      print("Purg finish")
       GlobalEidolonSummonID = 12307878
       return true
     end
     if HasID(AIExtra(),11270236,true,SummonElysion,1)
     then
-      print("Elysion regular")
       GlobalEidolonSummonID = 11270236 
       return true
     end
     if HasID(AIExtra(),12307878,true,SummonPurgatorio,1)
     then
-      print("Purg regular")
       GlobalEidolonSummonID = 12307878
       return true
     end
     if HasID(AIExtra(),75286621,true,SummonMerkabah,1)
     then
-      print("Merkabah regular")
       GlobalEidolonSummonID = 75286621
       return true
     end
     if HasID(AIExtra(),49513164,true,SummonRaideen,1)
     then
-      print("Raideen regular")
       GlobalEidolonSummonID = 49513164
       return true
     end
     if HasID(AIExtra(),48791583,true,SummonMagallanica,1)
     then
-      print("Magallanica regular")
       GlobalEidolonSummonID = 48791583
       return true
     end
     if HasID(AIExtra(),85908279,true,SummonCocytus,1)
     then
-      print("Cocytus regular")
       GlobalEidolonSummonID = 85908279
       return true
     end
     if HasID(AIExtra(),11270236,true,SummonElysion,2)
     then
-      print("Elysion beatstick")
       GlobalEidolonSummonID = 11270236
       return true
     end
     if HasID(AIExtra(),75286621,true,SummonMerkabah,2)
     then
-      print("Merkabah beatstick")
       GlobalEidolonSummonID = 75286621
       return true
     end
     if HasID(AIExtra(),12307878,true,SummonPurgatorio,2)
     then
-      print("Purg beatstick")
       GlobalEidolonSummonID = 12307878
       return true
     end
     if HasID(AIExtra(),49513164,true,SummonRaideen,2)
     then
-      print("Raideen beatstick")
       GlobalEidolonSummonID = 49513164
       return true
     end
     if HasID(AIExtra(),85908279,true,SummonCocytus,2)
     then
-      print("Cocytus")
       GlobalEidolonSummonID = 85908279
       return true
     end
@@ -757,9 +753,6 @@ function EidolonInit(cards)
   local Rep = cards.repositionable_cards
   local SetMon = cards.monster_setable_cards
   local SetST = cards.st_setable_cards
-  for i,c in pairs(AIExtra()) do
-    --print(CanSummonEidolon(c,1))
-  end
   if HasIDNotNegated(Act,49513164,UseRaideen,1) then
     return Activate()
 	end
@@ -814,13 +807,13 @@ function EidolonInit(cards)
   if HasID(SpSum,14577226,SummonWinterBell,1) then
     return SynchroSummon()
   end
-  if HasID(SpSum,82044280,SummonClearWingEidolon,1) then
+  if HasID(SpSum,82044279,SummonClearWingEidolon,1) then
     return SynchroSummon()
   end
   if HasID(SpSum,50954680,SummonCrystalWing,1) then
     return SynchroSummon()
   end
-  if HasID(SpSum,82044280,SummonClearWingEidolon,2) then
+  if HasID(SpSum,82044279,SummonClearWingEidolon,2) then
     return SynchroSummon()
   end
   if HasID(SpSum,14577226,SummonWinterBell,3) then
@@ -876,6 +869,33 @@ function EidolonInit(cards)
   end
   if HasID(Sum,71007216,SummonGlassBell,2) then
     return Summon()
+  end
+  
+  if #SetST > 0 
+  and TurnEndCheck()
+  then
+    local setThisTurn = 0
+    for i,c in pairs(AIST()) do
+      if FilterStatus(c,STATUS_SET_TURN) then
+        setThisTurn=setThisTurn+1
+      end
+    end
+    local targets = {}
+    for i,c in pairs(SetST) do
+      if setThisTurn < 3 and #AIST()<4
+      and (SetBlacklist(c.id)==0 
+      and FilterType(c,TYPE_TRAP+TYPE_QUICKPLAY)
+      or FilterType(c,TYPE_MONSTER)
+      and ArtifactFilter(c)
+      and HasID(AICards(),43898403,true)) -- Twin Twister
+      and DiscardCheck()
+      then
+        targets[#targets+1]=i
+      end
+    end
+    if #targets>0 then
+      return SetSpell(targets[math.random(#targets)])
+    end
   end
   return nil
 end
@@ -953,8 +973,8 @@ end
 function SanctumTargetEidolon(cards)
   if GlobalCardMode == 1 then
     GlobalCardMode = nil
-    local id = GlobalEidolonSummonID
-    GlobalEidolonSummonID = nil
+    local id = GlobalSanctumID
+    GlobalSanctumID = nil
     return Add(cards,PRIO_TOFIELD,1,FilterID,id)
   end
   if CardsMatchingFilter(OppField,MoralltachFilter)>0 then
@@ -983,6 +1003,7 @@ function ChainIceBell(c)
   return true
 end
 function ChainGlassBell(c)
+  OPTSet(c.id)
   return true
 end
 function ChainAleister(c)
@@ -1015,6 +1036,16 @@ function ChainAleister(c)
     and (AttackBoostCheck(1000*count) 
 		or (CanFinishGame(aimon,oppmon,aimon:GetAttack()+1000*count)
     and not CanFinishGame(aimon,oppmon)))
+		and UnchainableCheck(c.id)
+		then
+      GlobalCardMode = 1
+      GlobalTargetSet(aimon)
+			return true
+		end
+    if aimon and #OppMon()==0
+    and EidolonMonsterFilter(aimon)
+    and CanFinishGame(aimon,nil,aimon:GetAttack()+1000*count)
+    and not CanFinishGame(aimon,nil)
 		and UnchainableCheck(c.id)
 		then
       GlobalCardMode = 1
@@ -1089,7 +1120,7 @@ function ChainRaideen(c)
         local target = Duel.GetChainInfo(i,CHAININFO_TARGET_CARDS):GetFirst()
         if target and RaideenFilter(target) then
           GlobalCardMode = 1
-          GlobalTargetSet(protect[1])
+          GlobalTargetSet(target[1])
           SetNegated(i)
           return true
         end
@@ -1190,7 +1221,7 @@ function ElysionFilter(c,attribute)
   and not attribute or FilterAttribute(c,attribute)
 end
 function ChainElysion(source)
-  if Negated(c) then return false end
+  if Negated(source) then return false end
   local cards = SubGroup(Merge(AIMon(),AIGrave()),EidolonMonsterFilter,source)
   local eidolons = {}
   for i,c in pairs(cards) do
@@ -1208,7 +1239,7 @@ function ChainElysion(source)
       if FilterLocation(c,LOCATION_ONFIELD) 
       and CardsMatchingFilter(targets,FilterAttribute,attribute)>1]]
   if RemovalCheckCard(source) 
-  and targets>0 
+  and #targets>0 
   then
     return true
   end
@@ -1273,7 +1304,7 @@ function ChainElysion(source)
         return true
       end
       if CardsEqual(aimon,source)
-      and targets>0
+      and #targets>0
       then
         return true
       end
@@ -1342,6 +1373,59 @@ function ChainSanctumEidolon(c)
     return true
   end
 end
+function ChainTwinTwister(c,mode)
+  local targets = DestroyCheck(OppST())
+  local facedown = DestroyCheck(OppST(),nil,nil,nil,FilterPosition,POS_FACEDOWN)
+  local prio = HasPriorityTarget(OppST(),true)
+  local endphase = CardsMatchingFilter(OppST(),MSTEndPhaseFilter)
+  local scythe = CardsMatchingFilter(AIST(),FilterID,20292186) -- Scythe
+  local moralltach = CardsMatchingFilter(AIST(),FilterID,85103922) -- Moralltach
+  local artifacts = scythe+moralltach
+  if not (CanSpecialSummon() 
+  and SpaceCheck()>0
+  and Duel.GetTurnPlayer()==1-player_ai) 
+  then
+    scythe = 0
+    moralltach = 0
+    artifacts = 0
+  end
+  if RemovalCheckCard(c)
+  then
+    return targets>1 or targets>0 
+    and (PriorityCheck(AIHand(),PRIO_TOGRAVE)>3
+    or artifacts>0)
+  end
+  if not UnchainableCheck(c) then
+    return false
+  end
+  if scythe>0 
+  and ScytheCheck()
+  and targets>0
+  then
+    GlobalTwinTwisterTarget = FindID(20292186,AIST())
+    return true
+  end
+  if Duel.CheckTiming(TIMING_END_PHASE)
+  and Duel.GetCurrentChain()==0
+  and endphase>0
+  and (targets>1
+  or targets>0 and artifacts>0)
+  then
+    GlobalTwinTwisterTarget = MSTEndPhaseFilter
+    return true
+  end
+  if Duel.GetTurnPlayer()==1-player_ai
+  and prio
+  and (targets>1 or artifacs>0)
+  then
+    return true
+  end
+  local target = RemoveOnActivation(nil,MSTFilter)
+  if target and (targets>1 or artifacts>0) then
+    GlobalTwinTwisterTarget = target
+    return true
+  end
+end
 EidolonChainFunctions={
 [43722862] = ChainIceBell,
 [71007216] = ChainGlassBell,
@@ -1370,6 +1454,12 @@ end
 function EidolonSum(cards,sum,card)
 end
 function EidolonYesNo(desc)
+  if desc == 43722862*16+1 then -- Ice Bell
+    if CanSpecialSummon() then
+      return 1
+    end
+    return 0
+  end
 end
 function EidolonTribute(cards,min, max)
 end
@@ -1437,7 +1527,7 @@ EidolonAtt={
 12307878, -- Purgatorio
 49513164, -- Raideen
 50954680, -- Crystal Wing
-82044280, -- Clear Wing
+82044279, -- Clear Wing
 14577226, -- Wind Witch Winter Bell
 56832966, -- Utopia Lightning
 84013237, -- Utopia
@@ -1493,7 +1583,18 @@ function AleisterCond(loc,c)
   end 
   return true
 end
-
+function SnowBellCond(loc,c)
+  if loc == PRIO_TOHAND then
+    if CardsMatchingFilter(AIMon(),WindWitchFilter)==2
+    and CardsMatchingFilter(AIMon(),FilterTuner)==1
+    and CanSpecialSummon()
+    then
+      return true
+    end
+    return false
+  end
+  return true
+end
 EidolonPriorityList={                      
 --[12345678] = {1,1,1,1,1,1,1,1,1,1,XXXCond},  -- Format
 
@@ -1505,7 +1606,7 @@ EidolonPriorityList={
 [86120751] = {5,1,5,1,7,1,1,1,6,1,AleisterCond},  -- Aleister
 [43722862] = {5,1,2,1,1,1,1,1,4,1,IceBellCond},  -- Wind Witch Ice Bell
 [23434538] = {1,1,1,1,1,1,1,1,5,1,MaxxCond},  -- Maxx "C"
-[70117860] = {7,1,3,1,1,1,1,1,6,1,WinterBellCond},  -- Wind Witch Snow Bell
+[70117860] = {7,1,3,1,1,1,1,1,6,1,SnowBellCond},  -- Wind Witch Snow Bell
 
 [01845204] = {1,1,1,1,1,1,1,1,1,1,IFCond},  -- Instant Fusion
 [73628505] = {1,1,1,1,1,1,1,1,1,1,TerraformingCond},  -- Terraforming
@@ -1519,16 +1620,16 @@ EidolonPriorityList={
 [84749824] = {1,1,1,1,1,1,1,1,1,1,WarningCond},  -- Warning
 [43898403] = {1,1,1,1,1,1,1,1,1,1,TwiTwiCond},  -- Twin Twister
 
-[11270236] = {1,1,1,1,1,1,1,1,2,1,ElysionCond},  -- Elysion
-[75286621] = {1,1,1,1,1,1,1,1,2,1,MerkabahCond},  -- Merkabah
-[48791583] = {1,1,1,1,1,1,1,1,2,1,MagallanicaCond},  -- Magallanica
-[12307878] = {1,1,1,1,1,1,1,1,2,1,PurgatorioCond},  -- Purgatorio
-[85908279] = {1,1,1,1,1,1,1,1,2,1,CocytusCond},  -- Cocytus
-[49513164] = {1,1,1,1,1,1,1,1,2,1,RaideenCond},  -- Raideen
-[13529466] = {1,1,1,1,1,1,1,1,2,1,CaligulaCond},  -- Caligula
-[50954680] = {1,1,1,1,1,1,1,1,2,1,CrystalWingCond},  -- Crystal Wing
-[82044280] = {1,1,1,1,1,1,1,1,2,1,ClearWingCond},  -- Clear Wing
-[14577226] = {1,1,1,1,1,1,1,1,2,1,WinterBellCond},  -- Wind Witch Winter Bell
-[56832966] = {1,1,1,1,1,1,1,1,2,1,LightningCond},  -- Utopia Lightning
-[84013237] = {1,1,1,1,1,1,1,1,2,1,UtopiaCond},  -- Utopia
+[11270236] = {1,1,1,1,1,1,1,1,1,1,ElysionCond},  -- Elysion
+[75286621] = {1,1,1,1,1,1,1,1,1,1,MerkabahCond},  -- Merkabah
+[48791583] = {1,1,1,1,1,1,1,1,1,1,MagallanicaCond},  -- Magallanica
+[12307878] = {1,1,1,1,1,1,1,1,1,1,PurgatorioCond},  -- Purgatorio
+[85908279] = {1,1,1,1,1,1,1,1,1,1,CocytusCond},  -- Cocytus
+[49513164] = {1,1,1,1,1,1,1,1,1,1,RaideenCond},  -- Raideen
+[13529466] = {1,1,1,1,1,1,1,1,5,1,CaligulaCond},  -- Caligula
+[50954680] = {1,1,1,1,1,1,1,1,1,1,CrystalWingCond},  -- Crystal Wing
+[82044279] = {1,1,1,1,1,1,1,1,1,1,ClearWingCond},  -- Clear Wing
+[14577226] = {1,1,1,1,1,1,1,1,1,1,WinterBellCond},  -- Wind Witch Winter Bell
+[56832966] = {1,1,1,1,1,1,1,1,1,1,LightningCond},  -- Utopia Lightning
+[84013237] = {1,1,1,1,1,1,1,1,1,1,UtopiaCond},  -- Utopia
 } 

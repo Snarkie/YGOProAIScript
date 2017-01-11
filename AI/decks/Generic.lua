@@ -2858,7 +2858,7 @@ function PriorityChain(cards) -- chain these before anything else
   if HasID(cards,74822425,false,nil,LOCATION_MZONE,ChainNegation) then -- Shekinaga
     return Chain()
   end
-  if HasID(cards,75286621,ChainNegation) then -- Merkabah
+  if HasIDNotNegated(cards,75286621,ChainNegation) then -- Merkabah
     return Chain()
   end
   if HasIDNotNegated(cards,27346636,ChainNegation) then -- Heraklinos
@@ -3250,6 +3250,23 @@ function TwinTwisterTarget(cards)
       end
     end
     GlobalTwinTwisterTarget = nil
+  end
+  if #targets<2
+  and HasID(AIST(),20292186,true) -- Artifact Scythe
+  and Duel.GetTurnPlayer()==1-player_ai
+  and CanSpecialSummon()
+  and SpaceCheck()>0
+  then
+    targets[#targets+1] = FindID(20292186,cards)
+  end
+  if #targets<2
+  and HasID(AIST(),85103922,true) -- Artifact Moralltach
+  and Duel.GetTurnPlayer()==1-player_ai
+  and CanSpecialSummon()
+  and SpaceCheck()>0
+  and CardsMatchingFilter(OppField(),MoralltachFilter)>0
+  then
+    targets[#targets+1] = FindID(85103922,cards)
   end
   local count = 0
   local check = DestroyCheck(cards,false,true,false,FilterController,2)
