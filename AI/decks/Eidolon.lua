@@ -1416,7 +1416,7 @@ function ChainTwinTwister(c,mode)
   end
   if Duel.GetTurnPlayer()==1-player_ai
   and prio
-  and (targets>1 or artifacs>0)
+  and (targets>1 or artifacts>0)
   then
     return true
   end
