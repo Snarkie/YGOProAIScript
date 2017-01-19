@@ -55,6 +55,7 @@ function IceHandCond(loc,c)
   return true
 end
 function MoralltachFilter(c)
+  c=GetCardFromScript(c)
   return FilterPosition(c,POS_FACEUP)
   and Affected(c,TYPE_MONSTER,5)
   and DestroyCheck(c,true)
